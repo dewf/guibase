@@ -14,14 +14,14 @@ enum MouseButton {
    Other
 }
 
-interface WindowDelegate {
+interface IWindowDelegate {
    void buttonClicked(int x, int y, MouseButton button);
    void closed();
 }
 
-interface Window {
+interface IWindow {
    void show();
    void destroy();
 }
 
-Window createWindow(int width, int height, string title, WindowDelegate del);
+IWindow createWindow(int width, int height, string title, IWindowDelegate del);

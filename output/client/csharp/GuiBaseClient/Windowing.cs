@@ -17,12 +17,83 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _runloop;
         private static ModuleMethodHandle _exitRunloop;
         private static ModuleMethodHandle _createWindow;
-        private static InterfaceHandle _windowDelegate;
-        private static InterfaceMethodHandle _windowDelegate_buttonClicked;
-        private static InterfaceMethodHandle _windowDelegate_closed;
-        private static InterfaceHandle _window;
-        private static InterfaceMethodHandle _window_show;
-        private static InterfaceMethodHandle _window_destroy;
+        private static InterfaceHandle _iWindowDelegate;
+        private static InterfaceMethodHandle _iWindowDelegate_buttonClicked;
+        private static InterfaceMethodHandle _iWindowDelegate_closed;
+        private static InterfaceHandle _iWindow;
+        private static InterfaceMethodHandle _iWindow_show;
+        private static InterfaceMethodHandle _iWindow_destroy;
+
+
+        public interface IWindow : IDisposable
+        {
+            void Show();
+            void Destroy();
+        }
+
+        internal static void IWindow__Push(IWindow thing, bool isReturn)
+        {
+            if (thing != null)
+            {
+                ((IPushable)thing).Push(isReturn);
+            }
+            else
+            {
+                NativeImplClient.PushNull();
+            }
+        }
+
+        internal static IWindow IWindow__Pop()
+        {
+            NativeImplClient.PopInstanceId(out var id, out var isClientId);
+            if (id != 0)
+            {
+                if (!isClientId)
+                {
+                    return new ServerIWindow(id);
+                }
+                else
+                {
+                    return (IWindow) ClientObject.GetById(id);
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public abstract class ClientIWindow : ClientObject, IWindow
+        {
+            public virtual void Dispose()
+            {
+                // override if necessary
+            }
+            public abstract void Show();
+            public abstract void Destroy();
+        }
+
+        internal class ServerIWindow : ServerObject, IWindow
+        {
+            public ServerIWindow(int id) : base(id)
+            {
+            }
+
+            public void Show()
+            {
+                NativeImplClient.InvokeInterfaceMethod(_iWindow_show, Id);
+            }
+
+            public void Destroy()
+            {
+                NativeImplClient.InvokeInterfaceMethod(_iWindow_destroy, Id);
+            }
+
+            public void Dispose()
+            {
+                ServerDispose();
+            }
+        }
 
         public enum MouseButton
         {
@@ -47,84 +118,13 @@ namespace Org.Prefixed.GuiBase
         }
 
 
-        public interface Window : IDisposable
-        {
-            void Show();
-            void Destroy();
-        }
-
-        internal static void Window__Push(Window thing, bool isReturn)
-        {
-            if (thing != null)
-            {
-                ((IPushable)thing).Push(isReturn);
-            }
-            else
-            {
-                NativeImplClient.PushNull();
-            }
-        }
-
-        internal static Window Window__Pop()
-        {
-            NativeImplClient.PopInstanceId(out var id, out var isClientId);
-            if (id != 0)
-            {
-                if (!isClientId)
-                {
-                    return new ServerWindow(id);
-                }
-                else
-                {
-                    return (Window) ClientObject.GetById(id);
-                }
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public abstract class ClientWindow : ClientObject, Window
-        {
-            public virtual void Dispose()
-            {
-                // override if necessary
-            }
-            public abstract void Show();
-            public abstract void Destroy();
-        }
-
-        internal class ServerWindow : ServerObject, Window
-        {
-            public ServerWindow(int id) : base(id)
-            {
-            }
-
-            public void Show()
-            {
-                NativeImplClient.InvokeInterfaceMethod(_window_show, Id);
-            }
-
-            public void Destroy()
-            {
-                NativeImplClient.InvokeInterfaceMethod(_window_destroy, Id);
-            }
-
-            public void Dispose()
-            {
-                ServerDispose();
-            }
-        }
-
-
-        public interface WindowDelegate : IDisposable
+        public interface IWindowDelegate : IDisposable
         {
             void ButtonClicked(int x, int y, MouseButton button);
             void Closed();
         }
 
-        internal static void WindowDelegate__Push(WindowDelegate thing, bool isReturn)
+        internal static void IWindowDelegate__Push(IWindowDelegate thing, bool isReturn)
         {
             if (thing != null)
             {
@@ -136,18 +136,18 @@ namespace Org.Prefixed.GuiBase
             }
         }
 
-        internal static WindowDelegate WindowDelegate__Pop()
+        internal static IWindowDelegate IWindowDelegate__Pop()
         {
             NativeImplClient.PopInstanceId(out var id, out var isClientId);
             if (id != 0)
             {
                 if (!isClientId)
                 {
-                    return new ServerWindowDelegate(id);
+                    return new ServerIWindowDelegate(id);
                 }
                 else
                 {
-                    return (WindowDelegate) ClientObject.GetById(id);
+                    return (IWindowDelegate) ClientObject.GetById(id);
                 }
             }
             else
@@ -156,7 +156,7 @@ namespace Org.Prefixed.GuiBase
             }
         }
 
-        public abstract class ClientWindowDelegate : ClientObject, WindowDelegate
+        public abstract class ClientIWindowDelegate : ClientObject, IWindowDelegate
         {
             public virtual void Dispose()
             {
@@ -166,9 +166,9 @@ namespace Org.Prefixed.GuiBase
             public abstract void Closed();
         }
 
-        internal class ServerWindowDelegate : ServerObject, WindowDelegate
+        internal class ServerIWindowDelegate : ServerObject, IWindowDelegate
         {
-            public ServerWindowDelegate(int id) : base(id)
+            public ServerIWindowDelegate(int id) : base(id)
             {
             }
 
@@ -177,12 +177,12 @@ namespace Org.Prefixed.GuiBase
                 MouseButton__Push(button);
                 NativeImplClient.PushInt32(y);
                 NativeImplClient.PushInt32(x);
-                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_buttonClicked, Id);
+                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_buttonClicked, Id);
             }
 
             public void Closed()
             {
-                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_closed, Id);
+                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_closed, Id);
             }
 
             public void Dispose()
@@ -211,14 +211,14 @@ namespace Org.Prefixed.GuiBase
             NativeImplClient.InvokeModuleMethod(_exitRunloop);
         }
 
-        public static Window CreateWindow(int width, int height, string title, WindowDelegate del)
+        public static IWindow CreateWindow(int width, int height, string title, IWindowDelegate del)
         {
-            WindowDelegate__Push(del, false);
+            IWindowDelegate__Push(del, false);
             NativeImplClient.PushString(title);
             NativeImplClient.PushInt32(height);
             NativeImplClient.PushInt32(width);
             NativeImplClient.InvokeModuleMethod(_createWindow);
-            var __ret = Window__Pop();
+            var __ret = IWindow__Pop();
             NativeImplClient.ServerClearSafetyArea();
             return __ret;
         }
@@ -234,41 +234,40 @@ namespace Org.Prefixed.GuiBase
             _exitRunloop = NativeImplClient.GetModuleMethod(_module, "exitRunloop");
             _createWindow = NativeImplClient.GetModuleMethod(_module, "createWindow");
 
-            _windowDelegate = NativeImplClient.GetInterface(_module, "WindowDelegate");
-            _windowDelegate_buttonClicked = NativeImplClient.GetInterfaceMethod(_windowDelegate, "buttonClicked");
-            _windowDelegate_closed = NativeImplClient.GetInterfaceMethod(_windowDelegate, "closed");
+            _iWindowDelegate = NativeImplClient.GetInterface(_module, "IWindowDelegate");
+            _iWindowDelegate_buttonClicked = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "buttonClicked");
+            _iWindowDelegate_closed = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "closed");
 
-            NativeImplClient.SetClientMethodWrapper(_windowDelegate_buttonClicked, delegate(ClientObject obj)
+            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_buttonClicked, delegate(ClientObject obj)
             {
-                var inst = (ClientWindowDelegate) obj;
+                var inst = (ClientIWindowDelegate) obj;
                 var x = NativeImplClient.PopInt32();
                 var y = NativeImplClient.PopInt32();
                 var button = MouseButton__Pop();
                 inst.ButtonClicked(x, y, button);
             });
 
-            NativeImplClient.SetClientMethodWrapper(_windowDelegate_closed, delegate(ClientObject obj)
+            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_closed, delegate(ClientObject obj)
             {
-                var inst = (ClientWindowDelegate) obj;
+                var inst = (ClientIWindowDelegate) obj;
                 inst.Closed();
             });
 
-            _window = NativeImplClient.GetInterface(_module, "Window");
-            _window_show = NativeImplClient.GetInterfaceMethod(_window, "show");
-            _window_destroy = NativeImplClient.GetInterfaceMethod(_window, "destroy");
+            _iWindow = NativeImplClient.GetInterface(_module, "IWindow");
+            _iWindow_show = NativeImplClient.GetInterfaceMethod(_iWindow, "show");
+            _iWindow_destroy = NativeImplClient.GetInterfaceMethod(_iWindow, "destroy");
 
-            NativeImplClient.SetClientMethodWrapper(_window_show, delegate(ClientObject obj)
+            NativeImplClient.SetClientMethodWrapper(_iWindow_show, delegate(ClientObject obj)
             {
-                var inst = (ClientWindow) obj;
+                var inst = (ClientIWindow) obj;
                 inst.Show();
             });
 
-            NativeImplClient.SetClientMethodWrapper(_window_destroy, delegate(ClientObject obj)
+            NativeImplClient.SetClientMethodWrapper(_iWindow_destroy, delegate(ClientObject obj)
             {
-                var inst = (ClientWindow) obj;
+                var inst = (ClientIWindow) obj;
                 inst.Destroy();
             });
-            
             ModuleInit();
         }
 

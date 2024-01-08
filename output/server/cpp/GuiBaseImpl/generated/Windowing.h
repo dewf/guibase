@@ -7,6 +7,22 @@
 #include <tuple>
 #include <set>
 
+class IWindow {
+public:
+    virtual void show() = 0;
+    virtual void destroy() = 0;
+};
+
+// inherit from this to create server instances of IWindow
+class ServerIWindow : public IWindow, public ServerObject {
+public:
+    virtual ~ServerIWindow() {}
+    static std::shared_ptr<ServerIWindow> getByID(int id) {
+        auto obj = ServerObject::getByID(id);
+        return std::static_pointer_cast<ServerIWindow>(obj);
+    }
+};
+
 enum class MouseButton {
     None,
     Left,
@@ -15,35 +31,19 @@ enum class MouseButton {
     Other
 };
 
-class Window {
-public:
-    virtual void show() = 0;
-    virtual void destroy() = 0;
-};
-
-// inherit from this to create server instances of Window
-class ServerWindow : public Window, public ServerObject {
-public:
-    virtual ~ServerWindow() {}
-    static std::shared_ptr<ServerWindow> getByID(int id) {
-        auto obj = ServerObject::getByID(id);
-        return std::static_pointer_cast<ServerWindow>(obj);
-    }
-};
-
-class WindowDelegate {
+class IWindowDelegate {
 public:
     virtual void buttonClicked(int32_t x, int32_t y, MouseButton button) = 0;
     virtual void closed() = 0;
 };
 
-// inherit from this to create server instances of WindowDelegate
-class ServerWindowDelegate : public WindowDelegate, public ServerObject {
+// inherit from this to create server instances of IWindowDelegate
+class ServerIWindowDelegate : public IWindowDelegate, public ServerObject {
 public:
-    virtual ~ServerWindowDelegate() {}
-    static std::shared_ptr<ServerWindowDelegate> getByID(int id) {
+    virtual ~ServerIWindowDelegate() {}
+    static std::shared_ptr<ServerIWindowDelegate> getByID(int id) {
         auto obj = ServerObject::getByID(id);
-        return std::static_pointer_cast<ServerWindowDelegate>(obj);
+        return std::static_pointer_cast<ServerIWindowDelegate>(obj);
     }
 };
 
@@ -51,4 +51,4 @@ void moduleInit();
 void moduleShutdown();
 void runloop();
 void exitRunloop();
-std::shared_ptr<Window> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del);
+std::shared_ptr<IWindow> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<IWindowDelegate> del);
