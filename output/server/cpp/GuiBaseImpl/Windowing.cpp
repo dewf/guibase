@@ -1,0 +1,21 @@
+#include "generated/Windowing.h"
+
+#include <stdio.h>
+
+void moduleInit() {
+    printf("Hello from module init! we are live! WOOOOOOOOO@@@@@@@@@\n");
+}
+
+void moduleShutdown() {
+    printf("goodbye from shutdown! we are less alive\n");
+}
+
+void runloop() {
+}
+
+void exitRunloop() {
+}
+
+std::shared_ptr<Window> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del) {
+    return std::shared_ptr<Window>();
+}

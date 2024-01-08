@@ -1,0 +1,27 @@
+module Windowing;
+
+void moduleInit();
+void moduleShutdown();
+
+void runloop();
+void exitRunloop();
+
+enum MouseButton {
+   None,
+   Left,
+   Middle,
+   Right,
+   Other
+}
+
+interface WindowDelegate {
+   void buttonClicked(int x, int y, MouseButton button);
+   void closed();
+}
+
+interface Window {
+   void show();
+   void destroy();
+}
+
+Window createWindow(int width, int height, string title, WindowDelegate del);
