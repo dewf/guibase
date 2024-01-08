@@ -1,9 +1,9 @@
-#include "generated/Windowing.h"
+#include "../../generated/Windowing.h"
 
 #include <stdio.h>
 
 void moduleInit() {
-    printf("Hello from module init! we are live! WOOOOOOOOO@@@@@@@@@\n");
+    printf("Hello from reorganized project!\n");
 }
 
 void moduleShutdown() {
