@@ -1,4 +1,4 @@
-#include "../../generated/Windowing.h"
+#include "generated/Windowing.h"
 
 #include <stdio.h>
 

@@ -137,8 +137,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\generated\Windowing_Wrappers.cpp" />
-    <ClCompile Include="..\platforms\windows\Windowing.cpp" />
     <ClCompile Include="..\support\NativeImplServer.cpp" />
+    <ClCompile Include="..\Windowing.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
