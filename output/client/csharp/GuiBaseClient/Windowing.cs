@@ -140,7 +140,7 @@ namespace Org.Prefixed.GuiBase
             return (Modifiers)ret;
         }
 
-        internal static void __ModifiersSet__Push(HashSet<Modifiers> items)
+        internal static void __ModifiersSet__Push(HashSet<Modifiers> items, bool isReturn)
         {
             var intValues = items.Select(i => (sbyte)i).ToArray();
             NativeImplClient.PushInt8Array(intValues);
@@ -229,7 +229,7 @@ namespace Org.Prefixed.GuiBase
 
             public void MouseDown(int x, int y, MouseButton button, HashSet<Modifiers> modifiers)
             {
-                __ModifiersSet__Push(modifiers);
+                __ModifiersSet__Push(modifiers, false);
                 MouseButton__Push(button);
                 NativeImplClient.PushInt32(y);
                 NativeImplClient.PushInt32(x);
@@ -334,6 +334,7 @@ namespace Org.Prefixed.GuiBase
                 var inst = (ClientIWindow) obj;
                 inst.Destroy();
             });
+
             ModuleInit();
         }
 
