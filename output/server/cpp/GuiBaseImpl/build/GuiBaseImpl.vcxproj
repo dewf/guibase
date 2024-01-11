@@ -134,7 +134,7 @@
     <ClInclude Include="..\generated\Windowing.h" />
     <ClInclude Include="..\support\CoreStuff.h" />
     <ClInclude Include="..\support\NativeImplServer.h" />
-    <ClInclude Include="..\windowing\everything.h" />
+    <ClInclude Include="..\windowing\window.h" />
     <ClInclude Include="..\windowing\globals.h" />
     <ClInclude Include="..\windowing\unicodestuff.h" />
     <ClInclude Include="..\windowing\win32util.h" />
@@ -143,7 +143,7 @@
     <ClCompile Include="..\generated\Windowing_Wrappers.cpp" />
     <ClCompile Include="..\support\NativeImplServer.cpp" />
     <ClCompile Include="..\Windowing.cpp" />
-    <ClCompile Include="..\windowing\everything.cpp" />
+    <ClCompile Include="..\windowing\window.cpp" />
     <ClCompile Include="..\windowing\globals.cpp" />
     <ClCompile Include="..\windowing\unicodestuff.cpp" />
     <ClCompile Include="..\windowing\win32util.cpp" />

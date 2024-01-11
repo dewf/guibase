@@ -3,7 +3,7 @@
 #include "windowing/win32util.h"
 
 // this will be removed eventually:
-#include "windowing/everything.h"
+#include "windowing/window.h"
 
 #include <stdio.h>
 

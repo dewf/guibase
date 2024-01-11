@@ -1,4 +1,4 @@
-#include "everything.h"
+#include "window.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -8,7 +8,7 @@
 #include "win32util.h"
 #include "globals.h"
 
-#include <ole2.h> // for MK_ALT, strangely enough
+#include <ole2.h> // for MK_ALT, strangely enough ... do these not work with mouse clicks? alt+click not possible, except when dnd dragging?
 
 // DPI macros
 #define DECLSF(dpi) double scaleFactor = (dpi) / 96.0;

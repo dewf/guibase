@@ -29,7 +29,7 @@
     <ClCompile Include="..\Windowing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\windowing\everything.cpp">
+    <ClCompile Include="..\windowing\window.cpp">
       <Filter>Source Files\windowing</Filter>
     </ClCompile>
     <ClCompile Include="..\windowing\unicodestuff.cpp">
@@ -52,7 +52,7 @@
     <ClInclude Include="..\support\NativeImplServer.h">
       <Filter>Source Files\support</Filter>
     </ClInclude>
-    <ClInclude Include="..\windowing\everything.h">
+    <ClInclude Include="..\windowing\window.h">
       <Filter>Source Files\windowing</Filter>
     </ClInclude>
     <ClInclude Include="..\windowing\unicodestuff.h">
