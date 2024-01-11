@@ -14,9 +14,18 @@ enum MouseButton {
    Other
 }
 
+enum Modifiers {
+   Shift,
+   Control,    // or Mac command
+   Alt,
+   MacControl
+}
+
 interface IWindowDelegate {
-   void buttonClicked(int x, int y, MouseButton button);
+   bool canClose();
    void closed();
+   void destroyed();
+   void mouseDown(int x, int y, MouseButton button, Set<Modifiers> modifiers);
 }
 
 interface IWindow {

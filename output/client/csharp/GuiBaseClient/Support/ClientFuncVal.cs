@@ -27,10 +27,9 @@
         public static ClientFuncVal AddFuncVal(FuncValWrapper wrapper, IntPtr uniqueKey)
         {
             Console.WriteLine($"Func Val Unique Key: {uniqueKey}");
-            if (ReverseFuncValDict.ContainsKey(uniqueKey))
+            if (ReverseFuncValDict.TryGetValue(uniqueKey, out var id))
             {
                 // return existing
-                var id = ReverseFuncValDict[uniqueKey];
                 return (ClientFuncVal)GetResourceById(id);
             }
             // else create anew

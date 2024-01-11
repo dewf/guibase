@@ -15,6 +15,9 @@
     <Filter Include="Source Files\support">
       <UniqueIdentifier>{d921281b-b3b3-4024-bbf3-bce56e03b2f6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\windowing">
+      <UniqueIdentifier>{7348497e-1443-43bb-9e28-9044ce5d5064}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\generated\Windowing_Wrappers.cpp">
@@ -26,6 +29,18 @@
     <ClCompile Include="..\Windowing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\windowing\everything.cpp">
+      <Filter>Source Files\windowing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\windowing\unicodestuff.cpp">
+      <Filter>Source Files\windowing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\windowing\win32util.cpp">
+      <Filter>Source Files\windowing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\windowing\globals.cpp">
+      <Filter>Source Files\windowing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\generated\Windowing.h">
@@ -36,6 +51,18 @@
     </ClInclude>
     <ClInclude Include="..\support\NativeImplServer.h">
       <Filter>Source Files\support</Filter>
+    </ClInclude>
+    <ClInclude Include="..\windowing\everything.h">
+      <Filter>Source Files\windowing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\windowing\unicodestuff.h">
+      <Filter>Source Files\windowing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\windowing\win32util.h">
+      <Filter>Source Files\windowing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\windowing\globals.h">
+      <Filter>Source Files\windowing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -18,8 +18,10 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _exitRunloop;
         private static ModuleMethodHandle _createWindow;
         private static InterfaceHandle _iWindowDelegate;
-        private static InterfaceMethodHandle _iWindowDelegate_buttonClicked;
+        private static InterfaceMethodHandle _iWindowDelegate_canClose;
         private static InterfaceMethodHandle _iWindowDelegate_closed;
+        private static InterfaceMethodHandle _iWindowDelegate_destroyed;
+        private static InterfaceMethodHandle _iWindowDelegate_mouseDown;
         private static InterfaceHandle _iWindow;
         private static InterfaceMethodHandle _iWindow_show;
         private static InterfaceMethodHandle _iWindow_destroy;
@@ -117,11 +119,46 @@ namespace Org.Prefixed.GuiBase
             return (MouseButton)ret;
         }
 
+        public enum Modifiers
+        {
+            Shift,
+            Control,
+            Alt,
+            MacControl
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Modifiers__Push(Modifiers value)
+        {
+            NativeImplClient.PushInt32((int)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Modifiers Modifiers__Pop()
+        {
+            var ret = NativeImplClient.PopInt32();
+            return (Modifiers)ret;
+        }
+
+        internal static void __ModifiersSet__Push(HashSet<Modifiers> items)
+        {
+            var intValues = items.Select(i => (sbyte)i).ToArray();
+            NativeImplClient.PushInt8Array(intValues);
+        }
+
+        internal static HashSet<Modifiers> __ModifiersSet__Pop()
+        {
+            var intValues = NativeImplClient.PopInt8Array();
+            return intValues.Select(i => (Modifiers)i).ToHashSet();
+        }
+
 
         public interface IWindowDelegate : IDisposable
         {
-            void ButtonClicked(int x, int y, MouseButton button);
+            bool CanClose();
             void Closed();
+            void Destroyed();
+            void MouseDown(int x, int y, MouseButton button, HashSet<Modifiers> modifiers);
         }
 
         internal static void IWindowDelegate__Push(IWindowDelegate thing, bool isReturn)
@@ -162,8 +199,10 @@ namespace Org.Prefixed.GuiBase
             {
                 // override if necessary
             }
-            public abstract void ButtonClicked(int x, int y, MouseButton button);
+            public abstract bool CanClose();
             public abstract void Closed();
+            public abstract void Destroyed();
+            public abstract void MouseDown(int x, int y, MouseButton button, HashSet<Modifiers> modifiers);
         }
 
         internal class ServerIWindowDelegate : ServerObject, IWindowDelegate
@@ -172,17 +211,29 @@ namespace Org.Prefixed.GuiBase
             {
             }
 
-            public void ButtonClicked(int x, int y, MouseButton button)
+            public bool CanClose()
             {
-                MouseButton__Push(button);
-                NativeImplClient.PushInt32(y);
-                NativeImplClient.PushInt32(x);
-                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_buttonClicked, Id);
+                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_canClose, Id);
+                return NativeImplClient.PopBool();
             }
 
             public void Closed()
             {
                 NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_closed, Id);
+            }
+
+            public void Destroyed()
+            {
+                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_destroyed, Id);
+            }
+
+            public void MouseDown(int x, int y, MouseButton button, HashSet<Modifiers> modifiers)
+            {
+                __ModifiersSet__Push(modifiers);
+                MouseButton__Push(button);
+                NativeImplClient.PushInt32(y);
+                NativeImplClient.PushInt32(x);
+                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_mouseDown, Id);
             }
 
             public void Dispose()
@@ -235,22 +286,37 @@ namespace Org.Prefixed.GuiBase
             _createWindow = NativeImplClient.GetModuleMethod(_module, "createWindow");
 
             _iWindowDelegate = NativeImplClient.GetInterface(_module, "IWindowDelegate");
-            _iWindowDelegate_buttonClicked = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "buttonClicked");
+            _iWindowDelegate_canClose = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "canClose");
             _iWindowDelegate_closed = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "closed");
+            _iWindowDelegate_destroyed = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "destroyed");
+            _iWindowDelegate_mouseDown = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "mouseDown");
 
-            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_buttonClicked, delegate(ClientObject obj)
+            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_canClose, delegate(ClientObject obj)
             {
                 var inst = (ClientIWindowDelegate) obj;
-                var x = NativeImplClient.PopInt32();
-                var y = NativeImplClient.PopInt32();
-                var button = MouseButton__Pop();
-                inst.ButtonClicked(x, y, button);
+                NativeImplClient.PushBool(inst.CanClose());
             });
 
             NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_closed, delegate(ClientObject obj)
             {
                 var inst = (ClientIWindowDelegate) obj;
                 inst.Closed();
+            });
+
+            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_destroyed, delegate(ClientObject obj)
+            {
+                var inst = (ClientIWindowDelegate) obj;
+                inst.Destroyed();
+            });
+
+            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_mouseDown, delegate(ClientObject obj)
+            {
+                var inst = (ClientIWindowDelegate) obj;
+                var x = NativeImplClient.PopInt32();
+                var y = NativeImplClient.PopInt32();
+                var button = MouseButton__Pop();
+                var modifiers = __ModifiersSet__Pop();
+                inst.MouseDown(x, y, button, modifiers);
             });
 
             _iWindow = NativeImplClient.GetInterface(_module, "IWindow");

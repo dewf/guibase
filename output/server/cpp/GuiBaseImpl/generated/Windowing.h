@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../support/NativeImplServer.h"
 #include <functional>
 #include <memory>
@@ -31,10 +33,21 @@ enum class MouseButton {
     Other
 };
 
+enum class Modifiers {
+    Shift,
+    Control,
+    Alt,
+    MacControl
+};
+
+// std::set<Modifiers>
+
 class IWindowDelegate {
 public:
-    virtual void buttonClicked(int32_t x, int32_t y, MouseButton button) = 0;
+    virtual bool canClose() = 0;
     virtual void closed() = 0;
+    virtual void destroyed() = 0;
+    virtual void mouseDown(int32_t x, int32_t y, MouseButton button, std::set<Modifiers> modifiers) = 0;
 };
 
 // inherit from this to create server instances of IWindowDelegate
