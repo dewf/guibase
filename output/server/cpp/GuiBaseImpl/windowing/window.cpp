@@ -9,8 +9,6 @@
 #include "globals.h"
 #include "comstuff.h"
 
-#include <d2d1_1.h>
-#include <dwrite.h>
 #include <ole2.h> // for MK_ALT, strangely enough ... do these not work with mouse clicks? alt+click not possible, except when dnd dragging?
 
 // DPI macros ===============
@@ -35,7 +33,7 @@ static ID2D1Factory1* d2dFactory = nullptr;
 // forward decls ============
 LRESULT CALLBACK topLevelWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-void calcChromeExtra(int* extraWidth, int* extraHeight, DWORD dwStyle, BOOL hasMenu, UINT dpi) {
+void calcChromeExtra(int* extraWidth, int* extraHeight, DWORD dwStyle, bool hasMenu, UINT dpi) {
 	const int arbitraryExtent = 500;
 	RECT rect;
 	rect.left = 0;
@@ -86,16 +84,35 @@ std::set<Modifiers> getMouseModifiers(WPARAM wParam) {
 	return modifiers;
 }
 
+void Window::direct2DCreateTarget()
+{
+	ID2D1RenderTarget* oldTarget = d2dRenderTarget;
+	if (d2dRenderTarget) {
+		d2dRenderTarget->Release();
+		d2dRenderTarget = nullptr;
+	}
+	// Create a Direct2D render target
+	auto rtprops = D2D1::RenderTargetProperties();
+	rtprops.dpiX = (FLOAT)dpi;
+	rtprops.dpiY = (FLOAT)dpi;
+	auto hrtprops = D2D1::HwndRenderTargetProperties(hWnd, D2D1::SizeU(clientWidth, clientHeight));
+	HR(d2dFactory->CreateHwndRenderTarget(&rtprops, &hrtprops, &d2dRenderTarget));
+
+	// TODO: used to be an OpenWL event here
+	// now we need to call
+	// dl_D2DTargetRecreated(event->d2dTargetRecreatedEvent.newTarget, event->d2dTargetRecreatedEvent.oldTarget);
+}
+
 void Window::show()
 {
-	ShowWindow(_hWnd, SW_SHOWNORMAL); // might need to use a different cmd based on whether first time or not
-	UpdateWindow(_hWnd);
+	ShowWindow(hWnd, SW_SHOWNORMAL); // might need to use a different cmd based on whether first time or not
+	UpdateWindow(hWnd);
 }
 
 void Window::destroy()
 {
 	//unregisterDropWindow();
-	DestroyWindow(_hWnd);
+	DestroyWindow(hWnd);
 	// I guess we will have to wait until the wndProc destroy to get called, 
 	//   before we destroy the HWndUserData, which possibly holds the last shared_ptr reference to our window class
 	// otherwise the destroy event would go to a deleted Window instance
@@ -103,11 +120,28 @@ void Window::destroy()
 
 bool Window::canClose()
 {
-	return _delegate->canClose();
+	return delegate_->canClose();
 }
 
 void Window::onDestroyed() {
-	_delegate->destroyed();
+	delegate_->destroyed();
+}
+
+void Window::onDPIChanged(UINT newDPI, RECT* suggestedRect)
+{
+	dpi = newDPI;
+
+	// recalc extraWidth/extraHeight for resize constraints
+	calcChromeExtra(&extraWidth, &extraHeight, dwStyle, hasMenu, dpi);
+
+	auto x = suggestedRect->left;
+	auto y = suggestedRect->top;
+	auto width = suggestedRect->right - suggestedRect->left;
+	auto height = suggestedRect->bottom - suggestedRect->top;
+	SetWindowPos(hWnd, HWND_TOP, x, y, width, height, 0);
+
+	// recreate target with new DPI
+	direct2DCreateTarget();
 }
 
 void Window::onMouseButton(UINT message, WPARAM wParam, LPARAM lParam)
@@ -150,7 +184,7 @@ void Window::onMouseButton(UINT message, WPARAM wParam, LPARAM lParam)
 		// todo
 	}
 	else {
-		_delegate->mouseDown(x, y, button, modifiers);
+		delegate_->mouseDown(x, y, button, modifiers);
 	}
 }
 
@@ -193,16 +227,14 @@ std::shared_ptr<Window> Window::create(int32_t dipWidth, int32_t dipHeight, std:
 	if (hWnd) {
 		// associate data
 		auto win = new Window();
-		win->_hWnd = hWnd;
-		win->_delegate = del;
+		win->hWnd = hWnd;
+		win->delegate_ = del;
 		win->dpi = dpi;
-		//wl_WindowRef wlw = new wl_Window;
-		//wlw->dwStyle = dwStyle;
-		//wlw->clientWidth = width;
-		//wlw->clientHeight = height;
-		//wlw->extraWidth = extraWidth;
-		//wlw->extraHeight = extraHeight;
-		//wlw->userData = userData;
+		win->dwStyle = dwStyle;
+		win->clientWidth = width;
+		win->clientHeight = height;
+		win->extraWidth = extraWidth;
+		win->extraHeight = extraHeight;
 		//wlw->dropTarget = nullptr;
 		//wlw->props.usedFields = 0;
 		//if (props != nullptr) {
@@ -212,9 +244,7 @@ std::shared_ptr<Window> Window::create(int32_t dipWidth, int32_t dipHeight, std:
 		userData->window = std::shared_ptr<Window>(win);
 		SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)userData);
 
-		//if (useDirect2D) {
-		//	wlw->direct2DCreateTarget();
-		//}
+		win->direct2DCreateTarget();
 
 		return userData->window;
 	}
@@ -244,6 +274,9 @@ LRESULT CALLBACK topLevelWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 		// here we will invoke Window:: methods
 		switch (message)
 		{
+		case WM_ERASEBKGND:
+			//printf("nothx erase background!\n");
+			return 1; // nonzero = we're handling background erasure -- keeps windows from doing it
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:
 		case WM_MBUTTONDOWN:
@@ -267,6 +300,10 @@ LRESULT CALLBACK topLevelWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 				// cancelled, return 0
 			}
 			break;
+		case WM_DPICHANGED: {
+			userData->window->onDPIChanged(LOWORD(wParam), (RECT*)lParam);
+			break;
+		}
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}

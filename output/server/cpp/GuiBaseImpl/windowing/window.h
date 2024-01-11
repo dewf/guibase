@@ -5,19 +5,34 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+#include <d2d1_1.h>
+
 class Window : public ServerIWindow {
 private:
+	HWND hWnd = NULL;
+	std::shared_ptr<IWindowDelegate> delegate_;
+
 	UINT dpi;
-	HWND _hWnd = NULL;
-	std::shared_ptr<IWindowDelegate> _delegate;
+	int clientWidth = -1;
+	int clientHeight = -1;
+	int extraWidth = -1;    // difference between client size and window size
+	int extraHeight = -1;
+
+	DWORD dwStyle = 0;
+	bool hasMenu = false;
+
+	ID2D1HwndRenderTarget* d2dRenderTarget = nullptr;
+
+	void direct2DCreateTarget();
 public:
 // IWindow interface
 	void show() override;
 	void destroy() override;
-// public events (wndProc handling, keeps it tidy in there)
+// wndProc event handling (keeps it tidy in there)
 	bool canClose();
 	void onMouseButton(UINT message, WPARAM wParam, LPARAM lParam);
 	void onDestroyed();
+	void onDPIChanged(UINT newDPI, RECT* suggestedRect);
 // static
 	static void init();
 	static void shutdown();
