@@ -1,21 +1,20 @@
 #include "generated/Windowing.h"
 
 #include "windowing/win32util.h"
-
-// this will be removed eventually:
 #include "windowing/window.h"
+#include "windowing/comstuff.h"
+#include "windowing/globals.h"
 
 #include <stdio.h>
 
 void moduleInit() {
-    // any sub-psuedo-modules
     win32util_init();
 
-    Window::registerWndClass();
+	Window::init();
 }
 
 void moduleShutdown() {
-	// nothing yet
+	Window::shutdown();
 }
 
 void runloop() {

@@ -3,8 +3,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#include <mutex>
-#include <condition_variable>
+//#include <mutex>
+//#include <condition_variable>
 
 //use this so we don't have to have the DllMain talk to us
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
@@ -33,7 +33,6 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 //
 //// direct2D stuff
 //extern bool useDirect2D;
-//extern ID2D1Factory1* d2dFactory;
 //
 //// for wl_ExecuteOnMainThread
 //extern std::mutex execMutex;

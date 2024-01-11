@@ -8,7 +8,7 @@
 class Window : public ServerIWindow {
 private:
 	UINT dpi;
-	HWND _hWnd;
+	HWND _hWnd = NULL;
 	std::shared_ptr<IWindowDelegate> _delegate;
 public:
 // IWindow interface
@@ -19,11 +19,7 @@ public:
 	void onMouseButton(UINT message, WPARAM wParam, LPARAM lParam);
 	void onDestroyed();
 // static
+	static void init();
+	static void shutdown();
 	static std::shared_ptr<Window> create(int32_t dipWidth, int32_t dipHeight, std::string title, std::shared_ptr<IWindowDelegate> del);
-	static void registerWndClass();
-};
-
-// we associate this with the hWND since it can't hold shared_ptrs
-struct HWndUserData {
-	std::shared_ptr<Window> window;
 };

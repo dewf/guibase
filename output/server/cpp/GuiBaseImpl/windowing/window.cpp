@@ -7,10 +7,13 @@
 #include "unicodestuff.h"
 #include "win32util.h"
 #include "globals.h"
+#include "comstuff.h"
 
+#include <d2d1_1.h>
+#include <dwrite.h>
 #include <ole2.h> // for MK_ALT, strangely enough ... do these not work with mouse clicks? alt+click not possible, except when dnd dragging?
 
-// DPI macros
+// DPI macros ===============
 #define DECLSF(dpi) double scaleFactor = (dpi) / 96.0;
 #define INT(x) ((int)(x))
 #define DPIUP(x) INT((x) * scaleFactor)                // from device-independent pixels to physical res
@@ -18,8 +21,18 @@
 #define DPIUP_INPLACE(x) x = DPIUP(x);
 #define DPIDOWN_INPLACE(x) x = DPIDOWN(x);
 
-static const WCHAR* topLevelWindowClass = L"OpenWLTopLevel";
+// private types ============
 
+// we associate this with the hWND since it can't hold shared_ptrs
+struct HWndUserData {
+	std::shared_ptr<Window> window;
+};
+
+// static definitions =======
+static const WCHAR* topLevelWindowClass = L"OpenWLTopLevel";
+static ID2D1Factory1* d2dFactory = nullptr;
+
+// forward decls ============
 LRESULT CALLBACK topLevelWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 void calcChromeExtra(int* extraWidth, int* extraHeight, DWORD dwStyle, BOOL hasMenu, UINT dpi) {
@@ -210,9 +223,18 @@ std::shared_ptr<Window> Window::create(int32_t dipWidth, int32_t dipHeight, std:
 }
 
 // static
-void Window::registerWndClass()
+void Window::init()
 {
-    registerWindowClass(topLevelWindowClass, topLevelWindowProc);
+	HR(OleInitialize(nullptr));
+	HR(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &d2dFactory));
+
+	registerWindowClass(topLevelWindowClass, topLevelWindowProc);
+}
+
+void Window::shutdown()
+{
+	SafeRelease(&d2dFactory);
+	OleUninitialize();
 }
 
 LRESULT CALLBACK topLevelWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

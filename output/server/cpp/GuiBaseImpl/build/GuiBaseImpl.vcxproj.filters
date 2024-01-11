@@ -64,5 +64,8 @@
     <ClInclude Include="..\windowing\globals.h">
       <Filter>Source Files\windowing</Filter>
     </ClInclude>
+    <ClInclude Include="..\windowing\comstuff.h">
+      <Filter>Source Files\windowing</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
