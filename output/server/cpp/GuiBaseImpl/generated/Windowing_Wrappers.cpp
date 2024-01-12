@@ -130,6 +130,42 @@ std::shared_ptr<IWindowDelegate> IWindowDelegate__pop()
     }
 }
 
+inline void PropFlags__push(uint32_t value) {
+    ni_pushUInt32(value);
+}
+
+inline uint32_t PropFlags__pop() {
+    return ni_popUInt32();
+}
+
+inline void WindowStyle__push(WindowStyle value) {
+    ni_pushInt32((int32_t)value);
+}
+
+inline WindowStyle WindowStyle__pop() {
+    auto tag = ni_popInt32();
+    return (WindowStyle)tag;
+}
+
+void WindowProperties__push(WindowProperties value, bool isReturn) {
+    WindowStyle__push(value.style);
+    ni_pushInt32(value.maxHeight);
+    ni_pushInt32(value.maxWidth);
+    ni_pushInt32(value.minHeight);
+    ni_pushInt32(value.minWidth);
+    PropFlags__push(value.usedFields);
+}
+
+WindowProperties WindowProperties__pop() {
+    auto usedFields = PropFlags__pop();
+    auto minWidth = ni_popInt32();
+    auto minHeight = ni_popInt32();
+    auto maxWidth = ni_popInt32();
+    auto maxHeight = ni_popInt32();
+    auto style = WindowStyle__pop();
+    return WindowProperties { usedFields, minWidth, minHeight, maxWidth, maxHeight, style };
+}
+
 void moduleInit__wrapper() {
     moduleInit();
 }
@@ -151,7 +187,8 @@ void createWindow__wrapper() {
     auto height = ni_popInt32();
     auto title = popStringInternal();
     auto del = IWindowDelegate__pop();
-    IWindow__push(createWindow(width, height, title, del), true);
+    auto props = WindowProperties__pop();
+    IWindow__push(createWindow(width, height, title, del, props), true);
 }
 
 void IWindowDelegate_canClose__wrapper(int serverID) {

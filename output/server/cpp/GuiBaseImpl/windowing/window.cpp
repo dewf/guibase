@@ -11,6 +11,8 @@
 
 #include <ole2.h> // for MK_ALT, strangely enough ... do these not work with mouse clicks? alt+click not possible, except when dnd dragging?
 
+#include <set>
+
 // DPI macros ===============
 #define DECLSF(dpi) double scaleFactor = (dpi) / 96.0;
 #define INT(x) ((int)(x))
@@ -47,26 +49,25 @@ void calcChromeExtra(int* extraWidth, int* extraHeight, DWORD dwStyle, bool hasM
 	*extraHeight = (rect.bottom - rect.top) - arbitraryExtent; // bottom - top = outer height
 }
 
-long getWindowStyle(void* props, bool isPluginWindow) {
-	//long dwStyle = WS_OVERLAPPEDWINDOW;
-	//if (isPluginWindow) {
-	//	dwStyle = WS_CHILD;
-	//}
-	//else if (props && (props->usedFields & wl_kWindowPropStyle)) {
-	//	switch (props->style) {
-	//	case wl_kWindowStyleDefault:
-	//		dwStyle = WS_OVERLAPPEDWINDOW;
-	//		break;
-	//	case wl_kWindowStyleFrameless:
-	//		dwStyle = WS_POPUP | WS_BORDER;
-	//		break;
-	//	default:
-	//		printf("wl_WindowCreate: unknown window style\n");
-	//		break;
-	//	}
-	//}
-	//return dwStyle;
-	return WS_OVERLAPPEDWINDOW;
+long getWindowStyle(WindowProperties &props, bool isPluginWindow) {
+	long dwStyle = WS_OVERLAPPEDWINDOW;
+	if (isPluginWindow) {
+		dwStyle = WS_CHILD;
+	}
+	else if (props.usedFields & PropFlags::Style) {
+		switch (props.style) {
+		case WindowStyle::Default:
+			dwStyle = WS_OVERLAPPEDWINDOW;
+			break;
+		case WindowStyle::Frameless:
+			dwStyle = WS_POPUP | WS_BORDER;
+			break;
+		default:
+			printf("wl_WindowCreate: unknown window style\n");
+			break;
+		}
+	}
+	return dwStyle;
 }
 
 std::set<Modifiers> getMouseModifiers(WPARAM wParam) {
@@ -144,6 +145,29 @@ void Window::onDPIChanged(UINT newDPI, RECT* suggestedRect)
 	direct2DCreateTarget();
 }
 
+void Window::onGetMinMaxInfo(LPARAM lParam)
+{
+	auto mmi = (MINMAXINFO*)lParam;
+
+	DECLSF(dpi);
+
+	// min
+	if (props.usedFields & PropFlags::MinWidth) {
+		mmi->ptMinTrackSize.x = DPIUP(props.minWidth) + extraWidth;
+	}
+	if (props.usedFields & PropFlags::MinHeight) {
+		mmi->ptMinTrackSize.y = DPIUP(props.minHeight) + extraHeight;
+	}
+
+	// max
+	if (props.usedFields & PropFlags::MaxWidth) {
+		mmi->ptMaxTrackSize.x = DPIUP(props.maxWidth) + extraWidth;
+	}
+	if (props.usedFields & PropFlags::MaxHeight) {
+		mmi->ptMaxTrackSize.y = DPIUP(props.maxHeight) + extraHeight;
+	}
+}
+
 void Window::onMouseButton(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	// process mouse events
@@ -189,13 +213,13 @@ void Window::onMouseButton(UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 // static
-std::shared_ptr<Window> Window::create(int32_t dipWidth, int32_t dipHeight, std::string title, std::shared_ptr<IWindowDelegate> del)
+std::shared_ptr<Window> Window::create(int32_t dipWidth, int32_t dipHeight, std::string title, std::shared_ptr<IWindowDelegate> del, WindowProperties &props)
 {
     auto wideTitle = utf8_to_wstring(title);
 	int extraWidth = 0;
 	int extraHeight = 0;
 
-	auto dwStyle = getWindowStyle(nullptr, false);
+	auto dwStyle = getWindowStyle(props, false);
 
 	// these need to be set by either branch below
 	UINT dpi;
@@ -214,7 +238,7 @@ std::shared_ptr<Window> Window::create(int32_t dipWidth, int32_t dipHeight, std:
 	height = DPIUP(dipHeight);
 	// note: we don't fix props -- the min/max/width/height all stay in DIPs, 
 	//   because window might get dragged between monitors of different DPI
-	// so just recalc (DPIUP) from props each time (wl_Window::onGetMinMaxInfo)
+	// so just recalc (DPIUP) from props each time (Window::onGetMinMaxInfo)
 
 	calcChromeExtra(&extraWidth, &extraHeight, dwStyle, FALSE, dpi); // FALSE = no menu for now ... will recalc when the time comes
 
@@ -235,11 +259,9 @@ std::shared_ptr<Window> Window::create(int32_t dipWidth, int32_t dipHeight, std:
 		win->clientHeight = height;
 		win->extraWidth = extraWidth;
 		win->extraHeight = extraHeight;
+		win->props = props;
 		//wlw->dropTarget = nullptr;
-		//wlw->props.usedFields = 0;
-		//if (props != nullptr) {
-		//	memcpy(&wlw->props, props, sizeof(wl_WindowProperties));
-		//}
+
 		auto userData = new HWndUserData();
 		userData->window = std::shared_ptr<Window>(win);
 		SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)userData);
@@ -300,10 +322,12 @@ LRESULT CALLBACK topLevelWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 				// cancelled, return 0
 			}
 			break;
-		case WM_DPICHANGED: {
+		case WM_GETMINMAXINFO:
+			userData->window->onGetMinMaxInfo(lParam);
+			break;
+		case WM_DPICHANGED:
 			userData->window->onDPIChanged(LOWORD(wParam), (RECT*)lParam);
 			break;
-		}
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}

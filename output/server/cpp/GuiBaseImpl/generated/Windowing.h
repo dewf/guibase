@@ -60,8 +60,32 @@ public:
     }
 };
 
+enum PropFlags {
+    MinWidth = 1,
+    MinHeight = 2,
+    MaxWidth = 4,
+    MaxHeight = 8,
+    Style = 16,
+    NativeParent = 32
+};
+
+enum class WindowStyle {
+    Default,
+    Frameless,
+    PluginWindow
+};
+
+struct WindowProperties {
+    uint32_t usedFields;
+    int32_t minWidth;
+    int32_t minHeight;
+    int32_t maxWidth;
+    int32_t maxHeight;
+    WindowStyle style;
+};
+
 void moduleInit();
 void moduleShutdown();
 void runloop();
 void exitRunloop();
-std::shared_ptr<IWindow> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<IWindowDelegate> del);
+std::shared_ptr<IWindow> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<IWindowDelegate> del, WindowProperties props);

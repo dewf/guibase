@@ -242,6 +242,89 @@ namespace Org.Prefixed.GuiBase
             }
         }
 
+        [Flags]
+        public enum PropFlags
+        {
+            MinWidth = 1,
+            MinHeight = 2,
+            MaxWidth = 4,
+            MaxHeight = 8,
+            Style = 16,
+            NativeParent = 32
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void PropFlags__Push(PropFlags value)
+        {
+            NativeImplClient.PushUInt32((uint)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static PropFlags PropFlags__Pop()
+        {
+            var ret = NativeImplClient.PopUInt32();
+            return (PropFlags)ret;
+        }
+
+        public enum WindowStyle
+        {
+            Default,
+            Frameless,
+            PluginWindow
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void WindowStyle__Push(WindowStyle value)
+        {
+            NativeImplClient.PushInt32((int)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static WindowStyle WindowStyle__Pop()
+        {
+            var ret = NativeImplClient.PopInt32();
+            return (WindowStyle)ret;
+        }
+
+        public struct WindowProperties {
+            public PropFlags UsedFields;
+            public int MinWidth;
+            public int MinHeight;
+            public int MaxWidth;
+            public int MaxHeight;
+            public WindowStyle Style;
+            public WindowProperties(PropFlags usedFields, int minWidth, int minHeight, int maxWidth, int maxHeight, WindowStyle style)
+            {
+                this.UsedFields = usedFields;
+                this.MinWidth = minWidth;
+                this.MinHeight = minHeight;
+                this.MaxWidth = maxWidth;
+                this.MaxHeight = maxHeight;
+                this.Style = style;
+            }
+        }
+
+        internal static void WindowProperties__Push(WindowProperties value, bool isReturn)
+        {
+            WindowStyle__Push(value.Style);
+            NativeImplClient.PushInt32(value.MaxHeight);
+            NativeImplClient.PushInt32(value.MaxWidth);
+            NativeImplClient.PushInt32(value.MinHeight);
+            NativeImplClient.PushInt32(value.MinWidth);
+            PropFlags__Push(value.UsedFields);
+        }
+
+        internal static WindowProperties WindowProperties__Pop()
+        {
+            var usedFields = PropFlags__Pop();
+            var minWidth = NativeImplClient.PopInt32();
+            var minHeight = NativeImplClient.PopInt32();
+            var maxWidth = NativeImplClient.PopInt32();
+            var maxHeight = NativeImplClient.PopInt32();
+            var style = WindowStyle__Pop();
+            return new WindowProperties(usedFields, minWidth, minHeight, maxWidth, maxHeight, style);
+        }
+
         public static void ModuleInit()
         {
             NativeImplClient.InvokeModuleMethod(_moduleInit);
@@ -262,8 +345,9 @@ namespace Org.Prefixed.GuiBase
             NativeImplClient.InvokeModuleMethod(_exitRunloop);
         }
 
-        public static IWindow CreateWindow(int width, int height, string title, IWindowDelegate del)
+        public static IWindow CreateWindow(int width, int height, string title, IWindowDelegate del, WindowProperties props)
         {
+            WindowProperties__Push(props, false);
             IWindowDelegate__Push(del, false);
             NativeImplClient.PushString(title);
             NativeImplClient.PushInt32(height);

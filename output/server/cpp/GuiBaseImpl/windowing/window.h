@@ -23,6 +23,8 @@ private:
 
 	ID2D1HwndRenderTarget* d2dRenderTarget = nullptr;
 
+	WindowProperties props;
+
 	void direct2DCreateTarget();
 public:
 // IWindow interface
@@ -33,8 +35,9 @@ public:
 	void onMouseButton(UINT message, WPARAM wParam, LPARAM lParam);
 	void onDestroyed();
 	void onDPIChanged(UINT newDPI, RECT* suggestedRect);
+	void onGetMinMaxInfo(LPARAM lParam);
 // static
 	static void init();
 	static void shutdown();
-	static std::shared_ptr<Window> create(int32_t dipWidth, int32_t dipHeight, std::string title, std::shared_ptr<IWindowDelegate> del);
+	static std::shared_ptr<Window> create(int32_t dipWidth, int32_t dipHeight, std::string title, std::shared_ptr<IWindowDelegate> del, WindowProperties &props);
 };

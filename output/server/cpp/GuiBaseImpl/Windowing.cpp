@@ -53,6 +53,6 @@ void exitRunloop() {
 	PostQuitMessage(0);
 }
 
-std::shared_ptr<IWindow> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<IWindowDelegate> delegate_) {
-    return Window::create(width, height, title, delegate_);
+std::shared_ptr<IWindow> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<IWindowDelegate> del, WindowProperties props) {
+    return Window::create(width, height, title, del, props);
 }

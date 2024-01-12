@@ -21,6 +21,33 @@ enum Modifiers {
    MacControl
 }
 
+// tried a couple of ways (Set<> of enum, Array<> of sumtype) and this is the least painful (common) API
+// sumtype seems attractive but then we'd have to convert it into a set or struct on the C++ side anyway (to check against it)
+// and the Set<> is a bit ugly to construct in C#
+flags PropFlags {
+   MinWidth = 1,
+   MinHeight = 1 << 1,
+   MaxWidth = 1 << 2,
+   MaxHeight = 1 << 3,
+   Style = 1 << 4,
+   NativeParent = 1 << 5
+}
+
+enum WindowStyle {
+   Default,
+   Frameless,
+   PluginWindow   // for VST/AU/etc
+}
+
+struct WindowProperties {
+   PropFlags usedFields;
+   int minWidth;
+   int minHeight;
+   int maxWidth;
+   int maxHeight;
+   WindowStyle style;
+}
+
 interface IWindowDelegate {
    bool canClose();
    void closed();
@@ -33,4 +60,4 @@ interface IWindow {
    void destroy();
 }
 
-IWindow createWindow(int width, int height, string title, IWindowDelegate del);
+IWindow createWindow(int width, int height, string title, IWindowDelegate del, WindowProperties props);
