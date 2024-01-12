@@ -11,6 +11,12 @@
 
 #include <ole2.h> // for MK_ALT, strangely enough ... do these not work with mouse clicks? alt+click not possible, except when dnd dragging?
 
+// dark mode stuff
+#include <dwmapi.h>
+#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#endif
+
 #include <set>
 
 // DPI macros ===============
@@ -249,6 +255,13 @@ std::shared_ptr<Window> Window::create(int32_t dipWidth, int32_t dipHeight, std:
 		width + extraWidth, height + extraHeight, nullptr, nullptr, HINST_THISCOMPONENT, nullptr);
 
 	if (hWnd) {
+		// dark mode stuff
+		// see here for how to track changes:
+		// https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/apply-windows-themes
+		// for now just force dark
+		BOOL value = TRUE;
+		DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+
 		// associate data
 		auto win = new Window();
 		win->hWnd = hWnd;
