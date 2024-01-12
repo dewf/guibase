@@ -1,6 +1,5 @@
 ﻿namespace AppRunner;
 
-using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Windowing;
 
 internal class WindowHandler : ClientIWindowDelegate
@@ -15,7 +14,7 @@ internal class WindowHandler : ClientIWindowDelegate
     public override void Destroyed()
     {
         Console.WriteLine("window destroyed! exiting runloop");
-        Windowing.ExitRunloop();
+        ExitRunloop();
     }
     public override void MouseDown(int x, int y, MouseButton button, HashSet<Modifiers> modifiers)
     {
