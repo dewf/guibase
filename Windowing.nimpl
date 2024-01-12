@@ -22,7 +22,7 @@ enum Modifiers {
 }
 
 // tried a couple of ways (Set<> of enum, Array<> of sumtype) and this is the least painful (common) API
-// sumtype seems attractive but then we'd have to convert it into a set or struct on the C++ side anyway (to check against it)
+// sumtype array seems attractive but requires conversion on the C++ side to actually check fields on demand
 // and the Set<> is a bit ugly to construct in C#
 flags PropFlags {
    MinWidth = 1,
