@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using Org.Prefixed.GuiBase.Support;
 using ModuleHandle = Org.Prefixed.GuiBase.Support.ModuleHandle;
 
+using static Org.Prefixed.GuiBase.Drawing;
+
 namespace Org.Prefixed.GuiBase
 {
     public static class Windowing
@@ -22,6 +24,7 @@ namespace Org.Prefixed.GuiBase
         private static InterfaceMethodHandle _iWindowDelegate_closed;
         private static InterfaceMethodHandle _iWindowDelegate_destroyed;
         private static InterfaceMethodHandle _iWindowDelegate_mouseDown;
+        private static InterfaceMethodHandle _iWindowDelegate_repaint;
         private static InterfaceHandle _iWindow;
         private static InterfaceMethodHandle _iWindow_show;
         private static InterfaceMethodHandle _iWindow_destroy;
@@ -153,12 +156,14 @@ namespace Org.Prefixed.GuiBase
         }
 
 
+
         public interface IWindowDelegate : IDisposable
         {
             bool CanClose();
             void Closed();
             void Destroyed();
             void MouseDown(int x, int y, MouseButton button, HashSet<Modifiers> modifiers);
+            void Repaint(CGContext context, int x, int y, int width, int height);
         }
 
         internal static void IWindowDelegate__Push(IWindowDelegate thing, bool isReturn)
@@ -203,6 +208,7 @@ namespace Org.Prefixed.GuiBase
             public abstract void Closed();
             public abstract void Destroyed();
             public abstract void MouseDown(int x, int y, MouseButton button, HashSet<Modifiers> modifiers);
+            public abstract void Repaint(CGContext context, int x, int y, int width, int height);
         }
 
         internal class ServerIWindowDelegate : ServerObject, IWindowDelegate
@@ -234,6 +240,16 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.PushInt32(y);
                 NativeImplClient.PushInt32(x);
                 NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_mouseDown, Id);
+            }
+
+            public void Repaint(CGContext context, int x, int y, int width, int height)
+            {
+                NativeImplClient.PushInt32(height);
+                NativeImplClient.PushInt32(width);
+                NativeImplClient.PushInt32(y);
+                NativeImplClient.PushInt32(x);
+                CGContext__Push(context, false);
+                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_repaint, Id);
             }
 
             public void Dispose()
@@ -374,6 +390,7 @@ namespace Org.Prefixed.GuiBase
             _iWindowDelegate_closed = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "closed");
             _iWindowDelegate_destroyed = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "destroyed");
             _iWindowDelegate_mouseDown = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "mouseDown");
+            _iWindowDelegate_repaint = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "repaint");
 
             NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_canClose, delegate(ClientObject obj)
             {
@@ -401,6 +418,17 @@ namespace Org.Prefixed.GuiBase
                 var button = MouseButton__Pop();
                 var modifiers = __ModifiersSet__Pop();
                 inst.MouseDown(x, y, button, modifiers);
+            });
+
+            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_repaint, delegate(ClientObject obj)
+            {
+                var inst = (ClientIWindowDelegate) obj;
+                var context = CGContext__Pop();
+                var x = NativeImplClient.PopInt32();
+                var y = NativeImplClient.PopInt32();
+                var width = NativeImplClient.PopInt32();
+                var height = NativeImplClient.PopInt32();
+                inst.Repaint(context, x, y, width, height);
             });
 
             _iWindow = NativeImplClient.GetInterface(_module, "IWindow");

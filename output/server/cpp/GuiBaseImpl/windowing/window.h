@@ -5,7 +5,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#include <d2d1_1.h>
+#include <d2d1_3.h>
 
 class Window : public ServerIWindow {
 private:
@@ -27,6 +27,8 @@ private:
 
 	void direct2DCreateTarget();
 public:
+	~Window();
+
 // IWindow interface
 	void show() override;
 	void destroy() override;
@@ -36,8 +38,9 @@ public:
 	void onDestroyed();
 	void onDPIChanged(UINT newDPI, RECT* suggestedRect);
 	void onGetMinMaxInfo(LPARAM lParam);
+	void onPaint();
 // static
-	static void init();
+	static void init(ID2D1Factory1 *factory);
 	static void shutdown();
 	static std::shared_ptr<Window> create(int32_t dipWidth, int32_t dipHeight, std::string title, std::shared_ptr<IWindowDelegate> del, WindowProperties &props);
 };

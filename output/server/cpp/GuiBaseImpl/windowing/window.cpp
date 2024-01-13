@@ -4,10 +4,12 @@
 #include <Windows.h>
 #include <windowsx.h> // for some macros (GET_X_LPARAM etc)
 
-#include "unicodestuff.h"
+#include "../common/unicodestuff.h"
+#include "../common/comstuff.h"
 #include "win32util.h"
 #include "globals.h"
-#include "comstuff.h"
+
+#include "../drawing/CGContext.h"
 
 #include <ole2.h> // for MK_ALT, strangely enough ... do these not work with mouse clicks? alt+click not possible, except when dnd dragging?
 
@@ -94,10 +96,12 @@ std::set<Modifiers> getMouseModifiers(WPARAM wParam) {
 void Window::direct2DCreateTarget()
 {
 	ID2D1RenderTarget* oldTarget = d2dRenderTarget;
-	if (d2dRenderTarget) {
-		d2dRenderTarget->Release();
-		d2dRenderTarget = nullptr;
-	}
+	SafeRelease(&d2dRenderTarget);
+	//if (d2dRenderTarget) {
+	//	d2dRenderTarget->Release();
+	//	d2dRenderTarget = nullptr;
+	//}
+	// 
 	// Create a Direct2D render target
 	auto rtprops = D2D1::RenderTargetProperties();
 	rtprops.dpiX = (FLOAT)dpi;
@@ -107,7 +111,13 @@ void Window::direct2DCreateTarget()
 
 	// TODO: used to be an OpenWL event here
 	// now we need to call
+	printf("TODO: need to call dl_D2DTargetRecreated()! (does some cache stuff I think)\n");
 	// dl_D2DTargetRecreated(event->d2dTargetRecreatedEvent.newTarget, event->d2dTargetRecreatedEvent.oldTarget);
+}
+
+Window::~Window()
+{
+	SafeRelease(&d2dRenderTarget);
 }
 
 void Window::show()
@@ -287,19 +297,53 @@ std::shared_ptr<Window> Window::create(int32_t dipWidth, int32_t dipHeight, std:
 	return std::shared_ptr<Window>();
 }
 
-// static
-void Window::init()
+void Window::init(ID2D1Factory1* factory)
 {
 	HR(OleInitialize(nullptr));
-	HR(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &d2dFactory));
-
 	registerWindowClass(topLevelWindowClass, topLevelWindowProc);
+
+	factory->AddRef();
+	::d2dFactory = factory;
 }
 
 void Window::shutdown()
 {
 	SafeRelease(&d2dFactory);
 	OleUninitialize();
+}
+
+void Window::onPaint()
+{
+	PAINTSTRUCT ps;
+	HDC hdc = BeginPaint(hWnd, &ps);
+
+	DECLSF(dpi);
+	auto x = DPIDOWN(ps.rcPaint.left);   // is this going to give us off-by-1 pixel errors repainting? due to rounding?
+	auto y = DPIDOWN(ps.rcPaint.top);
+	auto width = DPIDOWN(ps.rcPaint.right) - x;
+	auto height = DPIDOWN(ps.rcPaint.bottom) - y;
+
+	// pass through DPI in either case
+	// but are these ever used? seems only target ever was ...
+	//event.repaintEvent.platformContext.dpi = dpi;
+	//event.repaintEvent.platformContext.d2d.factory = d2dFactory;
+	//event.repaintEvent.platformContext.d2d.target = d2dRenderTarget;
+
+	d2dRenderTarget->BeginDraw();
+
+	// construct a CGContext
+	auto context = std::shared_ptr<CGContext>(new CGContext2());
+	// call delegate here
+	delegate_->repaint(context, x, y, width, height);
+	// release CGContext
+	context.reset();
+
+	auto hr = d2dRenderTarget->EndDraw();
+	if (hr == D2DERR_RECREATE_TARGET) {
+		direct2DCreateTarget();
+	}
+
+	EndPaint(hWnd, &ps);
 }
 
 LRESULT CALLBACK topLevelWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -341,6 +385,12 @@ LRESULT CALLBACK topLevelWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 		case WM_DPICHANGED:
 			userData->window->onDPIChanged(LOWORD(wParam), (RECT*)lParam);
 			break;
+		case WM_PAINT:
+		{
+			userData->window->onPaint();
+		}
+		break;
+
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}

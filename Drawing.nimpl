@@ -1,0 +1,21 @@
+module Drawing;
+
+struct Point {
+    double x;
+    double y;
+}
+
+struct Size {
+    double width;
+    double height;
+}
+
+struct Rect {
+    Point origin;
+    Size size;
+}
+
+interface CGContext {
+    void setRGBFillColor(double red, double green, double blue, double alpha);
+    void fillRect(Rect rect);
+}

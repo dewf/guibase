@@ -2,15 +2,18 @@
 
 #include "windowing/win32util.h"
 #include "windowing/window.h"
-#include "windowing/comstuff.h"
+#include "common/comstuff.h"
 #include "windowing/globals.h"
+#include "drawing/CGContext.h"
 
 #include <stdio.h>
 
+// shouldn't we have a LibraryInit() instead? need to figure out how that should all work
 void moduleInit() {
     win32util_init();
 
-	Window::init();
+	CGContext2::init();
+	Window::init(CGContext2::getFactory());
 }
 
 void moduleShutdown() {

@@ -18,6 +18,12 @@
     <Filter Include="Source Files\windowing">
       <UniqueIdentifier>{7348497e-1443-43bb-9e28-9044ce5d5064}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\common">
+      <UniqueIdentifier>{aa34b4c2-73fa-4c6f-addf-7275fd92b12a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\drawing">
+      <UniqueIdentifier>{c5831ba4-6805-4758-9738-9c6293142891}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\generated\Windowing_Wrappers.cpp">
@@ -32,14 +38,26 @@
     <ClCompile Include="..\windowing\window.cpp">
       <Filter>Source Files\windowing</Filter>
     </ClCompile>
-    <ClCompile Include="..\windowing\unicodestuff.cpp">
-      <Filter>Source Files\windowing</Filter>
-    </ClCompile>
     <ClCompile Include="..\windowing\win32util.cpp">
       <Filter>Source Files\windowing</Filter>
     </ClCompile>
     <ClCompile Include="..\windowing\globals.cpp">
       <Filter>Source Files\windowing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\unicodestuff.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Drawing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\generated\Drawing_Wrappers.cpp">
+      <Filter>Source Files\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\generated\Library.cpp">
+      <Filter>Source Files\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\drawing\CGContext.cpp">
+      <Filter>Source Files\drawing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -55,17 +73,23 @@
     <ClInclude Include="..\windowing\window.h">
       <Filter>Source Files\windowing</Filter>
     </ClInclude>
-    <ClInclude Include="..\windowing\unicodestuff.h">
-      <Filter>Source Files\windowing</Filter>
-    </ClInclude>
     <ClInclude Include="..\windowing\win32util.h">
       <Filter>Source Files\windowing</Filter>
     </ClInclude>
     <ClInclude Include="..\windowing\globals.h">
       <Filter>Source Files\windowing</Filter>
     </ClInclude>
-    <ClInclude Include="..\windowing\comstuff.h">
-      <Filter>Source Files\windowing</Filter>
+    <ClInclude Include="..\common\comstuff.h">
+      <Filter>Source Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\unicodestuff.h">
+      <Filter>Source Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\generated\Drawing.h">
+      <Filter>Source Files\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\drawing\CGContext.h">
+      <Filter>Source Files\drawing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,6 +1,8 @@
-﻿namespace AppRunner;
+﻿using Org.Prefixed.GuiBase;
 
-using static Org.Prefixed.GuiBase.Windowing;
+namespace AppRunner;
+
+using static Windowing;
 
 internal class WindowHandler : ClientIWindowDelegate
 {
@@ -23,6 +25,13 @@ internal class WindowHandler : ClientIWindowDelegate
     private static string ModifiersToString(HashSet<Modifiers> modifiers)
     {
         return string.Join("+", modifiers.Select(m => m.ToString()).Order());
+    }
+    public override void Repaint(Drawing.CGContext context, int x, int y, int width, int height)
+    {
+        // context.SetRGBFillColor(1.0, 1.0, 1.0, 1.0);
+        // var rect = new Drawing.Rect(new Drawing.Point(30.0, 10.0), new Drawing.Size(100.0, 100.0));
+        // context.FillRect(rect);
+        Console.WriteLine($"repaint!!! {x}/{y}/{width}/{height}");
     }
 }
 

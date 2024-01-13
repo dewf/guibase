@@ -5,6 +5,7 @@ ni_InterfaceMethodRef iWindowDelegate_canClose;
 ni_InterfaceMethodRef iWindowDelegate_closed;
 ni_InterfaceMethodRef iWindowDelegate_destroyed;
 ni_InterfaceMethodRef iWindowDelegate_mouseDown;
+ni_InterfaceMethodRef iWindowDelegate_repaint;
 ni_InterfaceMethodRef iWindow_show;
 ni_InterfaceMethodRef iWindow_destroy;
 
@@ -81,6 +82,9 @@ std::set<Modifiers> __ModifiersSet__pop() {
     return __ret;
 }
 
+void CGContext__push(std::shared_ptr<CGContext> thing, bool isReturn);
+std::shared_ptr<CGContext> CGContext__pop();
+
 class ClientIWindowDelegate : public ClientObject, public IWindowDelegate {
 public:
     ClientIWindowDelegate(int id) : ClientObject(id) {}
@@ -100,6 +104,14 @@ public:
         ni_pushInt32(y);
         ni_pushInt32(x);
         invokeMethod(iWindowDelegate_mouseDown);
+    }
+    void repaint(std::shared_ptr<CGContext> context, int32_t x, int32_t y, int32_t width, int32_t height) override {
+        ni_pushInt32(height);
+        ni_pushInt32(width);
+        ni_pushInt32(y);
+        ni_pushInt32(x);
+        CGContext__push(context, false);
+        invokeMethod(iWindowDelegate_repaint);
     }
 };
 
@@ -215,6 +227,16 @@ void IWindowDelegate_mouseDown__wrapper(int serverID) {
     inst->mouseDown(x, y, button, modifiers);
 }
 
+void IWindowDelegate_repaint__wrapper(int serverID) {
+    auto inst = ServerIWindowDelegate::getByID(serverID);
+    auto context = CGContext__pop();
+    auto x = ni_popInt32();
+    auto y = ni_popInt32();
+    auto width = ni_popInt32();
+    auto height = ni_popInt32();
+    inst->repaint(context, x, y, width, height);
+}
+
 void IWindow_show__wrapper(int serverID) {
     auto inst = ServerIWindow::getByID(serverID);
     inst->show();
@@ -225,7 +247,7 @@ void IWindow_destroy__wrapper(int serverID) {
     inst->destroy();
 }
 
-extern "C" int nativeLibraryInit() {
+int Windowing__init() {
     auto m = ni_registerModule("Windowing");
     ni_registerModuleMethod(m, "moduleInit", &moduleInit__wrapper);
     ni_registerModuleMethod(m, "moduleShutdown", &moduleShutdown__wrapper);
@@ -237,11 +259,12 @@ extern "C" int nativeLibraryInit() {
     iWindowDelegate_closed = ni_registerInterfaceMethod(iWindowDelegate, "closed", &IWindowDelegate_closed__wrapper);
     iWindowDelegate_destroyed = ni_registerInterfaceMethod(iWindowDelegate, "destroyed", &IWindowDelegate_destroyed__wrapper);
     iWindowDelegate_mouseDown = ni_registerInterfaceMethod(iWindowDelegate, "mouseDown", &IWindowDelegate_mouseDown__wrapper);
+    iWindowDelegate_repaint = ni_registerInterfaceMethod(iWindowDelegate, "repaint", &IWindowDelegate_repaint__wrapper);
     auto iWindow = ni_registerInterface(m, "IWindow");
     iWindow_show = ni_registerInterfaceMethod(iWindow, "show", &IWindow_show__wrapper);
     iWindow_destroy = ni_registerInterfaceMethod(iWindow, "destroy", &IWindow_destroy__wrapper);
     return 0; // = OK
 }
 
-extern "C" void nativeLibraryShutdown() {
+void Windowing__shutdown() {
 }
