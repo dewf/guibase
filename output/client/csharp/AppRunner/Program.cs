@@ -29,7 +29,7 @@ internal class WindowHandler : Windowing.ClientIWindowDelegate
         // context.SetRGBFillColor(1.0, 1.0, 1.0, 1.0);
         // var rect = new Drawing.Rect(new Drawing.Point(30.0, 10.0), new Drawing.Size(100.0, 100.0));
         // context.FillRect(rect);
-        Console.WriteLine($"repaint!!! {x}/{y}/{width}/{height}");
+        Console.WriteLine($"repaint!!! {x} / {y} / {width} / {height}");
     }
 }
 
@@ -39,10 +39,9 @@ internal static class Program
     private static void Main(string[] args)
     {
         Library.Init();
-        
+
         var props = new Windowing.WindowProperties
         {
-            UsedFields = Windowing.PropFlags.MinWidth | Windowing.PropFlags.MaxWidth | Windowing.PropFlags.MinHeight | Windowing.PropFlags.MaxHeight | Windowing.PropFlags.Style,
             MinWidth = 320,
             MinHeight = 200,
             MaxWidth = 1280,

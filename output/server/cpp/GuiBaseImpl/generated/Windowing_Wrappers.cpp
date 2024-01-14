@@ -160,22 +160,55 @@ inline WindowStyle WindowStyle__pop() {
 }
 
 void WindowProperties__push(WindowProperties value, bool isReturn) {
-    WindowStyle__push(value.style);
-    ni_pushInt32(value.maxHeight);
-    ni_pushInt32(value.maxWidth);
-    ni_pushInt32(value.minHeight);
-    ni_pushInt32(value.minWidth);
-    PropFlags__push(value.usedFields);
+    bool nativeParent;
+    if (value.hasNativeParent(&nativeParent)) {
+        ni_pushBool(nativeParent);
+    }
+    WindowStyle style;
+    if (value.hasStyle(&style)) {
+        WindowStyle__push(style);
+    }
+    int maxHeight;
+    if (value.hasMaxHeight(&maxHeight)) {
+        ni_pushInt32(maxHeight);
+    }
+    int maxWidth;
+    if (value.hasMaxWidth(&maxWidth)) {
+        ni_pushInt32(maxWidth);
+    }
+    int minHeight;
+    if (value.hasMinHeight(&minHeight)) {
+        ni_pushInt32(minHeight);
+    }
+    int minWidth;
+    if (value.hasMinWidth(&minWidth)) {
+        ni_pushInt32(minWidth);
+    }
+    ni_pushInt32(value.getUsedFields());
 }
 
 WindowProperties WindowProperties__pop() {
-    auto usedFields = PropFlags__pop();
-    auto minWidth = ni_popInt32();
-    auto minHeight = ni_popInt32();
-    auto maxWidth = ni_popInt32();
-    auto maxHeight = ni_popInt32();
-    auto style = WindowStyle__pop();
-    return WindowProperties { usedFields, minWidth, minHeight, maxWidth, maxHeight, style };
+    WindowProperties value;
+    auto usedFields = ni_popInt32();
+    if (usedFields & WindowProperties::Fields::MinWidth) {
+        value.setMinWidth(ni_popInt32());
+    }
+    if (usedFields & WindowProperties::Fields::MinHeight) {
+        value.setMinHeight(ni_popInt32());
+    }
+    if (usedFields & WindowProperties::Fields::MaxWidth) {
+        value.setMaxWidth(ni_popInt32());
+    }
+    if (usedFields & WindowProperties::Fields::MaxHeight) {
+        value.setMaxHeight(ni_popInt32());
+    }
+    if (usedFields & WindowProperties::Fields::Style) {
+        value.setStyle(WindowStyle__pop());
+    }
+    if (usedFields & WindowProperties::Fields::NativeParent) {
+        value.setNativeParent(ni_popBool());
+    }
+    return value;
 }
 
 void moduleInit__wrapper() {

@@ -62,17 +62,20 @@ long getWindowStyle(WindowProperties &props, bool isPluginWindow) {
 	if (isPluginWindow) {
 		dwStyle = WS_CHILD;
 	}
-	else if (props.usedFields & PropFlags::Style) {
-		switch (props.style) {
-		case WindowStyle::Default:
-			dwStyle = WS_OVERLAPPEDWINDOW;
-			break;
-		case WindowStyle::Frameless:
-			dwStyle = WS_POPUP | WS_BORDER;
-			break;
-		default:
-			printf("wl_WindowCreate: unknown window style\n");
-			break;
+	else {
+		WindowStyle propStyle;
+		if (props.hasStyle(&propStyle)) {
+			switch (propStyle) {
+			case WindowStyle::Default:
+				dwStyle = WS_OVERLAPPEDWINDOW;
+				break;
+			case WindowStyle::Frameless:
+				dwStyle = WS_POPUP | WS_BORDER;
+				break;
+			default:
+				printf("wl_WindowCreate: unknown window style\n");
+				break;
+			}
 		}
 	}
 	return dwStyle;
@@ -167,20 +170,21 @@ void Window::onGetMinMaxInfo(LPARAM lParam)
 
 	DECLSF(dpi);
 
-	// min
-	if (props.usedFields & PropFlags::MinWidth) {
-		mmi->ptMinTrackSize.x = DPIUP(props.minWidth) + extraWidth;
-	}
-	if (props.usedFields & PropFlags::MinHeight) {
-		mmi->ptMinTrackSize.y = DPIUP(props.minHeight) + extraHeight;
-	}
+	int minWidth, minHeight, maxWidth, maxHeight;
 
-	// max
-	if (props.usedFields & PropFlags::MaxWidth) {
-		mmi->ptMaxTrackSize.x = DPIUP(props.maxWidth) + extraWidth;
+	// min
+	if (props.hasMinWidth(&minWidth)) {
+		mmi->ptMinTrackSize.x = DPIUP(minWidth) + extraWidth;
 	}
-	if (props.usedFields & PropFlags::MaxHeight) {
-		mmi->ptMaxTrackSize.y = DPIUP(props.maxHeight) + extraHeight;
+	if (props.hasMinHeight(&minHeight)) {
+		mmi->ptMinTrackSize.y = DPIUP(minHeight) + extraHeight;
+	}
+	// max
+	if (props.hasMaxWidth(&maxWidth)) {
+		mmi->ptMaxTrackSize.x = DPIUP(maxWidth) + extraWidth;
+	}
+	if (props.hasMaxHeight(&maxHeight)) {
+		mmi->ptMaxTrackSize.y = DPIUP(maxHeight) + extraHeight;
 	}
 }
 
