@@ -247,7 +247,7 @@ void IWindow_destroy__wrapper(int serverID) {
     inst->destroy();
 }
 
-int Windowing__init() {
+int Windowing__register() {
     auto m = ni_registerModule("Windowing");
     ni_registerModuleMethod(m, "moduleInit", &moduleInit__wrapper);
     ni_registerModuleMethod(m, "moduleShutdown", &moduleShutdown__wrapper);
@@ -264,7 +264,4 @@ int Windowing__init() {
     iWindow_show = ni_registerInterfaceMethod(iWindow, "show", &IWindow_show__wrapper);
     iWindow_destroy = ni_registerInterfaceMethod(iWindow, "destroy", &IWindow_destroy__wrapper);
     return 0; // = OK
-}
-
-void Windowing__shutdown() {
 }

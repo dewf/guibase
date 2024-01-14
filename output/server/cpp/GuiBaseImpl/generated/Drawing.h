@@ -40,5 +40,4 @@ public:
     }
 };
 
-int Drawing__init();
-void Drawing__shutdown();
+int Drawing__register();

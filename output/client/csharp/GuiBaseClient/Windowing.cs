@@ -374,9 +374,8 @@ namespace Org.Prefixed.GuiBase
             return __ret;
         }
 
-        public static void Init()
+        internal static void Init()
         {
-            Debug.Assert(NativeImplClient.Init() == 0);
             _module = NativeImplClient.GetModule("Windowing");
 
             _moduleInit = NativeImplClient.GetModuleMethod(_module, "moduleInit");
@@ -450,15 +449,9 @@ namespace Org.Prefixed.GuiBase
             ModuleInit();
         }
 
-        public static void Shutdown()
+        internal static void Shutdown()
         {
             ModuleShutdown();
-            NativeImplClient.Shutdown();
-        }
-
-        public static void DumpTables()
-        {
-            NativeImplClient.DumpTables();
         }
     }
 }

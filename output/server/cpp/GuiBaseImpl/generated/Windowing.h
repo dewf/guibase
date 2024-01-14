@@ -95,5 +95,4 @@ void runloop();
 void exitRunloop();
 std::shared_ptr<IWindow> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<IWindowDelegate> del, WindowProperties props);
 
-int Windowing__init();
-void Windowing__shutdown();
+int Windowing__register();

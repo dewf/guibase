@@ -161,9 +161,8 @@ namespace Org.Prefixed.GuiBase
             }
         }
 
-        public static void Init()
+        internal static void Init()
         {
-            Debug.Assert(NativeImplClient.Init() == 0);
             _module = NativeImplClient.GetModule("Drawing");
 
             _cGContext = NativeImplClient.GetInterface(_module, "CGContext");
@@ -186,16 +185,13 @@ namespace Org.Prefixed.GuiBase
                 var rect = Rect__Pop();
                 inst.FillRect(rect);
             });
+
+            // no static init
         }
 
-        public static void Shutdown()
+        internal static void Shutdown()
         {
-            NativeImplClient.Shutdown();
-        }
-
-        public static void DumpTables()
-        {
-            NativeImplClient.DumpTables();
+            // no static shutdown
         }
     }
 }

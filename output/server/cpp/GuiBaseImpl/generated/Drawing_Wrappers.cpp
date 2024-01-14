@@ -95,13 +95,10 @@ void CGContext_fillRect__wrapper(int serverID) {
     inst->fillRect(rect);
 }
 
-int Drawing__init() {
+int Drawing__register() {
     auto m = ni_registerModule("Drawing");
     auto cGContext = ni_registerInterface(m, "CGContext");
     cGContext_setRGBFillColor = ni_registerInterfaceMethod(cGContext, "setRGBFillColor", &CGContext_setRGBFillColor__wrapper);
     cGContext_fillRect = ni_registerInterfaceMethod(cGContext, "fillRect", &CGContext_fillRect__wrapper);
     return 0; // = OK
-}
-
-void Drawing__shutdown() {
 }
