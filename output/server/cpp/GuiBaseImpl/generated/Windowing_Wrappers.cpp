@@ -142,14 +142,6 @@ std::shared_ptr<IWindowDelegate> IWindowDelegate__pop()
     }
 }
 
-inline void PropFlags__push(uint32_t value) {
-    ni_pushUInt32(value);
-}
-
-inline uint32_t PropFlags__pop() {
-    return ni_popUInt32();
-}
-
 inline void WindowStyle__push(WindowStyle value) {
     ni_pushInt32((int32_t)value);
 }
@@ -168,19 +160,19 @@ void WindowProperties__push(WindowProperties value, bool isReturn) {
     if (value.hasStyle(&style)) {
         WindowStyle__push(style);
     }
-    int maxHeight;
+    int32_t maxHeight;
     if (value.hasMaxHeight(&maxHeight)) {
         ni_pushInt32(maxHeight);
     }
-    int maxWidth;
+    int32_t maxWidth;
     if (value.hasMaxWidth(&maxWidth)) {
         ni_pushInt32(maxWidth);
     }
-    int minHeight;
+    int32_t minHeight;
     if (value.hasMinHeight(&minHeight)) {
         ni_pushInt32(minHeight);
     }
-    int minWidth;
+    int32_t minWidth;
     if (value.hasMinWidth(&minWidth)) {
         ni_pushInt32(minWidth);
     }
@@ -191,22 +183,28 @@ WindowProperties WindowProperties__pop() {
     WindowProperties value;
     auto usedFields = ni_popInt32();
     if (usedFields & WindowProperties::Fields::MinWidth) {
-        value.setMinWidth(ni_popInt32());
+        auto x = ni_popInt32();
+        value.setMinWidth(x);
     }
     if (usedFields & WindowProperties::Fields::MinHeight) {
-        value.setMinHeight(ni_popInt32());
+        auto x = ni_popInt32();
+        value.setMinHeight(x);
     }
     if (usedFields & WindowProperties::Fields::MaxWidth) {
-        value.setMaxWidth(ni_popInt32());
+        auto x = ni_popInt32();
+        value.setMaxWidth(x);
     }
     if (usedFields & WindowProperties::Fields::MaxHeight) {
-        value.setMaxHeight(ni_popInt32());
+        auto x = ni_popInt32();
+        value.setMaxHeight(x);
     }
     if (usedFields & WindowProperties::Fields::Style) {
-        value.setStyle(WindowStyle__pop());
+        auto x = WindowStyle__pop();
+        value.setStyle(x);
     }
     if (usedFields & WindowProperties::Fields::NativeParent) {
-        value.setNativeParent(ni_popBool());
+        auto x = ni_popBool();
+        value.setNativeParent(x);
     }
     return value;
 }

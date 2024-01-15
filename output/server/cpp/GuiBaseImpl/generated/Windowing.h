@@ -81,7 +81,7 @@ private:
         Style = 16,
         NativeParent = 32
     };
-    uint32_t _usedFields;
+    int32_t _usedFields;
     int32_t _minWidth;
     int32_t _minHeight;
     int32_t _maxWidth;
@@ -89,13 +89,12 @@ private:
     WindowStyle _style;
     bool _nativeParent;
 protected:
-    uint32_t getUsedFields() {
+    int32_t getUsedFields() {
         return _usedFields;
     }
     friend void WindowProperties__push(WindowProperties value, bool isReturn);
     friend WindowProperties WindowProperties__pop();
 public:
-    // min width
     void setMinWidth(int32_t value) {
         _minWidth = value;
         _usedFields |= Fields::MinWidth;
@@ -107,7 +106,6 @@ public:
         }
         return false;
     }
-    // min height
     void setMinHeight(int32_t value) {
         _minHeight = value;
         _usedFields |= Fields::MinHeight;
@@ -119,48 +117,44 @@ public:
         }
         return false;
     }
-    // max width
     void setMaxWidth(int32_t value) {
         _maxWidth = value;
         _usedFields |= Fields::MaxWidth;
     }
-    bool hasMaxWidth(int32_t* value) {
+    bool hasMaxWidth(int32_t *value) {
         if (_usedFields & Fields::MaxWidth) {
             *value = _maxWidth;
             return true;
         }
         return false;
     }
-    // max height
     void setMaxHeight(int32_t value) {
         _maxHeight = value;
         _usedFields |= Fields::MaxHeight;
     }
-    bool hasMaxHeight(int32_t* value) {
+    bool hasMaxHeight(int32_t *value) {
         if (_usedFields & Fields::MaxHeight) {
             *value = _maxHeight;
             return true;
         }
         return false;
     }
-    // style
     void setStyle(WindowStyle value) {
         _style = value;
         _usedFields |= Fields::Style;
     }
-    bool hasStyle(WindowStyle* value) {
+    bool hasStyle(WindowStyle *value) {
         if (_usedFields & Fields::Style) {
             *value = _style;
             return true;
         }
         return false;
     }
-    // nativeparent
     void setNativeParent(bool value) {
         _nativeParent = value;
         _usedFields |= Fields::NativeParent;
     }
-    bool hasNativeParent(bool* value) {
+    bool hasNativeParent(bool *value) {
         if (_usedFields & Fields::NativeParent) {
             *value = _nativeParent;
             return true;

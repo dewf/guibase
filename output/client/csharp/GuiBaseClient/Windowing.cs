@@ -278,119 +278,115 @@ namespace Org.Prefixed.GuiBase
             return (WindowStyle)ret;
         }
 
-        public struct WindowProperties {
+        public struct WindowProperties
+        {
             [Flags]
             internal enum Fields
             {
-                MinWidthField = 1,
-                MinHeightField = 2,
-                MaxWidthField = 4,
-                MaxHeightField = 8,
-                StyleField = 16,
+                MinWidth = 1,
+                MinHeight = 2,
+                MaxWidth = 4,
+                MaxHeight = 8,
+                Style = 16,
                 NativeParent = 32
             }
             internal Fields UsedFields;
-            
+
             private int _minWidth;
             public int MinWidth
             {
                 set
                 {
                     _minWidth = value;
-                    UsedFields |= Fields.MinWidthField;
+                    UsedFields |= Fields.MinWidth;
                 }
             }
             public bool HasMinWidth(out int value)
             {
-                if (UsedFields.HasFlag(Fields.MinWidthField))
+                if (UsedFields.HasFlag(Fields.MinWidth))
                 {
                     value = _minWidth;
                     return true;
                 }
-                value = 0;
+                value = default;
                 return false;
             }
-            
             private int _minHeight;
             public int MinHeight
             {
                 set
                 {
                     _minHeight = value;
-                    UsedFields |= Fields.MinHeightField;
+                    UsedFields |= Fields.MinHeight;
                 }
             }
             public bool HasMinHeight(out int value)
             {
-                if (UsedFields.HasFlag(Fields.MinHeightField))
+                if (UsedFields.HasFlag(Fields.MinHeight))
                 {
                     value = _minHeight;
                     return true;
                 }
-                value = 0;
+                value = default;
                 return false;
             }
-
             private int _maxWidth;
             public int MaxWidth
             {
                 set
                 {
                     _maxWidth = value;
-                    UsedFields |= Fields.MaxWidthField;
+                    UsedFields |= Fields.MaxWidth;
                 }
             }
             public bool HasMaxWidth(out int value)
             {
-                if (UsedFields.HasFlag(Fields.MaxWidthField))
+                if (UsedFields.HasFlag(Fields.MaxWidth))
                 {
                     value = _maxWidth;
                     return true;
                 }
-                value = 0;
+                value = default;
                 return false;
             }
-            
             private int _maxHeight;
             public int MaxHeight
             {
                 set
                 {
                     _maxHeight = value;
-                    UsedFields |= Fields.MaxHeightField;
+                    UsedFields |= Fields.MaxHeight;
                 }
             }
             public bool HasMaxHeight(out int value)
             {
-                if (UsedFields.HasFlag(Fields.MaxHeightField))
+                if (UsedFields.HasFlag(Fields.MaxHeight))
                 {
                     value = _maxHeight;
                     return true;
                 }
-                value = 0;
+                value = default;
                 return false;
             }
-            
             private WindowStyle _style;
             public WindowStyle Style
             {
                 set
                 {
                     _style = value;
-                    UsedFields |= Fields.StyleField;
+                    UsedFields |= Fields.Style;
                 }
             }
             public bool HasStyle(out WindowStyle value)
             {
-                if (UsedFields.HasFlag(Fields.StyleField))
+                if (UsedFields.HasFlag(Fields.Style))
                 {
                     value = _style;
                     return true;
                 }
-                value = WindowStyle.Default;
+                value = default;
                 return false;
             }
-
             private bool _nativeParent;
             public bool NativeParent
             {
@@ -407,13 +403,16 @@ namespace Org.Prefixed.GuiBase
                     value = _nativeParent;
                     return true;
                 }
-                value = false;
+                value = default;
                 return false;
             }
         }
-
         internal static void WindowProperties__Push(WindowProperties value, bool isReturn)
         {
+            if (value.HasNativeParent(out var nativeParent))
+            {
+                NativeImplClient.PushBool(nativeParent);
+            }
             if (value.HasStyle(out var style))
             {
                 WindowStyle__Push(style);
@@ -436,34 +435,37 @@ namespace Org.Prefixed.GuiBase
             }
             NativeImplClient.PushInt32((int)value.UsedFields);
         }
-
         internal static WindowProperties WindowProperties__Pop()
         {
-            var props = new WindowProperties
+            var opts = new WindowProperties
             {
                 UsedFields = (WindowProperties.Fields)NativeImplClient.PopInt32()
             };
-            if (props.UsedFields.HasFlag(WindowProperties.Fields.MinWidthField))
+            if (opts.UsedFields.HasFlag(WindowProperties.Fields.MinWidth))
             {
-                props.MinWidth = NativeImplClient.PopInt32();
+                opts.MinWidth = NativeImplClient.PopInt32();
             }
-            if (props.UsedFields.HasFlag(WindowProperties.Fields.MinHeightField))
+            if (opts.UsedFields.HasFlag(WindowProperties.Fields.MinHeight))
             {
-                props.MinHeight = NativeImplClient.PopInt32();
+                opts.MinHeight = NativeImplClient.PopInt32();
             }
-            if (props.UsedFields.HasFlag(WindowProperties.Fields.MaxWidthField))
+            if (opts.UsedFields.HasFlag(WindowProperties.Fields.MaxWidth))
             {
-                props.MaxWidth = NativeImplClient.PopInt32();
+                opts.MaxWidth = NativeImplClient.PopInt32();
             }
-            if (props.UsedFields.HasFlag(WindowProperties.Fields.MaxHeightField))
+            if (opts.UsedFields.HasFlag(WindowProperties.Fields.MaxHeight))
             {
-                props.MaxHeight = NativeImplClient.PopInt32();
+                opts.MaxHeight = NativeImplClient.PopInt32();
             }
-            if (props.UsedFields.HasFlag(WindowProperties.Fields.StyleField))
+            if (opts.UsedFields.HasFlag(WindowProperties.Fields.Style))
             {
-                props.Style = WindowStyle__Pop();
+                opts.Style = WindowStyle__Pop();
             }
-            return props;
+            if (opts.UsedFields.HasFlag(WindowProperties.Fields.NativeParent))
+            {
+                opts.NativeParent = NativeImplClient.PopBool();
+            }
+            return opts;
         }
 
         public static void ModuleInit()

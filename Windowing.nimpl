@@ -37,6 +37,7 @@ options WindowProperties {
    int maxWidth;
    int maxHeight;
    WindowStyle style;
+   bool nativeParent;
 }
 
 interface IWindowDelegate {
