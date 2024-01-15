@@ -12,7 +12,7 @@ struct WlPrivateWrapper {
     std::shared_ptr<Window2> window;
 };
 
-static void convertProps(WindowProperties& props, wl_WindowProperties& output) {
+static void convertProps(WindowOptions& opts, wl_WindowProperties& output) {
     int minWidth, minHeight, maxWidth, maxHeight;
     WindowStyle style;
     size_t nativeParent; // HWND
@@ -20,27 +20,27 @@ static void convertProps(WindowProperties& props, wl_WindowProperties& output) {
     // make sure nothing by default
     output.usedFields = 0;
 
-    if (props.hasMinWidth(&minWidth)) {
+    if (opts.hasMinWidth(&minWidth)) {
         output.usedFields |= wl_kWindowPropMinWidth;
         output.minWidth = minWidth;
     }
-    if (props.hasMinHeight(&minHeight)) {
+    if (opts.hasMinHeight(&minHeight)) {
         output.usedFields |= wl_kWindowPropMinHeight;
         output.minHeight = minHeight;
     }
-    if (props.hasMaxWidth(&maxWidth)) {
+    if (opts.hasMaxWidth(&maxWidth)) {
         output.usedFields |= wl_kWindowPropMaxWidth;
         output.maxWidth = maxWidth;
     }
-    if (props.hasMaxHeight(&maxHeight)) {
+    if (opts.hasMaxHeight(&maxHeight)) {
         output.usedFields |= wl_kWindowPropMaxHeight;
         output.maxHeight = maxHeight;
     }
-    if (props.hasStyle(&style)) {
+    if (opts.hasStyle(&style)) {
         output.usedFields |= wl_kWindowPropStyle;
         output.style = (wl_WindowStyleEnum)style; // 1:1 mapping at the moment
     }
-    if (props.hasNativeParent(&nativeParent)) {
+    if (opts.hasNativeParent(&nativeParent)) {
         output.usedFields |= wl_kWindowPropNativeParent;
         output.nativeParent = (HWND)nativeParent;
     }
@@ -67,17 +67,17 @@ public:
 class Window2 : public ServerIWindow {
 private:
     wl_WindowRef wlWindow = nullptr;
-    std::shared_ptr<IWindowDelegate> delegate_;
+    std::shared_ptr<IWindowDelegate> del;
 public:
-    static std::shared_ptr<IWindow> create(int width, int height, std::string title, std::shared_ptr<IWindowDelegate> del, WindowProperties &props) {
+    static std::shared_ptr<IWindow> create(int width, int height, std::string title, std::shared_ptr<IWindowDelegate> del, WindowOptions &opts) {
         auto wrapper = new WlPrivateWrapper();
         
         wl_WindowProperties wlProps;
-        convertProps(props, wlProps);
+        convertProps(opts, wlProps);
 
         auto win2 = new Window2();
         win2->wlWindow = wl_WindowCreate(width, height, title.c_str(), wrapper, &wlProps);
-        win2->delegate_ = del;
+        win2->del = del;
 
         // need to hold on to this as long as the window exists ...
         wrapper->window = std::shared_ptr<Window2>(win2);
@@ -93,18 +93,19 @@ public:
     }
     // event handling ==========================
     void onDestroyed() {
-        delegate_->destroyed();
+        del->destroyed();
     }
     bool canClose() {
-        return delegate_->canClose();
+        return del->canClose();
     }
     void onRepaint(wl_RepaintEvent& paintEvent) {
         // oooooh this is why we'd want an opaque type! client side has no business determining lifetime!
         // same probably goes for Window as well ...
         DrawContextImpl context(paintEvent.platformContext.d2d.target);
-        delegate_->repaint(std::shared_ptr<DrawContext>(&context), paintEvent.x, paintEvent.y, paintEvent.width, paintEvent.height);
+        del->repaint(std::shared_ptr<DrawContext>(&context), paintEvent.x, paintEvent.y, paintEvent.width, paintEvent.height);
     }
     void onResized(wl_ResizeEvent& resizeEvent) {
+        del->resized(resizeEvent.newWidth, resizeEvent.newHeight);
     }
 };
 
@@ -130,6 +131,9 @@ CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* user
             break;
         case wl_kEventTypeD2DTargetRecreated:
             dl_D2DTargetRecreated(event->d2dTargetRecreatedEvent.newTarget, event->d2dTargetRecreatedEvent.oldTarget);
+            break;
+        case wl_kEventTypeWindowResized:
+            win->onResized(event->resizeEvent);
             break;
         default:
             //printf("unhandled event type: %d\n", event->eventType);
@@ -166,6 +170,6 @@ void exitRunloop() {
     wl_ExitRunloop();
 }
 
-std::shared_ptr<IWindow> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<IWindowDelegate> del, WindowProperties props) {
-    return Window2::create(width, height, title, del, props);
+std::shared_ptr<IWindow> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<IWindowDelegate> del, WindowOptions opts) {
+    return Window2::create(width, height, title, del, opts);
 }

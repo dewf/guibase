@@ -29,7 +29,7 @@ enum WindowStyle {
    PluginWindow   // for VST/AU/etc
 }
 
-options WindowProperties {
+options WindowOptions {
    // each of these will provide a setter and will keep track of whether it "exists" or not
    // basically a quicker way of implementing a group of optional settings without either flags or sumtypes
    int minWidth;
@@ -47,6 +47,7 @@ interface IWindowDelegate {
    void destroyed();
    void mouseDown(int x, int y, MouseButton button, Set<Modifiers> modifiers);
    void repaint(DrawContext context, int x, int y, int width, int height);
+   void resized(int width, int height);
 }
 
 interface IWindow {
@@ -54,4 +55,4 @@ interface IWindow {
    void destroy();
 }
 
-IWindow createWindow(int width, int height, string title, IWindowDelegate del, WindowProperties props);
+IWindow createWindow(int width, int height, string title, IWindowDelegate del, WindowOptions opts);

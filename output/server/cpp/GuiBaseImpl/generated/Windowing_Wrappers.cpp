@@ -6,6 +6,7 @@ ni_InterfaceMethodRef iWindowDelegate_closed;
 ni_InterfaceMethodRef iWindowDelegate_destroyed;
 ni_InterfaceMethodRef iWindowDelegate_mouseDown;
 ni_InterfaceMethodRef iWindowDelegate_repaint;
+ni_InterfaceMethodRef iWindowDelegate_resized;
 ni_InterfaceMethodRef iWindow_show;
 ni_InterfaceMethodRef iWindow_destroy;
 
@@ -113,6 +114,11 @@ public:
         DrawContext__push(context, false);
         invokeMethod(iWindowDelegate_repaint);
     }
+    void resized(int32_t width, int32_t height) override {
+        ni_pushInt32(height);
+        ni_pushInt32(width);
+        invokeMethod(iWindowDelegate_resized);
+    }
 };
 
 void IWindowDelegate__push(std::shared_ptr<IWindowDelegate> inst, bool isReturn) {
@@ -151,7 +157,7 @@ inline WindowStyle WindowStyle__pop() {
     return (WindowStyle)tag;
 }
 
-void WindowProperties__push(WindowProperties value, bool isReturn) {
+void WindowOptions__push(WindowOptions value, bool isReturn) {
     size_t nativeParent;
     if (value.hasNativeParent(&nativeParent)) {
         ni_pushSizeT(nativeParent);
@@ -179,30 +185,30 @@ void WindowProperties__push(WindowProperties value, bool isReturn) {
     ni_pushInt32(value.getUsedFields());
 }
 
-WindowProperties WindowProperties__pop() {
-    WindowProperties value;
-    auto usedFields = ni_popInt32();
-    if (usedFields & WindowProperties::Fields::MinWidth) {
+WindowOptions WindowOptions__pop() {
+    WindowOptions value = {};
+    value._usedFields =  ni_popInt32();
+    if (value._usedFields & WindowOptions::Fields::MinWidth) {
         auto x = ni_popInt32();
         value.setMinWidth(x);
     }
-    if (usedFields & WindowProperties::Fields::MinHeight) {
+    if (value._usedFields & WindowOptions::Fields::MinHeight) {
         auto x = ni_popInt32();
         value.setMinHeight(x);
     }
-    if (usedFields & WindowProperties::Fields::MaxWidth) {
+    if (value._usedFields & WindowOptions::Fields::MaxWidth) {
         auto x = ni_popInt32();
         value.setMaxWidth(x);
     }
-    if (usedFields & WindowProperties::Fields::MaxHeight) {
+    if (value._usedFields & WindowOptions::Fields::MaxHeight) {
         auto x = ni_popInt32();
         value.setMaxHeight(x);
     }
-    if (usedFields & WindowProperties::Fields::Style) {
+    if (value._usedFields & WindowOptions::Fields::Style) {
         auto x = WindowStyle__pop();
         value.setStyle(x);
     }
-    if (usedFields & WindowProperties::Fields::NativeParent) {
+    if (value._usedFields & WindowOptions::Fields::NativeParent) {
         auto x = ni_popSizeT();
         value.setNativeParent(x);
     }
@@ -230,8 +236,8 @@ void createWindow__wrapper() {
     auto height = ni_popInt32();
     auto title = popStringInternal();
     auto del = IWindowDelegate__pop();
-    auto props = WindowProperties__pop();
-    IWindow__push(createWindow(width, height, title, del, props), true);
+    auto opts = WindowOptions__pop();
+    IWindow__push(createWindow(width, height, title, del, opts), true);
 }
 
 void IWindowDelegate_canClose__wrapper(int serverID) {
@@ -268,6 +274,13 @@ void IWindowDelegate_repaint__wrapper(int serverID) {
     inst->repaint(context, x, y, width, height);
 }
 
+void IWindowDelegate_resized__wrapper(int serverID) {
+    auto inst = ServerIWindowDelegate::getByID(serverID);
+    auto width = ni_popInt32();
+    auto height = ni_popInt32();
+    inst->resized(width, height);
+}
+
 void IWindow_show__wrapper(int serverID) {
     auto inst = ServerIWindow::getByID(serverID);
     inst->show();
@@ -291,6 +304,7 @@ int Windowing__register() {
     iWindowDelegate_destroyed = ni_registerInterfaceMethod(iWindowDelegate, "destroyed", &IWindowDelegate_destroyed__wrapper);
     iWindowDelegate_mouseDown = ni_registerInterfaceMethod(iWindowDelegate, "mouseDown", &IWindowDelegate_mouseDown__wrapper);
     iWindowDelegate_repaint = ni_registerInterfaceMethod(iWindowDelegate, "repaint", &IWindowDelegate_repaint__wrapper);
+    iWindowDelegate_resized = ni_registerInterfaceMethod(iWindowDelegate, "resized", &IWindowDelegate_resized__wrapper);
     auto iWindow = ni_registerInterface(m, "IWindow");
     iWindow_show = ni_registerInterfaceMethod(iWindow, "show", &IWindow_show__wrapper);
     iWindow_destroy = ni_registerInterfaceMethod(iWindow, "destroy", &IWindow_destroy__wrapper);

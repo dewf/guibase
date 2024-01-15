@@ -38,6 +38,10 @@ internal class WindowHandler : Windowing.ClientIWindowDelegate
         context.SetRGBFillColor(0, 0, 1, 0.5);
         RectAt(140, 140, context);
     }
+    public override void Resized(int width, int height)
+    {
+        Console.WriteLine($"resized to: {width} / {height}");
+    }
 }
 
 internal static class Program
@@ -47,15 +51,12 @@ internal static class Program
     {
         Library.Init();
 
-        var props = new Windowing.WindowProperties
+        var options = new Windowing.WindowOptions
         {
             MinWidth = 320,
-            MinHeight = 200,
-            // MaxWidth = 1280,
-            // MaxHeight = 960,
-            // Style = Windowing.WindowStyle.Default
+            MinHeight = 200
         };
-        using (var window = Windowing.CreateWindow(800, 600, "this is the first window!", new WindowHandler(), props))
+        using (var window = Windowing.CreateWindow(800, 600, "this is the first window!", new WindowHandler(), options))
         {
             window.Show();
             Windowing.Runloop();
