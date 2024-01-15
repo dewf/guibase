@@ -16,6 +16,8 @@ struct Rect {
 }
 
 interface DrawContext {
+    void saveGState();
+    void restoreGState();
     void setRGBFillColor(double red, double green, double blue, double alpha);
     void fillRect(Rect rect);
 }

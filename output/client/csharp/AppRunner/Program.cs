@@ -4,6 +4,8 @@ namespace AppRunner;
 
 internal class WindowHandler : Windowing.ClientIWindowDelegate
 {
+    private int _width, _height;
+    
     public override bool CanClose() => true;
 
     public override void Closed()
@@ -31,16 +33,24 @@ internal class WindowHandler : Windowing.ClientIWindowDelegate
     }
     public override void Repaint(Drawing.DrawContext context, int x, int y, int width, int height)
     {
+        context.SaveGState();
+        //
+        context.SetRGBFillColor(0.23, 0, 0.4, 1);
+        context.FillRect(new Drawing.Rect(new Drawing.Point(10, 10), new Drawing.Size(_width - 20, _height - 20)));
+        //
         context.SetRGBFillColor(1, 0, 0, 0.5);
         RectAt(100, 100, context);
         context.SetRGBFillColor(0, 1, 0, 0.5);
         RectAt(120, 120, context);
         context.SetRGBFillColor(0, 0, 1, 0.5);
         RectAt(140, 140, context);
+        //
+        context.RestoreGState();
     }
     public override void Resized(int width, int height)
     {
-        Console.WriteLine($"resized to: {width} / {height}");
+        _width = width;
+        _height = height;
     }
 }
 

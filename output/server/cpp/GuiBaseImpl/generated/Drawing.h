@@ -26,6 +26,8 @@ struct Rect {
 
 class DrawContext {
 public:
+    virtual void saveGState() = 0;
+    virtual void restoreGState() = 0;
     virtual void setRGBFillColor(double red, double green, double blue, double alpha) = 0;
     virtual void fillRect(Rect rect) = 0;
 };

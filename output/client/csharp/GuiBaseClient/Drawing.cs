@@ -13,6 +13,8 @@ namespace Org.Prefixed.GuiBase
     {
         private static ModuleHandle _module;
         private static InterfaceHandle _drawContext;
+        private static InterfaceMethodHandle _drawContext_saveGState;
+        private static InterfaceMethodHandle _drawContext_restoreGState;
         private static InterfaceMethodHandle _drawContext_setRGBFillColor;
         private static InterfaceMethodHandle _drawContext_fillRect;
 
@@ -88,6 +90,8 @@ namespace Org.Prefixed.GuiBase
 
         public interface DrawContext : IDisposable
         {
+            void SaveGState();
+            void RestoreGState();
             void SetRGBFillColor(double red, double green, double blue, double alpha);
             void FillRect(Rect rect);
         }
@@ -130,6 +134,8 @@ namespace Org.Prefixed.GuiBase
             {
                 // override if necessary
             }
+            public abstract void SaveGState();
+            public abstract void RestoreGState();
             public abstract void SetRGBFillColor(double red, double green, double blue, double alpha);
             public abstract void FillRect(Rect rect);
         }
@@ -138,6 +144,16 @@ namespace Org.Prefixed.GuiBase
         {
             public ServerDrawContext(int id) : base(id)
             {
+            }
+
+            public void SaveGState()
+            {
+                NativeImplClient.InvokeInterfaceMethod(_drawContext_saveGState, Id);
+            }
+
+            public void RestoreGState()
+            {
+                NativeImplClient.InvokeInterfaceMethod(_drawContext_restoreGState, Id);
             }
 
             public void SetRGBFillColor(double red, double green, double blue, double alpha)
@@ -166,8 +182,22 @@ namespace Org.Prefixed.GuiBase
             _module = NativeImplClient.GetModule("Drawing");
 
             _drawContext = NativeImplClient.GetInterface(_module, "DrawContext");
+            _drawContext_saveGState = NativeImplClient.GetInterfaceMethod(_drawContext, "saveGState");
+            _drawContext_restoreGState = NativeImplClient.GetInterfaceMethod(_drawContext, "restoreGState");
             _drawContext_setRGBFillColor = NativeImplClient.GetInterfaceMethod(_drawContext, "setRGBFillColor");
             _drawContext_fillRect = NativeImplClient.GetInterfaceMethod(_drawContext, "fillRect");
+
+            NativeImplClient.SetClientMethodWrapper(_drawContext_saveGState, delegate(ClientObject obj)
+            {
+                var inst = (ClientDrawContext) obj;
+                inst.SaveGState();
+            });
+
+            NativeImplClient.SetClientMethodWrapper(_drawContext_restoreGState, delegate(ClientObject obj)
+            {
+                var inst = (ClientDrawContext) obj;
+                inst.RestoreGState();
+            });
 
             NativeImplClient.SetClientMethodWrapper(_drawContext_setRGBFillColor, delegate(ClientObject obj)
             {

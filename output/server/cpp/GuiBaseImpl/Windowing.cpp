@@ -56,6 +56,12 @@ public:
     ~DrawContextImpl() {
         dl_CGContextRelease(context);
     }
+    void saveGState() override {
+        dl_CGContextSaveGState(context);
+    }
+    void restoreGState() override {
+        dl_CGContextRestoreGState(context);
+    }
     void setRGBFillColor(double red, double green, double blue, double alpha) override {
         dl_CGContextSetRGBFillColor(context, red, green, blue, alpha);
     }
