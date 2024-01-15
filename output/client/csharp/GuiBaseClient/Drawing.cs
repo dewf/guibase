@@ -12,9 +12,9 @@ namespace Org.Prefixed.GuiBase
     public static class Drawing
     {
         private static ModuleHandle _module;
-        private static InterfaceHandle _cGContext;
-        private static InterfaceMethodHandle _cGContext_setRGBFillColor;
-        private static InterfaceMethodHandle _cGContext_fillRect;
+        private static InterfaceHandle _drawContext;
+        private static InterfaceMethodHandle _drawContext_setRGBFillColor;
+        private static InterfaceMethodHandle _drawContext_fillRect;
 
         public struct Point {
             public double X;
@@ -86,13 +86,13 @@ namespace Org.Prefixed.GuiBase
         }
 
 
-        public interface CGContext : IDisposable
+        public interface DrawContext : IDisposable
         {
             void SetRGBFillColor(double red, double green, double blue, double alpha);
             void FillRect(Rect rect);
         }
 
-        internal static void CGContext__Push(CGContext thing, bool isReturn)
+        internal static void DrawContext__Push(DrawContext thing, bool isReturn)
         {
             if (thing != null)
             {
@@ -104,18 +104,18 @@ namespace Org.Prefixed.GuiBase
             }
         }
 
-        internal static CGContext CGContext__Pop()
+        internal static DrawContext DrawContext__Pop()
         {
             NativeImplClient.PopInstanceId(out var id, out var isClientId);
             if (id != 0)
             {
                 if (!isClientId)
                 {
-                    return new ServerCGContext(id);
+                    return new ServerDrawContext(id);
                 }
                 else
                 {
-                    return (CGContext) ClientObject.GetById(id);
+                    return (DrawContext) ClientObject.GetById(id);
                 }
             }
             else
@@ -124,7 +124,7 @@ namespace Org.Prefixed.GuiBase
             }
         }
 
-        public abstract class ClientCGContext : ClientObject, CGContext
+        public abstract class ClientDrawContext : ClientObject, DrawContext
         {
             public virtual void Dispose()
             {
@@ -134,9 +134,9 @@ namespace Org.Prefixed.GuiBase
             public abstract void FillRect(Rect rect);
         }
 
-        internal class ServerCGContext : ServerObject, CGContext
+        internal class ServerDrawContext : ServerObject, DrawContext
         {
-            public ServerCGContext(int id) : base(id)
+            public ServerDrawContext(int id) : base(id)
             {
             }
 
@@ -146,13 +146,13 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.PushDouble(blue);
                 NativeImplClient.PushDouble(green);
                 NativeImplClient.PushDouble(red);
-                NativeImplClient.InvokeInterfaceMethod(_cGContext_setRGBFillColor, Id);
+                NativeImplClient.InvokeInterfaceMethod(_drawContext_setRGBFillColor, Id);
             }
 
             public void FillRect(Rect rect)
             {
                 Rect__Push(rect, false);
-                NativeImplClient.InvokeInterfaceMethod(_cGContext_fillRect, Id);
+                NativeImplClient.InvokeInterfaceMethod(_drawContext_fillRect, Id);
             }
 
             public void Dispose()
@@ -165,13 +165,13 @@ namespace Org.Prefixed.GuiBase
         {
             _module = NativeImplClient.GetModule("Drawing");
 
-            _cGContext = NativeImplClient.GetInterface(_module, "CGContext");
-            _cGContext_setRGBFillColor = NativeImplClient.GetInterfaceMethod(_cGContext, "setRGBFillColor");
-            _cGContext_fillRect = NativeImplClient.GetInterfaceMethod(_cGContext, "fillRect");
+            _drawContext = NativeImplClient.GetInterface(_module, "DrawContext");
+            _drawContext_setRGBFillColor = NativeImplClient.GetInterfaceMethod(_drawContext, "setRGBFillColor");
+            _drawContext_fillRect = NativeImplClient.GetInterfaceMethod(_drawContext, "fillRect");
 
-            NativeImplClient.SetClientMethodWrapper(_cGContext_setRGBFillColor, delegate(ClientObject obj)
+            NativeImplClient.SetClientMethodWrapper(_drawContext_setRGBFillColor, delegate(ClientObject obj)
             {
-                var inst = (ClientCGContext) obj;
+                var inst = (ClientDrawContext) obj;
                 var red = NativeImplClient.PopDouble();
                 var green = NativeImplClient.PopDouble();
                 var blue = NativeImplClient.PopDouble();
@@ -179,9 +179,9 @@ namespace Org.Prefixed.GuiBase
                 inst.SetRGBFillColor(red, green, blue, alpha);
             });
 
-            NativeImplClient.SetClientMethodWrapper(_cGContext_fillRect, delegate(ClientObject obj)
+            NativeImplClient.SetClientMethodWrapper(_drawContext_fillRect, delegate(ClientObject obj)
             {
-                var inst = (ClientCGContext) obj;
+                var inst = (ClientDrawContext) obj;
                 var rect = Rect__Pop();
                 inst.FillRect(rect);
             });

@@ -1,8 +1,8 @@
 #include "../support/NativeImplServer.h"
 #include "Drawing.h"
 
-ni_InterfaceMethodRef cGContext_setRGBFillColor;
-ni_InterfaceMethodRef cGContext_fillRect;
+ni_InterfaceMethodRef drawContext_setRGBFillColor;
+ni_InterfaceMethodRef drawContext_fillRect;
 
 void Point__push(Point value, bool isReturn) {
     ni_pushDouble(value.y);
@@ -37,23 +37,23 @@ Rect Rect__pop() {
     return Rect { origin, size };
 }
 
-class ClientCGContext : public ClientObject, public CGContext {
+class ClientDrawContext : public ClientObject, public DrawContext {
 public:
-    ClientCGContext(int id) : ClientObject(id) {}
+    ClientDrawContext(int id) : ClientObject(id) {}
     void setRGBFillColor(double red, double green, double blue, double alpha) override {
         ni_pushDouble(alpha);
         ni_pushDouble(blue);
         ni_pushDouble(green);
         ni_pushDouble(red);
-        invokeMethod(cGContext_setRGBFillColor);
+        invokeMethod(drawContext_setRGBFillColor);
     }
     void fillRect(Rect rect) override {
         Rect__push(rect, false);
-        invokeMethod(cGContext_fillRect);
+        invokeMethod(drawContext_fillRect);
     }
 };
 
-void CGContext__push(std::shared_ptr<CGContext> inst, bool isReturn) {
+void DrawContext__push(std::shared_ptr<DrawContext> inst, bool isReturn) {
     if (inst != nullptr) {
         auto pushable = std::dynamic_pointer_cast<Pushable>(inst);
         pushable->push(pushable, isReturn);
@@ -63,25 +63,25 @@ void CGContext__push(std::shared_ptr<CGContext> inst, bool isReturn) {
     }
 }
 
-std::shared_ptr<CGContext> CGContext__pop()
+std::shared_ptr<DrawContext> DrawContext__pop()
 {
     bool isClientID;
     auto id = ni_popInstance(&isClientID);
     if (id != 0) {
         if (isClientID) {
-            return std::shared_ptr<CGContext>(new ClientCGContext(id));
+            return std::shared_ptr<DrawContext>(new ClientDrawContext(id));
         }
         else {
-            return ServerCGContext::getByID(id);
+            return ServerDrawContext::getByID(id);
         }
     }
     else {
-        return std::shared_ptr<CGContext>();
+        return std::shared_ptr<DrawContext>();
     }
 }
 
-void CGContext_setRGBFillColor__wrapper(int serverID) {
-    auto inst = ServerCGContext::getByID(serverID);
+void DrawContext_setRGBFillColor__wrapper(int serverID) {
+    auto inst = ServerDrawContext::getByID(serverID);
     auto red = ni_popDouble();
     auto green = ni_popDouble();
     auto blue = ni_popDouble();
@@ -89,16 +89,16 @@ void CGContext_setRGBFillColor__wrapper(int serverID) {
     inst->setRGBFillColor(red, green, blue, alpha);
 }
 
-void CGContext_fillRect__wrapper(int serverID) {
-    auto inst = ServerCGContext::getByID(serverID);
+void DrawContext_fillRect__wrapper(int serverID) {
+    auto inst = ServerDrawContext::getByID(serverID);
     auto rect = Rect__pop();
     inst->fillRect(rect);
 }
 
 int Drawing__register() {
     auto m = ni_registerModule("Drawing");
-    auto cGContext = ni_registerInterface(m, "CGContext");
-    cGContext_setRGBFillColor = ni_registerInterfaceMethod(cGContext, "setRGBFillColor", &CGContext_setRGBFillColor__wrapper);
-    cGContext_fillRect = ni_registerInterfaceMethod(cGContext, "fillRect", &CGContext_fillRect__wrapper);
+    auto drawContext = ni_registerInterface(m, "DrawContext");
+    drawContext_setRGBFillColor = ni_registerInterfaceMethod(drawContext, "setRGBFillColor", &DrawContext_setRGBFillColor__wrapper);
+    drawContext_fillRect = ni_registerInterfaceMethod(drawContext, "fillRect", &DrawContext_fillRect__wrapper);
     return 0; // = OK
 }

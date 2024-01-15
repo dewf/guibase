@@ -133,27 +133,19 @@
   <ItemGroup>
     <ClInclude Include="..\common\comstuff.h" />
     <ClInclude Include="..\common\unicodestuff.h" />
-    <ClInclude Include="..\drawing\CGContext.h" />
     <ClInclude Include="..\generated\Drawing.h" />
     <ClInclude Include="..\generated\Windowing.h" />
     <ClInclude Include="..\support\CoreStuff.h" />
     <ClInclude Include="..\support\NativeImplServer.h" />
-    <ClInclude Include="..\windowing\window.h" />
-    <ClInclude Include="..\windowing\globals.h" />
-    <ClInclude Include="..\windowing\win32util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\unicodestuff.cpp" />
     <ClCompile Include="..\Drawing.cpp" />
-    <ClCompile Include="..\drawing\CGContext.cpp" />
     <ClCompile Include="..\generated\Drawing_Wrappers.cpp" />
     <ClCompile Include="..\generated\Library.cpp" />
     <ClCompile Include="..\generated\Windowing_Wrappers.cpp" />
     <ClCompile Include="..\support\NativeImplServer.cpp" />
     <ClCompile Include="..\Windowing.cpp" />
-    <ClCompile Include="..\windowing\window.cpp" />
-    <ClCompile Include="..\windowing\globals.cpp" />
-    <ClCompile Include="..\windowing\win32util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

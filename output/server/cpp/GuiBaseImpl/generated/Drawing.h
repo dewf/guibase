@@ -24,19 +24,19 @@ struct Rect {
     Size size;
 };
 
-class CGContext {
+class DrawContext {
 public:
     virtual void setRGBFillColor(double red, double green, double blue, double alpha) = 0;
     virtual void fillRect(Rect rect) = 0;
 };
 
-// inherit from this to create server instances of CGContext
-class ServerCGContext : public CGContext, public ServerObject {
+// inherit from this to create server instances of DrawContext
+class ServerDrawContext : public DrawContext, public ServerObject {
 public:
-    virtual ~ServerCGContext() {}
-    static std::shared_ptr<ServerCGContext> getByID(int id) {
+    virtual ~ServerDrawContext() {}
+    static std::shared_ptr<ServerDrawContext> getByID(int id) {
         auto obj = ServerObject::getByID(id);
-        return std::static_pointer_cast<ServerCGContext>(obj);
+        return std::static_pointer_cast<ServerDrawContext>(obj);
     }
 };
 

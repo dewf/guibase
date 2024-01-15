@@ -37,7 +37,8 @@ options WindowProperties {
    int maxWidth;
    int maxHeight;
    WindowStyle style;
-   bool nativeParent;
+   // windows-only:
+   size_t nativeParent; // HWND actually
 }
 
 interface IWindowDelegate {
@@ -45,7 +46,7 @@ interface IWindowDelegate {
    void closed();
    void destroyed();
    void mouseDown(int x, int y, MouseButton button, Set<Modifiers> modifiers);
-   void repaint(CGContext context, int x, int y, int width, int height);
+   void repaint(DrawContext context, int x, int y, int width, int height);
 }
 
 interface IWindow {

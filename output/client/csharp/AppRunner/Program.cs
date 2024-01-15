@@ -24,12 +24,19 @@ internal class WindowHandler : Windowing.ClientIWindowDelegate
     {
         return string.Join("+", modifiers.Select(m => m.ToString()).Order());
     }
-    public override void Repaint(Drawing.CGContext context, int x, int y, int width, int height)
+    private static void RectAt(int x, int y, Drawing.DrawContext context)
     {
-        // context.SetRGBFillColor(1.0, 1.0, 1.0, 1.0);
-        // var rect = new Drawing.Rect(new Drawing.Point(30.0, 10.0), new Drawing.Size(100.0, 100.0));
-        // context.FillRect(rect);
-        Console.WriteLine($"repaint!!! {x} / {y} / {width} / {height}");
+        var rect = new Drawing.Rect(new Drawing.Point(x, y), new Drawing.Size(100.0, 100.0));
+        context.FillRect(rect);
+    }
+    public override void Repaint(Drawing.DrawContext context, int x, int y, int width, int height)
+    {
+        context.SetRGBFillColor(1, 0, 0, 0.5);
+        RectAt(100, 100, context);
+        context.SetRGBFillColor(0, 1, 0, 0.5);
+        RectAt(120, 120, context);
+        context.SetRGBFillColor(0, 0, 1, 0.5);
+        RectAt(140, 140, context);
     }
 }
 
@@ -44,9 +51,9 @@ internal static class Program
         {
             MinWidth = 320,
             MinHeight = 200,
-            MaxWidth = 1280,
-            MaxHeight = 960,
-            Style = Windowing.WindowStyle.Default
+            // MaxWidth = 1280,
+            // MaxHeight = 960,
+            // Style = Windowing.WindowStyle.Default
         };
         using (var window = Windowing.CreateWindow(800, 600, "this is the first window!", new WindowHandler(), props))
         {

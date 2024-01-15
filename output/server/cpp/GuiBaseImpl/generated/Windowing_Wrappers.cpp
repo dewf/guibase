@@ -82,8 +82,8 @@ std::set<Modifiers> __ModifiersSet__pop() {
     return __ret;
 }
 
-void CGContext__push(std::shared_ptr<CGContext> thing, bool isReturn);
-std::shared_ptr<CGContext> CGContext__pop();
+void DrawContext__push(std::shared_ptr<DrawContext> thing, bool isReturn);
+std::shared_ptr<DrawContext> DrawContext__pop();
 
 class ClientIWindowDelegate : public ClientObject, public IWindowDelegate {
 public:
@@ -105,12 +105,12 @@ public:
         ni_pushInt32(x);
         invokeMethod(iWindowDelegate_mouseDown);
     }
-    void repaint(std::shared_ptr<CGContext> context, int32_t x, int32_t y, int32_t width, int32_t height) override {
+    void repaint(std::shared_ptr<DrawContext> context, int32_t x, int32_t y, int32_t width, int32_t height) override {
         ni_pushInt32(height);
         ni_pushInt32(width);
         ni_pushInt32(y);
         ni_pushInt32(x);
-        CGContext__push(context, false);
+        DrawContext__push(context, false);
         invokeMethod(iWindowDelegate_repaint);
     }
 };
@@ -152,9 +152,9 @@ inline WindowStyle WindowStyle__pop() {
 }
 
 void WindowProperties__push(WindowProperties value, bool isReturn) {
-    bool nativeParent;
+    size_t nativeParent;
     if (value.hasNativeParent(&nativeParent)) {
-        ni_pushBool(nativeParent);
+        ni_pushSizeT(nativeParent);
     }
     WindowStyle style;
     if (value.hasStyle(&style)) {
@@ -203,7 +203,7 @@ WindowProperties WindowProperties__pop() {
         value.setStyle(x);
     }
     if (usedFields & WindowProperties::Fields::NativeParent) {
-        auto x = ni_popBool();
+        auto x = ni_popSizeT();
         value.setNativeParent(x);
     }
     return value;
@@ -260,7 +260,7 @@ void IWindowDelegate_mouseDown__wrapper(int serverID) {
 
 void IWindowDelegate_repaint__wrapper(int serverID) {
     auto inst = ServerIWindowDelegate::getByID(serverID);
-    auto context = CGContext__pop();
+    auto context = DrawContext__pop();
     auto x = ni_popInt32();
     auto y = ni_popInt32();
     auto width = ni_popInt32();

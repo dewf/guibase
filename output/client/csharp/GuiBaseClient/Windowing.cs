@@ -163,7 +163,7 @@ namespace Org.Prefixed.GuiBase
             void Closed();
             void Destroyed();
             void MouseDown(int x, int y, MouseButton button, HashSet<Modifiers> modifiers);
-            void Repaint(CGContext context, int x, int y, int width, int height);
+            void Repaint(DrawContext context, int x, int y, int width, int height);
         }
 
         internal static void IWindowDelegate__Push(IWindowDelegate thing, bool isReturn)
@@ -208,7 +208,7 @@ namespace Org.Prefixed.GuiBase
             public abstract void Closed();
             public abstract void Destroyed();
             public abstract void MouseDown(int x, int y, MouseButton button, HashSet<Modifiers> modifiers);
-            public abstract void Repaint(CGContext context, int x, int y, int width, int height);
+            public abstract void Repaint(DrawContext context, int x, int y, int width, int height);
         }
 
         internal class ServerIWindowDelegate : ServerObject, IWindowDelegate
@@ -242,13 +242,13 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_mouseDown, Id);
             }
 
-            public void Repaint(CGContext context, int x, int y, int width, int height)
+            public void Repaint(DrawContext context, int x, int y, int width, int height)
             {
                 NativeImplClient.PushInt32(height);
                 NativeImplClient.PushInt32(width);
                 NativeImplClient.PushInt32(y);
                 NativeImplClient.PushInt32(x);
-                CGContext__Push(context, false);
+                DrawContext__Push(context, false);
                 NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_repaint, Id);
             }
 
@@ -387,8 +387,8 @@ namespace Org.Prefixed.GuiBase
                 value = default;
                 return false;
             }
-            private bool _nativeParent;
-            public bool NativeParent
+            private IntPtr _nativeParent;
+            public IntPtr NativeParent
             {
                 set
                 {
@@ -396,7 +396,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.NativeParent;
                 }
             }
-            public bool HasNativeParent(out bool value)
+            public bool HasNativeParent(out IntPtr value)
             {
                 if (UsedFields.HasFlag(Fields.NativeParent))
                 {
@@ -411,7 +411,7 @@ namespace Org.Prefixed.GuiBase
         {
             if (value.HasNativeParent(out var nativeParent))
             {
-                NativeImplClient.PushBool(nativeParent);
+                NativeImplClient.PushSizeT(nativeParent);
             }
             if (value.HasStyle(out var style))
             {
@@ -463,7 +463,7 @@ namespace Org.Prefixed.GuiBase
             }
             if (opts.UsedFields.HasFlag(WindowProperties.Fields.NativeParent))
             {
-                opts.NativeParent = NativeImplClient.PopBool();
+                opts.NativeParent = NativeImplClient.PopSizeT();
             }
             return opts;
         }
@@ -549,7 +549,7 @@ namespace Org.Prefixed.GuiBase
             NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_repaint, delegate(ClientObject obj)
             {
                 var inst = (ClientIWindowDelegate) obj;
-                var context = CGContext__Pop();
+                var context = DrawContext__Pop();
                 var x = NativeImplClient.PopInt32();
                 var y = NativeImplClient.PopInt32();
                 var width = NativeImplClient.PopInt32();

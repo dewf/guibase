@@ -44,7 +44,7 @@ enum class Modifiers {
 
 // std::set<Modifiers>
 
-class CGContext; // fwd decl
+class DrawContext; // fwd decl
 
 class IWindowDelegate {
 public:
@@ -52,7 +52,7 @@ public:
     virtual void closed() = 0;
     virtual void destroyed() = 0;
     virtual void mouseDown(int32_t x, int32_t y, MouseButton button, std::set<Modifiers> modifiers) = 0;
-    virtual void repaint(std::shared_ptr<CGContext> context, int32_t x, int32_t y, int32_t width, int32_t height) = 0;
+    virtual void repaint(std::shared_ptr<DrawContext> context, int32_t x, int32_t y, int32_t width, int32_t height) = 0;
 };
 
 // inherit from this to create server instances of IWindowDelegate
@@ -87,7 +87,7 @@ private:
     int32_t _maxWidth;
     int32_t _maxHeight;
     WindowStyle _style;
-    bool _nativeParent;
+    size_t _nativeParent;
 protected:
     int32_t getUsedFields() {
         return _usedFields;
@@ -150,11 +150,11 @@ public:
         }
         return false;
     }
-    void setNativeParent(bool value) {
+    void setNativeParent(size_t value) {
         _nativeParent = value;
         _usedFields |= Fields::NativeParent;
     }
-    bool hasNativeParent(bool *value) {
+    bool hasNativeParent(size_t *value) {
         if (_usedFields & Fields::NativeParent) {
             *value = _nativeParent;
             return true;
