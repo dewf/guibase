@@ -24,22 +24,9 @@ struct Rect {
     Size size;
 };
 
-class DrawContext {
-public:
-    virtual void saveGState() = 0;
-    virtual void restoreGState() = 0;
-    virtual void setRGBFillColor(double red, double green, double blue, double alpha) = 0;
-    virtual void fillRect(Rect rect) = 0;
-};
+struct __DrawContext; typedef struct __DrawContext* DrawContext;
 
-// inherit from this to create server instances of DrawContext
-class ServerDrawContext : public DrawContext, public ServerObject {
-public:
-    virtual ~ServerDrawContext() {}
-    static std::shared_ptr<ServerDrawContext> getByID(int id) {
-        auto obj = ServerObject::getByID(id);
-        return std::static_pointer_cast<ServerDrawContext>(obj);
-    }
-};
-
-int Drawing__register();
+void DrawContext_saveGState(DrawContext _this);
+void DrawContext_restoreGState(DrawContext _this);
+void DrawContext_setRGBFillColor(DrawContext _this, double red, double green, double blue, double alpha);
+void DrawContext_fillRect(DrawContext _this, Rect rect);

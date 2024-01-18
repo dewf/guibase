@@ -1,10 +1,8 @@
 #include "../support/NativeImplServer.h"
+#include "Drawing_wrappers.h"
 #include "Drawing.h"
 
-ni_InterfaceMethodRef drawContext_saveGState;
-ni_InterfaceMethodRef drawContext_restoreGState;
-ni_InterfaceMethodRef drawContext_setRGBFillColor;
-ni_InterfaceMethodRef drawContext_fillRect;
+NIHANDLE(drawContext);
 
 void Point__push(Point value, bool isReturn) {
     ni_pushDouble(value.y);
@@ -39,86 +37,44 @@ Rect Rect__pop() {
     return Rect { origin, size };
 }
 
-class ClientDrawContext : public ClientObject, public DrawContext {
-public:
-    ClientDrawContext(int id) : ClientObject(id) {}
-    void saveGState() override {
-        invokeMethod(drawContext_saveGState);
-    }
-    void restoreGState() override {
-        invokeMethod(drawContext_restoreGState);
-    }
-    void setRGBFillColor(double red, double green, double blue, double alpha) override {
-        ni_pushDouble(alpha);
-        ni_pushDouble(blue);
-        ni_pushDouble(green);
-        ni_pushDouble(red);
-        invokeMethod(drawContext_setRGBFillColor);
-    }
-    void fillRect(Rect rect) override {
-        Rect__push(rect, false);
-        invokeMethod(drawContext_fillRect);
-    }
-};
-
-void DrawContext__push(std::shared_ptr<DrawContext> inst, bool isReturn) {
-    if (inst != nullptr) {
-        auto pushable = std::dynamic_pointer_cast<Pushable>(inst);
-        pushable->push(pushable, isReturn);
-    }
-    else {
-        ni_pushNull();
-    }
+void DrawContext__push(DrawContext value) {
+    ni_pushPtr(value);
 }
 
-std::shared_ptr<DrawContext> DrawContext__pop()
-{
-    bool isClientID;
-    auto id = ni_popInstance(&isClientID);
-    if (id != 0) {
-        if (isClientID) {
-            return std::shared_ptr<DrawContext>(new ClientDrawContext(id));
-        }
-        else {
-            return ServerDrawContext::getByID(id);
-        }
-    }
-    else {
-        return std::shared_ptr<DrawContext>();
-    }
+DrawContext DrawContext__pop() {
+    return (DrawContext)ni_popPtr();
 }
 
-void DrawContext_saveGState__wrapper(int serverID) {
-    auto inst = ServerDrawContext::getByID(serverID);
-    inst->saveGState();
+void DrawContext_saveGState__wrapper() {
+    auto _this = DrawContext__pop();
+    DrawContext_saveGState(_this);
 }
 
-void DrawContext_restoreGState__wrapper(int serverID) {
-    auto inst = ServerDrawContext::getByID(serverID);
-    inst->restoreGState();
+void DrawContext_restoreGState__wrapper() {
+    auto _this = DrawContext__pop();
+    DrawContext_restoreGState(_this);
 }
 
-void DrawContext_setRGBFillColor__wrapper(int serverID) {
-    auto inst = ServerDrawContext::getByID(serverID);
+void DrawContext_setRGBFillColor__wrapper() {
+    auto _this = DrawContext__pop();
     auto red = ni_popDouble();
     auto green = ni_popDouble();
     auto blue = ni_popDouble();
     auto alpha = ni_popDouble();
-    inst->setRGBFillColor(red, green, blue, alpha);
+    DrawContext_setRGBFillColor(_this, red, green, blue, alpha);
 }
 
-void DrawContext_fillRect__wrapper(int serverID) {
-    auto inst = ServerDrawContext::getByID(serverID);
+void DrawContext_fillRect__wrapper() {
+    auto _this = DrawContext__pop();
     auto rect = Rect__pop();
-    inst->fillRect(rect);
+    DrawContext_fillRect(_this, rect);
 }
 
 int Drawing__register() {
     auto m = ni_registerModule("Drawing");
-    auto drawContext = ni_registerInterface(m, "DrawContext");
-    drawContext_saveGState = ni_registerInterfaceMethod(drawContext, "saveGState", &DrawContext_saveGState__wrapper);
-    drawContext_restoreGState = ni_registerInterfaceMethod(drawContext, "restoreGState", &DrawContext_restoreGState__wrapper);
-    drawContext_setRGBFillColor = ni_registerInterfaceMethod(drawContext, "setRGBFillColor", &DrawContext_setRGBFillColor__wrapper);
-    drawContext_fillRect = ni_registerInterfaceMethod(drawContext, "fillRect", &DrawContext_fillRect__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_saveGState", &DrawContext_saveGState__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_restoreGState", &DrawContext_restoreGState__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_setRGBFillColor", &DrawContext_setRGBFillColor__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_fillRect", &DrawContext_fillRect__wrapper);
     return 0; // = OK
 }

@@ -46,30 +46,6 @@ static void convertProps(WindowOptions& opts, wl_WindowProperties& output) {
     }
 }
 
-class DrawContextImpl : public ServerDrawContext {
-private:
-    dl_CGContextRef context;
-public:
-    DrawContextImpl(ID2D1RenderTarget* target) {
-        context = dl_CGContextCreateD2D(target);
-    }
-    ~DrawContextImpl() {
-        dl_CGContextRelease(context);
-    }
-    void saveGState() override {
-        dl_CGContextSaveGState(context);
-    }
-    void restoreGState() override {
-        dl_CGContextRestoreGState(context);
-    }
-    void setRGBFillColor(double red, double green, double blue, double alpha) override {
-        dl_CGContextSetRGBFillColor(context, red, green, blue, alpha);
-    }
-    void fillRect(Rect rect) override {
-        dl_CGContextFillRect(context, *((dl_CGRect*)&rect));
-    }
-};
-
 class Window2 : public ServerIWindow {
 private:
     wl_WindowRef wlWindow = nullptr;
@@ -105,10 +81,9 @@ public:
         return del->canClose();
     }
     void onRepaint(wl_RepaintEvent& paintEvent) {
-        // oooooh this is why we'd want an opaque type! client side has no business determining lifetime!
-        // same probably goes for Window as well ...
-        DrawContextImpl context(paintEvent.platformContext.d2d.target);
-        del->repaint(std::shared_ptr<DrawContext>(&context), paintEvent.x, paintEvent.y, paintEvent.width, paintEvent.height);
+        auto context = dl_CGContextCreateD2D(paintEvent.platformContext.d2d.target);
+        del->repaint((DrawContext)context, paintEvent.x, paintEvent.y, paintEvent.width, paintEvent.height);
+        dl_CGContextRelease(context);
     }
     void onResized(wl_ResizeEvent& resizeEvent) {
         del->resized(resizeEvent.newWidth, resizeEvent.newHeight);

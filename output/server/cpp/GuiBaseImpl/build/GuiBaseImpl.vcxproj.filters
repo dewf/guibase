@@ -61,5 +61,11 @@
     <ClInclude Include="..\generated\Drawing.h">
       <Filter>Source Files\generated</Filter>
     </ClInclude>
+    <ClInclude Include="..\generated\Drawing_Wrappers.h">
+      <Filter>Source Files\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\generated\Windowing_Wrappers.h">
+      <Filter>Source Files\generated</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

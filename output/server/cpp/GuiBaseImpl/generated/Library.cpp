@@ -1,5 +1,5 @@
-#include "Drawing.h"
-#include "Windowing.h"
+#include "Drawing_wrappers.h"
+#include "Windowing_wrappers.h"
 
 extern "C" int nativeLibraryInit() {
     Drawing__register();

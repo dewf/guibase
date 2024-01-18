@@ -12,11 +12,10 @@ namespace Org.Prefixed.GuiBase
     public static class Drawing
     {
         private static ModuleHandle _module;
-        private static InterfaceHandle _drawContext;
-        private static InterfaceMethodHandle _drawContext_saveGState;
-        private static InterfaceMethodHandle _drawContext_restoreGState;
-        private static InterfaceMethodHandle _drawContext_setRGBFillColor;
-        private static InterfaceMethodHandle _drawContext_fillRect;
+        private static ModuleMethodHandle _drawContext_saveGState;
+        private static ModuleMethodHandle _drawContext_restoreGState;
+        private static ModuleMethodHandle _drawContext_setRGBFillColor;
+        private static ModuleMethodHandle _drawContext_fillRect;
 
         public struct Point {
             public double X;
@@ -87,73 +86,24 @@ namespace Org.Prefixed.GuiBase
             return new Rect(origin, size);
         }
 
-
-        public interface DrawContext : IDisposable
+        public class DrawContext
         {
-            void SaveGState();
-            void RestoreGState();
-            void SetRGBFillColor(double red, double green, double blue, double alpha);
-            void FillRect(Rect rect);
-        }
-
-        internal static void DrawContext__Push(DrawContext thing, bool isReturn)
-        {
-            if (thing != null)
+            internal readonly IntPtr NativeHandle;
+            internal DrawContext(IntPtr nativeHandle)
             {
-                ((IPushable)thing).Push(isReturn);
-            }
-            else
-            {
-                NativeImplClient.PushNull();
-            }
-        }
-
-        internal static DrawContext DrawContext__Pop()
-        {
-            NativeImplClient.PopInstanceId(out var id, out var isClientId);
-            if (id != 0)
-            {
-                if (!isClientId)
-                {
-                    return new ServerDrawContext(id);
-                }
-                else
-                {
-                    return (DrawContext) ClientObject.GetById(id);
-                }
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public abstract class ClientDrawContext : ClientObject, DrawContext
-        {
-            public virtual void Dispose()
-            {
-                // override if necessary
-            }
-            public abstract void SaveGState();
-            public abstract void RestoreGState();
-            public abstract void SetRGBFillColor(double red, double green, double blue, double alpha);
-            public abstract void FillRect(Rect rect);
-        }
-
-        internal class ServerDrawContext : ServerObject, DrawContext
-        {
-            public ServerDrawContext(int id) : base(id)
-            {
+                NativeHandle = nativeHandle;
             }
 
             public void SaveGState()
             {
-                NativeImplClient.InvokeInterfaceMethod(_drawContext_saveGState, Id);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_saveGState);
             }
 
             public void RestoreGState()
             {
-                NativeImplClient.InvokeInterfaceMethod(_drawContext_restoreGState, Id);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_restoreGState);
             }
 
             public void SetRGBFillColor(double red, double green, double blue, double alpha)
@@ -162,59 +112,37 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.PushDouble(blue);
                 NativeImplClient.PushDouble(green);
                 NativeImplClient.PushDouble(red);
-                NativeImplClient.InvokeInterfaceMethod(_drawContext_setRGBFillColor, Id);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_setRGBFillColor);
             }
 
             public void FillRect(Rect rect)
             {
                 Rect__Push(rect, false);
-                NativeImplClient.InvokeInterfaceMethod(_drawContext_fillRect, Id);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_fillRect);
             }
+        }
 
-            public void Dispose()
-            {
-                ServerDispose();
-            }
+        internal static void DrawContext__Push(DrawContext thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        internal static DrawContext DrawContext__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new DrawContext(ptr) : null;
         }
 
         internal static void Init()
         {
             _module = NativeImplClient.GetModule("Drawing");
 
-            _drawContext = NativeImplClient.GetInterface(_module, "DrawContext");
-            _drawContext_saveGState = NativeImplClient.GetInterfaceMethod(_drawContext, "saveGState");
-            _drawContext_restoreGState = NativeImplClient.GetInterfaceMethod(_drawContext, "restoreGState");
-            _drawContext_setRGBFillColor = NativeImplClient.GetInterfaceMethod(_drawContext, "setRGBFillColor");
-            _drawContext_fillRect = NativeImplClient.GetInterfaceMethod(_drawContext, "fillRect");
-
-            NativeImplClient.SetClientMethodWrapper(_drawContext_saveGState, delegate(ClientObject obj)
-            {
-                var inst = (ClientDrawContext) obj;
-                inst.SaveGState();
-            });
-
-            NativeImplClient.SetClientMethodWrapper(_drawContext_restoreGState, delegate(ClientObject obj)
-            {
-                var inst = (ClientDrawContext) obj;
-                inst.RestoreGState();
-            });
-
-            NativeImplClient.SetClientMethodWrapper(_drawContext_setRGBFillColor, delegate(ClientObject obj)
-            {
-                var inst = (ClientDrawContext) obj;
-                var red = NativeImplClient.PopDouble();
-                var green = NativeImplClient.PopDouble();
-                var blue = NativeImplClient.PopDouble();
-                var alpha = NativeImplClient.PopDouble();
-                inst.SetRGBFillColor(red, green, blue, alpha);
-            });
-
-            NativeImplClient.SetClientMethodWrapper(_drawContext_fillRect, delegate(ClientObject obj)
-            {
-                var inst = (ClientDrawContext) obj;
-                var rect = Rect__Pop();
-                inst.FillRect(rect);
-            });
+            _drawContext_saveGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_saveGState");
+            _drawContext_restoreGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_restoreGState");
+            _drawContext_setRGBFillColor = NativeImplClient.GetModuleMethod(_module, "DrawContext_setRGBFillColor");
+            _drawContext_fillRect = NativeImplClient.GetModuleMethod(_module, "DrawContext_fillRect");
 
             // no static init
         }

@@ -1,5 +1,7 @@
 #include "../support/NativeImplServer.h"
+#include "Windowing_wrappers.h"
 #include "Windowing.h"
+#include "Drawing_wrappers.h"
 
 ni_InterfaceMethodRef iWindowDelegate_canClose;
 ni_InterfaceMethodRef iWindowDelegate_closed;
@@ -31,8 +33,7 @@ void IWindow__push(std::shared_ptr<IWindow> inst, bool isReturn) {
     }
 }
 
-std::shared_ptr<IWindow> IWindow__pop()
-{
+std::shared_ptr<IWindow> IWindow__pop() {
     bool isClientID;
     auto id = ni_popInstance(&isClientID);
     if (id != 0) {
@@ -83,9 +84,6 @@ std::set<Modifiers> __ModifiersSet__pop() {
     return __ret;
 }
 
-void DrawContext__push(std::shared_ptr<DrawContext> thing, bool isReturn);
-std::shared_ptr<DrawContext> DrawContext__pop();
-
 class ClientIWindowDelegate : public ClientObject, public IWindowDelegate {
 public:
     ClientIWindowDelegate(int id) : ClientObject(id) {}
@@ -106,12 +104,12 @@ public:
         ni_pushInt32(x);
         invokeMethod(iWindowDelegate_mouseDown);
     }
-    void repaint(std::shared_ptr<DrawContext> context, int32_t x, int32_t y, int32_t width, int32_t height) override {
+    void repaint(DrawContext context, int32_t x, int32_t y, int32_t width, int32_t height) override {
         ni_pushInt32(height);
         ni_pushInt32(width);
         ni_pushInt32(y);
         ni_pushInt32(x);
-        DrawContext__push(context, false);
+        DrawContext__push(context);
         invokeMethod(iWindowDelegate_repaint);
     }
     void resized(int32_t width, int32_t height) override {
@@ -131,8 +129,7 @@ void IWindowDelegate__push(std::shared_ptr<IWindowDelegate> inst, bool isReturn)
     }
 }
 
-std::shared_ptr<IWindowDelegate> IWindowDelegate__pop()
-{
+std::shared_ptr<IWindowDelegate> IWindowDelegate__pop() {
     bool isClientID;
     auto id = ni_popInstance(&isClientID);
     if (id != 0) {

@@ -157,7 +157,6 @@ namespace Org.Prefixed.GuiBase
         }
 
 
-
         public interface IWindowDelegate : IDisposable
         {
             bool CanClose();
@@ -251,7 +250,7 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.PushInt32(width);
                 NativeImplClient.PushInt32(y);
                 NativeImplClient.PushInt32(x);
-                DrawContext__Push(context, false);
+                DrawContext__Push(context);
                 NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_repaint, Id);
             }
 

@@ -44,15 +44,13 @@ enum class Modifiers {
 
 // std::set<Modifiers>
 
-class DrawContext; // fwd decl
-
 class IWindowDelegate {
 public:
     virtual bool canClose() = 0;
     virtual void closed() = 0;
     virtual void destroyed() = 0;
     virtual void mouseDown(int32_t x, int32_t y, MouseButton button, std::set<Modifiers> modifiers) = 0;
-    virtual void repaint(std::shared_ptr<DrawContext> context, int32_t x, int32_t y, int32_t width, int32_t height) = 0;
+    virtual void repaint(DrawContext context, int32_t x, int32_t y, int32_t width, int32_t height) = 0;
     virtual void resized(int32_t width, int32_t height) = 0;
 };
 
@@ -169,5 +167,3 @@ void moduleShutdown();
 void runloop();
 void exitRunloop();
 std::shared_ptr<IWindow> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<IWindowDelegate> del, WindowOptions opts);
-
-int Windowing__register();

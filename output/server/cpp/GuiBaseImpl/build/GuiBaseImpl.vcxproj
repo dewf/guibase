@@ -134,7 +134,9 @@
     <ClInclude Include="..\common\comstuff.h" />
     <ClInclude Include="..\common\unicodestuff.h" />
     <ClInclude Include="..\generated\Drawing.h" />
+    <ClInclude Include="..\generated\Drawing_Wrappers.h" />
     <ClInclude Include="..\generated\Windowing.h" />
+    <ClInclude Include="..\generated\Windowing_Wrappers.h" />
     <ClInclude Include="..\support\CoreStuff.h" />
     <ClInclude Include="..\support\NativeImplServer.h" />
   </ItemGroup>

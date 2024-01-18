@@ -15,7 +15,7 @@ struct Rect {
     Size size;
 }
 
-interface DrawContext {
+opaque DrawContext {
     void saveGState();
     void restoreGState();
     void setRGBFillColor(double red, double green, double blue, double alpha);
