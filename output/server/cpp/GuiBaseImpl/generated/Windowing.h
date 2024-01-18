@@ -11,20 +11,11 @@
 
 #include "Drawing.h"
 
-class IWindow {
-public:
-    virtual void show() = 0;
-    virtual void destroy() = 0;
-};
-
-// inherit from this to create server instances of IWindow
-class ServerIWindow : public IWindow, public ServerObject {
-public:
-    virtual ~ServerIWindow() {}
-    static std::shared_ptr<ServerIWindow> getByID(int id) {
-        auto obj = ServerObject::getByID(id);
-        return std::static_pointer_cast<ServerIWindow>(obj);
-    }
+enum class Modifiers {
+    Shift,
+    Control,
+    Alt,
+    MacControl
 };
 
 enum class MouseButton {
@@ -35,16 +26,11 @@ enum class MouseButton {
     Other
 };
 
-enum class Modifiers {
-    Shift,
-    Control,
-    Alt,
-    MacControl
-};
+struct __Window; typedef struct __Window* Window;
 
 // std::set<Modifiers>
 
-class IWindowDelegate {
+class WindowDelegate {
 public:
     virtual bool canClose() = 0;
     virtual void closed() = 0;
@@ -54,13 +40,13 @@ public:
     virtual void resized(int32_t width, int32_t height) = 0;
 };
 
-// inherit from this to create server instances of IWindowDelegate
-class ServerIWindowDelegate : public IWindowDelegate, public ServerObject {
+// inherit from this to create server instances of WindowDelegate
+class ServerWindowDelegate : public WindowDelegate, public ServerObject {
 public:
-    virtual ~ServerIWindowDelegate() {}
-    static std::shared_ptr<ServerIWindowDelegate> getByID(int id) {
+    virtual ~ServerWindowDelegate() {}
+    static std::shared_ptr<ServerWindowDelegate> getByID(int id) {
         auto obj = ServerObject::getByID(id);
-        return std::static_pointer_cast<ServerIWindowDelegate>(obj);
+        return std::static_pointer_cast<ServerWindowDelegate>(obj);
     }
 };
 
@@ -166,4 +152,6 @@ void moduleInit();
 void moduleShutdown();
 void runloop();
 void exitRunloop();
-std::shared_ptr<IWindow> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<IWindowDelegate> del, WindowOptions opts);
+Window createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts);
+void Window_show(Window _this);
+void Window_destroy(Window _this);

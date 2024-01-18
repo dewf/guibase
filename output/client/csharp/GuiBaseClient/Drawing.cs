@@ -124,11 +124,13 @@ namespace Org.Prefixed.GuiBase
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void DrawContext__Push(DrawContext thing)
         {
             NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static DrawContext DrawContext__Pop()
         {
             var ptr = NativeImplClient.PopPtr();

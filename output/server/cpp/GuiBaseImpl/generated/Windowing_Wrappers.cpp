@@ -3,50 +3,21 @@
 #include "Windowing.h"
 #include "Drawing_wrappers.h"
 
-ni_InterfaceMethodRef iWindowDelegate_canClose;
-ni_InterfaceMethodRef iWindowDelegate_closed;
-ni_InterfaceMethodRef iWindowDelegate_destroyed;
-ni_InterfaceMethodRef iWindowDelegate_mouseDown;
-ni_InterfaceMethodRef iWindowDelegate_repaint;
-ni_InterfaceMethodRef iWindowDelegate_resized;
-ni_InterfaceMethodRef iWindow_show;
-ni_InterfaceMethodRef iWindow_destroy;
+ni_InterfaceMethodRef windowDelegate_canClose;
+ni_InterfaceMethodRef windowDelegate_closed;
+ni_InterfaceMethodRef windowDelegate_destroyed;
+ni_InterfaceMethodRef windowDelegate_mouseDown;
+ni_InterfaceMethodRef windowDelegate_repaint;
+ni_InterfaceMethodRef windowDelegate_resized;
+NIHANDLE(window);
 
-class ClientIWindow : public ClientObject, public IWindow {
-public:
-    ClientIWindow(int id) : ClientObject(id) {}
-    void show() override {
-        invokeMethod(iWindow_show);
-    }
-    void destroy() override {
-        invokeMethod(iWindow_destroy);
-    }
-};
-
-void IWindow__push(std::shared_ptr<IWindow> inst, bool isReturn) {
-    if (inst != nullptr) {
-        auto pushable = std::dynamic_pointer_cast<Pushable>(inst);
-        pushable->push(pushable, isReturn);
-    }
-    else {
-        ni_pushNull();
-    }
+inline void Modifiers__push(Modifiers value) {
+    ni_pushInt32((int32_t)value);
 }
 
-std::shared_ptr<IWindow> IWindow__pop() {
-    bool isClientID;
-    auto id = ni_popInstance(&isClientID);
-    if (id != 0) {
-        if (isClientID) {
-            return std::shared_ptr<IWindow>(new ClientIWindow(id));
-        }
-        else {
-            return ServerIWindow::getByID(id);
-        }
-    }
-    else {
-        return std::shared_ptr<IWindow>();
-    }
+inline Modifiers Modifiers__pop() {
+    auto tag = ni_popInt32();
+    return (Modifiers)tag;
 }
 
 inline void MouseButton__push(MouseButton value) {
@@ -58,13 +29,12 @@ inline MouseButton MouseButton__pop() {
     return (MouseButton)tag;
 }
 
-inline void Modifiers__push(Modifiers value) {
-    ni_pushInt32((int32_t)value);
+void Window__push(Window value) {
+    ni_pushPtr(value);
 }
 
-inline Modifiers Modifiers__pop() {
-    auto tag = ni_popInt32();
-    return (Modifiers)tag;
+Window Window__pop() {
+    return (Window)ni_popPtr();
 }
 
 void __ModifiersSet__push(std::set<Modifiers> values, bool isReturn) {
@@ -84,25 +54,25 @@ std::set<Modifiers> __ModifiersSet__pop() {
     return __ret;
 }
 
-class ClientIWindowDelegate : public ClientObject, public IWindowDelegate {
+class ClientWindowDelegate : public ClientObject, public WindowDelegate {
 public:
-    ClientIWindowDelegate(int id) : ClientObject(id) {}
+    ClientWindowDelegate(int id) : ClientObject(id) {}
     bool canClose() override {
-        invokeMethod(iWindowDelegate_canClose);
+        invokeMethod(windowDelegate_canClose);
         return ni_popBool();
     }
     void closed() override {
-        invokeMethod(iWindowDelegate_closed);
+        invokeMethod(windowDelegate_closed);
     }
     void destroyed() override {
-        invokeMethod(iWindowDelegate_destroyed);
+        invokeMethod(windowDelegate_destroyed);
     }
     void mouseDown(int32_t x, int32_t y, MouseButton button, std::set<Modifiers> modifiers) override {
         __ModifiersSet__push(modifiers, false);
         MouseButton__push(button);
         ni_pushInt32(y);
         ni_pushInt32(x);
-        invokeMethod(iWindowDelegate_mouseDown);
+        invokeMethod(windowDelegate_mouseDown);
     }
     void repaint(DrawContext context, int32_t x, int32_t y, int32_t width, int32_t height) override {
         ni_pushInt32(height);
@@ -110,16 +80,16 @@ public:
         ni_pushInt32(y);
         ni_pushInt32(x);
         DrawContext__push(context);
-        invokeMethod(iWindowDelegate_repaint);
+        invokeMethod(windowDelegate_repaint);
     }
     void resized(int32_t width, int32_t height) override {
         ni_pushInt32(height);
         ni_pushInt32(width);
-        invokeMethod(iWindowDelegate_resized);
+        invokeMethod(windowDelegate_resized);
     }
 };
 
-void IWindowDelegate__push(std::shared_ptr<IWindowDelegate> inst, bool isReturn) {
+void WindowDelegate__push(std::shared_ptr<WindowDelegate> inst, bool isReturn) {
     if (inst != nullptr) {
         auto pushable = std::dynamic_pointer_cast<Pushable>(inst);
         pushable->push(pushable, isReturn);
@@ -129,19 +99,19 @@ void IWindowDelegate__push(std::shared_ptr<IWindowDelegate> inst, bool isReturn)
     }
 }
 
-std::shared_ptr<IWindowDelegate> IWindowDelegate__pop() {
+std::shared_ptr<WindowDelegate> WindowDelegate__pop() {
     bool isClientID;
     auto id = ni_popInstance(&isClientID);
     if (id != 0) {
         if (isClientID) {
-            return std::shared_ptr<IWindowDelegate>(new ClientIWindowDelegate(id));
+            return std::shared_ptr<WindowDelegate>(new ClientWindowDelegate(id));
         }
         else {
-            return ServerIWindowDelegate::getByID(id);
+            return ServerWindowDelegate::getByID(id);
         }
     }
     else {
-        return std::shared_ptr<IWindowDelegate>();
+        return std::shared_ptr<WindowDelegate>();
     }
 }
 
@@ -232,28 +202,38 @@ void createWindow__wrapper() {
     auto width = ni_popInt32();
     auto height = ni_popInt32();
     auto title = popStringInternal();
-    auto del = IWindowDelegate__pop();
+    auto del = WindowDelegate__pop();
     auto opts = WindowOptions__pop();
-    IWindow__push(createWindow(width, height, title, del, opts), true);
+    Window__push(createWindow(width, height, title, del, opts));
 }
 
-void IWindowDelegate_canClose__wrapper(int serverID) {
-    auto inst = ServerIWindowDelegate::getByID(serverID);
+void Window_show__wrapper() {
+    auto _this = Window__pop();
+    Window_show(_this);
+}
+
+void Window_destroy__wrapper() {
+    auto _this = Window__pop();
+    Window_destroy(_this);
+}
+
+void WindowDelegate_canClose__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
     ni_pushBool(inst->canClose());
 }
 
-void IWindowDelegate_closed__wrapper(int serverID) {
-    auto inst = ServerIWindowDelegate::getByID(serverID);
+void WindowDelegate_closed__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
     inst->closed();
 }
 
-void IWindowDelegate_destroyed__wrapper(int serverID) {
-    auto inst = ServerIWindowDelegate::getByID(serverID);
+void WindowDelegate_destroyed__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
     inst->destroyed();
 }
 
-void IWindowDelegate_mouseDown__wrapper(int serverID) {
-    auto inst = ServerIWindowDelegate::getByID(serverID);
+void WindowDelegate_mouseDown__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
     auto x = ni_popInt32();
     auto y = ni_popInt32();
     auto button = MouseButton__pop();
@@ -261,8 +241,8 @@ void IWindowDelegate_mouseDown__wrapper(int serverID) {
     inst->mouseDown(x, y, button, modifiers);
 }
 
-void IWindowDelegate_repaint__wrapper(int serverID) {
-    auto inst = ServerIWindowDelegate::getByID(serverID);
+void WindowDelegate_repaint__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
     auto context = DrawContext__pop();
     auto x = ni_popInt32();
     auto y = ni_popInt32();
@@ -271,21 +251,11 @@ void IWindowDelegate_repaint__wrapper(int serverID) {
     inst->repaint(context, x, y, width, height);
 }
 
-void IWindowDelegate_resized__wrapper(int serverID) {
-    auto inst = ServerIWindowDelegate::getByID(serverID);
+void WindowDelegate_resized__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
     auto width = ni_popInt32();
     auto height = ni_popInt32();
     inst->resized(width, height);
-}
-
-void IWindow_show__wrapper(int serverID) {
-    auto inst = ServerIWindow::getByID(serverID);
-    inst->show();
-}
-
-void IWindow_destroy__wrapper(int serverID) {
-    auto inst = ServerIWindow::getByID(serverID);
-    inst->destroy();
 }
 
 int Windowing__register() {
@@ -295,15 +265,14 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "runloop", &runloop__wrapper);
     ni_registerModuleMethod(m, "exitRunloop", &exitRunloop__wrapper);
     ni_registerModuleMethod(m, "createWindow", &createWindow__wrapper);
-    auto iWindowDelegate = ni_registerInterface(m, "IWindowDelegate");
-    iWindowDelegate_canClose = ni_registerInterfaceMethod(iWindowDelegate, "canClose", &IWindowDelegate_canClose__wrapper);
-    iWindowDelegate_closed = ni_registerInterfaceMethod(iWindowDelegate, "closed", &IWindowDelegate_closed__wrapper);
-    iWindowDelegate_destroyed = ni_registerInterfaceMethod(iWindowDelegate, "destroyed", &IWindowDelegate_destroyed__wrapper);
-    iWindowDelegate_mouseDown = ni_registerInterfaceMethod(iWindowDelegate, "mouseDown", &IWindowDelegate_mouseDown__wrapper);
-    iWindowDelegate_repaint = ni_registerInterfaceMethod(iWindowDelegate, "repaint", &IWindowDelegate_repaint__wrapper);
-    iWindowDelegate_resized = ni_registerInterfaceMethod(iWindowDelegate, "resized", &IWindowDelegate_resized__wrapper);
-    auto iWindow = ni_registerInterface(m, "IWindow");
-    iWindow_show = ni_registerInterfaceMethod(iWindow, "show", &IWindow_show__wrapper);
-    iWindow_destroy = ni_registerInterfaceMethod(iWindow, "destroy", &IWindow_destroy__wrapper);
+    ni_registerModuleMethod(m, "Window_show", &Window_show__wrapper);
+    ni_registerModuleMethod(m, "Window_destroy", &Window_destroy__wrapper);
+    auto windowDelegate = ni_registerInterface(m, "WindowDelegate");
+    windowDelegate_canClose = ni_registerInterfaceMethod(windowDelegate, "canClose", &WindowDelegate_canClose__wrapper);
+    windowDelegate_closed = ni_registerInterfaceMethod(windowDelegate, "closed", &WindowDelegate_closed__wrapper);
+    windowDelegate_destroyed = ni_registerInterfaceMethod(windowDelegate, "destroyed", &WindowDelegate_destroyed__wrapper);
+    windowDelegate_mouseDown = ni_registerInterfaceMethod(windowDelegate, "mouseDown", &WindowDelegate_mouseDown__wrapper);
+    windowDelegate_repaint = ni_registerInterfaceMethod(windowDelegate, "repaint", &WindowDelegate_repaint__wrapper);
+    windowDelegate_resized = ni_registerInterfaceMethod(windowDelegate, "resized", &WindowDelegate_resized__wrapper);
     return 0; // = OK
 }

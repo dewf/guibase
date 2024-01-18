@@ -41,7 +41,7 @@ options WindowOptions {
    size_t nativeParent; // HWND actually
 }
 
-interface IWindowDelegate {
+interface WindowDelegate {
    bool canClose();
    void closed();
    void destroyed();
@@ -50,9 +50,9 @@ interface IWindowDelegate {
    void resized(int width, int height);
 }
 
-interface IWindow {
+opaque Window {
    void show();
    void destroy();
 }
 
-IWindow createWindow(int width, int height, string title, IWindowDelegate del, WindowOptions opts);
+Window createWindow(int width, int height, string title, WindowDelegate del, WindowOptions opts);

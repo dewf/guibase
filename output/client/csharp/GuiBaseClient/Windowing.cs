@@ -19,86 +19,35 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _runloop;
         private static ModuleMethodHandle _exitRunloop;
         private static ModuleMethodHandle _createWindow;
-        private static InterfaceHandle _iWindowDelegate;
-        private static InterfaceMethodHandle _iWindowDelegate_canClose;
-        private static InterfaceMethodHandle _iWindowDelegate_closed;
-        private static InterfaceMethodHandle _iWindowDelegate_destroyed;
-        private static InterfaceMethodHandle _iWindowDelegate_mouseDown;
-        private static InterfaceMethodHandle _iWindowDelegate_repaint;
-        private static InterfaceMethodHandle _iWindowDelegate_resized;
-        private static InterfaceHandle _iWindow;
-        private static InterfaceMethodHandle _iWindow_show;
-        private static InterfaceMethodHandle _iWindow_destroy;
+        private static ModuleMethodHandle _window_show;
+        private static ModuleMethodHandle _window_destroy;
+        private static InterfaceHandle _windowDelegate;
+        private static InterfaceMethodHandle _windowDelegate_canClose;
+        private static InterfaceMethodHandle _windowDelegate_closed;
+        private static InterfaceMethodHandle _windowDelegate_destroyed;
+        private static InterfaceMethodHandle _windowDelegate_mouseDown;
+        private static InterfaceMethodHandle _windowDelegate_repaint;
+        private static InterfaceMethodHandle _windowDelegate_resized;
 
-
-        public interface IWindow : IDisposable
+        public enum Modifiers
         {
-            void Show();
-            void Destroy();
+            Shift,
+            Control,
+            Alt,
+            MacControl
         }
 
-        internal static void IWindow__Push(IWindow thing, bool isReturn)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Modifiers__Push(Modifiers value)
         {
-            if (thing != null)
-            {
-                ((IPushable)thing).Push(isReturn);
-            }
-            else
-            {
-                NativeImplClient.PushNull();
-            }
+            NativeImplClient.PushInt32((int)value);
         }
 
-        internal static IWindow IWindow__Pop()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Modifiers Modifiers__Pop()
         {
-            NativeImplClient.PopInstanceId(out var id, out var isClientId);
-            if (id != 0)
-            {
-                if (!isClientId)
-                {
-                    return new ServerIWindow(id);
-                }
-                else
-                {
-                    return (IWindow) ClientObject.GetById(id);
-                }
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public abstract class ClientIWindow : ClientObject, IWindow
-        {
-            public virtual void Dispose()
-            {
-                // override if necessary
-            }
-            public abstract void Show();
-            public abstract void Destroy();
-        }
-
-        internal class ServerIWindow : ServerObject, IWindow
-        {
-            public ServerIWindow(int id) : base(id)
-            {
-            }
-
-            public void Show()
-            {
-                NativeImplClient.InvokeInterfaceMethod(_iWindow_show, Id);
-            }
-
-            public void Destroy()
-            {
-                NativeImplClient.InvokeInterfaceMethod(_iWindow_destroy, Id);
-            }
-
-            public void Dispose()
-            {
-                ServerDispose();
-            }
+            var ret = NativeImplClient.PopInt32();
+            return (Modifiers)ret;
         }
 
         public enum MouseButton
@@ -123,25 +72,38 @@ namespace Org.Prefixed.GuiBase
             return (MouseButton)ret;
         }
 
-        public enum Modifiers
+        public class Window
         {
-            Shift,
-            Control,
-            Alt,
-            MacControl
+            internal readonly IntPtr NativeHandle;
+            internal Window(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+
+            public void Show()
+            {
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_show);
+            }
+
+            public void Destroy()
+            {
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_destroy);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void Modifiers__Push(Modifiers value)
+        internal static void Window__Push(Window thing)
         {
-            NativeImplClient.PushInt32((int)value);
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Modifiers Modifiers__Pop()
+        internal static Window Window__Pop()
         {
-            var ret = NativeImplClient.PopInt32();
-            return (Modifiers)ret;
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new Window(ptr) : null;
         }
 
         internal static void __ModifiersSet__Push(HashSet<Modifiers> items, bool isReturn)
@@ -157,7 +119,7 @@ namespace Org.Prefixed.GuiBase
         }
 
 
-        public interface IWindowDelegate : IDisposable
+        public interface WindowDelegate : IDisposable
         {
             bool CanClose();
             void Closed();
@@ -167,7 +129,7 @@ namespace Org.Prefixed.GuiBase
             void Resized(int width, int height);
         }
 
-        internal static void IWindowDelegate__Push(IWindowDelegate thing, bool isReturn)
+        internal static void WindowDelegate__Push(WindowDelegate thing, bool isReturn)
         {
             if (thing != null)
             {
@@ -179,18 +141,18 @@ namespace Org.Prefixed.GuiBase
             }
         }
 
-        internal static IWindowDelegate IWindowDelegate__Pop()
+        internal static WindowDelegate WindowDelegate__Pop()
         {
             NativeImplClient.PopInstanceId(out var id, out var isClientId);
             if (id != 0)
             {
                 if (!isClientId)
                 {
-                    return new ServerIWindowDelegate(id);
+                    return new ServerWindowDelegate(id);
                 }
                 else
                 {
-                    return (IWindowDelegate) ClientObject.GetById(id);
+                    return (WindowDelegate) ClientObject.GetById(id);
                 }
             }
             else
@@ -199,7 +161,7 @@ namespace Org.Prefixed.GuiBase
             }
         }
 
-        public abstract class ClientIWindowDelegate : ClientObject, IWindowDelegate
+        public abstract class ClientWindowDelegate : ClientObject, WindowDelegate
         {
             public virtual void Dispose()
             {
@@ -213,26 +175,26 @@ namespace Org.Prefixed.GuiBase
             public abstract void Resized(int width, int height);
         }
 
-        internal class ServerIWindowDelegate : ServerObject, IWindowDelegate
+        internal class ServerWindowDelegate : ServerObject, WindowDelegate
         {
-            public ServerIWindowDelegate(int id) : base(id)
+            public ServerWindowDelegate(int id) : base(id)
             {
             }
 
             public bool CanClose()
             {
-                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_canClose, Id);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_canClose, Id);
                 return NativeImplClient.PopBool();
             }
 
             public void Closed()
             {
-                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_closed, Id);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_closed, Id);
             }
 
             public void Destroyed()
             {
-                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_destroyed, Id);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_destroyed, Id);
             }
 
             public void MouseDown(int x, int y, MouseButton button, HashSet<Modifiers> modifiers)
@@ -241,7 +203,7 @@ namespace Org.Prefixed.GuiBase
                 MouseButton__Push(button);
                 NativeImplClient.PushInt32(y);
                 NativeImplClient.PushInt32(x);
-                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_mouseDown, Id);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_mouseDown, Id);
             }
 
             public void Repaint(DrawContext context, int x, int y, int width, int height)
@@ -251,14 +213,14 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.PushInt32(y);
                 NativeImplClient.PushInt32(x);
                 DrawContext__Push(context);
-                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_repaint, Id);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_repaint, Id);
             }
 
             public void Resized(int width, int height)
             {
                 NativeImplClient.PushInt32(height);
                 NativeImplClient.PushInt32(width);
-                NativeImplClient.InvokeInterfaceMethod(_iWindowDelegate_resized, Id);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_resized, Id);
             }
 
             public void Dispose()
@@ -497,17 +459,15 @@ namespace Org.Prefixed.GuiBase
             NativeImplClient.InvokeModuleMethod(_exitRunloop);
         }
 
-        public static IWindow CreateWindow(int width, int height, string title, IWindowDelegate del, WindowOptions opts)
+        public static Window CreateWindow(int width, int height, string title, WindowDelegate del, WindowOptions opts)
         {
             WindowOptions__Push(opts, false);
-            IWindowDelegate__Push(del, false);
+            WindowDelegate__Push(del, false);
             NativeImplClient.PushString(title);
             NativeImplClient.PushInt32(height);
             NativeImplClient.PushInt32(width);
             NativeImplClient.InvokeModuleMethod(_createWindow);
-            var __ret = IWindow__Pop();
-            NativeImplClient.ServerClearSafetyArea();
-            return __ret;
+            return Window__Pop();
         }
 
         internal static void Init()
@@ -520,35 +480,38 @@ namespace Org.Prefixed.GuiBase
             _exitRunloop = NativeImplClient.GetModuleMethod(_module, "exitRunloop");
             _createWindow = NativeImplClient.GetModuleMethod(_module, "createWindow");
 
-            _iWindowDelegate = NativeImplClient.GetInterface(_module, "IWindowDelegate");
-            _iWindowDelegate_canClose = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "canClose");
-            _iWindowDelegate_closed = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "closed");
-            _iWindowDelegate_destroyed = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "destroyed");
-            _iWindowDelegate_mouseDown = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "mouseDown");
-            _iWindowDelegate_repaint = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "repaint");
-            _iWindowDelegate_resized = NativeImplClient.GetInterfaceMethod(_iWindowDelegate, "resized");
+            _window_show = NativeImplClient.GetModuleMethod(_module, "Window_show");
+            _window_destroy = NativeImplClient.GetModuleMethod(_module, "Window_destroy");
 
-            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_canClose, delegate(ClientObject obj)
+            _windowDelegate = NativeImplClient.GetInterface(_module, "WindowDelegate");
+            _windowDelegate_canClose = NativeImplClient.GetInterfaceMethod(_windowDelegate, "canClose");
+            _windowDelegate_closed = NativeImplClient.GetInterfaceMethod(_windowDelegate, "closed");
+            _windowDelegate_destroyed = NativeImplClient.GetInterfaceMethod(_windowDelegate, "destroyed");
+            _windowDelegate_mouseDown = NativeImplClient.GetInterfaceMethod(_windowDelegate, "mouseDown");
+            _windowDelegate_repaint = NativeImplClient.GetInterfaceMethod(_windowDelegate, "repaint");
+            _windowDelegate_resized = NativeImplClient.GetInterfaceMethod(_windowDelegate, "resized");
+
+            NativeImplClient.SetClientMethodWrapper(_windowDelegate_canClose, delegate(ClientObject obj)
             {
-                var inst = (ClientIWindowDelegate) obj;
+                var inst = (ClientWindowDelegate) obj;
                 NativeImplClient.PushBool(inst.CanClose());
             });
 
-            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_closed, delegate(ClientObject obj)
+            NativeImplClient.SetClientMethodWrapper(_windowDelegate_closed, delegate(ClientObject obj)
             {
-                var inst = (ClientIWindowDelegate) obj;
+                var inst = (ClientWindowDelegate) obj;
                 inst.Closed();
             });
 
-            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_destroyed, delegate(ClientObject obj)
+            NativeImplClient.SetClientMethodWrapper(_windowDelegate_destroyed, delegate(ClientObject obj)
             {
-                var inst = (ClientIWindowDelegate) obj;
+                var inst = (ClientWindowDelegate) obj;
                 inst.Destroyed();
             });
 
-            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_mouseDown, delegate(ClientObject obj)
+            NativeImplClient.SetClientMethodWrapper(_windowDelegate_mouseDown, delegate(ClientObject obj)
             {
-                var inst = (ClientIWindowDelegate) obj;
+                var inst = (ClientWindowDelegate) obj;
                 var x = NativeImplClient.PopInt32();
                 var y = NativeImplClient.PopInt32();
                 var button = MouseButton__Pop();
@@ -556,9 +519,9 @@ namespace Org.Prefixed.GuiBase
                 inst.MouseDown(x, y, button, modifiers);
             });
 
-            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_repaint, delegate(ClientObject obj)
+            NativeImplClient.SetClientMethodWrapper(_windowDelegate_repaint, delegate(ClientObject obj)
             {
-                var inst = (ClientIWindowDelegate) obj;
+                var inst = (ClientWindowDelegate) obj;
                 var context = DrawContext__Pop();
                 var x = NativeImplClient.PopInt32();
                 var y = NativeImplClient.PopInt32();
@@ -567,28 +530,12 @@ namespace Org.Prefixed.GuiBase
                 inst.Repaint(context, x, y, width, height);
             });
 
-            NativeImplClient.SetClientMethodWrapper(_iWindowDelegate_resized, delegate(ClientObject obj)
+            NativeImplClient.SetClientMethodWrapper(_windowDelegate_resized, delegate(ClientObject obj)
             {
-                var inst = (ClientIWindowDelegate) obj;
+                var inst = (ClientWindowDelegate) obj;
                 var width = NativeImplClient.PopInt32();
                 var height = NativeImplClient.PopInt32();
                 inst.Resized(width, height);
-            });
-
-            _iWindow = NativeImplClient.GetInterface(_module, "IWindow");
-            _iWindow_show = NativeImplClient.GetInterfaceMethod(_iWindow, "show");
-            _iWindow_destroy = NativeImplClient.GetInterfaceMethod(_iWindow, "destroy");
-
-            NativeImplClient.SetClientMethodWrapper(_iWindow_show, delegate(ClientObject obj)
-            {
-                var inst = (ClientIWindow) obj;
-                inst.Show();
-            });
-
-            NativeImplClient.SetClientMethodWrapper(_iWindow_destroy, delegate(ClientObject obj)
-            {
-                var inst = (ClientIWindow) obj;
-                inst.Destroy();
             });
 
             ModuleInit();

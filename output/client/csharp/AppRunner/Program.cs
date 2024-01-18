@@ -2,7 +2,7 @@
 
 namespace AppRunner;
 
-internal class WindowHandler : Windowing.ClientIWindowDelegate
+internal class WindowHandler : Windowing.ClientWindowDelegate
 {
     private int _width, _height;
     
@@ -66,14 +66,10 @@ internal static class Program
             MinWidth = 320,
             MinHeight = 200
         };
-        using (var window = Windowing.CreateWindow(800, 600, "this is the first window!", new WindowHandler(), options))
-        {
-            window.Show();
-            Windowing.Runloop();
-            Console.WriteLine("last line of 'using'");
-        }
+        var window = Windowing.CreateWindow(800, 600, "this is the first window!", new WindowHandler(), options);
+        window.Show();
+        Windowing.Runloop();
         Console.WriteLine("before shutdown");
-        
         Library.Shutdown();
     }
 }

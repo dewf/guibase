@@ -6,12 +6,6 @@
 
 #include <stdio.h>
 
-class Window2;
-
-struct WlPrivateWrapper {
-    std::shared_ptr<Window2> window;
-};
-
 static void convertProps(WindowOptions& opts, wl_WindowProperties& output) {
     int minWidth, minHeight, maxWidth, maxHeight;
     WindowStyle style;
@@ -46,34 +40,29 @@ static void convertProps(WindowOptions& opts, wl_WindowProperties& output) {
     }
 }
 
-class Window2 : public ServerIWindow {
+class MyWindow {
 private:
     wl_WindowRef wlWindow = nullptr;
-    std::shared_ptr<IWindowDelegate> del;
+    std::shared_ptr<WindowDelegate> del;
 public:
-    static std::shared_ptr<IWindow> create(int width, int height, std::string title, std::shared_ptr<IWindowDelegate> del, WindowOptions &opts) {
-        auto wrapper = new WlPrivateWrapper();
-        
+    static MyWindow* create(int width, int height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions &opts) {
         wl_WindowProperties wlProps;
         convertProps(opts, wlProps);
 
-        auto win2 = new Window2();
-        win2->wlWindow = wl_WindowCreate(width, height, title.c_str(), wrapper, &wlProps);
+        auto win2 = new MyWindow();
+        win2->wlWindow = wl_WindowCreate(width, height, title.c_str(), win2, &wlProps);
         win2->del = del;
 
-        // need to hold on to this as long as the window exists ...
-        wrapper->window = std::shared_ptr<Window2>(win2);
-
-        return wrapper->window;
+        return win2;
     }
-    // interface implementation ================
-    void show() override {
+    // opaque methods ==========================
+    void show() {
         wl_WindowShow(wlWindow);
     }
-    void destroy() override {
+    void destroy() {
         wl_WindowDestroy(wlWindow);
     }
-    // event handling ==========================
+    // OpenWL event handling ==========================
     void onDestroyed() {
         del->destroyed();
     }
@@ -93,8 +82,7 @@ public:
 
 CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* userData) {
     if (userData != nullptr) {
-        auto wrapper = (WlPrivateWrapper*)userData;
-        auto win = wrapper->window;
+        auto win = (MyWindow*)userData;
 
         event->handled = true;
         switch (event->eventType) {
@@ -103,9 +91,9 @@ CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* user
             break;
         case wl_kEventTypeWindowDestroyed:
             win->onDestroyed();
-            // we should be able to delete the wrapper now, after destroy there should be no more uses of it
-            printf("Windowing event handler deleting wl private wrapper\n");
-            delete wrapper;
+            // we should be able to delete the window instance now, after destroy there should be no more uses of it
+            printf("Windowing event handler deleting wl private window instance\n");
+            delete win;
             break;
         case wl_kEventTypeWindowRepaint:
             win->onRepaint(event->repaintEvent);
@@ -151,6 +139,14 @@ void exitRunloop() {
     wl_ExitRunloop();
 }
 
-std::shared_ptr<IWindow> createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<IWindowDelegate> del, WindowOptions opts) {
-    return Window2::create(width, height, title, del, opts);
+Window createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts) {
+    return (Window)MyWindow::create(width, height, title, del, opts);
+}
+
+void Window_show(Window _this) {
+    ((MyWindow*)_this)->show();
+}
+
+void Window_destroy(Window _this) {
+    ((MyWindow*)_this)->destroy();
 }
