@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Org.Prefixed.GuiBase.Support;
 
 namespace Org.Prefixed.GuiBase;
@@ -7,7 +6,11 @@ public static class Library
 {
     public static void Init()
     {
-        Debug.Assert(NativeImplClient.Init() == 0);
+        if (NativeImplClient.Init() != 0)
+        {
+            Console.WriteLine("NativeImplClient.Init failed!");
+            return;
+        }
         // registrations, static module inits
         Drawing.Init();
         Windowing.Init();
