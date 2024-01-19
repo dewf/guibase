@@ -40,6 +40,15 @@ static void convertProps(WindowOptions& opts, wl_WindowProperties& output) {
     }
 }
 
+static inline std::set<Modifiers> wlToModifiers(unsigned int modifiers) {
+    std::set<Modifiers> result;
+    if (modifiers & wl_kModifierShift) result.insert(Modifiers::Shift);
+    if (modifiers & wl_kModifierControl) result.insert(Modifiers::Control);
+    if (modifiers & wl_kModifierAlt) result.insert(Modifiers::Alt);
+    if (modifiers & wl_kModifierMacControl) result.insert(Modifiers::MacControl);
+    return result;
+}
+
 class MyWindow {
 private:
     wl_WindowRef wlWindow = nullptr;
@@ -77,6 +86,14 @@ public:
     void onResized(wl_ResizeEvent& resizeEvent) {
         del->resized(resizeEvent.newWidth, resizeEvent.newHeight);
     }
+    void onMouse(wl_MouseEvent& mouseEvent) {
+        auto modifiers = wlToModifiers(mouseEvent.modifiers);
+        switch (mouseEvent.eventType) {
+        case wl_kMouseEventTypeMouseDown:
+            del->mouseDown(mouseEvent.x, mouseEvent.y, (MouseButton)mouseEvent.button, modifiers);
+            break;
+        }
+    }
 };
 
 
@@ -94,6 +111,9 @@ CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* user
             // we should be able to delete the window instance now, after destroy there should be no more uses of it
             printf("Windowing event handler deleting wl private window instance\n");
             delete win;
+            break;
+        case wl_kEventTypeMouse:
+            win->onMouse(event->mouseEvent);
             break;
         case wl_kEventTypeWindowRepaint:
             win->onRepaint(event->repaintEvent);
