@@ -7,7 +7,19 @@ namespace AppRunner;
 internal class WindowHandler : ClientWindowDelegate
 {
     private int _width, _height;
+    private Lazy<Menu> _contextMenu;
+    public Window? Window { get; set; }
     
+    public WindowHandler()
+    {
+        _contextMenu = new Lazy<Menu>(() =>
+        {
+            var menu = CreateMenu();
+            menu.AddAction(CreateAction(202, "Context Item", null, null));
+            return menu;
+        });
+    }
+
     public override bool CanClose() => true;
 
     public override void Closed()
@@ -24,6 +36,10 @@ internal class WindowHandler : ClientWindowDelegate
     public override void MouseDown(int x, int y, MouseButton button, HashSet<Modifier> modifiers)
     {
         Console.WriteLine($"button press @ {x}/{y}/{button}/{ModifiersToString(modifiers)}");
+        if (button == MouseButton.Right)
+        {
+            Window!.ShowContextMenu(x, y, _contextMenu.Value);
+        }
     }
     private static string ModifiersToString(HashSet<Modifier> modifiers)
     {
@@ -62,10 +78,15 @@ internal class WindowHandler : ClientWindowDelegate
 
     public override void PerformAction(int id, Windowing.Action action)
     {
-        if (id == 101)
+        switch (id)
         {
-            Console.WriteLine("Exiting!");
-            ExitRunloop();
+            case 101:
+                Console.WriteLine("Exiting!");
+                ExitRunloop();
+                break;
+            case 202:
+                Console.WriteLine("Context item selected!");
+                break;
         }
     }
 }
@@ -82,7 +103,9 @@ internal static class Program
             MinWidth = 320,
             MinHeight = 200
         };
-        var window = CreateWindow(800, 600, "this is the first window! 🚀", new WindowHandler(), options);
+        var handler = new WindowHandler();
+        var window = CreateWindow(800, 600, "this is the first window! 🚀", handler, options);
+        handler.Window = window;
 
         var fileMenu = CreateMenu();
         var quitMods = new HashSet<Modifier>(new[] { Modifier.Control });
