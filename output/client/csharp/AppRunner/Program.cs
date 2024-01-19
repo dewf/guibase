@@ -66,10 +66,10 @@ internal static class Program
             MinWidth = 320,
             MinHeight = 200
         };
-        var window = Windowing.CreateWindow(800, 600, "this is the first window!", new WindowHandler(), options);
+        var window = Windowing.CreateWindow(800, 600, "this is the first window! 🚀", new WindowHandler(), options);
         window.Show();
         Windowing.Runloop();
-        Console.WriteLine("before shutdown");
+
         Library.Shutdown();
     }
 }
