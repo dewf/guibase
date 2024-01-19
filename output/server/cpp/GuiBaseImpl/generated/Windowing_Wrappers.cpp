@@ -9,15 +9,82 @@ ni_InterfaceMethodRef windowDelegate_destroyed;
 ni_InterfaceMethodRef windowDelegate_mouseDown;
 ni_InterfaceMethodRef windowDelegate_repaint;
 ni_InterfaceMethodRef windowDelegate_resized;
+ni_InterfaceMethodRef windowDelegate_performAction;
 NIHANDLE(window);
+NIHANDLE(icon);
+NIHANDLE(accelerator);
+NIHANDLE(action);
+NIHANDLE(menuItem);
+NIHANDLE(menu);
+NIHANDLE(menuBar);
 
-inline void Modifiers__push(Modifiers value) {
+void Accelerator__push(Accelerator value) {
+    ni_pushPtr(value);
+}
+
+Accelerator Accelerator__pop() {
+    return (Accelerator)ni_popPtr();
+}
+
+void Action__push(Action value) {
+    ni_pushPtr(value);
+}
+
+Action Action__pop() {
+    return (Action)ni_popPtr();
+}
+
+void Icon__push(Icon value) {
+    ni_pushPtr(value);
+}
+
+Icon Icon__pop() {
+    return (Icon)ni_popPtr();
+}
+
+inline void Key__push(Key value) {
     ni_pushInt32((int32_t)value);
 }
 
-inline Modifiers Modifiers__pop() {
+inline Key Key__pop() {
     auto tag = ni_popInt32();
-    return (Modifiers)tag;
+    return (Key)tag;
+}
+
+
+
+
+void Menu__push(Menu value) {
+    ni_pushPtr(value);
+}
+
+Menu Menu__pop() {
+    return (Menu)ni_popPtr();
+}
+
+void MenuBar__push(MenuBar value) {
+    ni_pushPtr(value);
+}
+
+MenuBar MenuBar__pop() {
+    return (MenuBar)ni_popPtr();
+}
+
+void MenuItem__push(MenuItem value) {
+    ni_pushPtr(value);
+}
+
+MenuItem MenuItem__pop() {
+    return (MenuItem)ni_popPtr();
+}
+
+inline void Modifier__push(Modifier value) {
+    ni_pushInt32((int32_t)value);
+}
+
+inline Modifier Modifier__pop() {
+    auto tag = ni_popInt32();
+    return (Modifier)tag;
 }
 
 inline void MouseButton__push(MouseButton value) {
@@ -29,6 +96,7 @@ inline MouseButton MouseButton__pop() {
     return (MouseButton)tag;
 }
 
+
 void Window__push(Window value) {
     ni_pushPtr(value);
 }
@@ -37,7 +105,7 @@ Window Window__pop() {
     return (Window)ni_popPtr();
 }
 
-void __ModifiersSet__push(std::set<Modifiers> values, bool isReturn) {
+void __ModifierSet__push(std::set<Modifier> values, bool isReturn) {
     std::vector<int8_t> intValues;
     for (auto i = values.begin(); i != values.end(); i++) {
         intValues.push_back((int8_t)*i);
@@ -45,11 +113,11 @@ void __ModifiersSet__push(std::set<Modifiers> values, bool isReturn) {
     pushInt8ArrayInternal(intValues);
 }
 
-std::set<Modifiers> __ModifiersSet__pop() {
+std::set<Modifier> __ModifierSet__pop() {
     auto intValues = popInt8ArrayInternal();
-    std::set<Modifiers> __ret;
+    std::set<Modifier> __ret;
     for (auto i = intValues.begin(); i != intValues.end(); i++) {
-        __ret.insert((Modifiers)*i);
+        __ret.insert((Modifier)*i);
     }
     return __ret;
 }
@@ -67,8 +135,8 @@ public:
     void destroyed() override {
         invokeMethod(windowDelegate_destroyed);
     }
-    void mouseDown(int32_t x, int32_t y, MouseButton button, std::set<Modifiers> modifiers) override {
-        __ModifiersSet__push(modifiers, false);
+    void mouseDown(int32_t x, int32_t y, MouseButton button, std::set<Modifier> modifiers) override {
+        __ModifierSet__push(modifiers, false);
         MouseButton__push(button);
         ni_pushInt32(y);
         ni_pushInt32(x);
@@ -86,6 +154,11 @@ public:
         ni_pushInt32(height);
         ni_pushInt32(width);
         invokeMethod(windowDelegate_resized);
+    }
+    void performAction(int32_t id, Action action) override {
+        Action__push(action);
+        ni_pushInt32(id);
+        invokeMethod(windowDelegate_performAction);
     }
 };
 
@@ -207,6 +280,34 @@ void createWindow__wrapper() {
     Window__push(createWindow(width, height, title, del, opts));
 }
 
+void createIcon__wrapper() {
+    auto filename = popStringInternal();
+    auto sizeToWidth = ni_popInt32();
+    Icon__push(createIcon(filename, sizeToWidth));
+}
+
+void createAccelerator__wrapper() {
+    auto key = Key__pop();
+    auto modifiers = __ModifierSet__pop();
+    Accelerator__push(createAccelerator(key, modifiers));
+}
+
+void createAction__wrapper() {
+    auto id = ni_popInt32();
+    auto label = popStringInternal();
+    auto icon = Icon__pop();
+    auto accel = Accelerator__pop();
+    Action__push(createAction(id, label, icon, accel));
+}
+
+void createMenu__wrapper() {
+    Menu__push(createMenu());
+}
+
+void createMenuBar__wrapper() {
+    MenuBar__push(createMenuBar());
+}
+
 void Window_show__wrapper() {
     auto _this = Window__pop();
     Window_show(_this);
@@ -215,6 +316,45 @@ void Window_show__wrapper() {
 void Window_destroy__wrapper() {
     auto _this = Window__pop();
     Window_destroy(_this);
+}
+
+void Window_setMenuBar__wrapper() {
+    auto _this = Window__pop();
+    auto menuBar = MenuBar__pop();
+    Window_setMenuBar(_this, menuBar);
+}
+
+void Window_showContextMenu__wrapper() {
+    auto _this = Window__pop();
+    auto x = ni_popInt32();
+    auto y = ni_popInt32();
+    auto menu = Menu__pop();
+    Window_showContextMenu(_this, x, y, menu);
+}
+
+void Menu_addAction__wrapper() {
+    auto _this = Menu__pop();
+    auto action = Action__pop();
+    MenuItem__push(Menu_addAction(_this, action));
+}
+
+void Menu_addSubmenu__wrapper() {
+    auto _this = Menu__pop();
+    auto label = popStringInternal();
+    auto sub = Menu__pop();
+    MenuItem__push(Menu_addSubmenu(_this, label, sub));
+}
+
+void Menu_addSeparator__wrapper() {
+    auto _this = Menu__pop();
+    Menu_addSeparator(_this);
+}
+
+void MenuBar_addMenu__wrapper() {
+    auto _this = MenuBar__pop();
+    auto label = popStringInternal();
+    auto menu = Menu__pop();
+    MenuItem__push(MenuBar_addMenu(_this, label, menu));
 }
 
 void WindowDelegate_canClose__wrapper(int serverID) {
@@ -237,7 +377,7 @@ void WindowDelegate_mouseDown__wrapper(int serverID) {
     auto x = ni_popInt32();
     auto y = ni_popInt32();
     auto button = MouseButton__pop();
-    auto modifiers = __ModifiersSet__pop();
+    auto modifiers = __ModifierSet__pop();
     inst->mouseDown(x, y, button, modifiers);
 }
 
@@ -258,6 +398,13 @@ void WindowDelegate_resized__wrapper(int serverID) {
     inst->resized(width, height);
 }
 
+void WindowDelegate_performAction__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
+    auto id = ni_popInt32();
+    auto action = Action__pop();
+    inst->performAction(id, action);
+}
+
 int Windowing__register() {
     auto m = ni_registerModule("Windowing");
     ni_registerModuleMethod(m, "moduleInit", &moduleInit__wrapper);
@@ -265,8 +412,19 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "runloop", &runloop__wrapper);
     ni_registerModuleMethod(m, "exitRunloop", &exitRunloop__wrapper);
     ni_registerModuleMethod(m, "createWindow", &createWindow__wrapper);
+    ni_registerModuleMethod(m, "createIcon", &createIcon__wrapper);
+    ni_registerModuleMethod(m, "createAccelerator", &createAccelerator__wrapper);
+    ni_registerModuleMethod(m, "createAction", &createAction__wrapper);
+    ni_registerModuleMethod(m, "createMenu", &createMenu__wrapper);
+    ni_registerModuleMethod(m, "createMenuBar", &createMenuBar__wrapper);
     ni_registerModuleMethod(m, "Window_show", &Window_show__wrapper);
     ni_registerModuleMethod(m, "Window_destroy", &Window_destroy__wrapper);
+    ni_registerModuleMethod(m, "Window_setMenuBar", &Window_setMenuBar__wrapper);
+    ni_registerModuleMethod(m, "Window_showContextMenu", &Window_showContextMenu__wrapper);
+    ni_registerModuleMethod(m, "Menu_addAction", &Menu_addAction__wrapper);
+    ni_registerModuleMethod(m, "Menu_addSubmenu", &Menu_addSubmenu__wrapper);
+    ni_registerModuleMethod(m, "Menu_addSeparator", &Menu_addSeparator__wrapper);
+    ni_registerModuleMethod(m, "MenuBar_addMenu", &MenuBar_addMenu__wrapper);
     auto windowDelegate = ni_registerInterface(m, "WindowDelegate");
     windowDelegate_canClose = ni_registerInterfaceMethod(windowDelegate, "canClose", &WindowDelegate_canClose__wrapper);
     windowDelegate_closed = ni_registerInterfaceMethod(windowDelegate, "closed", &WindowDelegate_closed__wrapper);
@@ -274,5 +432,6 @@ int Windowing__register() {
     windowDelegate_mouseDown = ni_registerInterfaceMethod(windowDelegate, "mouseDown", &WindowDelegate_mouseDown__wrapper);
     windowDelegate_repaint = ni_registerInterfaceMethod(windowDelegate, "repaint", &WindowDelegate_repaint__wrapper);
     windowDelegate_resized = ni_registerInterfaceMethod(windowDelegate, "resized", &WindowDelegate_resized__wrapper);
+    windowDelegate_performAction = ni_registerInterfaceMethod(windowDelegate, "performAction", &WindowDelegate_performAction__wrapper);
     return 0; // = OK
 }

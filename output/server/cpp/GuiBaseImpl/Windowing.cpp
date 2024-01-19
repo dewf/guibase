@@ -40,12 +40,29 @@ static void convertProps(WindowOptions& opts, wl_WindowProperties& output) {
     }
 }
 
-static inline std::set<Modifiers> wlToModifiers(unsigned int modifiers) {
-    std::set<Modifiers> result;
-    if (modifiers & wl_kModifierShift) result.insert(Modifiers::Shift);
-    if (modifiers & wl_kModifierControl) result.insert(Modifiers::Control);
-    if (modifiers & wl_kModifierAlt) result.insert(Modifiers::Alt);
-    if (modifiers & wl_kModifierMacControl) result.insert(Modifiers::MacControl);
+static inline std::set<Modifier> wlToModifiers(unsigned int modifiers) {
+    std::set<Modifier> result;
+    if (modifiers & wl_kModifierShift) result.insert(Modifier::Shift);
+    if (modifiers & wl_kModifierControl) result.insert(Modifier::Control);
+    if (modifiers & wl_kModifierAlt) result.insert(Modifier::Alt);
+    if (modifiers & wl_kModifierMacControl) result.insert(Modifier::MacControl);
+    return result;
+}
+
+static inline unsigned int modifiersToWl(std::set<Modifier> modifiers) {
+    unsigned int result = 0;
+    if (modifiers.contains(Modifier::Shift)) {
+        result |= wl_kModifierShift;
+    }
+    if (modifiers.contains(Modifier::Control)) {
+        result |= wl_kModifierControl;
+    }
+    if (modifiers.contains(Modifier::Alt)) {
+        result |= wl_kModifierAlt;
+    }
+    if (modifiers.contains(Modifier::MacControl)) {
+        result |= wl_kModifierMacControl;
+    }
     return result;
 }
 
@@ -71,12 +88,21 @@ public:
     void destroy() {
         wl_WindowDestroy(wlWindow);
     }
+    void setMenuBar(MenuBar mb) {
+        wl_WindowSetMenuBar(wlWindow, (wl_MenuBarRef)mb);
+    }
+    void showContextMenu(int x, int y, Menu menu) {
+        wl_WindowShowContextMenu(wlWindow, x, y, (wl_MenuRef)menu, nullptr);
+    }
     // OpenWL event handling ==========================
     void onDestroyed() {
         del->destroyed();
     }
     bool canClose() {
         return del->canClose();
+    }
+    void onAction(wl_ActionEvent& actionEvent) {
+        del->performAction(actionEvent.id, (Action)actionEvent.action);
     }
     void onRepaint(wl_RepaintEvent& paintEvent) {
         auto context = dl_CGContextCreateD2D(paintEvent.platformContext.d2d.target);
@@ -111,6 +137,9 @@ CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* user
             // we should be able to delete the window instance now, after destroy there should be no more uses of it
             printf("Windowing event handler deleting wl private window instance\n");
             delete win;
+            break;
+        case wl_kEventTypeAction:
+            win->onAction(event->actionEvent);
             break;
         case wl_kEventTypeMouse:
             win->onMouse(event->mouseEvent);
@@ -169,4 +198,48 @@ void Window_show(Window _this) {
 
 void Window_destroy(Window _this) {
     ((MyWindow*)_this)->destroy();
+}
+
+void Window_setMenuBar(Window _this, MenuBar menuBar) {
+    ((MyWindow*)_this)->setMenuBar(menuBar);
+}
+
+void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu) {
+    ((MyWindow*)_this)->showContextMenu(x, y, menu);
+}
+
+MenuItem Menu_addAction(Menu _this, Action action) {
+    return (MenuItem)wl_MenuAddAction((wl_MenuRef)_this, (wl_ActionRef)action);
+}
+
+MenuItem Menu_addSubmenu(Menu _this, std::string label, Menu sub) {
+    return (MenuItem)wl_MenuAddSubmenu((wl_MenuRef)_this, label.c_str(), (wl_MenuRef)sub);
+}
+
+void Menu_addSeparator(Menu _this) {
+    wl_MenuAddSeparator((wl_MenuRef)_this);
+}
+
+MenuItem MenuBar_addMenu(MenuBar _this, std::string label, Menu menu) {
+    return (MenuItem)wl_MenuBarAddMenu((wl_MenuBarRef)_this, label.c_str(), (wl_MenuRef)menu);
+}
+
+Icon createIcon(std::string filename, int32_t sizeToWidth) {
+    return (Icon)wl_IconLoadFromFile(filename.c_str(), sizeToWidth);
+}
+
+Accelerator createAccelerator(Key key, std::set<Modifier> modifiers) {
+    return (Accelerator)wl_AccelCreate((wl_KeyEnum)key, modifiersToWl(modifiers));
+}
+
+Action createAction(int32_t id, std::string label, Icon icon, Accelerator accel) {
+    return (Action)wl_ActionCreate(id, label.c_str(), (wl_IconRef)icon, (wl_AcceleratorRef)accel);
+}
+
+Menu createMenu() {
+    return (Menu)wl_MenuCreate();
+}
+
+MenuBar createMenuBar() {
+    return (MenuBar)wl_MenuBarCreate();
 }

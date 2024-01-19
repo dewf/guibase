@@ -8,7 +8,7 @@ public static class Library
     {
         if (NativeImplClient.Init() != 0)
         {
-            Console.WriteLine("NativeImplClient.Init failed!");
+            Console.WriteLine("NativeImplClient.Init failed");
             return;
         }
         // registrations, static module inits

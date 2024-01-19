@@ -11,7 +11,135 @@
 
 #include "Drawing.h"
 
-enum class Modifiers {
+struct __Accelerator; typedef struct __Accelerator* Accelerator;
+
+struct __Action; typedef struct __Action* Action;
+
+struct __Icon; typedef struct __Icon* Icon;
+
+enum class Key {
+    Unknown,
+    Escape,
+    Tab,
+    Backspace,
+    Return,
+    Space,
+    F1,
+    F2,
+    F3,
+    F4,
+    F5,
+    F6,
+    F7,
+    F8,
+    F9,
+    F10,
+    F11,
+    F12,
+    F13,
+    F14,
+    F15,
+    F16,
+    F17,
+    F18,
+    F19,
+    _0,
+    _1,
+    _2,
+    _3,
+    _4,
+    _5,
+    _6,
+    _7,
+    _8,
+    _9,
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    K,
+    L,
+    M,
+    N,
+    O,
+    P,
+    Q,
+    R,
+    S,
+    T,
+    U,
+    V,
+    W,
+    X,
+    Y,
+    Z,
+    Control,
+    Shift,
+    AltOption,
+    WinCommand,
+    Fn,
+    Insert,
+    Delete,
+    PageUp,
+    PageDown,
+    Home,
+    End,
+    LeftArrow,
+    UpArrow,
+    RightArrow,
+    DownArrow,
+    KP0,
+    KP1,
+    KP2,
+    KP3,
+    KP4,
+    KP5,
+    KP6,
+    KP7,
+    KP8,
+    KP9,
+    KPClear,
+    KPEquals,
+    KPDivide,
+    KPMultiply,
+    KPSubtract,
+    KPAdd,
+    KPEnter,
+    KPDecimal,
+    CapsLock,
+    NumLock,
+    ScrollLock,
+    PrintScreen,
+    Pause,
+    Cancel,
+    MediaMute,
+    MediaVolumeDown,
+    MediaVolumeUp,
+    MediaNext,
+    MediaPrev,
+    MediaStop,
+    MediaPlayPause
+};
+
+class MenuItem; // fwd decl
+
+class Action; // fwd decl
+
+class Menu; // fwd decl
+
+struct __Menu; typedef struct __Menu* Menu;
+
+struct __MenuBar; typedef struct __MenuBar* MenuBar;
+
+struct __MenuItem; typedef struct __MenuItem* MenuItem;
+
+enum class Modifier {
     Shift,
     Control,
     Alt,
@@ -26,18 +154,21 @@ enum class MouseButton {
     Other
 };
 
+class MenuBar; // fwd decl
+
 struct __Window; typedef struct __Window* Window;
 
-// std::set<Modifiers>
+// std::set<Modifier>
 
 class WindowDelegate {
 public:
     virtual bool canClose() = 0;
     virtual void closed() = 0;
     virtual void destroyed() = 0;
-    virtual void mouseDown(int32_t x, int32_t y, MouseButton button, std::set<Modifiers> modifiers) = 0;
+    virtual void mouseDown(int32_t x, int32_t y, MouseButton button, std::set<Modifier> modifiers) = 0;
     virtual void repaint(DrawContext context, int32_t x, int32_t y, int32_t width, int32_t height) = 0;
     virtual void resized(int32_t width, int32_t height) = 0;
+    virtual void performAction(int32_t id, Action action) = 0;
 };
 
 // inherit from this to create server instances of WindowDelegate
@@ -153,5 +284,16 @@ void moduleShutdown();
 void runloop();
 void exitRunloop();
 Window createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts);
+Icon createIcon(std::string filename, int32_t sizeToWidth);
+Accelerator createAccelerator(Key key, std::set<Modifier> modifiers);
+Action createAction(int32_t id, std::string label, Icon icon, Accelerator accel);
+Menu createMenu();
+MenuBar createMenuBar();
 void Window_show(Window _this);
 void Window_destroy(Window _this);
+void Window_setMenuBar(Window _this, MenuBar menuBar);
+void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu);
+MenuItem Menu_addAction(Menu _this, Action action);
+MenuItem Menu_addSubmenu(Menu _this, std::string label, Menu sub);
+void Menu_addSeparator(Menu _this);
+MenuItem MenuBar_addMenu(MenuBar _this, std::string label, Menu menu);
