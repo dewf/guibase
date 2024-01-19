@@ -26,25 +26,29 @@ internal class WindowHandler : Windowing.ClientWindowDelegate
     {
         return string.Join("+", modifiers.Select(m => m.ToString()).Order());
     }
-    private static void RectAt(int x, int y, Drawing.DrawContext context)
-    {
-        var rect = new Drawing.Rect(new Drawing.Point(x, y), new Drawing.Size(100.0, 100.0));
-        context.FillRect(rect);
-    }
     public override void Repaint(Drawing.DrawContext context, int x, int y, int width, int height)
     {
         context.SaveGState();
-        //
+        
+        // bordered
         context.SetRGBFillColor(0.23, 0, 0.4, 1);
         context.FillRect(new Drawing.Rect(new Drawing.Point(10, 10), new Drawing.Size(_width - 20, _height - 20)));
-        //
+
+        // overlapping
+        var rect = new Drawing.Rect(new Drawing.Point(100, 100), new Drawing.Size(100, 100));
         context.SetRGBFillColor(1, 0, 0, 0.5);
-        RectAt(100, 100, context);
+        context.FillRect(rect);
+
+        rect.Origin.X += 20;
+        rect.Origin.Y += 20;
         context.SetRGBFillColor(0, 1, 0, 0.5);
-        RectAt(120, 120, context);
+        context.FillRect(rect);
+        
+        rect.Origin.X += 20;
+        rect.Origin.Y += 20;
         context.SetRGBFillColor(0, 0, 1, 0.5);
-        RectAt(140, 140, context);
-        //
+        context.FillRect(rect);
+
         context.RestoreGState();
     }
     public override void Resized(int width, int height)
