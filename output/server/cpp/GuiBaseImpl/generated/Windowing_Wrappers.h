@@ -14,6 +14,8 @@ Key Key__pop();
 
 void Menu__push(Menu value);
 Menu Menu__pop();
+void MenuActionFunc__push(std::function<MenuActionFunc> f);
+std::function<MenuActionFunc> MenuActionFunc__pop();
 
 void MenuBar__push(MenuBar value);
 MenuBar MenuBar__pop();
@@ -21,8 +23,8 @@ MenuBar MenuBar__pop();
 void MenuItem__push(MenuItem value);
 MenuItem MenuItem__pop();
 
-void Modifier__push(Modifier value);
-Modifier Modifier__pop();
+void Modifiers__push(uint32_t value);
+uint32_t Modifiers__pop();
 
 void MouseButton__push(MouseButton value);
 MouseButton MouseButton__pop();
@@ -86,7 +88,5 @@ void WindowDelegate_mouseDown__wrapper(int serverID);
 void WindowDelegate_repaint__wrapper(int serverID);
 
 void WindowDelegate_resized__wrapper(int serverID);
-
-void WindowDelegate_performAction__wrapper(int serverID);
 
 int Windowing__register();

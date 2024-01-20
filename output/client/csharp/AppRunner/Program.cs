@@ -7,17 +7,16 @@ namespace AppRunner;
 internal class WindowHandler : ClientWindowDelegate
 {
     private int _width, _height;
-    private Lazy<Menu> _contextMenu;
+    private readonly Menu _contextMenu;
     public Window? Window { get; set; }
     
     public WindowHandler()
     {
-        _contextMenu = new Lazy<Menu>(() =>
+        _contextMenu = CreateMenu();
+        _contextMenu.AddAction(CreateAction("Context Item", null, null, () =>
         {
-            var menu = CreateMenu();
-            menu.AddAction(CreateAction(202, "Context Item", null, null));
-            return menu;
-        });
+            Console.WriteLine("context item clicked!");
+        }));
     }
 
     public override bool CanClose() => true;
@@ -33,17 +32,19 @@ internal class WindowHandler : ClientWindowDelegate
         ExitRunloop();
     }
 
-    public override void MouseDown(int x, int y, MouseButton button, HashSet<Modifier> modifiers)
+    public override void MouseDown(int x, int y, MouseButton button, Modifiers modifiers)
     {
         Console.WriteLine($"button press @ {x}/{y}/{button}/{ModifiersToString(modifiers)}");
         if (button == MouseButton.Right)
         {
-            Window!.ShowContextMenu(x, y, _contextMenu.Value);
+            Window!.ShowContextMenu(x, y, _contextMenu);
         }
     }
-    private static string ModifiersToString(HashSet<Modifier> modifiers)
+    private static string ModifiersToString(Modifiers modifiers)
     {
-        return string.Join("+", modifiers.Select(m => m.ToString()).Order());
+        var strings = 
+            from modifier in new[] { Modifiers.Shift, Modifiers.Control, Modifiers.Alt, Modifiers.MacControl } where modifiers.HasFlag(modifier) select modifier.ToString();
+        return string.Join("+", strings);
     }
     public override void Repaint(DrawContext context, int x, int y, int width, int height)
     {
@@ -75,20 +76,6 @@ internal class WindowHandler : ClientWindowDelegate
         _width = width;
         _height = height;
     }
-
-    public override void PerformAction(int id, Windowing.Action action)
-    {
-        switch (id)
-        {
-            case 101:
-                Console.WriteLine("Exiting!");
-                ExitRunloop();
-                break;
-            case 202:
-                Console.WriteLine("Context item selected!");
-                break;
-        }
-    }
 }
 
 internal static class Program
@@ -108,9 +95,12 @@ internal static class Program
         handler.Window = window;
 
         var fileMenu = CreateMenu();
-        var quitMods = new HashSet<Modifier>(new[] { Modifier.Control });
         var exitAction =
-            CreateAction(101, "E&xit", null, CreateAccelerator(Key.Q, quitMods));
+            CreateAction("E&xit", null, CreateAccelerator(Key.Q, Modifiers.Control), () =>
+            {
+                Console.WriteLine("you chose 'exit'!");
+                ExitRunloop();
+            });
         fileMenu.AddAction(exitAction);
 
         var menuBar = CreateMenuBar();

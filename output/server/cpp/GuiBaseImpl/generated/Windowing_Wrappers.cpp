@@ -9,7 +9,6 @@ ni_InterfaceMethodRef windowDelegate_destroyed;
 ni_InterfaceMethodRef windowDelegate_mouseDown;
 ni_InterfaceMethodRef windowDelegate_repaint;
 ni_InterfaceMethodRef windowDelegate_resized;
-ni_InterfaceMethodRef windowDelegate_performAction;
 NIHANDLE(window);
 NIHANDLE(icon);
 NIHANDLE(accelerator);
@@ -51,15 +50,35 @@ inline Key Key__pop() {
     return (Key)tag;
 }
 
-
-
-
 void Menu__push(Menu value) {
     ni_pushPtr(value);
 }
 
 Menu Menu__pop() {
     return (Menu)ni_popPtr();
+}
+
+void MenuActionFunc__push(std::function<MenuActionFunc> f) {
+    size_t uniqueKey = 0;
+    if (f) {
+        MenuActionFunc* ptr_fun = f.target<MenuActionFunc>();
+        if (ptr_fun != nullptr) {
+            uniqueKey = (size_t)ptr_fun;
+        }
+    }
+    auto wrapper = [f]() {
+        f();
+    };
+    pushServerFuncVal(wrapper, uniqueKey);
+}
+
+std::function<MenuActionFunc> MenuActionFunc__pop() {
+    auto id = ni_popClientFunc();
+    auto cf = std::shared_ptr<ClientFuncVal>(new ClientFuncVal(id));
+    auto wrapper = [cf]() {
+        cf->remoteExec();
+    };
+    return wrapper;
 }
 
 void MenuBar__push(MenuBar value) {
@@ -78,13 +97,12 @@ MenuItem MenuItem__pop() {
     return (MenuItem)ni_popPtr();
 }
 
-inline void Modifier__push(Modifier value) {
-    ni_pushInt32((int32_t)value);
+inline void Modifiers__push(uint32_t value) {
+    ni_pushUInt32(value);
 }
 
-inline Modifier Modifier__pop() {
-    auto tag = ni_popInt32();
-    return (Modifier)tag;
+inline uint32_t Modifiers__pop() {
+    return ni_popUInt32();
 }
 
 inline void MouseButton__push(MouseButton value) {
@@ -96,30 +114,12 @@ inline MouseButton MouseButton__pop() {
     return (MouseButton)tag;
 }
 
-
 void Window__push(Window value) {
     ni_pushPtr(value);
 }
 
 Window Window__pop() {
     return (Window)ni_popPtr();
-}
-
-void __ModifierSet__push(std::set<Modifier> values, bool isReturn) {
-    std::vector<int8_t> intValues;
-    for (auto i = values.begin(); i != values.end(); i++) {
-        intValues.push_back((int8_t)*i);
-    }
-    pushInt8ArrayInternal(intValues);
-}
-
-std::set<Modifier> __ModifierSet__pop() {
-    auto intValues = popInt8ArrayInternal();
-    std::set<Modifier> __ret;
-    for (auto i = intValues.begin(); i != intValues.end(); i++) {
-        __ret.insert((Modifier)*i);
-    }
-    return __ret;
 }
 
 class ClientWindowDelegate : public ClientObject, public WindowDelegate {
@@ -135,8 +135,8 @@ public:
     void destroyed() override {
         invokeMethod(windowDelegate_destroyed);
     }
-    void mouseDown(int32_t x, int32_t y, MouseButton button, std::set<Modifier> modifiers) override {
-        __ModifierSet__push(modifiers, false);
+    void mouseDown(int32_t x, int32_t y, MouseButton button, uint32_t modifiers) override {
+        Modifiers__push(modifiers);
         MouseButton__push(button);
         ni_pushInt32(y);
         ni_pushInt32(x);
@@ -154,11 +154,6 @@ public:
         ni_pushInt32(height);
         ni_pushInt32(width);
         invokeMethod(windowDelegate_resized);
-    }
-    void performAction(int32_t id, Action action) override {
-        Action__push(action);
-        ni_pushInt32(id);
-        invokeMethod(windowDelegate_performAction);
     }
 };
 
@@ -288,16 +283,16 @@ void createIcon__wrapper() {
 
 void createAccelerator__wrapper() {
     auto key = Key__pop();
-    auto modifiers = __ModifierSet__pop();
+    auto modifiers = Modifiers__pop();
     Accelerator__push(createAccelerator(key, modifiers));
 }
 
 void createAction__wrapper() {
-    auto id = ni_popInt32();
     auto label = popStringInternal();
     auto icon = Icon__pop();
     auto accel = Accelerator__pop();
-    Action__push(createAction(id, label, icon, accel));
+    auto func = MenuActionFunc__pop();
+    Action__push(createAction(label, icon, accel, func));
 }
 
 void createMenu__wrapper() {
@@ -377,7 +372,7 @@ void WindowDelegate_mouseDown__wrapper(int serverID) {
     auto x = ni_popInt32();
     auto y = ni_popInt32();
     auto button = MouseButton__pop();
-    auto modifiers = __ModifierSet__pop();
+    auto modifiers = Modifiers__pop();
     inst->mouseDown(x, y, button, modifiers);
 }
 
@@ -396,13 +391,6 @@ void WindowDelegate_resized__wrapper(int serverID) {
     auto width = ni_popInt32();
     auto height = ni_popInt32();
     inst->resized(width, height);
-}
-
-void WindowDelegate_performAction__wrapper(int serverID) {
-    auto inst = ServerWindowDelegate::getByID(serverID);
-    auto id = ni_popInt32();
-    auto action = Action__pop();
-    inst->performAction(id, action);
 }
 
 int Windowing__register() {
@@ -432,6 +420,5 @@ int Windowing__register() {
     windowDelegate_mouseDown = ni_registerInterfaceMethod(windowDelegate, "mouseDown", &WindowDelegate_mouseDown__wrapper);
     windowDelegate_repaint = ni_registerInterfaceMethod(windowDelegate, "repaint", &WindowDelegate_repaint__wrapper);
     windowDelegate_resized = ni_registerInterfaceMethod(windowDelegate, "resized", &WindowDelegate_resized__wrapper);
-    windowDelegate_performAction = ni_registerInterfaceMethod(windowDelegate, "performAction", &WindowDelegate_performAction__wrapper);
     return 0; // = OK
 }

@@ -6,6 +6,13 @@
 
 #include <stdio.h>
 
+static std::map<int, std::function<MenuActionFunc>> menuActionFuncs;
+static int _nextMenuActionId = 1;
+
+static std::function<MenuActionFunc> actionFuncForId(int id) {
+    return menuActionFuncs[id];
+}
+
 static void convertProps(WindowOptions& opts, wl_WindowProperties& output) {
     int minWidth, minHeight, maxWidth, maxHeight;
     WindowStyle style;
@@ -40,31 +47,31 @@ static void convertProps(WindowOptions& opts, wl_WindowProperties& output) {
     }
 }
 
-static inline std::set<Modifier> wlToModifiers(unsigned int modifiers) {
-    std::set<Modifier> result;
-    if (modifiers & wl_kModifierShift) result.insert(Modifier::Shift);
-    if (modifiers & wl_kModifierControl) result.insert(Modifier::Control);
-    if (modifiers & wl_kModifierAlt) result.insert(Modifier::Alt);
-    if (modifiers & wl_kModifierMacControl) result.insert(Modifier::MacControl);
-    return result;
-}
-
-static inline unsigned int modifiersToWl(std::set<Modifier> modifiers) {
-    unsigned int result = 0;
-    if (modifiers.contains(Modifier::Shift)) {
-        result |= wl_kModifierShift;
-    }
-    if (modifiers.contains(Modifier::Control)) {
-        result |= wl_kModifierControl;
-    }
-    if (modifiers.contains(Modifier::Alt)) {
-        result |= wl_kModifierAlt;
-    }
-    if (modifiers.contains(Modifier::MacControl)) {
-        result |= wl_kModifierMacControl;
-    }
-    return result;
-}
+//static inline std::set<Modifier> wlToModifiers(unsigned int modifiers) {
+//    std::set<Modifier> result;
+//    if (modifiers & wl_kModifierShift) result.insert(Modifier::Shift);
+//    if (modifiers & wl_kModifierControl) result.insert(Modifier::Control);
+//    if (modifiers & wl_kModifierAlt) result.insert(Modifier::Alt);
+//    if (modifiers & wl_kModifierMacControl) result.insert(Modifier::MacControl);
+//    return result;
+//}
+//
+//static inline unsigned int modifiersToWl(std::set<Modifier> modifiers) {
+//    unsigned int result = 0;
+//    if (modifiers.contains(Modifier::Shift)) {
+//        result |= wl_kModifierShift;
+//    }
+//    if (modifiers.contains(Modifier::Control)) {
+//        result |= wl_kModifierControl;
+//    }
+//    if (modifiers.contains(Modifier::Alt)) {
+//        result |= wl_kModifierAlt;
+//    }
+//    if (modifiers.contains(Modifier::MacControl)) {
+//        result |= wl_kModifierMacControl;
+//    }
+//    return result;
+//}
 
 class MyWindow {
 private:
@@ -102,7 +109,8 @@ public:
         return del->canClose();
     }
     void onAction(wl_ActionEvent& actionEvent) {
-        del->performAction(actionEvent.id, (Action)actionEvent.action);
+        auto func = actionFuncForId(actionEvent.id);
+        func();
     }
     void onRepaint(wl_RepaintEvent& paintEvent) {
         auto context = dl_CGContextCreateD2D(paintEvent.platformContext.d2d.target);
@@ -113,10 +121,9 @@ public:
         del->resized(resizeEvent.newWidth, resizeEvent.newHeight);
     }
     void onMouse(wl_MouseEvent& mouseEvent) {
-        auto modifiers = wlToModifiers(mouseEvent.modifiers);
         switch (mouseEvent.eventType) {
         case wl_kMouseEventTypeMouseDown:
-            del->mouseDown(mouseEvent.x, mouseEvent.y, (MouseButton)mouseEvent.button, modifiers);
+            del->mouseDown(mouseEvent.x, mouseEvent.y, (MouseButton)mouseEvent.button, mouseEvent.modifiers);
             break;
         }
     }
@@ -228,11 +235,15 @@ Icon createIcon(std::string filename, int32_t sizeToWidth) {
     return (Icon)wl_IconLoadFromFile(filename.c_str(), sizeToWidth);
 }
 
-Accelerator createAccelerator(Key key, std::set<Modifier> modifiers) {
-    return (Accelerator)wl_AccelCreate((wl_KeyEnum)key, modifiersToWl(modifiers));
+Accelerator createAccelerator(Key key, uint32_t modifiers)
+{
+    return (Accelerator)wl_AccelCreate((wl_KeyEnum)key, modifiers);
 }
 
-Action createAction(int32_t id, std::string label, Icon icon, Accelerator accel) {
+Action createAction(std::string label, Icon icon, Accelerator accel, std::function<MenuActionFunc> func)
+{
+    auto id = _nextMenuActionId++;
+    menuActionFuncs[id] = func;
     return (Action)wl_ActionCreate(id, label.c_str(), (wl_IconRef)icon, (wl_AcceleratorRef)accel);
 }
 

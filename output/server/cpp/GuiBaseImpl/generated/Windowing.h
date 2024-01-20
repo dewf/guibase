@@ -127,23 +127,19 @@ enum class Key {
     MediaPlayPause
 };
 
-class MenuItem; // fwd decl
-
-class Action; // fwd decl
-
-class Menu; // fwd decl
-
 struct __Menu; typedef struct __Menu* Menu;
+
+typedef void MenuActionFunc();
 
 struct __MenuBar; typedef struct __MenuBar* MenuBar;
 
 struct __MenuItem; typedef struct __MenuItem* MenuItem;
 
-enum class Modifier {
-    Shift,
-    Control,
-    Alt,
-    MacControl
+enum Modifiers {
+    Shift = 1,
+    Control = 2,
+    Alt = 4,
+    MacControl = 8
 };
 
 enum class MouseButton {
@@ -154,21 +150,16 @@ enum class MouseButton {
     Other
 };
 
-class MenuBar; // fwd decl
-
 struct __Window; typedef struct __Window* Window;
-
-// std::set<Modifier>
 
 class WindowDelegate {
 public:
     virtual bool canClose() = 0;
     virtual void closed() = 0;
     virtual void destroyed() = 0;
-    virtual void mouseDown(int32_t x, int32_t y, MouseButton button, std::set<Modifier> modifiers) = 0;
+    virtual void mouseDown(int32_t x, int32_t y, MouseButton button, uint32_t modifiers) = 0;
     virtual void repaint(DrawContext context, int32_t x, int32_t y, int32_t width, int32_t height) = 0;
     virtual void resized(int32_t width, int32_t height) = 0;
-    virtual void performAction(int32_t id, Action action) = 0;
 };
 
 // inherit from this to create server instances of WindowDelegate
@@ -285,8 +276,8 @@ void runloop();
 void exitRunloop();
 Window createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts);
 Icon createIcon(std::string filename, int32_t sizeToWidth);
-Accelerator createAccelerator(Key key, std::set<Modifier> modifiers);
-Action createAction(int32_t id, std::string label, Icon icon, Accelerator accel);
+Accelerator createAccelerator(Key key, uint32_t modifiers);
+Action createAction(std::string label, Icon icon, Accelerator accel, std::function<MenuActionFunc> func);
 Menu createMenu();
 MenuBar createMenuBar();
 void Window_show(Window _this);

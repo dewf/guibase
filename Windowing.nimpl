@@ -16,11 +16,11 @@ enum MouseButton {
    Other
 }
 
-enum Modifier {
-   Shift,
-   Control,    // or Mac command
-   Alt,
-   MacControl
+flags Modifiers {
+   Shift = 1 << 0,
+   Control = 1 << 1, // command on mac
+   Alt = 1 << 2,
+   MacControl = 1 << 3
 }
 
 enum WindowStyle {
@@ -45,10 +45,9 @@ interface WindowDelegate {
    bool canClose();
    void closed();
    void destroyed();
-   void mouseDown(int x, int y, MouseButton button, Set<Modifier> modifiers);
+   void mouseDown(int x, int y, MouseButton button, Modifiers modifiers);
    void repaint(DrawContext context, int x, int y, int width, int height);
    void resized(int width, int height);
-   void performAction(int id, Action action);
 }
 
 opaque Window {
@@ -65,8 +64,9 @@ opaque Icon;
 opaque Accelerator;
 opaque Action;
 Icon createIcon(string filename, int sizeToWidth);
-Accelerator createAccelerator(Key key, Set<Modifier> modifiers);
-Action createAction(int id, string label, Icon icon, Accelerator accel);
+Accelerator createAccelerator(Key key, Modifiers modifiers);
+delegate void MenuActionFunc();
+Action createAction(string label, Icon icon, Accelerator accel, MenuActionFunc func);
 
 opaque MenuItem;
 opaque Menu {

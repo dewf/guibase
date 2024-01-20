@@ -39,7 +39,6 @@ namespace Org.Prefixed.GuiBase
         private static InterfaceMethodHandle _windowDelegate_mouseDown;
         private static InterfaceMethodHandle _windowDelegate_repaint;
         private static InterfaceMethodHandle _windowDelegate_resized;
-        private static InterfaceMethodHandle _windowDelegate_performAction;
 
         public class Accelerator
         {
@@ -231,9 +230,6 @@ namespace Org.Prefixed.GuiBase
             return (Key)ret;
         }
 
-
-
-
         public class Menu
         {
             internal readonly IntPtr NativeHandle;
@@ -277,6 +273,28 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new Menu(ptr) : null;
+        }
+
+        public delegate void MenuActionFunc();
+
+        internal static void MenuActionFunc__Push(MenuActionFunc callback)
+        {
+            void CallbackWrapper()
+            {
+                callback();
+            }
+            NativeImplClient.PushClientFuncVal(CallbackWrapper, Marshal.GetFunctionPointerForDelegate(callback));
+        }
+
+        internal static MenuActionFunc MenuActionFunc__Pop()
+        {
+            var id = NativeImplClient.PopServerFuncValId();
+            var remoteFunc = new ServerFuncVal(id);
+            void Wrapper()
+            {
+                remoteFunc.Exec();
+            }
+            return Wrapper;
         }
 
         public class MenuBar
@@ -332,25 +350,26 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new MenuItem(ptr) : null;
         }
 
-        public enum Modifier
+        [Flags]
+        public enum Modifiers
         {
-            Shift,
-            Control,
-            Alt,
-            MacControl
+            Shift = 1,
+            Control = 2,
+            Alt = 4,
+            MacControl = 8
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void Modifier__Push(Modifier value)
+        internal static void Modifiers__Push(Modifiers value)
         {
-            NativeImplClient.PushInt32((int)value);
+            NativeImplClient.PushUInt32((uint)value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Modifier Modifier__Pop()
+        internal static Modifiers Modifiers__Pop()
         {
-            var ret = NativeImplClient.PopInt32();
-            return (Modifier)ret;
+            var ret = NativeImplClient.PopUInt32();
+            return (Modifiers)ret;
         }
 
         public enum MouseButton
@@ -374,7 +393,6 @@ namespace Org.Prefixed.GuiBase
             var ret = NativeImplClient.PopInt32();
             return (MouseButton)ret;
         }
-
 
         public class Window
         {
@@ -426,28 +444,15 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Window(ptr) : null;
         }
 
-        internal static void __ModifierSet__Push(HashSet<Modifier> items, bool isReturn)
-        {
-            var intValues = items.Select(i => (sbyte)i).ToArray();
-            NativeImplClient.PushInt8Array(intValues);
-        }
-
-        internal static HashSet<Modifier> __ModifierSet__Pop()
-        {
-            var intValues = NativeImplClient.PopInt8Array();
-            return intValues.Select(i => (Modifier)i).ToHashSet();
-        }
-
 
         public interface WindowDelegate : IDisposable
         {
             bool CanClose();
             void Closed();
             void Destroyed();
-            void MouseDown(int x, int y, MouseButton button, HashSet<Modifier> modifiers);
+            void MouseDown(int x, int y, MouseButton button, Modifiers modifiers);
             void Repaint(DrawContext context, int x, int y, int width, int height);
             void Resized(int width, int height);
-            void PerformAction(int id, Action action);
         }
 
         internal static void WindowDelegate__Push(WindowDelegate thing, bool isReturn)
@@ -491,10 +496,9 @@ namespace Org.Prefixed.GuiBase
             public abstract bool CanClose();
             public abstract void Closed();
             public abstract void Destroyed();
-            public abstract void MouseDown(int x, int y, MouseButton button, HashSet<Modifier> modifiers);
+            public abstract void MouseDown(int x, int y, MouseButton button, Modifiers modifiers);
             public abstract void Repaint(DrawContext context, int x, int y, int width, int height);
             public abstract void Resized(int width, int height);
-            public abstract void PerformAction(int id, Action action);
         }
 
         internal class ServerWindowDelegate : ServerObject, WindowDelegate
@@ -519,9 +523,9 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.InvokeInterfaceMethod(_windowDelegate_destroyed, Id);
             }
 
-            public void MouseDown(int x, int y, MouseButton button, HashSet<Modifier> modifiers)
+            public void MouseDown(int x, int y, MouseButton button, Modifiers modifiers)
             {
-                __ModifierSet__Push(modifiers, false);
+                Modifiers__Push(modifiers);
                 MouseButton__Push(button);
                 NativeImplClient.PushInt32(y);
                 NativeImplClient.PushInt32(x);
@@ -543,13 +547,6 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.PushInt32(height);
                 NativeImplClient.PushInt32(width);
                 NativeImplClient.InvokeInterfaceMethod(_windowDelegate_resized, Id);
-            }
-
-            public void PerformAction(int id, Action action)
-            {
-                Action__Push(action);
-                NativeImplClient.PushInt32(id);
-                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_performAction, Id);
             }
 
             public void Dispose()
@@ -807,20 +804,20 @@ namespace Org.Prefixed.GuiBase
             return Icon__Pop();
         }
 
-        public static Accelerator CreateAccelerator(Key key, HashSet<Modifier> modifiers)
+        public static Accelerator CreateAccelerator(Key key, Modifiers modifiers)
         {
-            __ModifierSet__Push(modifiers, false);
+            Modifiers__Push(modifiers);
             Key__Push(key);
             NativeImplClient.InvokeModuleMethod(_createAccelerator);
             return Accelerator__Pop();
         }
 
-        public static Action CreateAction(int id, string label, Icon icon, Accelerator accel)
+        public static Action CreateAction(string label, Icon icon, Accelerator accel, MenuActionFunc func)
         {
+            MenuActionFunc__Push(func);
             Accelerator__Push(accel);
             Icon__Push(icon);
             NativeImplClient.PushString(label);
-            NativeImplClient.PushInt32(id);
             NativeImplClient.InvokeModuleMethod(_createAction);
             return Action__Pop();
         }
@@ -868,7 +865,6 @@ namespace Org.Prefixed.GuiBase
             _windowDelegate_mouseDown = NativeImplClient.GetInterfaceMethod(_windowDelegate, "mouseDown");
             _windowDelegate_repaint = NativeImplClient.GetInterfaceMethod(_windowDelegate, "repaint");
             _windowDelegate_resized = NativeImplClient.GetInterfaceMethod(_windowDelegate, "resized");
-            _windowDelegate_performAction = NativeImplClient.GetInterfaceMethod(_windowDelegate, "performAction");
 
             NativeImplClient.SetClientMethodWrapper(_windowDelegate_canClose, delegate(ClientObject obj)
             {
@@ -894,7 +890,7 @@ namespace Org.Prefixed.GuiBase
                 var x = NativeImplClient.PopInt32();
                 var y = NativeImplClient.PopInt32();
                 var button = MouseButton__Pop();
-                var modifiers = __ModifierSet__Pop();
+                var modifiers = Modifiers__Pop();
                 inst.MouseDown(x, y, button, modifiers);
             });
 
@@ -915,14 +911,6 @@ namespace Org.Prefixed.GuiBase
                 var width = NativeImplClient.PopInt32();
                 var height = NativeImplClient.PopInt32();
                 inst.Resized(width, height);
-            });
-
-            NativeImplClient.SetClientMethodWrapper(_windowDelegate_performAction, delegate(ClientObject obj)
-            {
-                var inst = (ClientWindowDelegate) obj;
-                var id = NativeImplClient.PopInt32();
-                var action = Action__Pop();
-                inst.PerformAction(id, action);
             });
 
             ModuleInit();
