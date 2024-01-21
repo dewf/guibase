@@ -28,6 +28,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _window_destroy;
         private static ModuleMethodHandle _window_setMenuBar;
         private static ModuleMethodHandle _window_showContextMenu;
+        private static ModuleMethodHandle _window_invalidate;
         private static ModuleMethodHandle _menu_addAction;
         private static ModuleMethodHandle _menu_addSubmenu;
         private static ModuleMethodHandle _menu_addSeparator;
@@ -237,24 +238,21 @@ namespace Org.Prefixed.GuiBase
             {
                 NativeHandle = nativeHandle;
             }
-
             public MenuItem AddAction(Action action)
             {
                 Action__Push(action);
                 Menu__Push(this);
                 NativeImplClient.InvokeModuleMethod(_menu_addAction);
-            return MenuItem__Pop();
+                return MenuItem__Pop();
             }
-
             public MenuItem AddSubmenu(string label, Menu sub)
             {
                 Menu__Push(sub);
                 NativeImplClient.PushString(label);
                 Menu__Push(this);
                 NativeImplClient.InvokeModuleMethod(_menu_addSubmenu);
-            return MenuItem__Pop();
+                return MenuItem__Pop();
             }
-
             public void AddSeparator()
             {
                 Menu__Push(this);
@@ -304,14 +302,13 @@ namespace Org.Prefixed.GuiBase
             {
                 NativeHandle = nativeHandle;
             }
-
             public MenuItem AddMenu(string label, Menu menu)
             {
                 Menu__Push(menu);
                 NativeImplClient.PushString(label);
                 MenuBar__Push(this);
                 NativeImplClient.InvokeModuleMethod(_menuBar_addMenu);
-            return MenuItem__Pop();
+                return MenuItem__Pop();
             }
         }
 
@@ -401,26 +398,22 @@ namespace Org.Prefixed.GuiBase
             {
                 NativeHandle = nativeHandle;
             }
-
             public void Show()
             {
                 Window__Push(this);
                 NativeImplClient.InvokeModuleMethod(_window_show);
             }
-
             public void Destroy()
             {
                 Window__Push(this);
                 NativeImplClient.InvokeModuleMethod(_window_destroy);
             }
-
             public void SetMenuBar(MenuBar menuBar)
             {
                 MenuBar__Push(menuBar);
                 Window__Push(this);
                 NativeImplClient.InvokeModuleMethod(_window_setMenuBar);
             }
-
             public void ShowContextMenu(int x, int y, Menu menu)
             {
                 Menu__Push(menu);
@@ -428,6 +421,15 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.PushInt32(x);
                 Window__Push(this);
                 NativeImplClient.InvokeModuleMethod(_window_showContextMenu);
+            }
+            public void Invalidate(int x, int y, int width, int height)
+            {
+                NativeImplClient.PushInt32(height);
+                NativeImplClient.PushInt32(width);
+                NativeImplClient.PushInt32(y);
+                NativeImplClient.PushInt32(x);
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_invalidate);
             }
         }
 
@@ -853,6 +855,7 @@ namespace Org.Prefixed.GuiBase
             _window_destroy = NativeImplClient.GetModuleMethod(_module, "Window_destroy");
             _window_setMenuBar = NativeImplClient.GetModuleMethod(_module, "Window_setMenuBar");
             _window_showContextMenu = NativeImplClient.GetModuleMethod(_module, "Window_showContextMenu");
+            _window_invalidate = NativeImplClient.GetModuleMethod(_module, "Window_invalidate");
             _menu_addAction = NativeImplClient.GetModuleMethod(_module, "Menu_addAction");
             _menu_addSubmenu = NativeImplClient.GetModuleMethod(_module, "Menu_addSubmenu");
             _menu_addSeparator = NativeImplClient.GetModuleMethod(_module, "Menu_addSeparator");

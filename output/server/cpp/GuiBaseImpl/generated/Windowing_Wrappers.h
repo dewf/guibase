@@ -69,6 +69,8 @@ void Window_setMenuBar__wrapper();
 
 void Window_showContextMenu__wrapper();
 
+void Window_invalidate__wrapper();
+
 void Menu_addAction__wrapper();
 
 void Menu_addSubmenu__wrapper();

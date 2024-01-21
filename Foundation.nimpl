@@ -1,0 +1,14 @@
+module Foundation;
+
+opaque CFString;
+CFString makeConstantString(string s);
+CFString createWithString(string s);
+
+enum URLPathStyle {
+    POSIX = 0,
+    // type 1 deprecated
+    Windows = 2
+}
+
+opaque URL;
+URL createWithFileSystemPath(CFString path, URLPathStyle pathStyle, bool isDirectory);

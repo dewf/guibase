@@ -1,7 +1,9 @@
+#include "Foundation_wrappers.h"
 #include "Drawing_wrappers.h"
 #include "Windowing_wrappers.h"
 
 extern "C" int nativeLibraryInit() {
+    Foundation__register();
     Drawing__register();
     Windowing__register();
     // should we do module inits here as well?

@@ -41,6 +41,12 @@
     <ClCompile Include="..\generated\Library.cpp">
       <Filter>Source Files\generated</Filter>
     </ClCompile>
+    <ClCompile Include="..\generated\Foundation_Wrappers.cpp">
+      <Filter>Source Files\generated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Foundation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\generated\Windowing.h">
@@ -65,6 +71,12 @@
       <Filter>Source Files\generated</Filter>
     </ClInclude>
     <ClInclude Include="..\generated\Windowing_Wrappers.h">
+      <Filter>Source Files\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\generated\Foundation.h">
+      <Filter>Source Files\generated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\generated\Foundation_Wrappers.h">
       <Filter>Source Files\generated</Filter>
     </ClInclude>
   </ItemGroup>

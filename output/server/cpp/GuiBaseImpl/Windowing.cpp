@@ -101,6 +101,9 @@ public:
     void showContextMenu(int x, int y, Menu menu) {
         wl_WindowShowContextMenu(wlWindow, x, y, (wl_MenuRef)menu, nullptr);
     }
+    void invalidate(int x, int y, int width, int height) {
+        wl_WindowInvalidate(wlWindow, x, y, width, height);
+    }
     // OpenWL event handling ==========================
     void onDestroyed() {
         del->destroyed();
@@ -213,6 +216,11 @@ void Window_setMenuBar(Window _this, MenuBar menuBar) {
 
 void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu) {
     ((MyWindow*)_this)->showContextMenu(x, y, menu);
+}
+
+void Window_invalidate(Window _this, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    ((MyWindow*)_this)->invalidate(x, y, width, height);
 }
 
 MenuItem Menu_addAction(Menu _this, Action action) {

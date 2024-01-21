@@ -284,6 +284,7 @@ void Window_show(Window _this);
 void Window_destroy(Window _this);
 void Window_setMenuBar(Window _this, MenuBar menuBar);
 void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu);
+void Window_invalidate(Window _this, int32_t x, int32_t y, int32_t width, int32_t height);
 MenuItem Menu_addAction(Menu _this, Action action);
 MenuItem Menu_addSubmenu(Menu _this, std::string label, Menu sub);
 void Menu_addSeparator(Menu _this);

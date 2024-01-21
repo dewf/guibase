@@ -12,6 +12,7 @@ public static class Library
             return;
         }
         // registrations, static module inits
+        Foundation.Init();
         Drawing.Init();
         Windowing.Init();
     }
@@ -21,6 +22,7 @@ public static class Library
         // module static shutdowns (if any, might be empty)
         Windowing.Shutdown();
         Drawing.Shutdown();
+        Foundation.Shutdown();
         // bye
         NativeImplClient.Shutdown();
     }

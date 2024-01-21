@@ -1,5 +1,7 @@
 module Drawing;
 
+import Foundation;
+
 struct Point {
     double x;
     double y;
@@ -15,9 +17,30 @@ struct Rect {
     Size size;
 }
 
+struct AffineTransform {
+    double a;
+    double b;
+    double c;
+    double d;
+    double tx;
+    double ty;
+}
+AffineTransform AffineTransformIdentity;
+
 opaque DrawContext {
     void saveGState();
     void restoreGState();
     void setRGBFillColor(double red, double green, double blue, double alpha);
     void fillRect(Rect rect);
 }
+
+// text stuff
+opaque FontDescriptor;
+opaque FontDescriptorArray {
+    // packaged up to hold the backing CFArray until release
+    Array<FontDescriptor> items();
+}
+opaque Font;
+
+FontDescriptorArray fontManagerCreateFontDescriptorsFromURL(URL fileUrl);
+Font fontCreateWithFontDescriptor(FontDescriptor descriptor, double size, AffineTransform matrix);

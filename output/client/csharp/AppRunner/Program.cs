@@ -4,19 +4,27 @@ using static Org.Prefixed.GuiBase.Windowing;
 
 namespace AppRunner;
 
-internal class WindowHandler : ClientWindowDelegate
+internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
 {
     private int _width, _height;
     private readonly Menu _contextMenu;
     public Window? Window { get; set; }
+    private readonly Page01 _page01;
+    private IPage _currentPage;
     
-    public WindowHandler()
+    public MainWindowDelegate()
     {
         _contextMenu = CreateMenu();
         _contextMenu.AddAction(CreateAction("Context Item", null, null, () =>
         {
             Console.WriteLine("context item clicked!");
         }));
+
+        // page init
+        _page01 = new Page01(this);
+        _page01.Init();
+
+        _currentPage = _page01;
     }
 
     public override bool CanClose() => true;
@@ -48,33 +56,18 @@ internal class WindowHandler : ClientWindowDelegate
     }
     public override void Repaint(DrawContext context, int x, int y, int width, int height)
     {
-        context.SaveGState();
-        
-        // bordered
-        context.SetRGBFillColor(0.23, 0, 0.4, 1);
-        context.FillRect(new Rect(new Point(10, 10), new Size(_width - 20, _height - 20)));
-
-        // overlapping
-        var rect = new Rect(new Point(100, 100), new Size(100, 100));
-        context.SetRGBFillColor(1, 0, 0, 0.5);
-        context.FillRect(rect);
-
-        rect.Origin.X += 20;
-        rect.Origin.Y += 20;
-        context.SetRGBFillColor(0, 1, 0, 0.5);
-        context.FillRect(rect);
-        
-        rect.Origin.X += 20;
-        rect.Origin.Y += 20;
-        context.SetRGBFillColor(0, 0, 1, 0.5);
-        context.FillRect(rect);
-
-        context.RestoreGState();
+        _currentPage.Render(context, x, y, width, height);
     }
     public override void Resized(int width, int height)
     {
         _width = width;
         _height = height;
+        _currentPage.OnSize(_width, _height);
+    }
+
+    public void Invalidate(int x, int y, int width, int height)
+    {
+        Window!.Invalidate(x, y, width, height);
     }
 }
 
@@ -90,9 +83,9 @@ internal static class Program
             MinWidth = 320,
             MinHeight = 200
         };
-        var handler = new WindowHandler();
-        var window = CreateWindow(800, 600, "this is the first window! 🚀", handler, options);
-        handler.Window = window;
+        var mainWinDel = new MainWindowDelegate();
+        var window = CreateWindow(800, 600, "this is the first window! 🚀", mainWinDel, options);
+        mainWinDel.Window = window;
 
         var fileMenu = CreateMenu();
         var exitAction =

@@ -327,6 +327,15 @@ void Window_showContextMenu__wrapper() {
     Window_showContextMenu(_this, x, y, menu);
 }
 
+void Window_invalidate__wrapper() {
+    auto _this = Window__pop();
+    auto x = ni_popInt32();
+    auto y = ni_popInt32();
+    auto width = ni_popInt32();
+    auto height = ni_popInt32();
+    Window_invalidate(_this, x, y, width, height);
+}
+
 void Menu_addAction__wrapper() {
     auto _this = Menu__pop();
     auto action = Action__pop();
@@ -409,6 +418,7 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "Window_destroy", &Window_destroy__wrapper);
     ni_registerModuleMethod(m, "Window_setMenuBar", &Window_setMenuBar__wrapper);
     ni_registerModuleMethod(m, "Window_showContextMenu", &Window_showContextMenu__wrapper);
+    ni_registerModuleMethod(m, "Window_invalidate", &Window_invalidate__wrapper);
     ni_registerModuleMethod(m, "Menu_addAction", &Menu_addAction__wrapper);
     ni_registerModuleMethod(m, "Menu_addSubmenu", &Menu_addSubmenu__wrapper);
     ni_registerModuleMethod(m, "Menu_addSeparator", &Menu_addSeparator__wrapper);

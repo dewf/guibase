@@ -7,15 +7,60 @@ using System.Runtime.InteropServices;
 using Org.Prefixed.GuiBase.Support;
 using ModuleHandle = Org.Prefixed.GuiBase.Support.ModuleHandle;
 
+using static Org.Prefixed.GuiBase.Foundation;
+
 namespace Org.Prefixed.GuiBase
 {
     public static class Drawing
     {
         private static ModuleHandle _module;
+        private static ModuleMethodHandle _fontManagerCreateFontDescriptorsFromURL;
+        private static ModuleMethodHandle _fontCreateWithFontDescriptor;
         private static ModuleMethodHandle _drawContext_saveGState;
         private static ModuleMethodHandle _drawContext_restoreGState;
         private static ModuleMethodHandle _drawContext_setRGBFillColor;
         private static ModuleMethodHandle _drawContext_fillRect;
+        private static ModuleMethodHandle _fontDescriptorArray_items;
+        public static AffineTransform AffineTransformIdentity { get; private set; }
+
+        public struct AffineTransform {
+            public double A;
+            public double B;
+            public double C;
+            public double D;
+            public double Tx;
+            public double Ty;
+            public AffineTransform(double a, double b, double c, double d, double tx, double ty)
+            {
+                this.A = a;
+                this.B = b;
+                this.C = c;
+                this.D = d;
+                this.Tx = tx;
+                this.Ty = ty;
+            }
+        }
+
+        internal static void AffineTransform__Push(AffineTransform value, bool isReturn)
+        {
+            NativeImplClient.PushDouble(value.Ty);
+            NativeImplClient.PushDouble(value.Tx);
+            NativeImplClient.PushDouble(value.D);
+            NativeImplClient.PushDouble(value.C);
+            NativeImplClient.PushDouble(value.B);
+            NativeImplClient.PushDouble(value.A);
+        }
+
+        internal static AffineTransform AffineTransform__Pop()
+        {
+            var a = NativeImplClient.PopDouble();
+            var b = NativeImplClient.PopDouble();
+            var c = NativeImplClient.PopDouble();
+            var d = NativeImplClient.PopDouble();
+            var tx = NativeImplClient.PopDouble();
+            var ty = NativeImplClient.PopDouble();
+            return new AffineTransform(a, b, c, d, tx, ty);
+        }
 
         public struct Point {
             public double X;
@@ -93,19 +138,16 @@ namespace Org.Prefixed.GuiBase
             {
                 NativeHandle = nativeHandle;
             }
-
             public void SaveGState()
             {
                 DrawContext__Push(this);
                 NativeImplClient.InvokeModuleMethod(_drawContext_saveGState);
             }
-
             public void RestoreGState()
             {
                 DrawContext__Push(this);
                 NativeImplClient.InvokeModuleMethod(_drawContext_restoreGState);
             }
-
             public void SetRGBFillColor(double red, double green, double blue, double alpha)
             {
                 NativeImplClient.PushDouble(alpha);
@@ -115,7 +157,6 @@ namespace Org.Prefixed.GuiBase
                 DrawContext__Push(this);
                 NativeImplClient.InvokeModuleMethod(_drawContext_setRGBFillColor);
             }
-
             public void FillRect(Rect rect)
             {
                 Rect__Push(rect, false);
@@ -137,14 +178,121 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new DrawContext(ptr) : null;
         }
 
+        public class Font
+        {
+            internal readonly IntPtr NativeHandle;
+            internal Font(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Font__Push(Font thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Font Font__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new Font(ptr) : null;
+        }
+
+        public class FontDescriptor
+        {
+            internal readonly IntPtr NativeHandle;
+            internal FontDescriptor(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void FontDescriptor__Push(FontDescriptor thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static FontDescriptor FontDescriptor__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new FontDescriptor(ptr) : null;
+        }
+
+        internal static void __FontDescriptor_Array__Push(FontDescriptor[] items)
+        {
+            var ptrs = items.Select(item => item.NativeHandle).ToArray();
+            NativeImplClient.PushPtrArray(ptrs);
+        }
+        internal static FontDescriptor[] __FontDescriptor_Array__Pop()
+        {
+            return NativeImplClient.PopPtrArray()
+                .Select(ptr => ptr != IntPtr.Zero ? new FontDescriptor(ptr) : null)
+                .ToArray();
+        }
+
+        public class FontDescriptorArray
+        {
+            internal readonly IntPtr NativeHandle;
+            internal FontDescriptorArray(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public FontDescriptor[] Items()
+            {
+                FontDescriptorArray__Push(this);
+                NativeImplClient.InvokeModuleMethod(_fontDescriptorArray_items);
+                return __FontDescriptor_Array__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void FontDescriptorArray__Push(FontDescriptorArray thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static FontDescriptorArray FontDescriptorArray__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new FontDescriptorArray(ptr) : null;
+        }
+
+        public static FontDescriptorArray FontManagerCreateFontDescriptorsFromURL(URL fileUrl)
+        {
+            URL__Push(fileUrl);
+            NativeImplClient.InvokeModuleMethod(_fontManagerCreateFontDescriptorsFromURL);
+            return FontDescriptorArray__Pop();
+        }
+
+        public static Font FontCreateWithFontDescriptor(FontDescriptor descriptor, double size, AffineTransform matrix)
+        {
+            AffineTransform__Push(matrix, false);
+            NativeImplClient.PushDouble(size);
+            FontDescriptor__Push(descriptor);
+            NativeImplClient.InvokeModuleMethod(_fontCreateWithFontDescriptor);
+            return Font__Pop();
+        }
+
         internal static void Init()
         {
             _module = NativeImplClient.GetModule("Drawing");
+
+            NativeImplClient.PushModuleConstants(_module);
+            AffineTransformIdentity = AffineTransform__Pop();
+
+            _fontManagerCreateFontDescriptorsFromURL = NativeImplClient.GetModuleMethod(_module, "fontManagerCreateFontDescriptorsFromURL");
+            _fontCreateWithFontDescriptor = NativeImplClient.GetModuleMethod(_module, "fontCreateWithFontDescriptor");
 
             _drawContext_saveGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_saveGState");
             _drawContext_restoreGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_restoreGState");
             _drawContext_setRGBFillColor = NativeImplClient.GetModuleMethod(_module, "DrawContext_setRGBFillColor");
             _drawContext_fillRect = NativeImplClient.GetModuleMethod(_module, "DrawContext_fillRect");
+            _fontDescriptorArray_items = NativeImplClient.GetModuleMethod(_module, "FontDescriptorArray_items");
 
             // no static init
         }
