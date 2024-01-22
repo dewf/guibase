@@ -16,6 +16,7 @@ struct Rect {
     Point origin;
     Size size;
 }
+Rect makeRect(double x, double y, double width, double height);
 
 struct AffineTransform {
     double a;
@@ -32,9 +33,21 @@ opaque DrawContext {
     void restoreGState();
     void setRGBFillColor(double red, double green, double blue, double alpha);
     void fillRect(Rect rect);
+    void setTextMatrix(AffineTransform t);
+    void setTextPosition(double x, double y);
 }
 
+opaque Color;
+Color createColor(double red, double green, double blue, double alpha);
+
 // text stuff
+options AttributedStringOptions {
+    Font font2;
+    Color foregroundColor;
+}
+opaque AttributedString;
+AttributedString createAttributedString(string s, AttributedStringOptions opts);
+
 opaque FontDescriptor;
 opaque FontDescriptorArray {
     // packaged up to hold the backing CFArray until release
@@ -44,3 +57,27 @@ opaque Font;
 
 FontDescriptorArray fontManagerCreateFontDescriptorsFromURL(URL fileUrl);
 Font fontCreateWithFontDescriptor(FontDescriptor descriptor, double size, AffineTransform matrix);
+
+// CTLine
+
+struct TypographicBounds {
+    double width;
+    double ascent;
+    double descent;
+    double leading;
+}
+
+flags LineBoundsOptions {
+    ExcludeTypographicLeading  = 1 << 0,
+    ExcludeTypographicShifts   = 1 << 1,
+    UseHangingPunctuation      = 1 << 2,
+    UseGlyphPathBounds         = 1 << 3,
+    UseOpticalBounds           = 1 << 4
+}
+
+opaque Line {
+    TypographicBounds getTypographicBounds();
+    Rect getBoundsWithOptions(LineBoundsOptions opts);
+    void draw(DrawContext context);
+}
+Line createLineWithAttributedString(AttributedString str);

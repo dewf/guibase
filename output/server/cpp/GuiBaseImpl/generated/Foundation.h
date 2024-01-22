@@ -21,3 +21,5 @@ enum class URLPathStyle {
 CFString makeConstantString(std::string s);
 CFString createWithString(std::string s);
 URL createWithFileSystemPath(CFString path, URLPathStyle pathStyle, bool isDirectory);
+void CFString_dispose(CFString _this);
+void URL_dispose(URL _this);

@@ -47,10 +47,22 @@ void createWithFileSystemPath__wrapper() {
     URL__push(createWithFileSystemPath(path, pathStyle, isDirectory));
 }
 
+void CFString_dispose__wrapper() {
+    auto _this = CFString__pop();
+    CFString_dispose(_this);
+}
+
+void URL_dispose__wrapper() {
+    auto _this = URL__pop();
+    URL_dispose(_this);
+}
+
 int Foundation__register() {
     auto m = ni_registerModule("Foundation");
     ni_registerModuleMethod(m, "makeConstantString", &makeConstantString__wrapper);
     ni_registerModuleMethod(m, "createWithString", &createWithString__wrapper);
     ni_registerModuleMethod(m, "createWithFileSystemPath", &createWithFileSystemPath__wrapper);
+    ni_registerModuleMethod(m, "CFString_dispose", &CFString_dispose__wrapper);
+    ni_registerModuleMethod(m, "URL_dispose", &URL_dispose__wrapper);
     return 0; // = OK
 }

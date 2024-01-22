@@ -15,4 +15,8 @@ void createWithString__wrapper();
 
 void createWithFileSystemPath__wrapper();
 
+void CFString_dispose__wrapper();
+
+void URL_dispose__wrapper();
+
 int Foundation__register();

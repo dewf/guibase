@@ -29,10 +29,17 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _window_setMenuBar;
         private static ModuleMethodHandle _window_showContextMenu;
         private static ModuleMethodHandle _window_invalidate;
+        private static ModuleMethodHandle _Window_dispose;
+        private static ModuleMethodHandle _Icon_dispose;
+        private static ModuleMethodHandle _Accelerator_dispose;
+        private static ModuleMethodHandle _Action_dispose;
+        private static ModuleMethodHandle _MenuItem_dispose;
         private static ModuleMethodHandle _menu_addAction;
         private static ModuleMethodHandle _menu_addSubmenu;
         private static ModuleMethodHandle _menu_addSeparator;
+        private static ModuleMethodHandle _Menu_dispose;
         private static ModuleMethodHandle _menuBar_addMenu;
+        private static ModuleMethodHandle _MenuBar_dispose;
         private static InterfaceHandle _windowDelegate;
         private static InterfaceMethodHandle _windowDelegate_canClose;
         private static InterfaceMethodHandle _windowDelegate_closed;
@@ -41,12 +48,19 @@ namespace Org.Prefixed.GuiBase
         private static InterfaceMethodHandle _windowDelegate_repaint;
         private static InterfaceMethodHandle _windowDelegate_resized;
 
-        public class Accelerator
+        public class Accelerator : IDisposable
         {
             internal readonly IntPtr NativeHandle;
+            private bool _disposed;
             internal Accelerator(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                Accelerator__Push(this);
+                NativeImplClient.InvokeModuleMethod(_Accelerator_dispose);
+                _disposed = true;
             }
         }
 
@@ -63,12 +77,19 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Accelerator(ptr) : null;
         }
 
-        public class Action
+        public class Action : IDisposable
         {
             internal readonly IntPtr NativeHandle;
+            private bool _disposed;
             internal Action(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                Action__Push(this);
+                NativeImplClient.InvokeModuleMethod(_Action_dispose);
+                _disposed = true;
             }
         }
 
@@ -85,12 +106,19 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Action(ptr) : null;
         }
 
-        public class Icon
+        public class Icon : IDisposable
         {
             internal readonly IntPtr NativeHandle;
+            private bool _disposed;
             internal Icon(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                Icon__Push(this);
+                NativeImplClient.InvokeModuleMethod(_Icon_dispose);
+                _disposed = true;
             }
         }
 
@@ -231,12 +259,19 @@ namespace Org.Prefixed.GuiBase
             return (Key)ret;
         }
 
-        public class Menu
+        public class Menu : IDisposable
         {
             internal readonly IntPtr NativeHandle;
+            private bool _disposed;
             internal Menu(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                Menu__Push(this);
+                NativeImplClient.InvokeModuleMethod(_Menu_dispose);
+                _disposed = true;
             }
             public MenuItem AddAction(Action action)
             {
@@ -295,12 +330,19 @@ namespace Org.Prefixed.GuiBase
             return Wrapper;
         }
 
-        public class MenuBar
+        public class MenuBar : IDisposable
         {
             internal readonly IntPtr NativeHandle;
+            private bool _disposed;
             internal MenuBar(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                MenuBar__Push(this);
+                NativeImplClient.InvokeModuleMethod(_MenuBar_dispose);
+                _disposed = true;
             }
             public MenuItem AddMenu(string label, Menu menu)
             {
@@ -325,12 +367,19 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new MenuBar(ptr) : null;
         }
 
-        public class MenuItem
+        public class MenuItem : IDisposable
         {
             internal readonly IntPtr NativeHandle;
+            private bool _disposed;
             internal MenuItem(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                MenuItem__Push(this);
+                NativeImplClient.InvokeModuleMethod(_MenuItem_dispose);
+                _disposed = true;
             }
         }
 
@@ -391,12 +440,19 @@ namespace Org.Prefixed.GuiBase
             return (MouseButton)ret;
         }
 
-        public class Window
+        public class Window : IDisposable
         {
             internal readonly IntPtr NativeHandle;
+            private bool _disposed;
             internal Window(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_Window_dispose);
+                _disposed = true;
             }
             public void Show()
             {
@@ -856,10 +912,17 @@ namespace Org.Prefixed.GuiBase
             _window_setMenuBar = NativeImplClient.GetModuleMethod(_module, "Window_setMenuBar");
             _window_showContextMenu = NativeImplClient.GetModuleMethod(_module, "Window_showContextMenu");
             _window_invalidate = NativeImplClient.GetModuleMethod(_module, "Window_invalidate");
+            _Window_dispose = NativeImplClient.GetModuleMethod(_module, "Window_dispose");
+            _Icon_dispose = NativeImplClient.GetModuleMethod(_module, "Icon_dispose");
+            _Accelerator_dispose = NativeImplClient.GetModuleMethod(_module, "Accelerator_dispose");
+            _Action_dispose = NativeImplClient.GetModuleMethod(_module, "Action_dispose");
+            _MenuItem_dispose = NativeImplClient.GetModuleMethod(_module, "MenuItem_dispose");
             _menu_addAction = NativeImplClient.GetModuleMethod(_module, "Menu_addAction");
             _menu_addSubmenu = NativeImplClient.GetModuleMethod(_module, "Menu_addSubmenu");
             _menu_addSeparator = NativeImplClient.GetModuleMethod(_module, "Menu_addSeparator");
+            _Menu_dispose = NativeImplClient.GetModuleMethod(_module, "Menu_dispose");
             _menuBar_addMenu = NativeImplClient.GetModuleMethod(_module, "MenuBar_addMenu");
+            _MenuBar_dispose = NativeImplClient.GetModuleMethod(_module, "MenuBar_dispose");
 
             _windowDelegate = NativeImplClient.GetInterface(_module, "WindowDelegate");
             _windowDelegate_canClose = NativeImplClient.GetInterfaceMethod(_windowDelegate, "canClose");

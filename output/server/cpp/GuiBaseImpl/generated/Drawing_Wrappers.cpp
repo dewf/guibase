@@ -4,9 +4,12 @@
 #include "Foundation_wrappers.h"
 
 NIHANDLE(drawContext);
+NIHANDLE(color);
+NIHANDLE(attributedString);
 NIHANDLE(fontDescriptor);
 NIHANDLE(fontDescriptorArray);
 NIHANDLE(font);
+NIHANDLE(line);
 
 void AffineTransform__push(AffineTransform value, bool isReturn) {
     ni_pushDouble(value.ty);
@@ -25,6 +28,48 @@ AffineTransform AffineTransform__pop() {
     auto tx = ni_popDouble();
     auto ty = ni_popDouble();
     return AffineTransform { a, b, c, d, tx, ty };
+}
+
+void AttributedString__push(AttributedString value) {
+    ni_pushPtr(value);
+}
+
+AttributedString AttributedString__pop() {
+    return (AttributedString)ni_popPtr();
+}
+
+void AttributedStringOptions__push(AttributedStringOptions value, bool isReturn) {
+    Color foregroundColor;
+    if (value.hasForegroundColor(&foregroundColor)) {
+        Color__push(foregroundColor);
+    }
+    Font font2;
+    if (value.hasFont2(&font2)) {
+        Font__push(font2);
+    }
+    ni_pushInt32(value.getUsedFields());
+}
+
+AttributedStringOptions AttributedStringOptions__pop() {
+    AttributedStringOptions value = {};
+    value._usedFields =  ni_popInt32();
+    if (value._usedFields & AttributedStringOptions::Fields::Font2) {
+        auto x = Font__pop();
+        value.setFont2(x);
+    }
+    if (value._usedFields & AttributedStringOptions::Fields::ForegroundColor) {
+        auto x = Color__pop();
+        value.setForegroundColor(x);
+    }
+    return value;
+}
+
+void Color__push(Color value) {
+    ni_pushPtr(value);
+}
+
+Color Color__pop() {
+    return (Color)ni_popPtr();
 }
 
 void Point__push(Point value, bool isReturn) {
@@ -103,6 +148,59 @@ FontDescriptorArray FontDescriptorArray__pop() {
     return (FontDescriptorArray)ni_popPtr();
 }
 
+void TypographicBounds__push(TypographicBounds value, bool isReturn) {
+    ni_pushDouble(value.leading);
+    ni_pushDouble(value.descent);
+    ni_pushDouble(value.ascent);
+    ni_pushDouble(value.width);
+}
+
+TypographicBounds TypographicBounds__pop() {
+    auto width = ni_popDouble();
+    auto ascent = ni_popDouble();
+    auto descent = ni_popDouble();
+    auto leading = ni_popDouble();
+    return TypographicBounds { width, ascent, descent, leading };
+}
+
+inline void LineBoundsOptions__push(uint32_t value) {
+    ni_pushUInt32(value);
+}
+
+inline uint32_t LineBoundsOptions__pop() {
+    return ni_popUInt32();
+}
+
+void Line__push(Line value) {
+    ni_pushPtr(value);
+}
+
+Line Line__pop() {
+    return (Line)ni_popPtr();
+}
+
+void makeRect__wrapper() {
+    auto x = ni_popDouble();
+    auto y = ni_popDouble();
+    auto width = ni_popDouble();
+    auto height = ni_popDouble();
+    Rect__push(makeRect(x, y, width, height), true);
+}
+
+void createColor__wrapper() {
+    auto red = ni_popDouble();
+    auto green = ni_popDouble();
+    auto blue = ni_popDouble();
+    auto alpha = ni_popDouble();
+    Color__push(createColor(red, green, blue, alpha));
+}
+
+void createAttributedString__wrapper() {
+    auto s = popStringInternal();
+    auto opts = AttributedStringOptions__pop();
+    AttributedString__push(createAttributedString(s, opts));
+}
+
 void fontManagerCreateFontDescriptorsFromURL__wrapper() {
     auto fileUrl = URL__pop();
     FontDescriptorArray__push(fontManagerCreateFontDescriptorsFromURL(fileUrl));
@@ -113,6 +211,16 @@ void fontCreateWithFontDescriptor__wrapper() {
     auto size = ni_popDouble();
     auto matrix = AffineTransform__pop();
     Font__push(fontCreateWithFontDescriptor(descriptor, size, matrix));
+}
+
+void createLineWithAttributedString__wrapper() {
+    auto str = AttributedString__pop();
+    Line__push(createLineWithAttributedString(str));
+}
+
+void DrawContext_dispose__wrapper() {
+    auto _this = DrawContext__pop();
+    DrawContext_dispose(_this);
 }
 
 void DrawContext_saveGState__wrapper() {
@@ -140,9 +248,69 @@ void DrawContext_fillRect__wrapper() {
     DrawContext_fillRect(_this, rect);
 }
 
+void DrawContext_setTextMatrix__wrapper() {
+    auto _this = DrawContext__pop();
+    auto t = AffineTransform__pop();
+    DrawContext_setTextMatrix(_this, t);
+}
+
+void DrawContext_setTextPosition__wrapper() {
+    auto _this = DrawContext__pop();
+    auto x = ni_popDouble();
+    auto y = ni_popDouble();
+    DrawContext_setTextPosition(_this, x, y);
+}
+
+void Color_dispose__wrapper() {
+    auto _this = Color__pop();
+    Color_dispose(_this);
+}
+
+void AttributedString_dispose__wrapper() {
+    auto _this = AttributedString__pop();
+    AttributedString_dispose(_this);
+}
+
+void FontDescriptor_dispose__wrapper() {
+    auto _this = FontDescriptor__pop();
+    FontDescriptor_dispose(_this);
+}
+
+void FontDescriptorArray_dispose__wrapper() {
+    auto _this = FontDescriptorArray__pop();
+    FontDescriptorArray_dispose(_this);
+}
+
 void FontDescriptorArray_items__wrapper() {
     auto _this = FontDescriptorArray__pop();
     __FontDescriptor_Array__push(FontDescriptorArray_items(_this), true);
+}
+
+void Font_dispose__wrapper() {
+    auto _this = Font__pop();
+    Font_dispose(_this);
+}
+
+void Line_dispose__wrapper() {
+    auto _this = Line__pop();
+    Line_dispose(_this);
+}
+
+void Line_getTypographicBounds__wrapper() {
+    auto _this = Line__pop();
+    TypographicBounds__push(Line_getTypographicBounds(_this), true);
+}
+
+void Line_getBoundsWithOptions__wrapper() {
+    auto _this = Line__pop();
+    auto opts = LineBoundsOptions__pop();
+    Rect__push(Line_getBoundsWithOptions(_this, opts), true);
+}
+
+void Line_draw__wrapper() {
+    auto _this = Line__pop();
+    auto context = DrawContext__pop();
+    Line_draw(_this, context);
 }
 
 void __constantsFunc() {
@@ -152,12 +320,28 @@ void __constantsFunc() {
 int Drawing__register() {
     auto m = ni_registerModule("Drawing");
     ni_registerModuleConstants(m, &__constantsFunc);
+    ni_registerModuleMethod(m, "makeRect", &makeRect__wrapper);
+    ni_registerModuleMethod(m, "createColor", &createColor__wrapper);
+    ni_registerModuleMethod(m, "createAttributedString", &createAttributedString__wrapper);
     ni_registerModuleMethod(m, "fontManagerCreateFontDescriptorsFromURL", &fontManagerCreateFontDescriptorsFromURL__wrapper);
     ni_registerModuleMethod(m, "fontCreateWithFontDescriptor", &fontCreateWithFontDescriptor__wrapper);
+    ni_registerModuleMethod(m, "createLineWithAttributedString", &createLineWithAttributedString__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_dispose", &DrawContext_dispose__wrapper);
     ni_registerModuleMethod(m, "DrawContext_saveGState", &DrawContext_saveGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_restoreGState", &DrawContext_restoreGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setRGBFillColor", &DrawContext_setRGBFillColor__wrapper);
     ni_registerModuleMethod(m, "DrawContext_fillRect", &DrawContext_fillRect__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_setTextMatrix", &DrawContext_setTextMatrix__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_setTextPosition", &DrawContext_setTextPosition__wrapper);
+    ni_registerModuleMethod(m, "Color_dispose", &Color_dispose__wrapper);
+    ni_registerModuleMethod(m, "AttributedString_dispose", &AttributedString_dispose__wrapper);
+    ni_registerModuleMethod(m, "FontDescriptor_dispose", &FontDescriptor_dispose__wrapper);
+    ni_registerModuleMethod(m, "FontDescriptorArray_dispose", &FontDescriptorArray_dispose__wrapper);
     ni_registerModuleMethod(m, "FontDescriptorArray_items", &FontDescriptorArray_items__wrapper);
+    ni_registerModuleMethod(m, "Font_dispose", &Font_dispose__wrapper);
+    ni_registerModuleMethod(m, "Line_dispose", &Line_dispose__wrapper);
+    ni_registerModuleMethod(m, "Line_getTypographicBounds", &Line_getTypographicBounds__wrapper);
+    ni_registerModuleMethod(m, "Line_getBoundsWithOptions", &Line_getBoundsWithOptions__wrapper);
+    ni_registerModuleMethod(m, "Line_draw", &Line_draw__wrapper);
     return 0; // = OK
 }

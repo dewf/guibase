@@ -61,6 +61,8 @@ void createMenu__wrapper();
 
 void createMenuBar__wrapper();
 
+void Window_dispose__wrapper();
+
 void Window_show__wrapper();
 
 void Window_destroy__wrapper();
@@ -71,11 +73,23 @@ void Window_showContextMenu__wrapper();
 
 void Window_invalidate__wrapper();
 
+void Icon_dispose__wrapper();
+
+void Accelerator_dispose__wrapper();
+
+void Action_dispose__wrapper();
+
+void MenuItem_dispose__wrapper();
+
+void Menu_dispose__wrapper();
+
 void Menu_addAction__wrapper();
 
 void Menu_addSubmenu__wrapper();
 
 void Menu_addSeparator__wrapper();
+
+void MenuBar_dispose__wrapper();
 
 void MenuBar_addMenu__wrapper();
 

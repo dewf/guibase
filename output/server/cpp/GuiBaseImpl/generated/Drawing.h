@@ -20,6 +20,50 @@ struct AffineTransform {
     double ty;
 };
 
+struct __AttributedString; typedef struct __AttributedString* AttributedString;
+struct __Color; typedef struct __Color* Color;
+struct __Font; typedef struct __Font* Font;
+
+struct AttributedStringOptions {
+private:
+    enum Fields {
+        Font2 = 1,
+        ForegroundColor = 2
+    };
+    int32_t _usedFields;
+    Font _font2;
+    Color _foregroundColor;
+protected:
+    int32_t getUsedFields() {
+        return _usedFields;
+    }
+    friend void AttributedStringOptions__push(AttributedStringOptions value, bool isReturn);
+    friend AttributedStringOptions AttributedStringOptions__pop();
+public:
+    void setFont2(Font value) {
+        _font2 = value;
+        _usedFields |= Fields::Font2;
+    }
+    bool hasFont2(Font *value) {
+        if (_usedFields & Fields::Font2) {
+            *value = _font2;
+            return true;
+        }
+        return false;
+    }
+    void setForegroundColor(Color value) {
+        _foregroundColor = value;
+        _usedFields |= Fields::ForegroundColor;
+    }
+    bool hasForegroundColor(Color *value) {
+        if (_usedFields & Fields::ForegroundColor) {
+            *value = _foregroundColor;
+            return true;
+        }
+        return false;
+    }
+};
+
 struct Point {
     double x;
     double y;
@@ -37,20 +81,51 @@ struct Rect {
 
 struct __DrawContext; typedef struct __DrawContext* DrawContext;
 
-struct __Font; typedef struct __Font* Font;
-
 struct __FontDescriptor; typedef struct __FontDescriptor* FontDescriptor;
 
 // std::vector<FontDescriptor>
 
 struct __FontDescriptorArray; typedef struct __FontDescriptorArray* FontDescriptorArray;
 
+struct TypographicBounds {
+    double width;
+    double ascent;
+    double descent;
+    double leading;
+};
+
+enum LineBoundsOptions {
+    ExcludeTypographicLeading = 1,
+    ExcludeTypographicShifts = 2,
+    UseHangingPunctuation = 4,
+    UseGlyphPathBounds = 8,
+    UseOpticalBounds = 16
+};
+
+struct __Line; typedef struct __Line* Line;
+
 extern const AffineTransform AffineTransformIdentity;
 
+Rect makeRect(double x, double y, double width, double height);
+Color createColor(double red, double green, double blue, double alpha);
+AttributedString createAttributedString(std::string s, AttributedStringOptions opts);
 FontDescriptorArray fontManagerCreateFontDescriptorsFromURL(URL fileUrl);
 Font fontCreateWithFontDescriptor(FontDescriptor descriptor, double size, AffineTransform matrix);
+Line createLineWithAttributedString(AttributedString str);
+void DrawContext_dispose(DrawContext _this);
 void DrawContext_saveGState(DrawContext _this);
 void DrawContext_restoreGState(DrawContext _this);
 void DrawContext_setRGBFillColor(DrawContext _this, double red, double green, double blue, double alpha);
 void DrawContext_fillRect(DrawContext _this, Rect rect);
+void DrawContext_setTextMatrix(DrawContext _this, AffineTransform t);
+void DrawContext_setTextPosition(DrawContext _this, double x, double y);
+void Color_dispose(Color _this);
+void AttributedString_dispose(AttributedString _this);
+void FontDescriptor_dispose(FontDescriptor _this);
+void FontDescriptorArray_dispose(FontDescriptorArray _this);
 std::vector<FontDescriptor> FontDescriptorArray_items(FontDescriptorArray _this);
+void Font_dispose(Font _this);
+void Line_dispose(Line _this);
+TypographicBounds Line_getTypographicBounds(Line _this);
+Rect Line_getBoundsWithOptions(Line _this, uint32_t opts);
+void Line_draw(Line _this, DrawContext context);

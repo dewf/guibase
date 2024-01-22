@@ -223,6 +223,26 @@ void Window_invalidate(Window _this, int32_t x, int32_t y, int32_t width, int32_
     ((MyWindow*)_this)->invalidate(x, y, width, height);
 }
 
+void Icon_dispose(Icon _this)
+{
+}
+
+void Accelerator_dispose(Accelerator _this)
+{
+}
+
+void Action_dispose(Action _this)
+{
+}
+
+void MenuItem_dispose(MenuItem _this)
+{
+}
+
+void Menu_dispose(Menu _this)
+{
+}
+
 MenuItem Menu_addAction(Menu _this, Action action) {
     return (MenuItem)wl_MenuAddAction((wl_MenuRef)_this, (wl_ActionRef)action);
 }
@@ -233,6 +253,10 @@ MenuItem Menu_addSubmenu(Menu _this, std::string label, Menu sub) {
 
 void Menu_addSeparator(Menu _this) {
     wl_MenuAddSeparator((wl_MenuRef)_this);
+}
+
+void MenuBar_dispose(MenuBar _this)
+{
 }
 
 MenuItem MenuBar_addMenu(MenuBar _this, std::string label, Menu menu) {
@@ -261,4 +285,8 @@ Menu createMenu() {
 
 MenuBar createMenuBar() {
     return (MenuBar)wl_MenuBarCreate();
+}
+
+void Window_dispose(Window _this)
+{
 }

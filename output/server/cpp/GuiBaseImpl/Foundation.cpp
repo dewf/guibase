@@ -12,3 +12,13 @@ CFString createWithString(std::string s) {
 URL createWithFileSystemPath(CFString path, URLPathStyle pathStyle, bool isDirectory) {
     return (URL)dl_CFURLCreateWithFileSystemPath((dl_CFStringRef)path, (dl_CFURLPathStyle)pathStyle, isDirectory);
 }
+
+void CFString_dispose(CFString _this)
+{
+    dl_CFRelease(_this);
+}
+
+void URL_dispose(URL _this)
+{
+    dl_CFRelease(_this);
+}
