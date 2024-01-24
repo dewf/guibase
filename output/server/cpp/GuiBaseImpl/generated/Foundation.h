@@ -10,8 +10,9 @@
 #include <set>
 
 struct __CFString; typedef struct __CFString* CFString;
-
 struct __URL; typedef struct __URL* URL;
+
+
 
 enum class URLPathStyle {
     POSIX = 0,

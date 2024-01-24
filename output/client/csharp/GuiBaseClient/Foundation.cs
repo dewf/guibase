@@ -28,9 +28,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                CFString__Push(this);
-                NativeImplClient.InvokeModuleMethod(_CFString_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    CFString__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_CFString_dispose);
+                    _disposed = true;
+                }
             }
         }
 
@@ -57,9 +60,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                URL__Push(this);
-                NativeImplClient.InvokeModuleMethod(_URL_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    URL__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_URL_dispose);
+                    _disposed = true;
+                }
             }
         }
 

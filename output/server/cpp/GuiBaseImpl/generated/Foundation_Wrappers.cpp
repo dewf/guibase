@@ -2,8 +2,6 @@
 #include "Foundation_wrappers.h"
 #include "Foundation.h"
 
-NIHANDLE(cFString);
-NIHANDLE(uRL);
 
 void CFString__push(CFString value) {
     ni_pushPtr(value);

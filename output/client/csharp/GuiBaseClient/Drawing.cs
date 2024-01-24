@@ -88,9 +88,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                AttributedString__Push(this);
-                NativeImplClient.InvokeModuleMethod(_AttributedString_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    AttributedString__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_AttributedString_dispose);
+                    _disposed = true;
+                }
             }
         }
 
@@ -112,25 +115,25 @@ namespace Org.Prefixed.GuiBase
             [Flags]
             internal enum Fields
             {
-                Font2 = 1,
+                Font = 1,
                 ForegroundColor = 2
             }
             internal Fields UsedFields;
 
-            private Font _font2;
-            public Font Font2
+            private Font _font;
+            public Font Font
             {
                 set
                 {
-                    _font2 = value;
-                    UsedFields |= Fields.Font2;
+                    _font = value;
+                    UsedFields |= Fields.Font;
                 }
             }
-            public bool HasFont2(out Font value)
+            public bool HasFont(out Font value)
             {
-                if (UsedFields.HasFlag(Fields.Font2))
+                if (UsedFields.HasFlag(Fields.Font))
                 {
-                    value = _font2;
+                    value = _font;
                     return true;
                 }
                 value = default;
@@ -162,9 +165,9 @@ namespace Org.Prefixed.GuiBase
             {
                 Color__Push(foregroundColor);
             }
-            if (value.HasFont2(out var font2))
+            if (value.HasFont(out var font))
             {
-                Font__Push(font2);
+                Font__Push(font);
             }
             NativeImplClient.PushInt32((int)value.UsedFields);
         }
@@ -174,9 +177,9 @@ namespace Org.Prefixed.GuiBase
             {
                 UsedFields = (AttributedStringOptions.Fields)NativeImplClient.PopInt32()
             };
-            if (opts.UsedFields.HasFlag(AttributedStringOptions.Fields.Font2))
+            if (opts.UsedFields.HasFlag(AttributedStringOptions.Fields.Font))
             {
-                opts.Font2 = Font__Pop();
+                opts.Font = Font__Pop();
             }
             if (opts.UsedFields.HasFlag(AttributedStringOptions.Fields.ForegroundColor))
             {
@@ -195,9 +198,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                Color__Push(this);
-                NativeImplClient.InvokeModuleMethod(_Color_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    Color__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Color_dispose);
+                    _disposed = true;
+                }
             }
         }
 
@@ -293,9 +299,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                DrawContext__Push(this);
-                NativeImplClient.InvokeModuleMethod(_DrawContext_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    DrawContext__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_DrawContext_dispose);
+                    _disposed = true;
+                }
             }
             public void SaveGState()
             {
@@ -360,9 +369,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                Font__Push(this);
-                NativeImplClient.InvokeModuleMethod(_Font_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    Font__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Font_dispose);
+                    _disposed = true;
+                }
             }
         }
 
@@ -389,9 +401,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                FontDescriptor__Push(this);
-                NativeImplClient.InvokeModuleMethod(_FontDescriptor_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    FontDescriptor__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_FontDescriptor_dispose);
+                    _disposed = true;
+                }
             }
         }
 
@@ -430,9 +445,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                FontDescriptorArray__Push(this);
-                NativeImplClient.InvokeModuleMethod(_FontDescriptorArray_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    FontDescriptorArray__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_FontDescriptorArray_dispose);
+                    _disposed = true;
+                }
             }
             public FontDescriptor[] Items()
             {
@@ -519,9 +537,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                Line__Push(this);
-                NativeImplClient.InvokeModuleMethod(_Line_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    Line__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Line_dispose);
+                    _disposed = true;
+                }
             }
             public TypographicBounds GetTypographicBounds()
             {

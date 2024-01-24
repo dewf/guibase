@@ -11,6 +11,14 @@
 
 #include "Foundation.h"
 
+struct __DrawContext; typedef struct __DrawContext* DrawContext;
+struct __Color; typedef struct __Color* Color;
+struct __AttributedString; typedef struct __AttributedString* AttributedString;
+struct __FontDescriptor; typedef struct __FontDescriptor* FontDescriptor;
+struct __FontDescriptorArray; typedef struct __FontDescriptorArray* FontDescriptorArray;
+struct __Font; typedef struct __Font* Font;
+struct __Line; typedef struct __Line* Line;
+
 struct AffineTransform {
     double a;
     double b;
@@ -20,18 +28,15 @@ struct AffineTransform {
     double ty;
 };
 
-struct __AttributedString; typedef struct __AttributedString* AttributedString;
-struct __Color; typedef struct __Color* Color;
-struct __Font; typedef struct __Font* Font;
 
 struct AttributedStringOptions {
 private:
     enum Fields {
-        Font2 = 1,
-        ForegroundColor = 2
+        FontField = 1,
+        ForegroundColorField = 2
     };
     int32_t _usedFields;
-    Font _font2;
+    Font _font;
     Color _foregroundColor;
 protected:
     int32_t getUsedFields() {
@@ -40,29 +45,30 @@ protected:
     friend void AttributedStringOptions__push(AttributedStringOptions value, bool isReturn);
     friend AttributedStringOptions AttributedStringOptions__pop();
 public:
-    void setFont2(Font value) {
-        _font2 = value;
-        _usedFields |= Fields::Font2;
+    void setFont(Font value) {
+        _font = value;
+        _usedFields |= Fields::FontField;
     }
-    bool hasFont2(Font *value) {
-        if (_usedFields & Fields::Font2) {
-            *value = _font2;
+    bool hasFont(Font *value) {
+        if (_usedFields & Fields::FontField) {
+            *value = _font;
             return true;
         }
         return false;
     }
     void setForegroundColor(Color value) {
         _foregroundColor = value;
-        _usedFields |= Fields::ForegroundColor;
+        _usedFields |= Fields::ForegroundColorField;
     }
     bool hasForegroundColor(Color *value) {
-        if (_usedFields & Fields::ForegroundColor) {
+        if (_usedFields & Fields::ForegroundColorField) {
             *value = _foregroundColor;
             return true;
         }
         return false;
     }
 };
+
 
 struct Point {
     double x;
@@ -79,13 +85,11 @@ struct Rect {
     Size size;
 };
 
-struct __DrawContext; typedef struct __DrawContext* DrawContext;
 
-struct __FontDescriptor; typedef struct __FontDescriptor* FontDescriptor;
+
 
 // std::vector<FontDescriptor>
 
-struct __FontDescriptorArray; typedef struct __FontDescriptorArray* FontDescriptorArray;
 
 struct TypographicBounds {
     double width;
@@ -102,7 +106,6 @@ enum LineBoundsOptions {
     UseOpticalBounds = 16
 };
 
-struct __Line; typedef struct __Line* Line;
 
 extern const AffineTransform AffineTransformIdentity;
 

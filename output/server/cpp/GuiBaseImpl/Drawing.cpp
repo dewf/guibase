@@ -23,7 +23,7 @@ AttributedString createAttributedString(std::string s, AttributedStringOptions o
 
     auto text = dl_CFStringCreateWithCString(s.c_str());
     auto dict = dl_CFDictionaryCreateMutable(0);
-    if (opts.hasFont2(&f)) {
+    if (opts.hasFont(&f)) {
         dl_CFDictionarySetValue(dict, dl_kCTFontAttributeName, (dl_CTFontRef)f);
     }
     if (opts.hasForegroundColor(&fg)) {

@@ -3,13 +3,6 @@
 #include "Drawing.h"
 #include "Foundation_wrappers.h"
 
-NIHANDLE(drawContext);
-NIHANDLE(color);
-NIHANDLE(attributedString);
-NIHANDLE(fontDescriptor);
-NIHANDLE(fontDescriptorArray);
-NIHANDLE(font);
-NIHANDLE(line);
 
 void AffineTransform__push(AffineTransform value, bool isReturn) {
     ni_pushDouble(value.ty);
@@ -43,9 +36,9 @@ void AttributedStringOptions__push(AttributedStringOptions value, bool isReturn)
     if (value.hasForegroundColor(&foregroundColor)) {
         Color__push(foregroundColor);
     }
-    Font font2;
-    if (value.hasFont2(&font2)) {
-        Font__push(font2);
+    Font font;
+    if (value.hasFont(&font)) {
+        Font__push(font);
     }
     ni_pushInt32(value.getUsedFields());
 }
@@ -53,11 +46,11 @@ void AttributedStringOptions__push(AttributedStringOptions value, bool isReturn)
 AttributedStringOptions AttributedStringOptions__pop() {
     AttributedStringOptions value = {};
     value._usedFields =  ni_popInt32();
-    if (value._usedFields & AttributedStringOptions::Fields::Font2) {
+    if (value._usedFields & AttributedStringOptions::Fields::FontField) {
         auto x = Font__pop();
-        value.setFont2(x);
+        value.setFont(x);
     }
-    if (value._usedFields & AttributedStringOptions::Fields::ForegroundColor) {
+    if (value._usedFields & AttributedStringOptions::Fields::ForegroundColorField) {
         auto x = Color__pop();
         value.setForegroundColor(x);
     }

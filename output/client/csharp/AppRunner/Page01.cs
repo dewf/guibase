@@ -22,7 +22,7 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
             Console.WriteLine("we got the font??");
             _labelString = CreateAttributedString("Quartz♪❦♛あぎ", new AttributedStringOptions
             {
-                Font2 = font,
+                Font = font,
                 ForegroundColor = CreateColor(0, 1, 1, 0.5)
             });
         }

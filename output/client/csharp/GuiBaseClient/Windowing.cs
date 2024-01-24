@@ -58,9 +58,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                Accelerator__Push(this);
-                NativeImplClient.InvokeModuleMethod(_Accelerator_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    Accelerator__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Accelerator_dispose);
+                    _disposed = true;
+                }
             }
         }
 
@@ -87,9 +90,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                Action__Push(this);
-                NativeImplClient.InvokeModuleMethod(_Action_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    Action__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Action_dispose);
+                    _disposed = true;
+                }
             }
         }
 
@@ -116,9 +122,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                Icon__Push(this);
-                NativeImplClient.InvokeModuleMethod(_Icon_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    Icon__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Icon_dispose);
+                    _disposed = true;
+                }
             }
         }
 
@@ -269,9 +278,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                Menu__Push(this);
-                NativeImplClient.InvokeModuleMethod(_Menu_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    Menu__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Menu_dispose);
+                    _disposed = true;
+                }
             }
             public MenuItem AddAction(Action action)
             {
@@ -340,9 +352,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                MenuBar__Push(this);
-                NativeImplClient.InvokeModuleMethod(_MenuBar_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    MenuBar__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_MenuBar_dispose);
+                    _disposed = true;
+                }
             }
             public MenuItem AddMenu(string label, Menu menu)
             {
@@ -377,9 +392,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                MenuItem__Push(this);
-                NativeImplClient.InvokeModuleMethod(_MenuItem_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    MenuItem__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_MenuItem_dispose);
+                    _disposed = true;
+                }
             }
         }
 
@@ -450,9 +468,12 @@ namespace Org.Prefixed.GuiBase
             }
             public void Dispose()
             {
-                Window__Push(this);
-                NativeImplClient.InvokeModuleMethod(_Window_dispose);
-                _disposed = true;
+                if (!_disposed)
+                {
+                    Window__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Window_dispose);
+                    _disposed = true;
+                }
             }
             public void Show()
             {

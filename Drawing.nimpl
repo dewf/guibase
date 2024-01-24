@@ -42,7 +42,7 @@ Color createColor(double red, double green, double blue, double alpha);
 
 // text stuff
 options AttributedStringOptions {
-    Font font2;
+    Font font;
     Color foregroundColor;
 }
 opaque AttributedString;

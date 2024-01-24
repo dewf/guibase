@@ -11,11 +11,16 @@
 
 #include "Drawing.h"
 
-struct __Accelerator; typedef struct __Accelerator* Accelerator;
-
-struct __Action; typedef struct __Action* Action;
-
+struct __Window; typedef struct __Window* Window;
 struct __Icon; typedef struct __Icon* Icon;
+struct __Accelerator; typedef struct __Accelerator* Accelerator;
+struct __Action; typedef struct __Action* Action;
+struct __MenuItem; typedef struct __MenuItem* MenuItem;
+struct __Menu; typedef struct __Menu* Menu;
+struct __MenuBar; typedef struct __MenuBar* MenuBar;
+
+
+
 
 enum class Key {
     Unknown,
@@ -127,13 +132,10 @@ enum class Key {
     MediaPlayPause
 };
 
-struct __Menu; typedef struct __Menu* Menu;
 
 typedef void MenuActionFunc();
 
-struct __MenuBar; typedef struct __MenuBar* MenuBar;
 
-struct __MenuItem; typedef struct __MenuItem* MenuItem;
 
 enum Modifiers {
     Shift = 1,
@@ -150,7 +152,6 @@ enum class MouseButton {
     Other
 };
 
-struct __Window; typedef struct __Window* Window;
 
 class WindowDelegate {
 public:
@@ -181,12 +182,12 @@ enum class WindowStyle {
 struct WindowOptions {
 private:
     enum Fields {
-        MinWidth = 1,
-        MinHeight = 2,
-        MaxWidth = 4,
-        MaxHeight = 8,
-        Style = 16,
-        NativeParent = 32
+        MinWidthField = 1,
+        MinHeightField = 2,
+        MaxWidthField = 4,
+        MaxHeightField = 8,
+        StyleField = 16,
+        NativeParentField = 32
     };
     int32_t _usedFields;
     int32_t _minWidth;
@@ -204,10 +205,10 @@ protected:
 public:
     void setMinWidth(int32_t value) {
         _minWidth = value;
-        _usedFields |= Fields::MinWidth;
+        _usedFields |= Fields::MinWidthField;
     }
     bool hasMinWidth(int32_t *value) {
-        if (_usedFields & Fields::MinWidth) {
+        if (_usedFields & Fields::MinWidthField) {
             *value = _minWidth;
             return true;
         }
@@ -215,10 +216,10 @@ public:
     }
     void setMinHeight(int32_t value) {
         _minHeight = value;
-        _usedFields |= Fields::MinHeight;
+        _usedFields |= Fields::MinHeightField;
     }
     bool hasMinHeight(int32_t *value) {
-        if (_usedFields & Fields::MinHeight) {
+        if (_usedFields & Fields::MinHeightField) {
             *value = _minHeight;
             return true;
         }
@@ -226,10 +227,10 @@ public:
     }
     void setMaxWidth(int32_t value) {
         _maxWidth = value;
-        _usedFields |= Fields::MaxWidth;
+        _usedFields |= Fields::MaxWidthField;
     }
     bool hasMaxWidth(int32_t *value) {
-        if (_usedFields & Fields::MaxWidth) {
+        if (_usedFields & Fields::MaxWidthField) {
             *value = _maxWidth;
             return true;
         }
@@ -237,10 +238,10 @@ public:
     }
     void setMaxHeight(int32_t value) {
         _maxHeight = value;
-        _usedFields |= Fields::MaxHeight;
+        _usedFields |= Fields::MaxHeightField;
     }
     bool hasMaxHeight(int32_t *value) {
-        if (_usedFields & Fields::MaxHeight) {
+        if (_usedFields & Fields::MaxHeightField) {
             *value = _maxHeight;
             return true;
         }
@@ -248,10 +249,10 @@ public:
     }
     void setStyle(WindowStyle value) {
         _style = value;
-        _usedFields |= Fields::Style;
+        _usedFields |= Fields::StyleField;
     }
     bool hasStyle(WindowStyle *value) {
-        if (_usedFields & Fields::Style) {
+        if (_usedFields & Fields::StyleField) {
             *value = _style;
             return true;
         }
@@ -259,10 +260,10 @@ public:
     }
     void setNativeParent(size_t value) {
         _nativeParent = value;
-        _usedFields |= Fields::NativeParent;
+        _usedFields |= Fields::NativeParentField;
     }
     bool hasNativeParent(size_t *value) {
-        if (_usedFields & Fields::NativeParent) {
+        if (_usedFields & Fields::NativeParentField) {
             *value = _nativeParent;
             return true;
         }

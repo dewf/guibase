@@ -9,13 +9,6 @@ ni_InterfaceMethodRef windowDelegate_destroyed;
 ni_InterfaceMethodRef windowDelegate_mouseDown;
 ni_InterfaceMethodRef windowDelegate_repaint;
 ni_InterfaceMethodRef windowDelegate_resized;
-NIHANDLE(window);
-NIHANDLE(icon);
-NIHANDLE(accelerator);
-NIHANDLE(action);
-NIHANDLE(menuItem);
-NIHANDLE(menu);
-NIHANDLE(menuBar);
 
 void Accelerator__push(Accelerator value) {
     ni_pushPtr(value);
@@ -223,27 +216,27 @@ void WindowOptions__push(WindowOptions value, bool isReturn) {
 WindowOptions WindowOptions__pop() {
     WindowOptions value = {};
     value._usedFields =  ni_popInt32();
-    if (value._usedFields & WindowOptions::Fields::MinWidth) {
+    if (value._usedFields & WindowOptions::Fields::MinWidthField) {
         auto x = ni_popInt32();
         value.setMinWidth(x);
     }
-    if (value._usedFields & WindowOptions::Fields::MinHeight) {
+    if (value._usedFields & WindowOptions::Fields::MinHeightField) {
         auto x = ni_popInt32();
         value.setMinHeight(x);
     }
-    if (value._usedFields & WindowOptions::Fields::MaxWidth) {
+    if (value._usedFields & WindowOptions::Fields::MaxWidthField) {
         auto x = ni_popInt32();
         value.setMaxWidth(x);
     }
-    if (value._usedFields & WindowOptions::Fields::MaxHeight) {
+    if (value._usedFields & WindowOptions::Fields::MaxHeightField) {
         auto x = ni_popInt32();
         value.setMaxHeight(x);
     }
-    if (value._usedFields & WindowOptions::Fields::Style) {
+    if (value._usedFields & WindowOptions::Fields::StyleField) {
         auto x = WindowStyle__pop();
         value.setStyle(x);
     }
-    if (value._usedFields & WindowOptions::Fields::NativeParent) {
+    if (value._usedFields & WindowOptions::Fields::NativeParentField) {
         auto x = ni_popSizeT();
         value.setNativeParent(x);
     }
