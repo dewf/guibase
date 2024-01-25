@@ -21,6 +21,9 @@ Size Size__pop();
 void Rect__push(Rect value, bool isReturn);
 Rect Rect__pop();
 
+void PathDrawingMode__push(PathDrawingMode value);
+PathDrawingMode PathDrawingMode__pop();
+
 void DrawContext__push(DrawContext value);
 DrawContext DrawContext__pop();
 
@@ -49,6 +52,26 @@ void DrawContext_fillRect__wrapper();
 void DrawContext_setTextMatrix__wrapper();
 
 void DrawContext_setTextPosition__wrapper();
+
+void DrawContext_beginPath__wrapper();
+
+void DrawContext_addArc__wrapper();
+
+void DrawContext_drawPath__wrapper();
+
+void DrawContext_setStrokeColorWithColor__wrapper();
+
+void DrawContext_strokeRectWithWidth__wrapper();
+
+void DrawContext_moveToPoint__wrapper();
+
+void DrawContext_addLineToPoint__wrapper();
+
+void DrawContext_strokePath__wrapper();
+
+void DrawContext_setLineDash__wrapper();
+
+void DrawContext_setLineWidth__wrapper();
 
 void DrawContext_dispose__wrapper();
 

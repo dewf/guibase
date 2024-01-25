@@ -98,6 +98,17 @@ Rect Rect__pop() {
     return Rect { origin, size };
 }
 
+inline void PathDrawingMode__push(PathDrawingMode value) {
+    ni_pushInt32((int32_t)value);
+}
+
+inline PathDrawingMode PathDrawingMode__pop() {
+    auto tag = ni_popInt32();
+    return (PathDrawingMode)tag;
+}
+
+// built-in array type: std::vector<double>
+
 void DrawContext__push(DrawContext value) {
     ni_pushPtr(value);
 }
@@ -191,6 +202,73 @@ void DrawContext_setTextPosition__wrapper() {
     DrawContext_setTextPosition(_this, x, y);
 }
 
+void DrawContext_beginPath__wrapper() {
+    auto _this = DrawContext__pop();
+    DrawContext_beginPath(_this);
+}
+
+void DrawContext_addArc__wrapper() {
+    auto _this = DrawContext__pop();
+    auto x = ni_popDouble();
+    auto y = ni_popDouble();
+    auto radius = ni_popDouble();
+    auto startAngle = ni_popDouble();
+    auto endAngle = ni_popDouble();
+    auto clockwise = ni_popBool();
+    DrawContext_addArc(_this, x, y, radius, startAngle, endAngle, clockwise);
+}
+
+void DrawContext_drawPath__wrapper() {
+    auto _this = DrawContext__pop();
+    auto mode = PathDrawingMode__pop();
+    DrawContext_drawPath(_this, mode);
+}
+
+void DrawContext_setStrokeColorWithColor__wrapper() {
+    auto _this = DrawContext__pop();
+    auto color = Color__pop();
+    DrawContext_setStrokeColorWithColor(_this, color);
+}
+
+void DrawContext_strokeRectWithWidth__wrapper() {
+    auto _this = DrawContext__pop();
+    auto rect = Rect__pop();
+    auto width = ni_popDouble();
+    DrawContext_strokeRectWithWidth(_this, rect, width);
+}
+
+void DrawContext_moveToPoint__wrapper() {
+    auto _this = DrawContext__pop();
+    auto x = ni_popDouble();
+    auto y = ni_popDouble();
+    DrawContext_moveToPoint(_this, x, y);
+}
+
+void DrawContext_addLineToPoint__wrapper() {
+    auto _this = DrawContext__pop();
+    auto x = ni_popDouble();
+    auto y = ni_popDouble();
+    DrawContext_addLineToPoint(_this, x, y);
+}
+
+void DrawContext_strokePath__wrapper() {
+    auto _this = DrawContext__pop();
+    DrawContext_strokePath(_this);
+}
+
+void DrawContext_setLineDash__wrapper() {
+    auto _this = DrawContext__pop();
+    auto phase = ni_popDouble();
+    auto lengths = popDoubleArrayInternal();
+    DrawContext_setLineDash(_this, phase, lengths);
+}
+
+void DrawContext_setLineWidth__wrapper() {
+    auto _this = DrawContext__pop();
+    auto width = ni_popDouble();
+    DrawContext_setLineWidth(_this, width);
+}
+
 void DrawContext_dispose__wrapper() {
     auto _this = DrawContext__pop();
     DrawContext_dispose(_this);
@@ -273,6 +351,16 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_fillRect", &DrawContext_fillRect__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setTextMatrix", &DrawContext_setTextMatrix__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setTextPosition", &DrawContext_setTextPosition__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_beginPath", &DrawContext_beginPath__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_addArc", &DrawContext_addArc__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_drawPath", &DrawContext_drawPath__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_setStrokeColorWithColor", &DrawContext_setStrokeColorWithColor__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_strokeRectWithWidth", &DrawContext_strokeRectWithWidth__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_moveToPoint", &DrawContext_moveToPoint__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_addLineToPoint", &DrawContext_addLineToPoint__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_strokePath", &DrawContext_strokePath__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_setLineDash", &DrawContext_setLineDash__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_setLineWidth", &DrawContext_setLineWidth__wrapper);
     ni_registerModuleMethod(m, "DrawContext_dispose", &DrawContext_dispose__wrapper);
     ni_registerModuleMethod(m, "Color_create", &Color_create__wrapper);
     ni_registerModuleMethod(m, "Color_dispose", &Color_dispose__wrapper);

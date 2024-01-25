@@ -46,6 +46,56 @@ void DrawContext_setTextPosition(DrawContext _this, double x, double y)
     dl_CGContextSetTextPosition((dl_CGContextRef)_this, x, y);
 }
 
+void DrawContext_beginPath(DrawContext _this)
+{
+    dl_CGContextBeginPath((dl_CGContextRef)_this);
+}
+
+void DrawContext_addArc(DrawContext _this, double x, double y, double radius, double startAngle, double endAngle, bool clockwise)
+{
+    dl_CGContextAddArc((dl_CGContextRef)_this, x, y, radius, startAngle, endAngle, clockwise ? 1 : 0);
+}
+
+void DrawContext_drawPath(DrawContext _this, PathDrawingMode mode)
+{
+    dl_CGContextDrawPath((dl_CGContextRef)_this, (dl_CGPathDrawingMode)mode);
+}
+
+void DrawContext_setStrokeColorWithColor(DrawContext _this, Color color)
+{
+    dl_CGContextSetStrokeColorWithColor((dl_CGContextRef)_this, (dl_CGColorRef)color);
+}
+
+void DrawContext_strokeRectWithWidth(DrawContext _this, Rect rect, double width)
+{
+    dl_CGContextStrokeRectWithWidth((dl_CGContextRef)_this, STRUCT_CAST(dl_CGRect, rect), width);
+}
+
+void DrawContext_moveToPoint(DrawContext _this, double x, double y)
+{
+    dl_CGContextMoveToPoint((dl_CGContextRef)_this, x, y);
+}
+
+void DrawContext_addLineToPoint(DrawContext _this, double x, double y)
+{
+    dl_CGContextAddLineToPoint((dl_CGContextRef)_this, x, y);
+}
+
+void DrawContext_strokePath(DrawContext _this)
+{
+    dl_CGContextStrokePath((dl_CGContextRef)_this);
+}
+
+void DrawContext_setLineDash(DrawContext _this, double phase, std::vector<double> lengths)
+{
+    dl_CGContextSetLineDash((dl_CGContextRef)_this, phase, lengths.data(), lengths.size());
+}
+
+void DrawContext_setLineWidth(DrawContext _this, double width)
+{
+    dl_CGContextSetLineWidth((dl_CGContextRef)_this, width);
+}
+
 Color Color_create(double red, double green, double blue, double alpha)
 {
     return (Color)dl_CGColorCreateGenericRGB(red, green, blue, alpha);

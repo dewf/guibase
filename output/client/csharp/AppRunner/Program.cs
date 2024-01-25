@@ -9,7 +9,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     private int _width, _height;
     private readonly Menu _contextMenu;
     public Window? Window { get; set; }
-    private readonly Page01 _page01;
+    private readonly Page02 _page02;
     private IPage _currentPage;
     
     public MainWindowDelegate()
@@ -21,10 +21,10 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
         }));
 
         // page init
-        _page01 = new Page01(this);
-        _page01.Init();
+        _page02 = new Page02(this);
+        _page02.Init();
 
-        _currentPage = _page01;
+        _currentPage = _page02;
     }
 
     public override bool CanClose() => true;

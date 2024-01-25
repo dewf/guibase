@@ -28,6 +28,14 @@ struct AffineTransform {
 }
 AffineTransform AffineTransformIdentity;
 
+enum PathDrawingMode {
+    Fill,
+    EOFill,
+    Stroke,
+    FillStroke,
+    EOFillStroke
+}
+
 opaque DrawContext {
     void saveGState();
     void restoreGState();
@@ -35,6 +43,16 @@ opaque DrawContext {
     void fillRect(Rect rect);
     void setTextMatrix(AffineTransform t);
     void setTextPosition(double x, double y);
+    void beginPath();
+    void addArc(double x, double y, double radius, double startAngle, double endAngle, bool clockwise);
+    void drawPath(PathDrawingMode mode);
+    void setStrokeColorWithColor(Color color);
+    void strokeRectWithWidth(Rect rect, double width);
+    void moveToPoint(double x, double y);
+    void addLineToPoint(double x, double y);
+    void strokePath();
+    void setLineDash(double phase, Array<double> lengths);
+    void setLineWidth(double width);
 }
 
 opaque Color {

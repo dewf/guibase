@@ -83,6 +83,16 @@ struct Rect {
     Size size;
 };
 
+enum class PathDrawingMode {
+    Fill,
+    EOFill,
+    Stroke,
+    FillStroke,
+    EOFillStroke
+};
+
+// std::vector<double>
+
 
 
 struct TypographicBounds {
@@ -110,6 +120,16 @@ void DrawContext_setRGBFillColor(DrawContext _this, double red, double green, do
 void DrawContext_fillRect(DrawContext _this, Rect rect);
 void DrawContext_setTextMatrix(DrawContext _this, AffineTransform t);
 void DrawContext_setTextPosition(DrawContext _this, double x, double y);
+void DrawContext_beginPath(DrawContext _this);
+void DrawContext_addArc(DrawContext _this, double x, double y, double radius, double startAngle, double endAngle, bool clockwise);
+void DrawContext_drawPath(DrawContext _this, PathDrawingMode mode);
+void DrawContext_setStrokeColorWithColor(DrawContext _this, Color color);
+void DrawContext_strokeRectWithWidth(DrawContext _this, Rect rect, double width);
+void DrawContext_moveToPoint(DrawContext _this, double x, double y);
+void DrawContext_addLineToPoint(DrawContext _this, double x, double y);
+void DrawContext_strokePath(DrawContext _this);
+void DrawContext_setLineDash(DrawContext _this, double phase, std::vector<double> lengths);
+void DrawContext_setLineWidth(DrawContext _this, double width);
 void DrawContext_dispose(DrawContext _this);
 Color Color_create(double red, double green, double blue, double alpha);
 void Color_dispose(Color _this);
