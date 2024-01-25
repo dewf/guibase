@@ -23,6 +23,8 @@ public interface IPage
     bool IsAnimating();
     void OnSize(int newWidth, int newHeight);
     void OnTimer(double secondsSinceLast);
+    void OnMouseMove(int x, int y, Windowing.Modifiers modifiers);
+    void OnKeyDown(Windowing.Key key, Windowing.Modifiers modifiers);
 }
 
 public abstract class BasePage(IWindowMethods windowMethods) : IPage
@@ -40,6 +42,14 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     }
 
     public virtual void Init()
+    {
+    }
+
+    public virtual void OnMouseMove(int x, int y, Windowing.Modifiers modifiers)
+    {
+    }
+
+    public virtual void OnKeyDown(Windowing.Key key, Windowing.Modifiers modifiers)
     {
     }
 

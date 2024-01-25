@@ -15,6 +15,10 @@ namespace Org.Prefixed.GuiBase
     {
         private static ModuleHandle _module;
         private static ModuleMethodHandle _makeRect;
+        private static ModuleMethodHandle _path_createWithRect;
+        private static ModuleMethodHandle _path_createWithEllipseInRect;
+        private static ModuleMethodHandle _path_createWithRoundedRect;
+        private static ModuleMethodHandle _Path_dispose;
         private static ModuleMethodHandle _drawContext_saveGState;
         private static ModuleMethodHandle _drawContext_restoreGState;
         private static ModuleMethodHandle _drawContext_setRGBFillColor;
@@ -24,6 +28,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _drawContext_setTextPosition;
         private static ModuleMethodHandle _drawContext_beginPath;
         private static ModuleMethodHandle _drawContext_addArc;
+        private static ModuleMethodHandle _drawContext_addArcToPoint;
         private static ModuleMethodHandle _drawContext_drawPath;
         private static ModuleMethodHandle _drawContext_setStrokeColorWithColor;
         private static ModuleMethodHandle _drawContext_strokeRectWithWidth;
@@ -35,6 +40,14 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _drawContext_setLineWidth;
         private static ModuleMethodHandle _drawContext_clip;
         private static ModuleMethodHandle _drawContext_translateCTM;
+        private static ModuleMethodHandle _drawContext_scaleCTM;
+        private static ModuleMethodHandle _drawContext_rotateCTM;
+        private static ModuleMethodHandle _drawContext_concatCTM;
+        private static ModuleMethodHandle _drawContext_addPath;
+        private static ModuleMethodHandle _drawContext_fillPath;
+        private static ModuleMethodHandle _drawContext_strokeRect;
+        private static ModuleMethodHandle _drawContext_addRect;
+        private static ModuleMethodHandle _drawContext_closePath;
         private static ModuleMethodHandle _DrawContext_dispose;
         private static ModuleMethodHandle _color_create;
         private static ModuleMethodHandle _Color_dispose;
@@ -419,6 +432,16 @@ namespace Org.Prefixed.GuiBase
                 DrawContext__Push(this);
                 NativeImplClient.InvokeModuleMethod(_drawContext_addArc);
             }
+            public void AddArcToPoint(double x1, double y1, double x2, double y2, double radius)
+            {
+                NativeImplClient.PushDouble(radius);
+                NativeImplClient.PushDouble(y2);
+                NativeImplClient.PushDouble(x2);
+                NativeImplClient.PushDouble(y1);
+                NativeImplClient.PushDouble(x1);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_addArcToPoint);
+            }
             public void DrawPath(PathDrawingMode mode)
             {
                 PathDrawingMode__Push(mode);
@@ -486,6 +509,53 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.PushDouble(tx);
                 DrawContext__Push(this);
                 NativeImplClient.InvokeModuleMethod(_drawContext_translateCTM);
+            }
+            public void ScaleCTM(double scaleX, double scaleY)
+            {
+                NativeImplClient.PushDouble(scaleY);
+                NativeImplClient.PushDouble(scaleX);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_scaleCTM);
+            }
+            public void RotateCTM(double angle)
+            {
+                NativeImplClient.PushDouble(angle);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_rotateCTM);
+            }
+            public void ConcatCTM(AffineTransform transform)
+            {
+                AffineTransform__Push(transform, false);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_concatCTM);
+            }
+            public void AddPath(Path path)
+            {
+                Path__Push(path);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_addPath);
+            }
+            public void FillPath()
+            {
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_fillPath);
+            }
+            public void StrokeRect(Rect rect)
+            {
+                Rect__Push(rect, false);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_strokeRect);
+            }
+            public void AddRect(Rect rect)
+            {
+                Rect__Push(rect, false);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_addRect);
+            }
+            public void ClosePath()
+            {
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_closePath);
             }
         }
 
@@ -653,6 +723,61 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Line(ptr) : null;
         }
 
+        public class Path : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal Path(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    Path__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Path_dispose);
+                    _disposed = true;
+                }
+            }
+            public static Path CreateWithRect(Rect rect, AffineTransform transform)
+            {
+                AffineTransform__Push(transform, false);
+                Rect__Push(rect, false);
+                NativeImplClient.InvokeModuleMethod(_path_createWithRect);
+                return Path__Pop();
+            }
+            public static Path CreateWithEllipseInRect(Rect rect, AffineTransform transform)
+            {
+                AffineTransform__Push(transform, false);
+                Rect__Push(rect, false);
+                NativeImplClient.InvokeModuleMethod(_path_createWithEllipseInRect);
+                return Path__Pop();
+            }
+            public static Path CreateWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, AffineTransform transform)
+            {
+                AffineTransform__Push(transform, false);
+                NativeImplClient.PushDouble(cornerHeight);
+                NativeImplClient.PushDouble(cornerWidth);
+                Rect__Push(rect, false);
+                NativeImplClient.InvokeModuleMethod(_path_createWithRoundedRect);
+                return Path__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Path__Push(Path thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Path Path__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new Path(ptr) : null;
+        }
+
         public static Rect MakeRect(double x, double y, double width, double height)
         {
             NativeImplClient.PushDouble(height);
@@ -672,6 +797,10 @@ namespace Org.Prefixed.GuiBase
 
             _makeRect = NativeImplClient.GetModuleMethod(_module, "makeRect");
 
+            _path_createWithRect = NativeImplClient.GetModuleMethod(_module, "Path_createWithRect");
+            _path_createWithEllipseInRect = NativeImplClient.GetModuleMethod(_module, "Path_createWithEllipseInRect");
+            _path_createWithRoundedRect = NativeImplClient.GetModuleMethod(_module, "Path_createWithRoundedRect");
+            _Path_dispose = NativeImplClient.GetModuleMethod(_module, "Path_dispose");
             _drawContext_saveGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_saveGState");
             _drawContext_restoreGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_restoreGState");
             _drawContext_setRGBFillColor = NativeImplClient.GetModuleMethod(_module, "DrawContext_setRGBFillColor");
@@ -681,6 +810,7 @@ namespace Org.Prefixed.GuiBase
             _drawContext_setTextPosition = NativeImplClient.GetModuleMethod(_module, "DrawContext_setTextPosition");
             _drawContext_beginPath = NativeImplClient.GetModuleMethod(_module, "DrawContext_beginPath");
             _drawContext_addArc = NativeImplClient.GetModuleMethod(_module, "DrawContext_addArc");
+            _drawContext_addArcToPoint = NativeImplClient.GetModuleMethod(_module, "DrawContext_addArcToPoint");
             _drawContext_drawPath = NativeImplClient.GetModuleMethod(_module, "DrawContext_drawPath");
             _drawContext_setStrokeColorWithColor = NativeImplClient.GetModuleMethod(_module, "DrawContext_setStrokeColorWithColor");
             _drawContext_strokeRectWithWidth = NativeImplClient.GetModuleMethod(_module, "DrawContext_strokeRectWithWidth");
@@ -692,6 +822,14 @@ namespace Org.Prefixed.GuiBase
             _drawContext_setLineWidth = NativeImplClient.GetModuleMethod(_module, "DrawContext_setLineWidth");
             _drawContext_clip = NativeImplClient.GetModuleMethod(_module, "DrawContext_clip");
             _drawContext_translateCTM = NativeImplClient.GetModuleMethod(_module, "DrawContext_translateCTM");
+            _drawContext_scaleCTM = NativeImplClient.GetModuleMethod(_module, "DrawContext_scaleCTM");
+            _drawContext_rotateCTM = NativeImplClient.GetModuleMethod(_module, "DrawContext_rotateCTM");
+            _drawContext_concatCTM = NativeImplClient.GetModuleMethod(_module, "DrawContext_concatCTM");
+            _drawContext_addPath = NativeImplClient.GetModuleMethod(_module, "DrawContext_addPath");
+            _drawContext_fillPath = NativeImplClient.GetModuleMethod(_module, "DrawContext_fillPath");
+            _drawContext_strokeRect = NativeImplClient.GetModuleMethod(_module, "DrawContext_strokeRect");
+            _drawContext_addRect = NativeImplClient.GetModuleMethod(_module, "DrawContext_addRect");
+            _drawContext_closePath = NativeImplClient.GetModuleMethod(_module, "DrawContext_closePath");
             _DrawContext_dispose = NativeImplClient.GetModuleMethod(_module, "DrawContext_dispose");
             _color_create = NativeImplClient.GetModuleMethod(_module, "Color_create");
             _Color_dispose = NativeImplClient.GetModuleMethod(_module, "Color_dispose");

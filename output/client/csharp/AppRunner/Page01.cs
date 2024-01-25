@@ -1,12 +1,31 @@
-﻿using static Org.Prefixed.GuiBase.Drawing;
+﻿using Org.Prefixed.GuiBase;
+using static Org.Prefixed.GuiBase.Drawing;
 
 namespace AppRunner;
 
 public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
-    public override void Init()
+    private double _animAngle = 0;
+    private int _mouseX, _mouseY;
+    private bool _doCrossMask = false;
+
+    public override void OnMouseMove(int x, int y, Windowing.Modifiers modifiers)
     {
-        base.Init();
+        _mouseX = x;
+        _mouseY = y;
+        if (_doCrossMask) // or animating
+        {
+            Invalidate();
+        }
+    }
+
+    public override void OnKeyDown(Windowing.Key key, Windowing.Modifiers modifiers)
+    {
+        if (key == Windowing.Key.C)
+        {
+            _doCrossMask = !_doCrossMask;
+            Invalidate();
+        }
     }
 
     private static void DrawStrokedLine(DrawContext context, Point start, Point end)
@@ -33,6 +52,44 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
         context.AddLineToPoint(rect.Origin.X, rect.Origin.Y + rect.Size.Height);
     }
 
+    private static void DoClippedCircle(DrawContext context)
+    {
+        var circleCenter = new Point(100, 100);
+        const double circleRadius = 100.0;
+        const double startingAngle = 0.0;
+        const double endingAngle = Math.PI * 2;
+        var ourRect = new Rect(new Point(15, 15), new Size(170, 170));
+        var totalArea = new Rect(new Point(0, 0), new Size(170 + 100 + 5 + 150 + 100 - 50, 200));
+
+        // white background
+        context.SetRGBFillColor(1, 1, 1, 1);
+        context.FillRect(totalArea);
+
+        // filled circle
+        context.SetRGBFillColor(0.663, 0, 0.031, 1);
+        context.BeginPath();
+        // construct cirle path counterclockwise
+        context.AddArc(circleCenter.X, circleCenter.Y, circleRadius, startingAngle, endingAngle, false);
+        context.DrawPath(PathDrawingMode.Fill);
+
+        // stroked square
+        context.StrokeRect(ourRect);
+
+        // translate to side
+        context.TranslateCTM(ourRect.Size.Width + circleRadius + 5, 0);
+
+        // create rect path + clip
+        context.BeginPath();
+        context.AddRect(ourRect);
+        context.Clip();
+
+        // circle again (clipped now)
+        context.BeginPath();
+        // construct cirle path counterclockwise
+        context.AddArc(circleCenter.X, circleCenter.Y, circleRadius, startingAngle, endingAngle, false);
+        context.DrawPath(PathDrawingMode.FillStroke);
+    }
+
     public override void Render(DrawContext context, RenderArea area)
     {
         // max-size background
@@ -44,11 +101,27 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
         context.SetRGBFillColor(0.1, 0.1, 0.3, 1);
         var rNormal = new Rect(new Point(0, 0), new Size(Constants.InitWidth, Constants.InitHeight));
         context.FillRect(rNormal);
+
+        if (_doCrossMask)
+        {
+            // circular clip
+            var clippy = new Rect(new Point(_mouseX - (400.0 / 2), _mouseY - (400.0 / 2)), new Size(400, 400));
+            context.BeginPath();
+            var clx = clippy.Origin.X + (clippy.Size.Width / 2);
+            var cly = clippy.Origin.Y + (clippy.Size.Height / 2);
+            context.AddArc(clx, cly, clippy.Size.Width / 2, 0, Math.PI * 2, false);
+            context.Clip();
+            // cross inside that
+            var crossWidth = clippy.Size.Width / 3;
+            var vert = new Rect(new Point(clx - (crossWidth / 2), clippy.Origin.Y), new Size(crossWidth, clippy.Size.Height));
+            var horz = new Rect(new Point(clippy.Origin.X, cly - (crossWidth / 2)), new Size(clippy.Size.Width, crossWidth));
+            context.BeginPath();
+            context.AddRect(vert);
+            context.AddRect(horz);
+            context.Clip();
+        }
         
-        // if crossMask () {}
-        // .....
-        
-        // dashed lines (??)
+        // DASHED LINES ===================
         context.SaveGState();
         
         var start = new Point(40, 280);
@@ -69,7 +142,6 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
         context.AddArc(start.X + linesWidth / 2, start.Y + linesHeight / 2, 300, 0, Math.PI * 2, false);
         context.Clip();
         
-        // DASHED LINES ===================
         context.SetRGBStrokeColor(1, 1, 0, 1);
 
         // line 1 solid
@@ -169,6 +241,83 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
             context.DrawPath((i % 2) != 0 ? PathDrawingMode.Fill : PathDrawingMode.FillStroke);
             context.TranslateCTM(-15, 15);
         }
+
+        context.RestoreGState();
+        
+        // alpha rects ==========================================
+        context.SaveGState();
+
+        var r6 = new Rect(new Point(0, 0), new Size(130, 100));
+        var r7 = new Rect(new Point(120, 90), new Size(5, 5));
+        var numRects = 6;
+        var tint = 1.0;
+        var tintAdjust = 1.0 / numRects;
+        var rotAngle = (Math.PI * 2) / numRects;
+
+        context.TranslateCTM(800, 400);
+        context.ScaleCTM(3, 3);
+
+        context.RotateCTM(_animAngle);
+
+        using var rounded = Drawing.Path.CreateWithRoundedRect(r6, 10, 10, AffineTransformIdentity);
+        using var cornerCircle = Drawing.Path.CreateWithEllipseInRect(r7, AffineTransformIdentity);
+        for (var i = 0; i < numRects; i++)
+        {
+            context.SetRGBFillColor(tint, tint / 2, 0, tint);
+            context.AddPath(rounded);
+            context.FillPath();
+
+            context.SetRGBStrokeColor(0, 0, 0, 1);
+            context.AddPath(rounded);
+            context.SetLineWidth(1.5);
+            context.StrokePath();
+
+            // yellow corner thing
+            context.SetRGBFillColor(1, 1, 0, 1);
+            context.AddPath(cornerCircle);
+            context.FillPath();
+
+            context.RotateCTM(rotAngle);
+            tint -= tintAdjust;
+        }
+        context.RestoreGState();
+        
+        // clipping example =====================================
+        context.SaveGState();
+
+        context.ScaleCTM(0.75, 0.75);
+        context.TranslateCTM(70, 740);
+
+        DoClippedCircle(context);
+
+        context.RestoreGState();
+        
+        // curved corner triangle thing =========================
+        context.SaveGState();
+
+        var points = new[] { new Point(150, 150), new Point(540, 340), new Point(130, 540) };
+
+        // line version
+        context.MoveToPoint(points[0].X, points[0].Y);
+        context.AddLineToPoint(points[1].X, points[1].Y);
+        context.AddLineToPoint(points[2].X, points[2].Y);
+        context.ClosePath();
+
+        context.SetRGBStrokeColor(1, 1, 1, 0.5);
+        context.SetLineWidth(1);
+        context.StrokePath();
+
+        // curved version
+        var startEnd = Common.BetweenPoints(points[2], points[0]);
+        context.MoveToPoint(startEnd.X, startEnd.Y);
+        context.AddArcToPoint(points[0].X, points[0].Y, points[1].X, points[1].Y, 20);
+        context.AddArcToPoint(points[1].X, points[1].Y, points[2].X, points[2].Y, 20);
+        context.AddArcToPoint(points[2].X, points[2].Y, points[0].X, points[0].Y, 20);
+        context.ClosePath();
+
+        context.SetRGBStrokeColor(1, 1, 0, 1);
+        context.SetLineWidth(2);
+        context.StrokePath();
 
         context.RestoreGState();
     }

@@ -51,6 +51,35 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
             Window!.ShowContextMenu(x, y, _contextMenu);
         }
     }
+    
+    public override void MouseMove(int x, int y, Modifiers modifiers)
+    {
+        _currentPage.OnMouseMove(x, y, modifiers);
+    }
+
+    private void SelectPage(IPage page)
+    {
+        _currentPage = page;
+        _currentPage.OnSize(_width, _height);
+        Invalidate(0, 0, _width, _height);
+    }
+
+    public override void KeyDown(Key key, Modifiers modifiers, KeyLocation location)
+    {
+        switch (key)
+        {
+            case Key._1:
+                SelectPage(_page01);
+                break;
+            case Key._2:
+                SelectPage(_page02);
+                break;
+            default:
+                _currentPage.OnKeyDown(key, modifiers);
+                break;
+        }
+    }
+
     private static string ModifiersToString(Modifiers modifiers)
     {
         var strings = 

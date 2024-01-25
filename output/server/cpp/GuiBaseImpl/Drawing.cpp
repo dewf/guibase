@@ -11,6 +11,26 @@ Rect makeRect(double x, double y, double width, double height)
     return STRUCT_CAST(Rect, r);
 }
 
+Path Path_createWithRect(Rect rect, AffineTransform transform)
+{
+    return (Path)dl_CGPathCreateWithRect(STRUCT_CAST(dl_CGRect, rect), (dl_CGAffineTransform*)&transform);
+}
+
+Path Path_createWithEllipseInRect(Rect rect, AffineTransform transform)
+{
+    return (Path)dl_CGPathCreateWithEllipseInRect(STRUCT_CAST(dl_CGRect, rect), (dl_CGAffineTransform*)&transform);
+}
+
+Path Path_createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, AffineTransform transform)
+{
+    return (Path)dl_CGPathCreateWithRoundedRect(STRUCT_CAST(dl_CGRect, rect), cornerWidth, cornerHeight, (dl_CGAffineTransform*)&transform);
+}
+
+void Path_dispose(Path _this)
+{
+    dl_CGPathRelease((dl_CGPathRef)_this);
+}
+
 void DrawContext_dispose(DrawContext _this)
 {
     // hmm this might have end-user value when for example drawing into bitmaps?
@@ -59,6 +79,11 @@ void DrawContext_beginPath(DrawContext _this)
 void DrawContext_addArc(DrawContext _this, double x, double y, double radius, double startAngle, double endAngle, bool clockwise)
 {
     dl_CGContextAddArc((dl_CGContextRef)_this, x, y, radius, startAngle, endAngle, clockwise ? 1 : 0);
+}
+
+void DrawContext_addArcToPoint(DrawContext _this, double x1, double y1, double x2, double y2, double radius)
+{
+    dl_CGContextAddArcToPoint((dl_CGContextRef)_this, x1, y1, x2, y2, radius);
 }
 
 void DrawContext_drawPath(DrawContext _this, PathDrawingMode mode)
@@ -114,6 +139,46 @@ void DrawContext_clip(DrawContext _this)
 void DrawContext_translateCTM(DrawContext _this, double tx, double ty)
 {
     dl_CGContextTranslateCTM((dl_CGContextRef)_this, tx, ty);
+}
+
+void DrawContext_scaleCTM(DrawContext _this, double scaleX, double scaleY)
+{
+    dl_CGContextScaleCTM((dl_CGContextRef)_this, scaleX, scaleY);
+}
+
+void DrawContext_rotateCTM(DrawContext _this, double angle)
+{
+    dl_CGContextRotateCTM((dl_CGContextRef)_this, angle);
+}
+
+void DrawContext_concatCTM(DrawContext _this, AffineTransform transform)
+{
+    dl_CGContextConcatCTM((dl_CGContextRef)_this, STRUCT_CAST(dl_CGAffineTransform, transform));
+}
+
+void DrawContext_addPath(DrawContext _this, Path path)
+{
+    dl_CGContextAddPath((dl_CGContextRef)_this, (dl_CGPathRef)path);
+}
+
+void DrawContext_fillPath(DrawContext _this)
+{
+    dl_CGContextFillPath((dl_CGContextRef)_this);
+}
+
+void DrawContext_strokeRect(DrawContext _this, Rect rect)
+{
+    dl_CGContextStrokeRect((dl_CGContextRef)_this, STRUCT_CAST(dl_CGRect, rect));
+}
+
+void DrawContext_addRect(DrawContext _this, Rect rect)
+{
+    dl_CGContextAddRect((dl_CGContextRef)_this, STRUCT_CAST(dl_CGRect, rect));
+}
+
+void DrawContext_closePath(DrawContext _this)
+{
+    dl_CGContextClosePath((dl_CGContextRef)_this);
 }
 
 Color Color_create(double red, double green, double blue, double alpha)

@@ -39,7 +39,18 @@ uint32_t LineBoundsOptions__pop();
 void Line__push(Line value);
 Line Line__pop();
 
+void Path__push(Path value);
+Path Path__pop();
+
 void makeRect__wrapper();
+
+void Path_createWithRect__wrapper();
+
+void Path_createWithEllipseInRect__wrapper();
+
+void Path_createWithRoundedRect__wrapper();
+
+void Path_dispose__wrapper();
 
 void DrawContext_saveGState__wrapper();
 
@@ -58,6 +69,8 @@ void DrawContext_setTextPosition__wrapper();
 void DrawContext_beginPath__wrapper();
 
 void DrawContext_addArc__wrapper();
+
+void DrawContext_addArcToPoint__wrapper();
 
 void DrawContext_drawPath__wrapper();
 
@@ -80,6 +93,22 @@ void DrawContext_setLineWidth__wrapper();
 void DrawContext_clip__wrapper();
 
 void DrawContext_translateCTM__wrapper();
+
+void DrawContext_scaleCTM__wrapper();
+
+void DrawContext_rotateCTM__wrapper();
+
+void DrawContext_concatCTM__wrapper();
+
+void DrawContext_addPath__wrapper();
+
+void DrawContext_fillPath__wrapper();
+
+void DrawContext_strokeRect__wrapper();
+
+void DrawContext_addRect__wrapper();
+
+void DrawContext_closePath__wrapper();
 
 void DrawContext_dispose__wrapper();
 

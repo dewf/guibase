@@ -46,8 +46,10 @@ interface WindowDelegate {
    void closed();
    void destroyed();
    void mouseDown(int x, int y, MouseButton button, Modifiers modifiers);
+   void mouseMove(int x, int y, Modifiers modifiers);
    void repaint(DrawContext context, int x, int y, int width, int height);
    void resized(int width, int height);
+   void keyDown(Key key, Modifiers modifiers, KeyLocation location);
 }
 
 opaque Window {
@@ -92,6 +94,12 @@ opaque MenuBar {
    static MenuBar create();
 }
 
+enum KeyLocation {
+   Default,
+   Left,
+   Right,
+   NumPad
+}
 
 enum Key {
    Unknown,

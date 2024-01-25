@@ -156,12 +156,45 @@ Line Line__pop() {
     return (Line)ni_popPtr();
 }
 
+void Path__push(Path value) {
+    ni_pushPtr(value);
+}
+
+Path Path__pop() {
+    return (Path)ni_popPtr();
+}
+
 void makeRect__wrapper() {
     auto x = ni_popDouble();
     auto y = ni_popDouble();
     auto width = ni_popDouble();
     auto height = ni_popDouble();
     Rect__push(makeRect(x, y, width, height), true);
+}
+
+void Path_createWithRect__wrapper() {
+    auto rect = Rect__pop();
+    auto transform = AffineTransform__pop();
+    Path__push(Path_createWithRect(rect, transform));
+}
+
+void Path_createWithEllipseInRect__wrapper() {
+    auto rect = Rect__pop();
+    auto transform = AffineTransform__pop();
+    Path__push(Path_createWithEllipseInRect(rect, transform));
+}
+
+void Path_createWithRoundedRect__wrapper() {
+    auto rect = Rect__pop();
+    auto cornerWidth = ni_popDouble();
+    auto cornerHeight = ni_popDouble();
+    auto transform = AffineTransform__pop();
+    Path__push(Path_createWithRoundedRect(rect, cornerWidth, cornerHeight, transform));
+}
+
+void Path_dispose__wrapper() {
+    auto _this = Path__pop();
+    Path_dispose(_this);
 }
 
 void DrawContext_saveGState__wrapper() {
@@ -225,6 +258,16 @@ void DrawContext_addArc__wrapper() {
     auto endAngle = ni_popDouble();
     auto clockwise = ni_popBool();
     DrawContext_addArc(_this, x, y, radius, startAngle, endAngle, clockwise);
+}
+
+void DrawContext_addArcToPoint__wrapper() {
+    auto _this = DrawContext__pop();
+    auto x1 = ni_popDouble();
+    auto y1 = ni_popDouble();
+    auto x2 = ni_popDouble();
+    auto y2 = ni_popDouble();
+    auto radius = ni_popDouble();
+    DrawContext_addArcToPoint(_this, x1, y1, x2, y2, radius);
 }
 
 void DrawContext_drawPath__wrapper() {
@@ -293,6 +336,53 @@ void DrawContext_translateCTM__wrapper() {
     auto tx = ni_popDouble();
     auto ty = ni_popDouble();
     DrawContext_translateCTM(_this, tx, ty);
+}
+
+void DrawContext_scaleCTM__wrapper() {
+    auto _this = DrawContext__pop();
+    auto scaleX = ni_popDouble();
+    auto scaleY = ni_popDouble();
+    DrawContext_scaleCTM(_this, scaleX, scaleY);
+}
+
+void DrawContext_rotateCTM__wrapper() {
+    auto _this = DrawContext__pop();
+    auto angle = ni_popDouble();
+    DrawContext_rotateCTM(_this, angle);
+}
+
+void DrawContext_concatCTM__wrapper() {
+    auto _this = DrawContext__pop();
+    auto transform = AffineTransform__pop();
+    DrawContext_concatCTM(_this, transform);
+}
+
+void DrawContext_addPath__wrapper() {
+    auto _this = DrawContext__pop();
+    auto path = Path__pop();
+    DrawContext_addPath(_this, path);
+}
+
+void DrawContext_fillPath__wrapper() {
+    auto _this = DrawContext__pop();
+    DrawContext_fillPath(_this);
+}
+
+void DrawContext_strokeRect__wrapper() {
+    auto _this = DrawContext__pop();
+    auto rect = Rect__pop();
+    DrawContext_strokeRect(_this, rect);
+}
+
+void DrawContext_addRect__wrapper() {
+    auto _this = DrawContext__pop();
+    auto rect = Rect__pop();
+    DrawContext_addRect(_this, rect);
+}
+
+void DrawContext_closePath__wrapper() {
+    auto _this = DrawContext__pop();
+    DrawContext_closePath(_this);
 }
 
 void DrawContext_dispose__wrapper() {
@@ -371,6 +461,10 @@ int Drawing__register() {
     auto m = ni_registerModule("Drawing");
     ni_registerModuleConstants(m, &__constantsFunc);
     ni_registerModuleMethod(m, "makeRect", &makeRect__wrapper);
+    ni_registerModuleMethod(m, "Path_createWithRect", &Path_createWithRect__wrapper);
+    ni_registerModuleMethod(m, "Path_createWithEllipseInRect", &Path_createWithEllipseInRect__wrapper);
+    ni_registerModuleMethod(m, "Path_createWithRoundedRect", &Path_createWithRoundedRect__wrapper);
+    ni_registerModuleMethod(m, "Path_dispose", &Path_dispose__wrapper);
     ni_registerModuleMethod(m, "DrawContext_saveGState", &DrawContext_saveGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_restoreGState", &DrawContext_restoreGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setRGBFillColor", &DrawContext_setRGBFillColor__wrapper);
@@ -380,6 +474,7 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_setTextPosition", &DrawContext_setTextPosition__wrapper);
     ni_registerModuleMethod(m, "DrawContext_beginPath", &DrawContext_beginPath__wrapper);
     ni_registerModuleMethod(m, "DrawContext_addArc", &DrawContext_addArc__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_addArcToPoint", &DrawContext_addArcToPoint__wrapper);
     ni_registerModuleMethod(m, "DrawContext_drawPath", &DrawContext_drawPath__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setStrokeColorWithColor", &DrawContext_setStrokeColorWithColor__wrapper);
     ni_registerModuleMethod(m, "DrawContext_strokeRectWithWidth", &DrawContext_strokeRectWithWidth__wrapper);
@@ -391,6 +486,14 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_setLineWidth", &DrawContext_setLineWidth__wrapper);
     ni_registerModuleMethod(m, "DrawContext_clip", &DrawContext_clip__wrapper);
     ni_registerModuleMethod(m, "DrawContext_translateCTM", &DrawContext_translateCTM__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_scaleCTM", &DrawContext_scaleCTM__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_rotateCTM", &DrawContext_rotateCTM__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_concatCTM", &DrawContext_concatCTM__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_addPath", &DrawContext_addPath__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_fillPath", &DrawContext_fillPath__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_strokeRect", &DrawContext_strokeRect__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_addRect", &DrawContext_addRect__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_closePath", &DrawContext_closePath__wrapper);
     ni_registerModuleMethod(m, "DrawContext_dispose", &DrawContext_dispose__wrapper);
     ni_registerModuleMethod(m, "Color_create", &Color_create__wrapper);
     ni_registerModuleMethod(m, "Color_dispose", &Color_dispose__wrapper);

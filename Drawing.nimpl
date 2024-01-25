@@ -36,6 +36,12 @@ enum PathDrawingMode {
     EOFillStroke
 }
 
+opaque Path {
+    static Path createWithRect(Rect rect, AffineTransform transform);
+    static Path createWithEllipseInRect(Rect rect, AffineTransform transform);
+    static Path createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, AffineTransform transform);
+}
+
 opaque DrawContext {
     void saveGState();
     void restoreGState();
@@ -46,6 +52,7 @@ opaque DrawContext {
     void setTextPosition(double x, double y);
     void beginPath();
     void addArc(double x, double y, double radius, double startAngle, double endAngle, bool clockwise);
+    void addArcToPoint(double x1, double y1, double x2, double y2, double radius);
     void drawPath(PathDrawingMode mode);
     void setStrokeColorWithColor(Color color);
     void strokeRectWithWidth(Rect rect, double width);
@@ -57,6 +64,14 @@ opaque DrawContext {
     void setLineWidth(double width);
     void clip();
     void translateCTM(double tx, double ty);
+    void scaleCTM(double scaleX, double scaleY);
+    void rotateCTM(double angle);
+    void concatCTM(AffineTransform transform);
+    void addPath(Path path);
+    void fillPath();
+    void strokeRect(Rect rect);
+    void addRect(Rect rect);
+    void closePath();
 }
 
 opaque Color {

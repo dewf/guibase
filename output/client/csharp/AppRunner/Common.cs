@@ -78,4 +78,11 @@ public static class Common
         // opaques will be auto-disposed ...
         context.RestoreGState();
     }
+
+    public static Point BetweenPoints(Point a, Point b)
+    {
+        var x = (a.X + b.X) / 2;
+        var y = (a.Y + b.Y) / 2;
+        return new Point(x, y);
+    }
 }

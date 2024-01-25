@@ -17,6 +17,9 @@ Action Action__pop();
 void Icon__push(Icon value);
 Icon Icon__pop();
 
+void KeyLocation__push(KeyLocation value);
+KeyLocation KeyLocation__pop();
+
 void Menu__push(Menu value);
 Menu Menu__pop();
 
@@ -101,8 +104,12 @@ void WindowDelegate_destroyed__wrapper(int serverID);
 
 void WindowDelegate_mouseDown__wrapper(int serverID);
 
+void WindowDelegate_mouseMove__wrapper(int serverID);
+
 void WindowDelegate_repaint__wrapper(int serverID);
 
 void WindowDelegate_resized__wrapper(int serverID);
+
+void WindowDelegate_keyDown__wrapper(int serverID);
 
 int Windowing__register();

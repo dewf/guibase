@@ -102,6 +102,16 @@ public:
         case wl_kMouseEventTypeMouseDown:
             del->mouseDown(mouseEvent.x, mouseEvent.y, (MouseButton)mouseEvent.button, mouseEvent.modifiers);
             break;
+        case wl_kMouseEventTypeMouseMove:
+            del->mouseMove(mouseEvent.x, mouseEvent.y, mouseEvent.modifiers);
+            break;
+        }
+    }
+    void onKey(wl_KeyEvent& keyEvent) {
+        switch (keyEvent.eventType) {
+        case wl_kKeyEventTypeDown:
+            del->keyDown((Key)keyEvent.key, keyEvent.modifiers, (KeyLocation)keyEvent.location);
+            break;
         }
     }
 };
@@ -127,6 +137,9 @@ CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* user
             break;
         case wl_kEventTypeMouse:
             win->onMouse(event->mouseEvent);
+            break;
+        case wl_kEventTypeKey:
+            win->onKey(event->keyEvent);
             break;
         case wl_kEventTypeWindowRepaint:
             win->onRepaint(event->repaintEvent);

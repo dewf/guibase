@@ -20,7 +20,7 @@ public class Page02(IWindowMethods windowMethods) : BasePage(windowMethods)
     public override void Render(DrawContext context, RenderArea area)
     {
         context.SetRGBFillColor(0.2, 0.2, 0.3, 1);
-        context.FillRect(MakeRect(0, 0, area.Width, area.Height));
+        context.FillRect(MakeRect(0, 0, Width, Height));
         context.SetTextMatrix(AffineTransformIdentity);
 
         using var line = Line.CreateWithAttributedString(_labelString);
@@ -34,8 +34,8 @@ public class Page02(IWindowMethods windowMethods) : BasePage(windowMethods)
         // concentric circles to test arcs
         context.SetRGBStrokeColor(0, 0.4, 1, 1);
         context.SetLineWidth(2.0);
-        x = area.Width / 2.0;
-        y = (area.Height * 2.0) / 3.0;
+        x = Width / 2.0;
+        y = (Height * 2.0) / 3.0;
         //dl_CGContextMoveToPoint(c, x, y);
         context.BeginPath();
         context.AddArc(x, y, 240, 0, 2 * Math.PI, true);

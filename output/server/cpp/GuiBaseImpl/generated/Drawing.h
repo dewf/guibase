@@ -11,6 +11,7 @@
 
 #include "Foundation.h"
 
+struct __Path; typedef struct __Path* Path;
 struct __DrawContext; typedef struct __DrawContext* DrawContext;
 struct __Color; typedef struct __Color* Color;
 struct __AttributedString; typedef struct __AttributedString* AttributedString;
@@ -111,9 +112,14 @@ enum LineBoundsOptions {
 };
 
 
+
 extern const AffineTransform AffineTransformIdentity;
 
 Rect makeRect(double x, double y, double width, double height);
+Path Path_createWithRect(Rect rect, AffineTransform transform);
+Path Path_createWithEllipseInRect(Rect rect, AffineTransform transform);
+Path Path_createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, AffineTransform transform);
+void Path_dispose(Path _this);
 void DrawContext_saveGState(DrawContext _this);
 void DrawContext_restoreGState(DrawContext _this);
 void DrawContext_setRGBFillColor(DrawContext _this, double red, double green, double blue, double alpha);
@@ -123,6 +129,7 @@ void DrawContext_setTextMatrix(DrawContext _this, AffineTransform t);
 void DrawContext_setTextPosition(DrawContext _this, double x, double y);
 void DrawContext_beginPath(DrawContext _this);
 void DrawContext_addArc(DrawContext _this, double x, double y, double radius, double startAngle, double endAngle, bool clockwise);
+void DrawContext_addArcToPoint(DrawContext _this, double x1, double y1, double x2, double y2, double radius);
 void DrawContext_drawPath(DrawContext _this, PathDrawingMode mode);
 void DrawContext_setStrokeColorWithColor(DrawContext _this, Color color);
 void DrawContext_strokeRectWithWidth(DrawContext _this, Rect rect, double width);
@@ -134,6 +141,14 @@ void DrawContext_clearLineDash(DrawContext _this);
 void DrawContext_setLineWidth(DrawContext _this, double width);
 void DrawContext_clip(DrawContext _this);
 void DrawContext_translateCTM(DrawContext _this, double tx, double ty);
+void DrawContext_scaleCTM(DrawContext _this, double scaleX, double scaleY);
+void DrawContext_rotateCTM(DrawContext _this, double angle);
+void DrawContext_concatCTM(DrawContext _this, AffineTransform transform);
+void DrawContext_addPath(DrawContext _this, Path path);
+void DrawContext_fillPath(DrawContext _this);
+void DrawContext_strokeRect(DrawContext _this, Rect rect);
+void DrawContext_addRect(DrawContext _this, Rect rect);
+void DrawContext_closePath(DrawContext _this);
 void DrawContext_dispose(DrawContext _this);
 Color Color_create(double red, double green, double blue, double alpha);
 void Color_dispose(Color _this);
