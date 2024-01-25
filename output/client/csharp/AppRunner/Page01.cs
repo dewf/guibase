@@ -1,5 +1,6 @@
 ﻿using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
+using static AppRunner.Common;
 
 namespace AppRunner;
 
@@ -58,8 +59,8 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
         const double circleRadius = 100.0;
         const double startingAngle = 0.0;
         const double endingAngle = Math.PI * 2;
-        var ourRect = new Rect(new Point(15, 15), new Size(170, 170));
-        var totalArea = new Rect(new Point(0, 0), new Size(170 + 100 + 5 + 150 + 100 - 50, 200));
+        var ourRect = MakeRect(15, 15, 170, 170);
+        var totalArea = MakeRect(0, 0, 170 + 100 + 5 + 150 + 100 - 50, 200);
 
         // white background
         context.SetRGBFillColor(1, 1, 1, 1);
@@ -94,18 +95,18 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
     {
         // max-size background
         context.SetRGBFillColor(0, 0, 0, 1);
-        var rMax = new Rect(new Point(0, 0), new Size(Constants.MaxWidth, Constants.MaxHeight));
+        var rMax = MakeRect(0, 0, Constants.MaxWidth, Constants.MaxHeight);
         context.FillRect(rMax);
 
         // normal size background
         context.SetRGBFillColor(0.1, 0.1, 0.3, 1);
-        var rNormal = new Rect(new Point(0, 0), new Size(Constants.InitWidth, Constants.InitHeight));
+        var rNormal = MakeRect(0, 0, Constants.InitWidth, Constants.InitHeight);
         context.FillRect(rNormal);
 
         if (_doCrossMask)
         {
             // circular clip
-            var clippy = new Rect(new Point(_mouseX - (400.0 / 2), _mouseY - (400.0 / 2)), new Size(400, 400));
+            var clippy = MakeRect(_mouseX - (400.0 / 2), _mouseY - (400.0 / 2), 400, 400);
             context.BeginPath();
             var clx = clippy.Origin.X + (clippy.Size.Width / 2);
             var cly = clippy.Origin.Y + (clippy.Size.Height / 2);
@@ -113,8 +114,8 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
             context.Clip();
             // cross inside that
             var crossWidth = clippy.Size.Width / 3;
-            var vert = new Rect(new Point(clx - (crossWidth / 2), clippy.Origin.Y), new Size(crossWidth, clippy.Size.Height));
-            var horz = new Rect(new Point(clippy.Origin.X, cly - (crossWidth / 2)), new Size(clippy.Size.Width, crossWidth));
+            var vert = MakeRect(clx - (crossWidth / 2), clippy.Origin.Y, crossWidth, clippy.Size.Height);
+            var horz = MakeRect(clippy.Origin.X, cly - (crossWidth / 2), clippy.Size.Width, crossWidth);
             context.BeginPath();
             context.AddRect(vert);
             context.AddRect(horz);
@@ -193,14 +194,14 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
         context.SaveGState();
 
         context.SetRGBStrokeColor(0, 1, 0, 1);
-        var r2 = new Rect(new Point(100, 100), new Size(250, 100));
+        var r2 = MakeRect(100, 100, 250, 100);
         context.StrokeRectWithWidth(r2, 3.0);
 
         context.SetRGBStrokeColor(0, 0.5, 1, 1);
         for (var i = 0; i < 5; i++)
         {
             var n = 0.5 + ((i + 1) * 5);
-            var r3 = new Rect(new Point(n, n), new Size(Constants.InitWidth - (n * 2), Constants.InitHeight - (n * 2)));
+            var r3 = MakeRect(n, n, Constants.InitWidth - (n * 2), Constants.InitHeight - (n * 2));
             context.StrokeRectWithWidth(r3, 1);
         }
 
@@ -208,7 +209,7 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
         for (var i = 0; i < 5; i++)
         {
             var n = 0.5 + ((i + 1) * 5);
-            var r3 = new Rect(new Point(n, n), new Size(Constants.MinWidth - (n * 2), Constants.MinHeight - (n * 2)));
+            var r3 = MakeRect(n, n, Constants.MinWidth - (n * 2), Constants.MinHeight - (n * 2));
             context.StrokeRectWithWidth(r3, 1);
         }
 
@@ -216,11 +217,11 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
         for (var i = 0; i < 5; i++)
         {
             var n = 0.5 + ((i + 1) * 5);
-            var r3 = new Rect(new Point(n, n), new Size(Constants.MaxWidth - (n * 2), Constants.MaxHeight - (n * 2)));
+            var r3 = MakeRect(n, n, Constants.MaxWidth - (n * 2), Constants.MaxHeight - (n * 2));
             context.StrokeRectWithWidth(r3, 1);
         }
-        
-        var r4 = new Rect(new Point(280, 100), new Size(200, 200));
+
+        var r4 = MakeRect(280, 100, 200, 200);
         var alpha = 1.0 / 5;
         for (var i = 0; i < 5; i++)
         {
@@ -229,8 +230,8 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
             DoBlueRect(context, r4, alpha);
             alpha += 1.0 / 5;
         }
-        
-        var r5 = new Rect(new Point(0.5, 0.5), new Size(149, 149));
+
+        var r5 = MakeRect(0.5, 0.5, 149, 149);
         context.TranslateCTM(280, 300);
         context.SetRGBFillColor(1, 0, .3, .2);
         context.SetRGBStrokeColor(0, 0, 0, 1);
@@ -247,8 +248,8 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
         // alpha rects ==========================================
         context.SaveGState();
 
-        var r6 = new Rect(new Point(0, 0), new Size(130, 100));
-        var r7 = new Rect(new Point(120, 90), new Size(5, 5));
+        var r6 = MakeRect(0, 0, 130, 100);
+        var r7 = MakeRect(120, 90, 5, 5);
         var numRects = 6;
         var tint = 1.0;
         var tintAdjust = 1.0 / numRects;
@@ -308,7 +309,7 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
         context.StrokePath();
 
         // curved version
-        var startEnd = Common.BetweenPoints(points[2], points[0]);
+        var startEnd = BetweenPoints(points[2], points[0]);
         context.MoveToPoint(startEnd.X, startEnd.Y);
         context.AddArcToPoint(points[0].X, points[0].Y, points[1].X, points[1].Y, 20);
         context.AddArcToPoint(points[1].X, points[1].Y, points[2].X, points[2].Y, 20);

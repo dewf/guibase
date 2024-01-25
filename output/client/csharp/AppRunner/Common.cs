@@ -4,6 +4,11 @@ namespace AppRunner;
 
 public static class Common
 {
+    public static Rect MakeRect(double x, double y, double width, double height)
+    {
+        return new Rect(new Point(x, y), new Size(width, height));
+    }
+    
     public static void PointAt(DrawContext context, Point p)
     {
         context.SaveGState();

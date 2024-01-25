@@ -5,12 +5,6 @@
 
 const AffineTransform AffineTransformIdentity = *((AffineTransform*)&dl_CGAffineTransformIdentity);
 
-Rect makeRect(double x, double y, double width, double height)
-{
-    auto r = dl_CGRectMake(x, y, width, height);
-    return STRUCT_CAST(Rect, r);
-}
-
 Path Path_createWithRect(Rect rect, AffineTransform transform)
 {
     return (Path)dl_CGPathCreateWithRect(STRUCT_CAST(dl_CGRect, rect), (dl_CGAffineTransform*)&transform);

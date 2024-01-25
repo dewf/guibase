@@ -14,7 +14,6 @@ namespace Org.Prefixed.GuiBase
     public static class Drawing
     {
         private static ModuleHandle _module;
-        private static ModuleMethodHandle _makeRect;
         private static ModuleMethodHandle _path_createWithRect;
         private static ModuleMethodHandle _path_createWithEllipseInRect;
         private static ModuleMethodHandle _path_createWithRoundedRect;
@@ -778,24 +777,12 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Path(ptr) : null;
         }
 
-        public static Rect MakeRect(double x, double y, double width, double height)
-        {
-            NativeImplClient.PushDouble(height);
-            NativeImplClient.PushDouble(width);
-            NativeImplClient.PushDouble(y);
-            NativeImplClient.PushDouble(x);
-            NativeImplClient.InvokeModuleMethod(_makeRect);
-            return Rect__Pop();
-        }
-
         internal static void Init()
         {
             _module = NativeImplClient.GetModule("Drawing");
 
             NativeImplClient.PushModuleConstants(_module);
             AffineTransformIdentity = AffineTransform__Pop();
-
-            _makeRect = NativeImplClient.GetModuleMethod(_module, "makeRect");
 
             _path_createWithRect = NativeImplClient.GetModuleMethod(_module, "Path_createWithRect");
             _path_createWithEllipseInRect = NativeImplClient.GetModuleMethod(_module, "Path_createWithEllipseInRect");

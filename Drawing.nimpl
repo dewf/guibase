@@ -16,7 +16,6 @@ struct Rect {
     Point origin;
     Size size;
 }
-Rect makeRect(double x, double y, double width, double height);
 
 struct AffineTransform {
     double a;
@@ -79,10 +78,12 @@ opaque Color {
 }
 
 // text stuff
+
 options AttributedStringOptions {
     Font font;
     Color foregroundColor;
 }
+
 opaque AttributedString {
     static AttributedString create(string s, AttributedStringOptions opts);
 }
@@ -90,8 +91,6 @@ opaque AttributedString {
 opaque Font {
     static Font createFromFile(string path, double size, AffineTransform matrix);
 }
-
-// CTLine
 
 struct TypographicBounds {
     double width;

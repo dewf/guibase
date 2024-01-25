@@ -1,4 +1,5 @@
 ﻿using static Org.Prefixed.GuiBase.Drawing;
+using static AppRunner.Common;
 
 namespace AppRunner;
 
@@ -29,7 +30,7 @@ public class Page02(IWindowMethods windowMethods) : BasePage(windowMethods)
         double x = 100;
         double y = 200;
 
-        Common.DrawLineAt(context, line, x, y, out yAdvance);
+        DrawLineAt(context, line, x, y, out yAdvance);
 
         // concentric circles to test arcs
         context.SetRGBStrokeColor(0, 0.4, 1, 1);

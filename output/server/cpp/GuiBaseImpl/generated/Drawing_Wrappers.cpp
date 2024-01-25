@@ -164,14 +164,6 @@ Path Path__pop() {
     return (Path)ni_popPtr();
 }
 
-void makeRect__wrapper() {
-    auto x = ni_popDouble();
-    auto y = ni_popDouble();
-    auto width = ni_popDouble();
-    auto height = ni_popDouble();
-    Rect__push(makeRect(x, y, width, height), true);
-}
-
 void Path_createWithRect__wrapper() {
     auto rect = Rect__pop();
     auto transform = AffineTransform__pop();
@@ -460,7 +452,6 @@ void __constantsFunc() {
 int Drawing__register() {
     auto m = ni_registerModule("Drawing");
     ni_registerModuleConstants(m, &__constantsFunc);
-    ni_registerModuleMethod(m, "makeRect", &makeRect__wrapper);
     ni_registerModuleMethod(m, "Path_createWithRect", &Path_createWithRect__wrapper);
     ni_registerModuleMethod(m, "Path_createWithEllipseInRect", &Path_createWithEllipseInRect__wrapper);
     ni_registerModuleMethod(m, "Path_createWithRoundedRect", &Path_createWithRoundedRect__wrapper);

@@ -42,8 +42,6 @@ Line Line__pop();
 void Path__push(Path value);
 Path Path__pop();
 
-void makeRect__wrapper();
-
 void Path_createWithRect__wrapper();
 
 void Path_createWithEllipseInRect__wrapper();

@@ -115,7 +115,6 @@ enum LineBoundsOptions {
 
 extern const AffineTransform AffineTransformIdentity;
 
-Rect makeRect(double x, double y, double width, double height);
 Path Path_createWithRect(Rect rect, AffineTransform transform);
 Path Path_createWithEllipseInRect(Rect rect, AffineTransform transform);
 Path Path_createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, AffineTransform transform);
