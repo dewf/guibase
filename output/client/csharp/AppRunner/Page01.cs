@@ -27,11 +27,9 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
         context.FillRect(MakeRect(0, 0, width, height));
         context.SetTextMatrix(AffineTransformIdentity);
 
-        using (var line = Line.CreateWithAttributedString(_labelString))
-        {
-            context.SetTextPosition(100, 300);
-            line.Draw(context);
-        }
+        using var line = Line.CreateWithAttributedString(_labelString);
+        context.SetTextPosition(100, 300);
+        line.Draw(context);
         
         // var text = MakeConstantString("Quartz♪❦♛あぎ");
         //

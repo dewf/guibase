@@ -16,10 +16,6 @@ struct Rect {
     Point origin;
     Size size;
 }
-// todo: static struct methods?
-// ideally this would be on the client somehow, at least for very very simple constructors
-// such that we wouldn't have to hand-write them as extension methods on multiple frontends
-// also, non-static struct methods make no sense because it's not opaque and we're shipping a full copy to the server and back ... seems a bit daft
 Rect makeRect(double x, double y, double width, double height);
 
 struct AffineTransform {
