@@ -12,21 +12,13 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
     public override void Init()
     {
         // test create some fonts and layouts and stuff
-        using var path = CFString.MakeConstant("./_democontent/LiberationSerif-Regular.ttf");
-        using var url = URL.CreateWithFileSystemPath(path, URLPathStyle.POSIX, false);
-        using var descriptors = FontManagerCreateFontDescriptorsFromURL(url);
-        var items = descriptors.Items(); // what's returned by this method is not owned, so no disposal
-        if (items.Length > 0)
+        using var font = Font.CreateFromFile("./_democontent/LiberationSerif-Regular.ttf", 120.0, AffineTransformIdentity);
+        _labelString = AttributedString.Create("Quartz♪❦♛あぎ", new AttributedStringOptions
         {
-            var font = FontCreateWithFontDescriptor(items[0], 120.0, AffineTransformIdentity);
-            Console.WriteLine("we got the font??");
-            _labelString = AttributedString.Create("Quartz♪❦♛あぎ", new AttributedStringOptions
-            {
-                Font = font,
-                ForegroundColor = Color.Create(0, 1, 1, 0.5)
-            });
-        }
-        // release: array, url, path
+            Font = font,
+            ForegroundColor = Color.Create(0, 1, 1, 0.5)
+        });
+        // this is going to auto-dispose the font, but the attributed string's internal dictionary should have retained it
     }
 
     public override void Render(DrawContext context, int x, int y, int width, int height)
@@ -35,10 +27,12 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
         context.FillRect(MakeRect(0, 0, width, height));
         context.SetTextMatrix(AffineTransformIdentity);
 
-        using var line = Line.CreateWithAttributedString(_labelString);
-        context.SetTextPosition(100, 300);
-        line.Draw(context);
-
+        using (var line = Line.CreateWithAttributedString(_labelString))
+        {
+            context.SetTextPosition(100, 300);
+            line.Draw(context);
+        }
+        
         // var text = MakeConstantString("Quartz♪❦♛あぎ");
         //
         // auto dict = dl_CFDictionaryCreateMutable(0);

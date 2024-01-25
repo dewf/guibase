@@ -27,12 +27,6 @@ DrawContext DrawContext__pop();
 void Font__push(Font value);
 Font Font__pop();
 
-void FontDescriptor__push(FontDescriptor value);
-FontDescriptor FontDescriptor__pop();
-
-void FontDescriptorArray__push(FontDescriptorArray value);
-FontDescriptorArray FontDescriptorArray__pop();
-
 void TypographicBounds__push(TypographicBounds value, bool isReturn);
 TypographicBounds TypographicBounds__pop();
 
@@ -43,10 +37,6 @@ void Line__push(Line value);
 Line Line__pop();
 
 void makeRect__wrapper();
-
-void fontManagerCreateFontDescriptorsFromURL__wrapper();
-
-void fontCreateWithFontDescriptor__wrapper();
 
 void DrawContext_saveGState__wrapper();
 
@@ -70,11 +60,7 @@ void AttributedString_create__wrapper();
 
 void AttributedString_dispose__wrapper();
 
-void FontDescriptor_dispose__wrapper();
-
-void FontDescriptorArray_items__wrapper();
-
-void FontDescriptorArray_dispose__wrapper();
+void Font_createFromFile__wrapper();
 
 void Font_dispose__wrapper();
 

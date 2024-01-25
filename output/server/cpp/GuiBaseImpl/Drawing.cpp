@@ -11,18 +11,6 @@ Rect makeRect(double x, double y, double width, double height)
     return STRUCT_CAST(Rect, r);
 }
 
-FontDescriptorArray fontManagerCreateFontDescriptorsFromURL(URL fileUrl)
-{
-    return (FontDescriptorArray)dl_CTFontManagerCreateFontDescriptorsFromURL((dl_CFURLRef)fileUrl);
-}
-
-Font fontCreateWithFontDescriptor(FontDescriptor descriptor, double size, AffineTransform matrix)
-{
-    auto res = (Font)dl_CTFontCreateWithFontDescriptor((dl_CTFontDescriptorRef)descriptor, size, (dl_CGAffineTransform*)&matrix);
-    printf("fontCreateWithFontDescriptor: [%p]\n", res);
-    return res;
-}
-
 void DrawContext_dispose(DrawContext _this)
 {
     // hmm this might have end-user value when for example drawing into bitmaps?
@@ -94,28 +82,20 @@ void AttributedString_dispose(AttributedString _this)
     dl_CFRelease(_this);
 }
 
-void FontDescriptor_dispose(FontDescriptor _this)
+Font Font_createFromFile(std::string path, double size, AffineTransform matrix)
 {
-    dl_CFRelease(_this);
-}
-
-void FontDescriptorArray_dispose(FontDescriptorArray _this)
-{
-    dl_CFRelease(_this);
-}
-
-std::vector<FontDescriptor> FontDescriptorArray_items(FontDescriptorArray _this)
-{
-    auto arr = (dl_CFArrayRef)_this;
-    std::vector<FontDescriptor> ret;
-    for (int i = 0; i < dl_CFArrayGetCount(arr); i++) {
-        auto fd = (dl_CTFontDescriptorRef)dl_CFArrayGetValueAtIndex(arr, i);
-        ret.push_back((FontDescriptor)fd);
+    auto pathStr = dl_CFStringCreateWithCString(path.c_str());
+    auto url = dl_CFURLCreateWithFileSystemPath(pathStr, dl_CFURLPathStyle::dl_kCFURLPOSIXPathStyle, false);
+    auto descriptors = dl_CTFontManagerCreateFontDescriptorsFromURL(url);
+    Font result = nullptr;
+    if (dl_CFArrayGetCount(descriptors) > 0) {
+        auto first = (dl_CTFontDescriptorRef)dl_CFArrayGetValueAtIndex(descriptors, 0);
+        result = (Font)dl_CTFontCreateWithFontDescriptor(first, size, (dl_CGAffineTransform*)&matrix);
     }
-    // the returned items are NOT owned and so shouldn't be released
-    // ideally we need a way of encoding that into the opaque type (annotated in the interface description?)
-    // so that we can catch and warn about it
-    return ret;
+    dl_CFRelease(descriptors);
+    dl_CFRelease(url);
+    dl_CFRelease(pathStr);
+    return result;
 }
 
 void Font_dispose(Font _this)

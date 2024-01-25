@@ -15,8 +15,6 @@ namespace Org.Prefixed.GuiBase
     {
         private static ModuleHandle _module;
         private static ModuleMethodHandle _makeRect;
-        private static ModuleMethodHandle _fontManagerCreateFontDescriptorsFromURL;
-        private static ModuleMethodHandle _fontCreateWithFontDescriptor;
         private static ModuleMethodHandle _drawContext_saveGState;
         private static ModuleMethodHandle _drawContext_restoreGState;
         private static ModuleMethodHandle _drawContext_setRGBFillColor;
@@ -28,9 +26,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _Color_dispose;
         private static ModuleMethodHandle _attributedString_create;
         private static ModuleMethodHandle _AttributedString_dispose;
-        private static ModuleMethodHandle _FontDescriptor_dispose;
-        private static ModuleMethodHandle _fontDescriptorArray_items;
-        private static ModuleMethodHandle _FontDescriptorArray_dispose;
+        private static ModuleMethodHandle _font_createFromFile;
         private static ModuleMethodHandle _Font_dispose;
         private static ModuleMethodHandle _line_getTypographicBounds;
         private static ModuleMethodHandle _line_getBoundsWithOptions;
@@ -392,6 +388,14 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
+            public static Font CreateFromFile(string path, double size, AffineTransform matrix)
+            {
+                AffineTransform__Push(matrix, false);
+                NativeImplClient.PushDouble(size);
+                NativeImplClient.PushString(path);
+                NativeImplClient.InvokeModuleMethod(_font_createFromFile);
+                return Font__Pop();
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -405,88 +409,6 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new Font(ptr) : null;
-        }
-
-        public class FontDescriptor : IDisposable
-        {
-            internal readonly IntPtr NativeHandle;
-            private bool _disposed;
-            internal FontDescriptor(IntPtr nativeHandle)
-            {
-                NativeHandle = nativeHandle;
-            }
-            public void Dispose()
-            {
-                if (!_disposed)
-                {
-                    FontDescriptor__Push(this);
-                    NativeImplClient.InvokeModuleMethod(_FontDescriptor_dispose);
-                    _disposed = true;
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void FontDescriptor__Push(FontDescriptor thing)
-        {
-            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static FontDescriptor FontDescriptor__Pop()
-        {
-            var ptr = NativeImplClient.PopPtr();
-            return ptr != IntPtr.Zero ? new FontDescriptor(ptr) : null;
-        }
-
-        internal static void __FontDescriptor_Array__Push(FontDescriptor[] items)
-        {
-            var ptrs = items.Select(item => item.NativeHandle).ToArray();
-            NativeImplClient.PushPtrArray(ptrs);
-        }
-        internal static FontDescriptor[] __FontDescriptor_Array__Pop()
-        {
-            return NativeImplClient.PopPtrArray()
-                .Select(ptr => ptr != IntPtr.Zero ? new FontDescriptor(ptr) : null)
-                .ToArray();
-        }
-
-        public class FontDescriptorArray : IDisposable
-        {
-            internal readonly IntPtr NativeHandle;
-            private bool _disposed;
-            internal FontDescriptorArray(IntPtr nativeHandle)
-            {
-                NativeHandle = nativeHandle;
-            }
-            public void Dispose()
-            {
-                if (!_disposed)
-                {
-                    FontDescriptorArray__Push(this);
-                    NativeImplClient.InvokeModuleMethod(_FontDescriptorArray_dispose);
-                    _disposed = true;
-                }
-            }
-            public FontDescriptor[] Items()
-            {
-                FontDescriptorArray__Push(this);
-                NativeImplClient.InvokeModuleMethod(_fontDescriptorArray_items);
-                return __FontDescriptor_Array__Pop();
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void FontDescriptorArray__Push(FontDescriptorArray thing)
-        {
-            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static FontDescriptorArray FontDescriptorArray__Pop()
-        {
-            var ptr = NativeImplClient.PopPtr();
-            return ptr != IntPtr.Zero ? new FontDescriptorArray(ptr) : null;
         }
 
         public struct TypographicBounds {
@@ -610,22 +532,6 @@ namespace Org.Prefixed.GuiBase
             return Rect__Pop();
         }
 
-        public static FontDescriptorArray FontManagerCreateFontDescriptorsFromURL(URL fileUrl)
-        {
-            URL__Push(fileUrl);
-            NativeImplClient.InvokeModuleMethod(_fontManagerCreateFontDescriptorsFromURL);
-            return FontDescriptorArray__Pop();
-        }
-
-        public static Font FontCreateWithFontDescriptor(FontDescriptor descriptor, double size, AffineTransform matrix)
-        {
-            AffineTransform__Push(matrix, false);
-            NativeImplClient.PushDouble(size);
-            FontDescriptor__Push(descriptor);
-            NativeImplClient.InvokeModuleMethod(_fontCreateWithFontDescriptor);
-            return Font__Pop();
-        }
-
         internal static void Init()
         {
             _module = NativeImplClient.GetModule("Drawing");
@@ -634,8 +540,6 @@ namespace Org.Prefixed.GuiBase
             AffineTransformIdentity = AffineTransform__Pop();
 
             _makeRect = NativeImplClient.GetModuleMethod(_module, "makeRect");
-            _fontManagerCreateFontDescriptorsFromURL = NativeImplClient.GetModuleMethod(_module, "fontManagerCreateFontDescriptorsFromURL");
-            _fontCreateWithFontDescriptor = NativeImplClient.GetModuleMethod(_module, "fontCreateWithFontDescriptor");
 
             _drawContext_saveGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_saveGState");
             _drawContext_restoreGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_restoreGState");
@@ -648,9 +552,7 @@ namespace Org.Prefixed.GuiBase
             _Color_dispose = NativeImplClient.GetModuleMethod(_module, "Color_dispose");
             _attributedString_create = NativeImplClient.GetModuleMethod(_module, "AttributedString_create");
             _AttributedString_dispose = NativeImplClient.GetModuleMethod(_module, "AttributedString_dispose");
-            _FontDescriptor_dispose = NativeImplClient.GetModuleMethod(_module, "FontDescriptor_dispose");
-            _fontDescriptorArray_items = NativeImplClient.GetModuleMethod(_module, "FontDescriptorArray_items");
-            _FontDescriptorArray_dispose = NativeImplClient.GetModuleMethod(_module, "FontDescriptorArray_dispose");
+            _font_createFromFile = NativeImplClient.GetModuleMethod(_module, "Font_createFromFile");
             _Font_dispose = NativeImplClient.GetModuleMethod(_module, "Font_dispose");
             _line_getTypographicBounds = NativeImplClient.GetModuleMethod(_module, "Line_getTypographicBounds");
             _line_getBoundsWithOptions = NativeImplClient.GetModuleMethod(_module, "Line_getBoundsWithOptions");

@@ -54,17 +54,9 @@ opaque AttributedString {
     static AttributedString create(string s, AttributedStringOptions opts);
 }
 
-// these are a mess, need to clean up this API a lot
-// none of those low-level stuff should be exposed
-opaque FontDescriptor;
-opaque FontDescriptorArray {
-    // packaged up to hold the backing CFArray until release
-    Array<FontDescriptor> items();
+opaque Font {
+    static Font createFromFile(string path, double size, AffineTransform matrix);
 }
-opaque Font;
-
-FontDescriptorArray fontManagerCreateFontDescriptorsFromURL(URL fileUrl);
-Font fontCreateWithFontDescriptor(FontDescriptor descriptor, double size, AffineTransform matrix);
 
 // CTLine
 

@@ -14,8 +14,6 @@
 struct __DrawContext; typedef struct __DrawContext* DrawContext;
 struct __Color; typedef struct __Color* Color;
 struct __AttributedString; typedef struct __AttributedString* AttributedString;
-struct __FontDescriptor; typedef struct __FontDescriptor* FontDescriptor;
-struct __FontDescriptorArray; typedef struct __FontDescriptorArray* FontDescriptorArray;
 struct __Font; typedef struct __Font* Font;
 struct __Line; typedef struct __Line* Line;
 
@@ -87,10 +85,6 @@ struct Rect {
 
 
 
-
-// std::vector<FontDescriptor>
-
-
 struct TypographicBounds {
     double width;
     double ascent;
@@ -110,8 +104,6 @@ enum LineBoundsOptions {
 extern const AffineTransform AffineTransformIdentity;
 
 Rect makeRect(double x, double y, double width, double height);
-FontDescriptorArray fontManagerCreateFontDescriptorsFromURL(URL fileUrl);
-Font fontCreateWithFontDescriptor(FontDescriptor descriptor, double size, AffineTransform matrix);
 void DrawContext_saveGState(DrawContext _this);
 void DrawContext_restoreGState(DrawContext _this);
 void DrawContext_setRGBFillColor(DrawContext _this, double red, double green, double blue, double alpha);
@@ -123,9 +115,7 @@ Color Color_create(double red, double green, double blue, double alpha);
 void Color_dispose(Color _this);
 AttributedString AttributedString_create(std::string s, AttributedStringOptions opts);
 void AttributedString_dispose(AttributedString _this);
-void FontDescriptor_dispose(FontDescriptor _this);
-std::vector<FontDescriptor> FontDescriptorArray_items(FontDescriptorArray _this);
-void FontDescriptorArray_dispose(FontDescriptorArray _this);
+Font Font_createFromFile(std::string path, double size, AffineTransform matrix);
 void Font_dispose(Font _this);
 TypographicBounds Line_getTypographicBounds(Line _this);
 Rect Line_getBoundsWithOptions(Line _this, uint32_t opts);

@@ -114,33 +114,6 @@ Font Font__pop() {
     return (Font)ni_popPtr();
 }
 
-void FontDescriptor__push(FontDescriptor value) {
-    ni_pushPtr(value);
-}
-
-FontDescriptor FontDescriptor__pop() {
-    return (FontDescriptor)ni_popPtr();
-}
-
-void __FontDescriptor_Array__push(std::vector<FontDescriptor> items, bool isReturn) {
-    ni_pushPtrArray((void**)items.data(), items.size());
-}
-
-std::vector<FontDescriptor> __FontDescriptor_Array__pop() {
-    FontDescriptor *values;
-    size_t count;
-    ni_popPtrArray((void***)&values, &count);
-    return std::vector<FontDescriptor>(values, values + count);
-}
-
-void FontDescriptorArray__push(FontDescriptorArray value) {
-    ni_pushPtr(value);
-}
-
-FontDescriptorArray FontDescriptorArray__pop() {
-    return (FontDescriptorArray)ni_popPtr();
-}
-
 void TypographicBounds__push(TypographicBounds value, bool isReturn) {
     ni_pushDouble(value.leading);
     ni_pushDouble(value.descent);
@@ -178,18 +151,6 @@ void makeRect__wrapper() {
     auto width = ni_popDouble();
     auto height = ni_popDouble();
     Rect__push(makeRect(x, y, width, height), true);
-}
-
-void fontManagerCreateFontDescriptorsFromURL__wrapper() {
-    auto fileUrl = URL__pop();
-    FontDescriptorArray__push(fontManagerCreateFontDescriptorsFromURL(fileUrl));
-}
-
-void fontCreateWithFontDescriptor__wrapper() {
-    auto descriptor = FontDescriptor__pop();
-    auto size = ni_popDouble();
-    auto matrix = AffineTransform__pop();
-    Font__push(fontCreateWithFontDescriptor(descriptor, size, matrix));
 }
 
 void DrawContext_saveGState__wrapper() {
@@ -259,19 +220,11 @@ void AttributedString_dispose__wrapper() {
     AttributedString_dispose(_this);
 }
 
-void FontDescriptor_dispose__wrapper() {
-    auto _this = FontDescriptor__pop();
-    FontDescriptor_dispose(_this);
-}
-
-void FontDescriptorArray_items__wrapper() {
-    auto _this = FontDescriptorArray__pop();
-    __FontDescriptor_Array__push(FontDescriptorArray_items(_this), true);
-}
-
-void FontDescriptorArray_dispose__wrapper() {
-    auto _this = FontDescriptorArray__pop();
-    FontDescriptorArray_dispose(_this);
+void Font_createFromFile__wrapper() {
+    auto path = popStringInternal();
+    auto size = ni_popDouble();
+    auto matrix = AffineTransform__pop();
+    Font__push(Font_createFromFile(path, size, matrix));
 }
 
 void Font_dispose__wrapper() {
@@ -314,8 +267,6 @@ int Drawing__register() {
     auto m = ni_registerModule("Drawing");
     ni_registerModuleConstants(m, &__constantsFunc);
     ni_registerModuleMethod(m, "makeRect", &makeRect__wrapper);
-    ni_registerModuleMethod(m, "fontManagerCreateFontDescriptorsFromURL", &fontManagerCreateFontDescriptorsFromURL__wrapper);
-    ni_registerModuleMethod(m, "fontCreateWithFontDescriptor", &fontCreateWithFontDescriptor__wrapper);
     ni_registerModuleMethod(m, "DrawContext_saveGState", &DrawContext_saveGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_restoreGState", &DrawContext_restoreGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setRGBFillColor", &DrawContext_setRGBFillColor__wrapper);
@@ -327,9 +278,7 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "Color_dispose", &Color_dispose__wrapper);
     ni_registerModuleMethod(m, "AttributedString_create", &AttributedString_create__wrapper);
     ni_registerModuleMethod(m, "AttributedString_dispose", &AttributedString_dispose__wrapper);
-    ni_registerModuleMethod(m, "FontDescriptor_dispose", &FontDescriptor_dispose__wrapper);
-    ni_registerModuleMethod(m, "FontDescriptorArray_items", &FontDescriptorArray_items__wrapper);
-    ni_registerModuleMethod(m, "FontDescriptorArray_dispose", &FontDescriptorArray_dispose__wrapper);
+    ni_registerModuleMethod(m, "Font_createFromFile", &Font_createFromFile__wrapper);
     ni_registerModuleMethod(m, "Font_dispose", &Font_dispose__wrapper);
     ni_registerModuleMethod(m, "Line_getTypographicBounds", &Line_getTypographicBounds__wrapper);
     ni_registerModuleMethod(m, "Line_getBoundsWithOptions", &Line_getBoundsWithOptions__wrapper);
