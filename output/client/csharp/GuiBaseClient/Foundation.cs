@@ -12,10 +12,10 @@ namespace Org.Prefixed.GuiBase
     public static class Foundation
     {
         private static ModuleHandle _module;
-        private static ModuleMethodHandle _makeConstantString;
-        private static ModuleMethodHandle _createWithString;
-        private static ModuleMethodHandle _createWithFileSystemPath;
+        private static ModuleMethodHandle _cFString_makeConstant;
+        private static ModuleMethodHandle _cFString_create;
         private static ModuleMethodHandle _CFString_dispose;
+        private static ModuleMethodHandle _uRL_createWithFileSystemPath;
         private static ModuleMethodHandle _URL_dispose;
 
         public class CFString : IDisposable
@@ -35,6 +35,18 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
+            public static CFString MakeConstant(string s)
+            {
+                NativeImplClient.PushString(s);
+                NativeImplClient.InvokeModuleMethod(_cFString_makeConstant);
+                return CFString__Pop();
+            }
+            public static CFString Create(string s)
+            {
+                NativeImplClient.PushString(s);
+                NativeImplClient.InvokeModuleMethod(_cFString_create);
+                return CFString__Pop();
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -48,38 +60,6 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new CFString(ptr) : null;
-        }
-
-        public class URL : IDisposable
-        {
-            internal readonly IntPtr NativeHandle;
-            private bool _disposed;
-            internal URL(IntPtr nativeHandle)
-            {
-                NativeHandle = nativeHandle;
-            }
-            public void Dispose()
-            {
-                if (!_disposed)
-                {
-                    URL__Push(this);
-                    NativeImplClient.InvokeModuleMethod(_URL_dispose);
-                    _disposed = true;
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void URL__Push(URL thing)
-        {
-            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static URL URL__Pop()
-        {
-            var ptr = NativeImplClient.PopPtr();
-            return ptr != IntPtr.Zero ? new URL(ptr) : null;
         }
 
         public enum URLPathStyle
@@ -101,38 +81,54 @@ namespace Org.Prefixed.GuiBase
             return (URLPathStyle)ret;
         }
 
-        public static CFString MakeConstantString(string s)
+        public class URL : IDisposable
         {
-            NativeImplClient.PushString(s);
-            NativeImplClient.InvokeModuleMethod(_makeConstantString);
-            return CFString__Pop();
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal URL(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    URL__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_URL_dispose);
+                    _disposed = true;
+                }
+            }
+            public static URL CreateWithFileSystemPath(CFString path, URLPathStyle pathStyle, bool isDirectory)
+            {
+                NativeImplClient.PushBool(isDirectory);
+                URLPathStyle__Push(pathStyle);
+                CFString__Push(path);
+                NativeImplClient.InvokeModuleMethod(_uRL_createWithFileSystemPath);
+                return URL__Pop();
+            }
         }
 
-        public static CFString CreateWithString(string s)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void URL__Push(URL thing)
         {
-            NativeImplClient.PushString(s);
-            NativeImplClient.InvokeModuleMethod(_createWithString);
-            return CFString__Pop();
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
         }
 
-        public static URL CreateWithFileSystemPath(CFString path, URLPathStyle pathStyle, bool isDirectory)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static URL URL__Pop()
         {
-            NativeImplClient.PushBool(isDirectory);
-            URLPathStyle__Push(pathStyle);
-            CFString__Push(path);
-            NativeImplClient.InvokeModuleMethod(_createWithFileSystemPath);
-            return URL__Pop();
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new URL(ptr) : null;
         }
 
         internal static void Init()
         {
             _module = NativeImplClient.GetModule("Foundation");
 
-            _makeConstantString = NativeImplClient.GetModuleMethod(_module, "makeConstantString");
-            _createWithString = NativeImplClient.GetModuleMethod(_module, "createWithString");
-            _createWithFileSystemPath = NativeImplClient.GetModuleMethod(_module, "createWithFileSystemPath");
-
+            _cFString_makeConstant = NativeImplClient.GetModuleMethod(_module, "CFString_makeConstant");
+            _cFString_create = NativeImplClient.GetModuleMethod(_module, "CFString_create");
             _CFString_dispose = NativeImplClient.GetModuleMethod(_module, "CFString_dispose");
+            _uRL_createWithFileSystemPath = NativeImplClient.GetModuleMethod(_module, "URL_createWithFileSystemPath");
             _URL_dispose = NativeImplClient.GetModuleMethod(_module, "URL_dispose");
 
             // no static init

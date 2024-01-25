@@ -16,6 +16,10 @@ struct Rect {
     Point origin;
     Size size;
 }
+// todo: static struct methods?
+// ideally this would be on the client somehow, at least for very very simple constructors
+// such that we wouldn't have to hand-write them as extension methods on multiple frontends
+// also, non-static struct methods make no sense because it's not opaque and we're shipping a full copy to the server and back ... seems a bit daft
 Rect makeRect(double x, double y, double width, double height);
 
 struct AffineTransform {
@@ -37,17 +41,21 @@ opaque DrawContext {
     void setTextPosition(double x, double y);
 }
 
-opaque Color;
-Color createColor(double red, double green, double blue, double alpha);
+opaque Color {
+    static Color create(double red, double green, double blue, double alpha);
+}
 
 // text stuff
 options AttributedStringOptions {
     Font font;
     Color foregroundColor;
 }
-opaque AttributedString;
-AttributedString createAttributedString(string s, AttributedStringOptions opts);
+opaque AttributedString {
+    static AttributedString create(string s, AttributedStringOptions opts);
+}
 
+// these are a mess, need to clean up this API a lot
+// none of those low-level stuff should be exposed
 opaque FontDescriptor;
 opaque FontDescriptorArray {
     // packaged up to hold the backing CFArray until release
@@ -79,5 +87,6 @@ opaque Line {
     TypographicBounds getTypographicBounds();
     Rect getBoundsWithOptions(LineBoundsOptions opts);
     void draw(DrawContext context);
+
+    static Line createWithAttributedString(AttributedString str);
 }
-Line createLineWithAttributedString(AttributedString str);

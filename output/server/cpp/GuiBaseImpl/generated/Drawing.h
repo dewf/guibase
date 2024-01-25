@@ -28,7 +28,6 @@ struct AffineTransform {
     double ty;
 };
 
-
 struct AttributedStringOptions {
 private:
     enum Fields {
@@ -68,6 +67,7 @@ public:
         return false;
     }
 };
+
 
 
 struct Point {
@@ -110,25 +110,25 @@ enum LineBoundsOptions {
 extern const AffineTransform AffineTransformIdentity;
 
 Rect makeRect(double x, double y, double width, double height);
-Color createColor(double red, double green, double blue, double alpha);
-AttributedString createAttributedString(std::string s, AttributedStringOptions opts);
 FontDescriptorArray fontManagerCreateFontDescriptorsFromURL(URL fileUrl);
 Font fontCreateWithFontDescriptor(FontDescriptor descriptor, double size, AffineTransform matrix);
-Line createLineWithAttributedString(AttributedString str);
-void DrawContext_dispose(DrawContext _this);
 void DrawContext_saveGState(DrawContext _this);
 void DrawContext_restoreGState(DrawContext _this);
 void DrawContext_setRGBFillColor(DrawContext _this, double red, double green, double blue, double alpha);
 void DrawContext_fillRect(DrawContext _this, Rect rect);
 void DrawContext_setTextMatrix(DrawContext _this, AffineTransform t);
 void DrawContext_setTextPosition(DrawContext _this, double x, double y);
+void DrawContext_dispose(DrawContext _this);
+Color Color_create(double red, double green, double blue, double alpha);
 void Color_dispose(Color _this);
+AttributedString AttributedString_create(std::string s, AttributedStringOptions opts);
 void AttributedString_dispose(AttributedString _this);
 void FontDescriptor_dispose(FontDescriptor _this);
-void FontDescriptorArray_dispose(FontDescriptorArray _this);
 std::vector<FontDescriptor> FontDescriptorArray_items(FontDescriptorArray _this);
+void FontDescriptorArray_dispose(FontDescriptorArray _this);
 void Font_dispose(Font _this);
-void Line_dispose(Line _this);
 TypographicBounds Line_getTypographicBounds(Line _this);
 Rect Line_getBoundsWithOptions(Line _this, uint32_t opts);
 void Line_draw(Line _this, DrawContext context);
+Line Line_createWithAttributedString(AttributedString str);
+void Line_dispose(Line _this);

@@ -47,42 +47,16 @@ static void convertProps(WindowOptions& opts, wl_WindowProperties& output) {
     }
 }
 
-//static inline std::set<Modifier> wlToModifiers(unsigned int modifiers) {
-//    std::set<Modifier> result;
-//    if (modifiers & wl_kModifierShift) result.insert(Modifier::Shift);
-//    if (modifiers & wl_kModifierControl) result.insert(Modifier::Control);
-//    if (modifiers & wl_kModifierAlt) result.insert(Modifier::Alt);
-//    if (modifiers & wl_kModifierMacControl) result.insert(Modifier::MacControl);
-//    return result;
-//}
-//
-//static inline unsigned int modifiersToWl(std::set<Modifier> modifiers) {
-//    unsigned int result = 0;
-//    if (modifiers.contains(Modifier::Shift)) {
-//        result |= wl_kModifierShift;
-//    }
-//    if (modifiers.contains(Modifier::Control)) {
-//        result |= wl_kModifierControl;
-//    }
-//    if (modifiers.contains(Modifier::Alt)) {
-//        result |= wl_kModifierAlt;
-//    }
-//    if (modifiers.contains(Modifier::MacControl)) {
-//        result |= wl_kModifierMacControl;
-//    }
-//    return result;
-//}
-
-class MyWindow {
+class InternalWindow {
 private:
     wl_WindowRef wlWindow = nullptr;
     std::shared_ptr<WindowDelegate> del;
 public:
-    static MyWindow* create(int width, int height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions &opts) {
+    static InternalWindow* create(int width, int height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions &opts) {
         wl_WindowProperties wlProps;
         convertProps(opts, wlProps);
 
-        auto win2 = new MyWindow();
+        auto win2 = new InternalWindow();
         win2->wlWindow = wl_WindowCreate(width, height, title.c_str(), win2, &wlProps);
         win2->del = del;
 
@@ -135,7 +109,7 @@ public:
 
 CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* userData) {
     if (userData != nullptr) {
-        auto win = (MyWindow*)userData;
+        auto win = (InternalWindow*)userData;
 
         event->handled = true;
         switch (event->eventType) {
@@ -198,29 +172,40 @@ void exitRunloop() {
     wl_ExitRunloop();
 }
 
-Window createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts) {
-    return (Window)MyWindow::create(width, height, title, del, opts);
-}
-
 void Window_show(Window _this) {
-    ((MyWindow*)_this)->show();
+    ((InternalWindow*)_this)->show();
 }
 
 void Window_destroy(Window _this) {
-    ((MyWindow*)_this)->destroy();
+    ((InternalWindow*)_this)->destroy();
 }
 
 void Window_setMenuBar(Window _this, MenuBar menuBar) {
-    ((MyWindow*)_this)->setMenuBar(menuBar);
+    ((InternalWindow*)_this)->setMenuBar(menuBar);
 }
 
 void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu) {
-    ((MyWindow*)_this)->showContextMenu(x, y, menu);
+    ((InternalWindow*)_this)->showContextMenu(x, y, menu);
 }
 
 void Window_invalidate(Window _this, int32_t x, int32_t y, int32_t width, int32_t height)
 {
-    ((MyWindow*)_this)->invalidate(x, y, width, height);
+    ((InternalWindow*)_this)->invalidate(x, y, width, height);
+}
+
+Window Window_create(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts)
+{
+    return (Window)InternalWindow::create(width, height, title, del, opts);
+}
+
+void Window_dispose(Window _this)
+{
+    // not using this currently, requires formal destruction
+}
+
+Icon Icon_create(std::string filename, int32_t sizeToWidth)
+{
+    return (Icon)wl_IconLoadFromFile(filename.c_str(), sizeToWidth);
 }
 
 void Icon_dispose(Icon _this)
@@ -229,6 +214,18 @@ void Icon_dispose(Icon _this)
 
 void Accelerator_dispose(Accelerator _this)
 {
+}
+
+Accelerator Accelerator_create(Key key, uint32_t modifiers)
+{
+    return (Accelerator)wl_AccelCreate((wl_KeyEnum)key, modifiers);
+}
+
+Action Action_create(std::string label, Icon icon, Accelerator accel, std::function<MenuActionFunc> func)
+{
+    auto id = _nextMenuActionId++;
+    menuActionFuncs[id] = func;
+    return (Action)wl_ActionCreate(id, label.c_str(), (wl_IconRef)icon, (wl_AcceleratorRef)accel);
 }
 
 void Action_dispose(Action _this)
@@ -255,6 +252,11 @@ void Menu_addSeparator(Menu _this) {
     wl_MenuAddSeparator((wl_MenuRef)_this);
 }
 
+Menu Menu_create()
+{
+    return (Menu)wl_MenuCreate();
+}
+
 void MenuBar_dispose(MenuBar _this)
 {
 }
@@ -263,30 +265,8 @@ MenuItem MenuBar_addMenu(MenuBar _this, std::string label, Menu menu) {
     return (MenuItem)wl_MenuBarAddMenu((wl_MenuBarRef)_this, label.c_str(), (wl_MenuRef)menu);
 }
 
-Icon createIcon(std::string filename, int32_t sizeToWidth) {
-    return (Icon)wl_IconLoadFromFile(filename.c_str(), sizeToWidth);
-}
-
-Accelerator createAccelerator(Key key, uint32_t modifiers)
+MenuBar MenuBar_create()
 {
-    return (Accelerator)wl_AccelCreate((wl_KeyEnum)key, modifiers);
-}
-
-Action createAction(std::string label, Icon icon, Accelerator accel, std::function<MenuActionFunc> func)
-{
-    auto id = _nextMenuActionId++;
-    menuActionFuncs[id] = func;
-    return (Action)wl_ActionCreate(id, label.c_str(), (wl_IconRef)icon, (wl_AcceleratorRef)accel);
-}
-
-Menu createMenu() {
-    return (Menu)wl_MenuCreate();
-}
-
-MenuBar createMenuBar() {
     return (MenuBar)wl_MenuBarCreate();
 }
 
-void Window_dispose(Window _this)
-{
-}

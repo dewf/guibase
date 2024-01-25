@@ -11,32 +11,6 @@ Rect makeRect(double x, double y, double width, double height)
     return STRUCT_CAST(Rect, r);
 }
 
-Color createColor(double red, double green, double blue, double alpha)
-{
-    return (Color)dl_CGColorCreateGenericRGB(red, green, blue, alpha);
-}
-
-AttributedString createAttributedString(std::string s, AttributedStringOptions opts)
-{
-    Font f;
-    Color fg;
-
-    auto text = dl_CFStringCreateWithCString(s.c_str());
-    auto dict = dl_CFDictionaryCreateMutable(0);
-    if (opts.hasFont(&f)) {
-        dl_CFDictionarySetValue(dict, dl_kCTFontAttributeName, (dl_CTFontRef)f);
-    }
-    if (opts.hasForegroundColor(&fg)) {
-        dl_CFDictionarySetValue(dict, dl_kCTForegroundColorAttributeName, (dl_CGColorRef)fg);
-    }
-    auto str = dl_CFAttributedStringCreate(text, dict);
-
-    dl_CFRelease(dict);
-    dl_CFRelease(text);
-
-    return (AttributedString)str;
-}
-
 FontDescriptorArray fontManagerCreateFontDescriptorsFromURL(URL fileUrl)
 {
     return (FontDescriptorArray)dl_CTFontManagerCreateFontDescriptorsFromURL((dl_CFURLRef)fileUrl);
@@ -49,13 +23,12 @@ Font fontCreateWithFontDescriptor(FontDescriptor descriptor, double size, Affine
     return res;
 }
 
-Line createLineWithAttributedString(AttributedString str)
-{
-    return (Line)dl_CTLineCreateWithAttributedString((dl_CFAttributedStringRef)str);
-}
-
 void DrawContext_dispose(DrawContext _this)
 {
+    // hmm this might have end-user value when for example drawing into bitmaps?
+    // but for window repainting we must never call .dispose() ...
+    // would be nice to annotate the API to indicate ownership or something
+    // (some .get() accessors for example returning non-owned copies of things, whereas .create() stuff is owned by convention)
     dl_CGContextRelease((dl_CGContextRef)_this);
 }
 
@@ -85,9 +58,35 @@ void DrawContext_setTextPosition(DrawContext _this, double x, double y)
     dl_CGContextSetTextPosition((dl_CGContextRef)_this, x, y);
 }
 
+Color Color_create(double red, double green, double blue, double alpha)
+{
+    return (Color)dl_CGColorCreateGenericRGB(red, green, blue, alpha);
+}
+
 void Color_dispose(Color _this)
 {
     dl_CGColorRelease((dl_CGColorRef)_this);
+}
+
+AttributedString AttributedString_create(std::string s, AttributedStringOptions opts)
+{
+    Font f;
+    Color fg;
+
+    auto text = dl_CFStringCreateWithCString(s.c_str());
+    auto dict = dl_CFDictionaryCreateMutable(0);
+    if (opts.hasFont(&f)) {
+        dl_CFDictionarySetValue(dict, dl_kCTFontAttributeName, (dl_CTFontRef)f);
+    }
+    if (opts.hasForegroundColor(&fg)) {
+        dl_CFDictionarySetValue(dict, dl_kCTForegroundColorAttributeName, (dl_CGColorRef)fg);
+    }
+    auto str = dl_CFAttributedStringCreate(text, dict);
+
+    dl_CFRelease(dict);
+    dl_CFRelease(text);
+
+    return (AttributedString)str;
 }
 
 void AttributedString_dispose(AttributedString _this)
@@ -124,11 +123,6 @@ void Font_dispose(Font _this)
     dl_CFRelease(_this);
 }
 
-void Line_dispose(Line _this)
-{
-    dl_CFRelease(_this);
-}
-
 TypographicBounds Line_getTypographicBounds(Line _this)
 {
     dl_CGFloat tb_width, ascent, descent, leading;
@@ -145,4 +139,14 @@ Rect Line_getBoundsWithOptions(Line _this, uint32_t opts)
 void Line_draw(Line _this, DrawContext context)
 {
     dl_CTLineDraw((dl_CTLineRef)_this, (dl_CGContextRef)context);
+}
+
+Line Line_createWithAttributedString(AttributedString str)
+{
+    return (Line)dl_CTLineCreateWithAttributedString((dl_CFAttributedStringRef)str);
+}
+
+void Line_dispose(Line _this)
+{
+    dl_CFRelease(_this);
 }

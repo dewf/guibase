@@ -10,30 +10,6 @@ ni_InterfaceMethodRef windowDelegate_mouseDown;
 ni_InterfaceMethodRef windowDelegate_repaint;
 ni_InterfaceMethodRef windowDelegate_resized;
 
-void Accelerator__push(Accelerator value) {
-    ni_pushPtr(value);
-}
-
-Accelerator Accelerator__pop() {
-    return (Accelerator)ni_popPtr();
-}
-
-void Action__push(Action value) {
-    ni_pushPtr(value);
-}
-
-Action Action__pop() {
-    return (Action)ni_popPtr();
-}
-
-void Icon__push(Icon value) {
-    ni_pushPtr(value);
-}
-
-Icon Icon__pop() {
-    return (Icon)ni_popPtr();
-}
-
 inline void Key__push(Key value) {
     ni_pushInt32((int32_t)value);
 }
@@ -43,12 +19,20 @@ inline Key Key__pop() {
     return (Key)tag;
 }
 
-void Menu__push(Menu value) {
+inline void Modifiers__push(uint32_t value) {
+    ni_pushUInt32(value);
+}
+
+inline uint32_t Modifiers__pop() {
+    return ni_popUInt32();
+}
+
+void Accelerator__push(Accelerator value) {
     ni_pushPtr(value);
 }
 
-Menu Menu__pop() {
-    return (Menu)ni_popPtr();
+Accelerator Accelerator__pop() {
+    return (Accelerator)ni_popPtr();
 }
 
 void MenuActionFunc__push(std::function<MenuActionFunc> f) {
@@ -74,6 +58,30 @@ std::function<MenuActionFunc> MenuActionFunc__pop() {
     return wrapper;
 }
 
+void Action__push(Action value) {
+    ni_pushPtr(value);
+}
+
+Action Action__pop() {
+    return (Action)ni_popPtr();
+}
+
+void Icon__push(Icon value) {
+    ni_pushPtr(value);
+}
+
+Icon Icon__pop() {
+    return (Icon)ni_popPtr();
+}
+
+void Menu__push(Menu value) {
+    ni_pushPtr(value);
+}
+
+Menu Menu__pop() {
+    return (Menu)ni_popPtr();
+}
+
 void MenuBar__push(MenuBar value) {
     ni_pushPtr(value);
 }
@@ -90,14 +98,6 @@ MenuItem MenuItem__pop() {
     return (MenuItem)ni_popPtr();
 }
 
-inline void Modifiers__push(uint32_t value) {
-    ni_pushUInt32(value);
-}
-
-inline uint32_t Modifiers__pop() {
-    return ni_popUInt32();
-}
-
 inline void MouseButton__push(MouseButton value) {
     ni_pushInt32((int32_t)value);
 }
@@ -105,6 +105,74 @@ inline void MouseButton__push(MouseButton value) {
 inline MouseButton MouseButton__pop() {
     auto tag = ni_popInt32();
     return (MouseButton)tag;
+}
+
+
+inline void WindowStyle__push(WindowStyle value) {
+    ni_pushInt32((int32_t)value);
+}
+
+inline WindowStyle WindowStyle__pop() {
+    auto tag = ni_popInt32();
+    return (WindowStyle)tag;
+}
+
+void WindowOptions__push(WindowOptions value, bool isReturn) {
+    size_t nativeParent;
+    if (value.hasNativeParent(&nativeParent)) {
+        ni_pushSizeT(nativeParent);
+    }
+    WindowStyle style;
+    if (value.hasStyle(&style)) {
+        WindowStyle__push(style);
+    }
+    int32_t maxHeight;
+    if (value.hasMaxHeight(&maxHeight)) {
+        ni_pushInt32(maxHeight);
+    }
+    int32_t maxWidth;
+    if (value.hasMaxWidth(&maxWidth)) {
+        ni_pushInt32(maxWidth);
+    }
+    int32_t minHeight;
+    if (value.hasMinHeight(&minHeight)) {
+        ni_pushInt32(minHeight);
+    }
+    int32_t minWidth;
+    if (value.hasMinWidth(&minWidth)) {
+        ni_pushInt32(minWidth);
+    }
+    ni_pushInt32(value.getUsedFields());
+}
+
+WindowOptions WindowOptions__pop() {
+    WindowOptions value = {};
+    value._usedFields =  ni_popInt32();
+    if (value._usedFields & WindowOptions::Fields::MinWidthField) {
+        auto x = ni_popInt32();
+        value.setMinWidth(x);
+    }
+    if (value._usedFields & WindowOptions::Fields::MinHeightField) {
+        auto x = ni_popInt32();
+        value.setMinHeight(x);
+    }
+    if (value._usedFields & WindowOptions::Fields::MaxWidthField) {
+        auto x = ni_popInt32();
+        value.setMaxWidth(x);
+    }
+    if (value._usedFields & WindowOptions::Fields::MaxHeightField) {
+        auto x = ni_popInt32();
+        value.setMaxHeight(x);
+    }
+    if (value._usedFields & WindowOptions::Fields::StyleField) {
+        auto x = WindowStyle__pop();
+        value.setStyle(x);
+    }
+    if (value._usedFields & WindowOptions::Fields::NativeParentField) {
+        auto x = ni_popSizeT();
+        value.setNativeParent(x);
+    }
+    return value;
 }
 
 void Window__push(Window value) {
@@ -176,73 +244,6 @@ std::shared_ptr<WindowDelegate> WindowDelegate__pop() {
     }
 }
 
-inline void WindowStyle__push(WindowStyle value) {
-    ni_pushInt32((int32_t)value);
-}
-
-inline WindowStyle WindowStyle__pop() {
-    auto tag = ni_popInt32();
-    return (WindowStyle)tag;
-}
-
-void WindowOptions__push(WindowOptions value, bool isReturn) {
-    size_t nativeParent;
-    if (value.hasNativeParent(&nativeParent)) {
-        ni_pushSizeT(nativeParent);
-    }
-    WindowStyle style;
-    if (value.hasStyle(&style)) {
-        WindowStyle__push(style);
-    }
-    int32_t maxHeight;
-    if (value.hasMaxHeight(&maxHeight)) {
-        ni_pushInt32(maxHeight);
-    }
-    int32_t maxWidth;
-    if (value.hasMaxWidth(&maxWidth)) {
-        ni_pushInt32(maxWidth);
-    }
-    int32_t minHeight;
-    if (value.hasMinHeight(&minHeight)) {
-        ni_pushInt32(minHeight);
-    }
-    int32_t minWidth;
-    if (value.hasMinWidth(&minWidth)) {
-        ni_pushInt32(minWidth);
-    }
-    ni_pushInt32(value.getUsedFields());
-}
-
-WindowOptions WindowOptions__pop() {
-    WindowOptions value = {};
-    value._usedFields =  ni_popInt32();
-    if (value._usedFields & WindowOptions::Fields::MinWidthField) {
-        auto x = ni_popInt32();
-        value.setMinWidth(x);
-    }
-    if (value._usedFields & WindowOptions::Fields::MinHeightField) {
-        auto x = ni_popInt32();
-        value.setMinHeight(x);
-    }
-    if (value._usedFields & WindowOptions::Fields::MaxWidthField) {
-        auto x = ni_popInt32();
-        value.setMaxWidth(x);
-    }
-    if (value._usedFields & WindowOptions::Fields::MaxHeightField) {
-        auto x = ni_popInt32();
-        value.setMaxHeight(x);
-    }
-    if (value._usedFields & WindowOptions::Fields::StyleField) {
-        auto x = WindowStyle__pop();
-        value.setStyle(x);
-    }
-    if (value._usedFields & WindowOptions::Fields::NativeParentField) {
-        auto x = ni_popSizeT();
-        value.setNativeParent(x);
-    }
-    return value;
-}
-
 void moduleInit__wrapper() {
     moduleInit();
 }
@@ -257,48 +258,6 @@ void runloop__wrapper() {
 
 void exitRunloop__wrapper() {
     exitRunloop();
-}
-
-void createWindow__wrapper() {
-    auto width = ni_popInt32();
-    auto height = ni_popInt32();
-    auto title = popStringInternal();
-    auto del = WindowDelegate__pop();
-    auto opts = WindowOptions__pop();
-    Window__push(createWindow(width, height, title, del, opts));
-}
-
-void createIcon__wrapper() {
-    auto filename = popStringInternal();
-    auto sizeToWidth = ni_popInt32();
-    Icon__push(createIcon(filename, sizeToWidth));
-}
-
-void createAccelerator__wrapper() {
-    auto key = Key__pop();
-    auto modifiers = Modifiers__pop();
-    Accelerator__push(createAccelerator(key, modifiers));
-}
-
-void createAction__wrapper() {
-    auto label = popStringInternal();
-    auto icon = Icon__pop();
-    auto accel = Accelerator__pop();
-    auto func = MenuActionFunc__pop();
-    Action__push(createAction(label, icon, accel, func));
-}
-
-void createMenu__wrapper() {
-    Menu__push(createMenu());
-}
-
-void createMenuBar__wrapper() {
-    MenuBar__push(createMenuBar());
-}
-
-void Window_dispose__wrapper() {
-    auto _this = Window__pop();
-    Window_dispose(_this);
 }
 
 void Window_show__wrapper() {
@@ -334,14 +293,48 @@ void Window_invalidate__wrapper() {
     Window_invalidate(_this, x, y, width, height);
 }
 
+void Window_create__wrapper() {
+    auto width = ni_popInt32();
+    auto height = ni_popInt32();
+    auto title = popStringInternal();
+    auto del = WindowDelegate__pop();
+    auto opts = WindowOptions__pop();
+    Window__push(Window_create(width, height, title, del, opts));
+}
+
+void Window_dispose__wrapper() {
+    auto _this = Window__pop();
+    Window_dispose(_this);
+}
+
+void Icon_create__wrapper() {
+    auto filename = popStringInternal();
+    auto sizeToWidth = ni_popInt32();
+    Icon__push(Icon_create(filename, sizeToWidth));
+}
+
 void Icon_dispose__wrapper() {
     auto _this = Icon__pop();
     Icon_dispose(_this);
 }
 
+void Accelerator_create__wrapper() {
+    auto key = Key__pop();
+    auto modifiers = Modifiers__pop();
+    Accelerator__push(Accelerator_create(key, modifiers));
+}
+
 void Accelerator_dispose__wrapper() {
     auto _this = Accelerator__pop();
     Accelerator_dispose(_this);
+}
+
+void Action_create__wrapper() {
+    auto label = popStringInternal();
+    auto icon = Icon__pop();
+    auto accel = Accelerator__pop();
+    auto func = MenuActionFunc__pop();
+    Action__push(Action_create(label, icon, accel, func));
 }
 
 void Action_dispose__wrapper() {
@@ -352,11 +345,6 @@ void Action_dispose__wrapper() {
 void MenuItem_dispose__wrapper() {
     auto _this = MenuItem__pop();
     MenuItem_dispose(_this);
-}
-
-void Menu_dispose__wrapper() {
-    auto _this = Menu__pop();
-    Menu_dispose(_this);
 }
 
 void Menu_addAction__wrapper() {
@@ -377,9 +365,13 @@ void Menu_addSeparator__wrapper() {
     Menu_addSeparator(_this);
 }
 
-void MenuBar_dispose__wrapper() {
-    auto _this = MenuBar__pop();
-    MenuBar_dispose(_this);
+void Menu_create__wrapper() {
+    Menu__push(Menu_create());
+}
+
+void Menu_dispose__wrapper() {
+    auto _this = Menu__pop();
+    Menu_dispose(_this);
 }
 
 void MenuBar_addMenu__wrapper() {
@@ -387,6 +379,15 @@ void MenuBar_addMenu__wrapper() {
     auto label = popStringInternal();
     auto menu = Menu__pop();
     MenuItem__push(MenuBar_addMenu(_this, label, menu));
+}
+
+void MenuBar_create__wrapper() {
+    MenuBar__push(MenuBar_create());
+}
+
+void MenuBar_dispose__wrapper() {
+    auto _this = MenuBar__pop();
+    MenuBar_dispose(_this);
 }
 
 void WindowDelegate_canClose__wrapper(int serverID) {
@@ -436,28 +437,28 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "moduleShutdown", &moduleShutdown__wrapper);
     ni_registerModuleMethod(m, "runloop", &runloop__wrapper);
     ni_registerModuleMethod(m, "exitRunloop", &exitRunloop__wrapper);
-    ni_registerModuleMethod(m, "createWindow", &createWindow__wrapper);
-    ni_registerModuleMethod(m, "createIcon", &createIcon__wrapper);
-    ni_registerModuleMethod(m, "createAccelerator", &createAccelerator__wrapper);
-    ni_registerModuleMethod(m, "createAction", &createAction__wrapper);
-    ni_registerModuleMethod(m, "createMenu", &createMenu__wrapper);
-    ni_registerModuleMethod(m, "createMenuBar", &createMenuBar__wrapper);
-    ni_registerModuleMethod(m, "Window_dispose", &Window_dispose__wrapper);
     ni_registerModuleMethod(m, "Window_show", &Window_show__wrapper);
     ni_registerModuleMethod(m, "Window_destroy", &Window_destroy__wrapper);
     ni_registerModuleMethod(m, "Window_setMenuBar", &Window_setMenuBar__wrapper);
     ni_registerModuleMethod(m, "Window_showContextMenu", &Window_showContextMenu__wrapper);
     ni_registerModuleMethod(m, "Window_invalidate", &Window_invalidate__wrapper);
+    ni_registerModuleMethod(m, "Window_create", &Window_create__wrapper);
+    ni_registerModuleMethod(m, "Window_dispose", &Window_dispose__wrapper);
+    ni_registerModuleMethod(m, "Icon_create", &Icon_create__wrapper);
     ni_registerModuleMethod(m, "Icon_dispose", &Icon_dispose__wrapper);
+    ni_registerModuleMethod(m, "Accelerator_create", &Accelerator_create__wrapper);
     ni_registerModuleMethod(m, "Accelerator_dispose", &Accelerator_dispose__wrapper);
+    ni_registerModuleMethod(m, "Action_create", &Action_create__wrapper);
     ni_registerModuleMethod(m, "Action_dispose", &Action_dispose__wrapper);
     ni_registerModuleMethod(m, "MenuItem_dispose", &MenuItem_dispose__wrapper);
-    ni_registerModuleMethod(m, "Menu_dispose", &Menu_dispose__wrapper);
     ni_registerModuleMethod(m, "Menu_addAction", &Menu_addAction__wrapper);
     ni_registerModuleMethod(m, "Menu_addSubmenu", &Menu_addSubmenu__wrapper);
     ni_registerModuleMethod(m, "Menu_addSeparator", &Menu_addSeparator__wrapper);
-    ni_registerModuleMethod(m, "MenuBar_dispose", &MenuBar_dispose__wrapper);
+    ni_registerModuleMethod(m, "Menu_create", &Menu_create__wrapper);
+    ni_registerModuleMethod(m, "Menu_dispose", &Menu_dispose__wrapper);
     ni_registerModuleMethod(m, "MenuBar_addMenu", &MenuBar_addMenu__wrapper);
+    ni_registerModuleMethod(m, "MenuBar_create", &MenuBar_create__wrapper);
+    ni_registerModuleMethod(m, "MenuBar_dispose", &MenuBar_dispose__wrapper);
     auto windowDelegate = ni_registerInterface(m, "WindowDelegate");
     windowDelegate_canClose = ni_registerInterfaceMethod(windowDelegate, "canClose", &WindowDelegate_canClose__wrapper);
     windowDelegate_closed = ni_registerInterfaceMethod(windowDelegate, "closed", &WindowDelegate_closed__wrapper);

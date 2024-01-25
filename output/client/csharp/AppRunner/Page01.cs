@@ -12,18 +12,18 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
     public override void Init()
     {
         // test create some fonts and layouts and stuff
-        using var path = MakeConstantString("./_democontent/LiberationSerif-Regular.ttf");
-        using var url = CreateWithFileSystemPath(path, URLPathStyle.POSIX, false);
+        using var path = CFString.MakeConstant("./_democontent/LiberationSerif-Regular.ttf");
+        using var url = URL.CreateWithFileSystemPath(path, URLPathStyle.POSIX, false);
         using var descriptors = FontManagerCreateFontDescriptorsFromURL(url);
         var items = descriptors.Items(); // what's returned by this method is not owned, so no disposal
         if (items.Length > 0)
         {
             var font = FontCreateWithFontDescriptor(items[0], 120.0, AffineTransformIdentity);
             Console.WriteLine("we got the font??");
-            _labelString = CreateAttributedString("Quartz♪❦♛あぎ", new AttributedStringOptions
+            _labelString = AttributedString.Create("Quartz♪❦♛あぎ", new AttributedStringOptions
             {
                 Font = font,
-                ForegroundColor = CreateColor(0, 1, 1, 0.5)
+                ForegroundColor = Color.Create(0, 1, 1, 0.5)
             });
         }
         // release: array, url, path
@@ -35,7 +35,7 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
         context.FillRect(MakeRect(0, 0, width, height));
         context.SetTextMatrix(AffineTransformIdentity);
 
-        using var line = CreateLineWithAttributedString(_labelString);
+        using var line = Line.CreateWithAttributedString(_labelString);
         context.SetTextPosition(100, 300);
         line.Draw(context);
 

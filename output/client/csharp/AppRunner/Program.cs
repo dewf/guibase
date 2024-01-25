@@ -14,8 +14,8 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     
     public MainWindowDelegate()
     {
-        _contextMenu = CreateMenu();
-        _contextMenu.AddAction(CreateAction("Context Item", null, null, () =>
+        _contextMenu = Menu.Create();
+        _contextMenu.AddAction(Windowing.Action.Create("Context Item", null, null, () =>
         {
             Console.WriteLine("context item clicked!");
         }));
@@ -86,19 +86,19 @@ internal static class Program
             MinHeight = 200
         };
         var mainWinDel = new MainWindowDelegate();
-        var window = CreateWindow(800, 600, "this is the first window! 🚀", mainWinDel, options);
+        var window = Window.Create(800, 600, "this is the first window! 🚀", mainWinDel, options);
         mainWinDel.Window = window;
 
-        var fileMenu = CreateMenu();
+        var fileMenu = Menu.Create();
         var exitAction =
-            CreateAction("E&xit", null, CreateAccelerator(Key.Q, Modifiers.Control), () =>
+            Windowing.Action.Create("E&xit", null, Accelerator.Create(Key.Q, Modifiers.Control), () =>
             {
                 Console.WriteLine("you chose 'exit'!");
                 ExitRunloop();
             });
         fileMenu.AddAction(exitAction);
 
-        var menuBar = CreateMenuBar();
+        var menuBar = MenuBar.Create();
         menuBar.AddMenu("&File", fileMenu);
         
         window.SetMenuBar(menuBar);

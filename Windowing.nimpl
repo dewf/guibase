@@ -56,31 +56,42 @@ opaque Window {
    void setMenuBar(MenuBar menuBar);
    void showContextMenu(int x, int y, Menu menu); // hmm, had a "fromEvent" parameter I think for GTK
    void invalidate(int x, int y, int width, int height);
+
+   static Window create(int width, int height, string title, WindowDelegate del, WindowOptions opts);
 }
-Window createWindow(int width, int height, string title, WindowDelegate del, WindowOptions opts);
 
 // menu stuff
 
-opaque Icon;
-opaque Accelerator;
-opaque Action;
-Icon createIcon(string filename, int sizeToWidth);
-Accelerator createAccelerator(Key key, Modifiers modifiers);
+opaque Icon {
+   static Icon create(string filename, int sizeToWidth);
+}
+
+opaque Accelerator {
+   static Accelerator create(Key key, Modifiers modifiers);
+}
+
 delegate void MenuActionFunc();
-Action createAction(string label, Icon icon, Accelerator accel, MenuActionFunc func);
+
+opaque Action {
+   static Action create(string label, Icon icon, Accelerator accel, MenuActionFunc func);
+}
 
 opaque MenuItem;
 opaque Menu {
    MenuItem addAction(Action action);
    MenuItem addSubmenu(string label, Menu sub);
    void addSeparator();
+
+   static Menu create();   // for menu bars and standalone popups
 }
-Menu createMenu();   // for menu bars and standalone popups
+
 
 opaque MenuBar {
    MenuItem addMenu(string label, Menu menu);
+   
+   static MenuBar create();
 }
-MenuBar createMenuBar();
+
 
 enum Key {
    Unknown,

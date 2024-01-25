@@ -18,27 +18,27 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _moduleShutdown;
         private static ModuleMethodHandle _runloop;
         private static ModuleMethodHandle _exitRunloop;
-        private static ModuleMethodHandle _createWindow;
-        private static ModuleMethodHandle _createIcon;
-        private static ModuleMethodHandle _createAccelerator;
-        private static ModuleMethodHandle _createAction;
-        private static ModuleMethodHandle _createMenu;
-        private static ModuleMethodHandle _createMenuBar;
         private static ModuleMethodHandle _window_show;
         private static ModuleMethodHandle _window_destroy;
         private static ModuleMethodHandle _window_setMenuBar;
         private static ModuleMethodHandle _window_showContextMenu;
         private static ModuleMethodHandle _window_invalidate;
+        private static ModuleMethodHandle _window_create;
         private static ModuleMethodHandle _Window_dispose;
+        private static ModuleMethodHandle _icon_create;
         private static ModuleMethodHandle _Icon_dispose;
+        private static ModuleMethodHandle _accelerator_create;
         private static ModuleMethodHandle _Accelerator_dispose;
+        private static ModuleMethodHandle _action_create;
         private static ModuleMethodHandle _Action_dispose;
         private static ModuleMethodHandle _MenuItem_dispose;
         private static ModuleMethodHandle _menu_addAction;
         private static ModuleMethodHandle _menu_addSubmenu;
         private static ModuleMethodHandle _menu_addSeparator;
+        private static ModuleMethodHandle _menu_create;
         private static ModuleMethodHandle _Menu_dispose;
         private static ModuleMethodHandle _menuBar_addMenu;
+        private static ModuleMethodHandle _menuBar_create;
         private static ModuleMethodHandle _MenuBar_dispose;
         private static InterfaceHandle _windowDelegate;
         private static InterfaceMethodHandle _windowDelegate_canClose;
@@ -47,102 +47,6 @@ namespace Org.Prefixed.GuiBase
         private static InterfaceMethodHandle _windowDelegate_mouseDown;
         private static InterfaceMethodHandle _windowDelegate_repaint;
         private static InterfaceMethodHandle _windowDelegate_resized;
-
-        public class Accelerator : IDisposable
-        {
-            internal readonly IntPtr NativeHandle;
-            private bool _disposed;
-            internal Accelerator(IntPtr nativeHandle)
-            {
-                NativeHandle = nativeHandle;
-            }
-            public void Dispose()
-            {
-                if (!_disposed)
-                {
-                    Accelerator__Push(this);
-                    NativeImplClient.InvokeModuleMethod(_Accelerator_dispose);
-                    _disposed = true;
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void Accelerator__Push(Accelerator thing)
-        {
-            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Accelerator Accelerator__Pop()
-        {
-            var ptr = NativeImplClient.PopPtr();
-            return ptr != IntPtr.Zero ? new Accelerator(ptr) : null;
-        }
-
-        public class Action : IDisposable
-        {
-            internal readonly IntPtr NativeHandle;
-            private bool _disposed;
-            internal Action(IntPtr nativeHandle)
-            {
-                NativeHandle = nativeHandle;
-            }
-            public void Dispose()
-            {
-                if (!_disposed)
-                {
-                    Action__Push(this);
-                    NativeImplClient.InvokeModuleMethod(_Action_dispose);
-                    _disposed = true;
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void Action__Push(Action thing)
-        {
-            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Action Action__Pop()
-        {
-            var ptr = NativeImplClient.PopPtr();
-            return ptr != IntPtr.Zero ? new Action(ptr) : null;
-        }
-
-        public class Icon : IDisposable
-        {
-            internal readonly IntPtr NativeHandle;
-            private bool _disposed;
-            internal Icon(IntPtr nativeHandle)
-            {
-                NativeHandle = nativeHandle;
-            }
-            public void Dispose()
-            {
-                if (!_disposed)
-                {
-                    Icon__Push(this);
-                    NativeImplClient.InvokeModuleMethod(_Icon_dispose);
-                    _disposed = true;
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void Icon__Push(Icon thing)
-        {
-            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Icon Icon__Pop()
-        {
-            var ptr = NativeImplClient.PopPtr();
-            return ptr != IntPtr.Zero ? new Icon(ptr) : null;
-        }
 
         public enum Key
         {
@@ -268,6 +172,169 @@ namespace Org.Prefixed.GuiBase
             return (Key)ret;
         }
 
+        [Flags]
+        public enum Modifiers
+        {
+            Shift = 1,
+            Control = 2,
+            Alt = 4,
+            MacControl = 8
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Modifiers__Push(Modifiers value)
+        {
+            NativeImplClient.PushUInt32((uint)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Modifiers Modifiers__Pop()
+        {
+            var ret = NativeImplClient.PopUInt32();
+            return (Modifiers)ret;
+        }
+
+        public class Accelerator : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal Accelerator(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    Accelerator__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Accelerator_dispose);
+                    _disposed = true;
+                }
+            }
+            public static Accelerator Create(Key key, Modifiers modifiers)
+            {
+                Modifiers__Push(modifiers);
+                Key__Push(key);
+                NativeImplClient.InvokeModuleMethod(_accelerator_create);
+                return Accelerator__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Accelerator__Push(Accelerator thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Accelerator Accelerator__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new Accelerator(ptr) : null;
+        }
+
+        public delegate void MenuActionFunc();
+
+        internal static void MenuActionFunc__Push(MenuActionFunc callback)
+        {
+            void CallbackWrapper()
+            {
+                callback();
+            }
+            NativeImplClient.PushClientFuncVal(CallbackWrapper, Marshal.GetFunctionPointerForDelegate(callback));
+        }
+
+        internal static MenuActionFunc MenuActionFunc__Pop()
+        {
+            var id = NativeImplClient.PopServerFuncValId();
+            var remoteFunc = new ServerFuncVal(id);
+            void Wrapper()
+            {
+                remoteFunc.Exec();
+            }
+            return Wrapper;
+        }
+
+        public class Action : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal Action(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    Action__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Action_dispose);
+                    _disposed = true;
+                }
+            }
+            public static Action Create(string label, Icon icon, Accelerator accel, MenuActionFunc func)
+            {
+                MenuActionFunc__Push(func);
+                Accelerator__Push(accel);
+                Icon__Push(icon);
+                NativeImplClient.PushString(label);
+                NativeImplClient.InvokeModuleMethod(_action_create);
+                return Action__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Action__Push(Action thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Action Action__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new Action(ptr) : null;
+        }
+
+        public class Icon : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal Icon(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    Icon__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Icon_dispose);
+                    _disposed = true;
+                }
+            }
+            public static Icon Create(string filename, int sizeToWidth)
+            {
+                NativeImplClient.PushInt32(sizeToWidth);
+                NativeImplClient.PushString(filename);
+                NativeImplClient.InvokeModuleMethod(_icon_create);
+                return Icon__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Icon__Push(Icon thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Icon Icon__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new Icon(ptr) : null;
+        }
+
         public class Menu : IDisposable
         {
             internal readonly IntPtr NativeHandle;
@@ -305,6 +372,11 @@ namespace Org.Prefixed.GuiBase
                 Menu__Push(this);
                 NativeImplClient.InvokeModuleMethod(_menu_addSeparator);
             }
+            public static Menu Create()
+            {
+                NativeImplClient.InvokeModuleMethod(_menu_create);
+                return Menu__Pop();
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -318,28 +390,6 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new Menu(ptr) : null;
-        }
-
-        public delegate void MenuActionFunc();
-
-        internal static void MenuActionFunc__Push(MenuActionFunc callback)
-        {
-            void CallbackWrapper()
-            {
-                callback();
-            }
-            NativeImplClient.PushClientFuncVal(CallbackWrapper, Marshal.GetFunctionPointerForDelegate(callback));
-        }
-
-        internal static MenuActionFunc MenuActionFunc__Pop()
-        {
-            var id = NativeImplClient.PopServerFuncValId();
-            var remoteFunc = new ServerFuncVal(id);
-            void Wrapper()
-            {
-                remoteFunc.Exec();
-            }
-            return Wrapper;
         }
 
         public class MenuBar : IDisposable
@@ -366,6 +416,11 @@ namespace Org.Prefixed.GuiBase
                 MenuBar__Push(this);
                 NativeImplClient.InvokeModuleMethod(_menuBar_addMenu);
                 return MenuItem__Pop();
+            }
+            public static MenuBar Create()
+            {
+                NativeImplClient.InvokeModuleMethod(_menuBar_create);
+                return MenuBar__Pop();
             }
         }
 
@@ -414,28 +469,6 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new MenuItem(ptr) : null;
         }
 
-        [Flags]
-        public enum Modifiers
-        {
-            Shift = 1,
-            Control = 2,
-            Alt = 4,
-            MacControl = 8
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void Modifiers__Push(Modifiers value)
-        {
-            NativeImplClient.PushUInt32((uint)value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Modifiers Modifiers__Pop()
-        {
-            var ret = NativeImplClient.PopUInt32();
-            return (Modifiers)ret;
-        }
-
         public enum MouseButton
         {
             None,
@@ -458,181 +491,6 @@ namespace Org.Prefixed.GuiBase
             return (MouseButton)ret;
         }
 
-        public class Window : IDisposable
-        {
-            internal readonly IntPtr NativeHandle;
-            private bool _disposed;
-            internal Window(IntPtr nativeHandle)
-            {
-                NativeHandle = nativeHandle;
-            }
-            public void Dispose()
-            {
-                if (!_disposed)
-                {
-                    Window__Push(this);
-                    NativeImplClient.InvokeModuleMethod(_Window_dispose);
-                    _disposed = true;
-                }
-            }
-            public void Show()
-            {
-                Window__Push(this);
-                NativeImplClient.InvokeModuleMethod(_window_show);
-            }
-            public void Destroy()
-            {
-                Window__Push(this);
-                NativeImplClient.InvokeModuleMethod(_window_destroy);
-            }
-            public void SetMenuBar(MenuBar menuBar)
-            {
-                MenuBar__Push(menuBar);
-                Window__Push(this);
-                NativeImplClient.InvokeModuleMethod(_window_setMenuBar);
-            }
-            public void ShowContextMenu(int x, int y, Menu menu)
-            {
-                Menu__Push(menu);
-                NativeImplClient.PushInt32(y);
-                NativeImplClient.PushInt32(x);
-                Window__Push(this);
-                NativeImplClient.InvokeModuleMethod(_window_showContextMenu);
-            }
-            public void Invalidate(int x, int y, int width, int height)
-            {
-                NativeImplClient.PushInt32(height);
-                NativeImplClient.PushInt32(width);
-                NativeImplClient.PushInt32(y);
-                NativeImplClient.PushInt32(x);
-                Window__Push(this);
-                NativeImplClient.InvokeModuleMethod(_window_invalidate);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void Window__Push(Window thing)
-        {
-            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Window Window__Pop()
-        {
-            var ptr = NativeImplClient.PopPtr();
-            return ptr != IntPtr.Zero ? new Window(ptr) : null;
-        }
-
-
-        public interface WindowDelegate : IDisposable
-        {
-            bool CanClose();
-            void Closed();
-            void Destroyed();
-            void MouseDown(int x, int y, MouseButton button, Modifiers modifiers);
-            void Repaint(DrawContext context, int x, int y, int width, int height);
-            void Resized(int width, int height);
-        }
-
-        internal static void WindowDelegate__Push(WindowDelegate thing, bool isReturn)
-        {
-            if (thing != null)
-            {
-                ((IPushable)thing).Push(isReturn);
-            }
-            else
-            {
-                NativeImplClient.PushNull();
-            }
-        }
-
-        internal static WindowDelegate WindowDelegate__Pop()
-        {
-            NativeImplClient.PopInstanceId(out var id, out var isClientId);
-            if (id != 0)
-            {
-                if (!isClientId)
-                {
-                    return new ServerWindowDelegate(id);
-                }
-                else
-                {
-                    return (WindowDelegate) ClientObject.GetById(id);
-                }
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public abstract class ClientWindowDelegate : ClientObject, WindowDelegate
-        {
-            public virtual void Dispose()
-            {
-                // override if necessary
-            }
-            public abstract bool CanClose();
-            public abstract void Closed();
-            public abstract void Destroyed();
-            public abstract void MouseDown(int x, int y, MouseButton button, Modifiers modifiers);
-            public abstract void Repaint(DrawContext context, int x, int y, int width, int height);
-            public abstract void Resized(int width, int height);
-        }
-
-        internal class ServerWindowDelegate : ServerObject, WindowDelegate
-        {
-            public ServerWindowDelegate(int id) : base(id)
-            {
-            }
-
-            public bool CanClose()
-            {
-                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_canClose, Id);
-                return NativeImplClient.PopBool();
-            }
-
-            public void Closed()
-            {
-                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_closed, Id);
-            }
-
-            public void Destroyed()
-            {
-                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_destroyed, Id);
-            }
-
-            public void MouseDown(int x, int y, MouseButton button, Modifiers modifiers)
-            {
-                Modifiers__Push(modifiers);
-                MouseButton__Push(button);
-                NativeImplClient.PushInt32(y);
-                NativeImplClient.PushInt32(x);
-                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_mouseDown, Id);
-            }
-
-            public void Repaint(DrawContext context, int x, int y, int width, int height)
-            {
-                NativeImplClient.PushInt32(height);
-                NativeImplClient.PushInt32(width);
-                NativeImplClient.PushInt32(y);
-                NativeImplClient.PushInt32(x);
-                DrawContext__Push(context);
-                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_repaint, Id);
-            }
-
-            public void Resized(int width, int height)
-            {
-                NativeImplClient.PushInt32(height);
-                NativeImplClient.PushInt32(width);
-                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_resized, Id);
-            }
-
-            public void Dispose()
-            {
-                ServerDispose();
-            }
-        }
 
         public enum WindowStyle
         {
@@ -844,6 +702,192 @@ namespace Org.Prefixed.GuiBase
             return opts;
         }
 
+        public class Window : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal Window(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    Window__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Window_dispose);
+                    _disposed = true;
+                }
+            }
+            public void Show()
+            {
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_show);
+            }
+            public void Destroy()
+            {
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_destroy);
+            }
+            public void SetMenuBar(MenuBar menuBar)
+            {
+                MenuBar__Push(menuBar);
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_setMenuBar);
+            }
+            public void ShowContextMenu(int x, int y, Menu menu)
+            {
+                Menu__Push(menu);
+                NativeImplClient.PushInt32(y);
+                NativeImplClient.PushInt32(x);
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_showContextMenu);
+            }
+            public void Invalidate(int x, int y, int width, int height)
+            {
+                NativeImplClient.PushInt32(height);
+                NativeImplClient.PushInt32(width);
+                NativeImplClient.PushInt32(y);
+                NativeImplClient.PushInt32(x);
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_invalidate);
+            }
+            public static Window Create(int width, int height, string title, WindowDelegate del, WindowOptions opts)
+            {
+                WindowOptions__Push(opts, false);
+                WindowDelegate__Push(del, false);
+                NativeImplClient.PushString(title);
+                NativeImplClient.PushInt32(height);
+                NativeImplClient.PushInt32(width);
+                NativeImplClient.InvokeModuleMethod(_window_create);
+                return Window__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Window__Push(Window thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Window Window__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new Window(ptr) : null;
+        }
+
+
+        public interface WindowDelegate : IDisposable
+        {
+            bool CanClose();
+            void Closed();
+            void Destroyed();
+            void MouseDown(int x, int y, MouseButton button, Modifiers modifiers);
+            void Repaint(DrawContext context, int x, int y, int width, int height);
+            void Resized(int width, int height);
+        }
+
+        internal static void WindowDelegate__Push(WindowDelegate thing, bool isReturn)
+        {
+            if (thing != null)
+            {
+                ((IPushable)thing).Push(isReturn);
+            }
+            else
+            {
+                NativeImplClient.PushNull();
+            }
+        }
+
+        internal static WindowDelegate WindowDelegate__Pop()
+        {
+            NativeImplClient.PopInstanceId(out var id, out var isClientId);
+            if (id != 0)
+            {
+                if (!isClientId)
+                {
+                    return new ServerWindowDelegate(id);
+                }
+                else
+                {
+                    return (WindowDelegate) ClientObject.GetById(id);
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public abstract class ClientWindowDelegate : ClientObject, WindowDelegate
+        {
+            public virtual void Dispose()
+            {
+                // override if necessary
+            }
+            public abstract bool CanClose();
+            public abstract void Closed();
+            public abstract void Destroyed();
+            public abstract void MouseDown(int x, int y, MouseButton button, Modifiers modifiers);
+            public abstract void Repaint(DrawContext context, int x, int y, int width, int height);
+            public abstract void Resized(int width, int height);
+        }
+
+        internal class ServerWindowDelegate : ServerObject, WindowDelegate
+        {
+            public ServerWindowDelegate(int id) : base(id)
+            {
+            }
+
+            public bool CanClose()
+            {
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_canClose, Id);
+                return NativeImplClient.PopBool();
+            }
+
+            public void Closed()
+            {
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_closed, Id);
+            }
+
+            public void Destroyed()
+            {
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_destroyed, Id);
+            }
+
+            public void MouseDown(int x, int y, MouseButton button, Modifiers modifiers)
+            {
+                Modifiers__Push(modifiers);
+                MouseButton__Push(button);
+                NativeImplClient.PushInt32(y);
+                NativeImplClient.PushInt32(x);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_mouseDown, Id);
+            }
+
+            public void Repaint(DrawContext context, int x, int y, int width, int height)
+            {
+                NativeImplClient.PushInt32(height);
+                NativeImplClient.PushInt32(width);
+                NativeImplClient.PushInt32(y);
+                NativeImplClient.PushInt32(x);
+                DrawContext__Push(context);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_repaint, Id);
+            }
+
+            public void Resized(int width, int height)
+            {
+                NativeImplClient.PushInt32(height);
+                NativeImplClient.PushInt32(width);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_resized, Id);
+            }
+
+            public void Dispose()
+            {
+                ServerDispose();
+            }
+        }
+
         public static void ModuleInit()
         {
             NativeImplClient.InvokeModuleMethod(_moduleInit);
@@ -864,55 +908,6 @@ namespace Org.Prefixed.GuiBase
             NativeImplClient.InvokeModuleMethod(_exitRunloop);
         }
 
-        public static Window CreateWindow(int width, int height, string title, WindowDelegate del, WindowOptions opts)
-        {
-            WindowOptions__Push(opts, false);
-            WindowDelegate__Push(del, false);
-            NativeImplClient.PushString(title);
-            NativeImplClient.PushInt32(height);
-            NativeImplClient.PushInt32(width);
-            NativeImplClient.InvokeModuleMethod(_createWindow);
-            return Window__Pop();
-        }
-
-        public static Icon CreateIcon(string filename, int sizeToWidth)
-        {
-            NativeImplClient.PushInt32(sizeToWidth);
-            NativeImplClient.PushString(filename);
-            NativeImplClient.InvokeModuleMethod(_createIcon);
-            return Icon__Pop();
-        }
-
-        public static Accelerator CreateAccelerator(Key key, Modifiers modifiers)
-        {
-            Modifiers__Push(modifiers);
-            Key__Push(key);
-            NativeImplClient.InvokeModuleMethod(_createAccelerator);
-            return Accelerator__Pop();
-        }
-
-        public static Action CreateAction(string label, Icon icon, Accelerator accel, MenuActionFunc func)
-        {
-            MenuActionFunc__Push(func);
-            Accelerator__Push(accel);
-            Icon__Push(icon);
-            NativeImplClient.PushString(label);
-            NativeImplClient.InvokeModuleMethod(_createAction);
-            return Action__Pop();
-        }
-
-        public static Menu CreateMenu()
-        {
-            NativeImplClient.InvokeModuleMethod(_createMenu);
-            return Menu__Pop();
-        }
-
-        public static MenuBar CreateMenuBar()
-        {
-            NativeImplClient.InvokeModuleMethod(_createMenuBar);
-            return MenuBar__Pop();
-        }
-
         internal static void Init()
         {
             _module = NativeImplClient.GetModule("Windowing");
@@ -921,28 +916,28 @@ namespace Org.Prefixed.GuiBase
             _moduleShutdown = NativeImplClient.GetModuleMethod(_module, "moduleShutdown");
             _runloop = NativeImplClient.GetModuleMethod(_module, "runloop");
             _exitRunloop = NativeImplClient.GetModuleMethod(_module, "exitRunloop");
-            _createWindow = NativeImplClient.GetModuleMethod(_module, "createWindow");
-            _createIcon = NativeImplClient.GetModuleMethod(_module, "createIcon");
-            _createAccelerator = NativeImplClient.GetModuleMethod(_module, "createAccelerator");
-            _createAction = NativeImplClient.GetModuleMethod(_module, "createAction");
-            _createMenu = NativeImplClient.GetModuleMethod(_module, "createMenu");
-            _createMenuBar = NativeImplClient.GetModuleMethod(_module, "createMenuBar");
 
             _window_show = NativeImplClient.GetModuleMethod(_module, "Window_show");
             _window_destroy = NativeImplClient.GetModuleMethod(_module, "Window_destroy");
             _window_setMenuBar = NativeImplClient.GetModuleMethod(_module, "Window_setMenuBar");
             _window_showContextMenu = NativeImplClient.GetModuleMethod(_module, "Window_showContextMenu");
             _window_invalidate = NativeImplClient.GetModuleMethod(_module, "Window_invalidate");
+            _window_create = NativeImplClient.GetModuleMethod(_module, "Window_create");
             _Window_dispose = NativeImplClient.GetModuleMethod(_module, "Window_dispose");
+            _icon_create = NativeImplClient.GetModuleMethod(_module, "Icon_create");
             _Icon_dispose = NativeImplClient.GetModuleMethod(_module, "Icon_dispose");
+            _accelerator_create = NativeImplClient.GetModuleMethod(_module, "Accelerator_create");
             _Accelerator_dispose = NativeImplClient.GetModuleMethod(_module, "Accelerator_dispose");
+            _action_create = NativeImplClient.GetModuleMethod(_module, "Action_create");
             _Action_dispose = NativeImplClient.GetModuleMethod(_module, "Action_dispose");
             _MenuItem_dispose = NativeImplClient.GetModuleMethod(_module, "MenuItem_dispose");
             _menu_addAction = NativeImplClient.GetModuleMethod(_module, "Menu_addAction");
             _menu_addSubmenu = NativeImplClient.GetModuleMethod(_module, "Menu_addSubmenu");
             _menu_addSeparator = NativeImplClient.GetModuleMethod(_module, "Menu_addSeparator");
+            _menu_create = NativeImplClient.GetModuleMethod(_module, "Menu_create");
             _Menu_dispose = NativeImplClient.GetModuleMethod(_module, "Menu_dispose");
             _menuBar_addMenu = NativeImplClient.GetModuleMethod(_module, "MenuBar_addMenu");
+            _menuBar_create = NativeImplClient.GetModuleMethod(_module, "MenuBar_create");
             _MenuBar_dispose = NativeImplClient.GetModuleMethod(_module, "MenuBar_dispose");
 
             _windowDelegate = NativeImplClient.GetInterface(_module, "WindowDelegate");

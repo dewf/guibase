@@ -1,8 +1,9 @@
 module Foundation;
 
-opaque CFString;
-CFString makeConstantString(string s);
-CFString createWithString(string s);
+opaque CFString {
+    static CFString makeConstant(string s);
+    static CFString create(string s);
+}
 
 enum URLPathStyle {
     POSIX = 0,
@@ -10,5 +11,6 @@ enum URLPathStyle {
     Windows = 2
 }
 
-opaque URL;
-URL createWithFileSystemPath(CFString path, URLPathStyle pathStyle, bool isDirectory);
+opaque URL {
+    static URL createWithFileSystemPath(CFString path, URLPathStyle pathStyle, bool isDirectory);
+}

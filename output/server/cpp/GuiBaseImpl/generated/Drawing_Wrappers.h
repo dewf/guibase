@@ -3,11 +3,11 @@
 void AffineTransform__push(AffineTransform value, bool isReturn);
 AffineTransform AffineTransform__pop();
 
-void AttributedString__push(AttributedString value);
-AttributedString AttributedString__pop();
-
 void AttributedStringOptions__push(AttributedStringOptions value, bool isReturn);
 AttributedStringOptions AttributedStringOptions__pop();
+
+void AttributedString__push(AttributedString value);
+AttributedString AttributedString__pop();
 
 void Color__push(Color value);
 Color Color__pop();
@@ -44,17 +44,9 @@ Line Line__pop();
 
 void makeRect__wrapper();
 
-void createColor__wrapper();
-
-void createAttributedString__wrapper();
-
 void fontManagerCreateFontDescriptorsFromURL__wrapper();
 
 void fontCreateWithFontDescriptor__wrapper();
-
-void createLineWithAttributedString__wrapper();
-
-void DrawContext_dispose__wrapper();
 
 void DrawContext_saveGState__wrapper();
 
@@ -68,25 +60,33 @@ void DrawContext_setTextMatrix__wrapper();
 
 void DrawContext_setTextPosition__wrapper();
 
+void DrawContext_dispose__wrapper();
+
+void Color_create__wrapper();
+
 void Color_dispose__wrapper();
+
+void AttributedString_create__wrapper();
 
 void AttributedString_dispose__wrapper();
 
 void FontDescriptor_dispose__wrapper();
 
-void FontDescriptorArray_dispose__wrapper();
-
 void FontDescriptorArray_items__wrapper();
 
-void Font_dispose__wrapper();
+void FontDescriptorArray_dispose__wrapper();
 
-void Line_dispose__wrapper();
+void Font_dispose__wrapper();
 
 void Line_getTypographicBounds__wrapper();
 
 void Line_getBoundsWithOptions__wrapper();
 
 void Line_draw__wrapper();
+
+void Line_createWithAttributedString__wrapper();
+
+void Line_dispose__wrapper();
 
 void __constantsFunc();
 

@@ -15,11 +15,8 @@ namespace Org.Prefixed.GuiBase
     {
         private static ModuleHandle _module;
         private static ModuleMethodHandle _makeRect;
-        private static ModuleMethodHandle _createColor;
-        private static ModuleMethodHandle _createAttributedString;
         private static ModuleMethodHandle _fontManagerCreateFontDescriptorsFromURL;
         private static ModuleMethodHandle _fontCreateWithFontDescriptor;
-        private static ModuleMethodHandle _createLineWithAttributedString;
         private static ModuleMethodHandle _drawContext_saveGState;
         private static ModuleMethodHandle _drawContext_restoreGState;
         private static ModuleMethodHandle _drawContext_setRGBFillColor;
@@ -27,7 +24,9 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _drawContext_setTextMatrix;
         private static ModuleMethodHandle _drawContext_setTextPosition;
         private static ModuleMethodHandle _DrawContext_dispose;
+        private static ModuleMethodHandle _color_create;
         private static ModuleMethodHandle _Color_dispose;
+        private static ModuleMethodHandle _attributedString_create;
         private static ModuleMethodHandle _AttributedString_dispose;
         private static ModuleMethodHandle _FontDescriptor_dispose;
         private static ModuleMethodHandle _fontDescriptorArray_items;
@@ -36,6 +35,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _line_getTypographicBounds;
         private static ModuleMethodHandle _line_getBoundsWithOptions;
         private static ModuleMethodHandle _line_draw;
+        private static ModuleMethodHandle _line_createWithAttributedString;
         private static ModuleMethodHandle _Line_dispose;
         public static AffineTransform AffineTransformIdentity { get; private set; }
 
@@ -76,38 +76,6 @@ namespace Org.Prefixed.GuiBase
             var tx = NativeImplClient.PopDouble();
             var ty = NativeImplClient.PopDouble();
             return new AffineTransform(a, b, c, d, tx, ty);
-        }
-
-        public class AttributedString : IDisposable
-        {
-            internal readonly IntPtr NativeHandle;
-            private bool _disposed;
-            internal AttributedString(IntPtr nativeHandle)
-            {
-                NativeHandle = nativeHandle;
-            }
-            public void Dispose()
-            {
-                if (!_disposed)
-                {
-                    AttributedString__Push(this);
-                    NativeImplClient.InvokeModuleMethod(_AttributedString_dispose);
-                    _disposed = true;
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AttributedString__Push(AttributedString thing)
-        {
-            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static AttributedString AttributedString__Pop()
-        {
-            var ptr = NativeImplClient.PopPtr();
-            return ptr != IntPtr.Zero ? new AttributedString(ptr) : null;
         }
 
         public struct AttributedStringOptions
@@ -188,6 +156,45 @@ namespace Org.Prefixed.GuiBase
             return opts;
         }
 
+        public class AttributedString : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal AttributedString(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    AttributedString__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_AttributedString_dispose);
+                    _disposed = true;
+                }
+            }
+            public static AttributedString Create(string s, AttributedStringOptions opts)
+            {
+                AttributedStringOptions__Push(opts, false);
+                NativeImplClient.PushString(s);
+                NativeImplClient.InvokeModuleMethod(_attributedString_create);
+                return AttributedString__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void AttributedString__Push(AttributedString thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static AttributedString AttributedString__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new AttributedString(ptr) : null;
+        }
+
         public class Color : IDisposable
         {
             internal readonly IntPtr NativeHandle;
@@ -204,6 +211,15 @@ namespace Org.Prefixed.GuiBase
                     NativeImplClient.InvokeModuleMethod(_Color_dispose);
                     _disposed = true;
                 }
+            }
+            public static Color Create(double red, double green, double blue, double alpha)
+            {
+                NativeImplClient.PushDouble(alpha);
+                NativeImplClient.PushDouble(blue);
+                NativeImplClient.PushDouble(green);
+                NativeImplClient.PushDouble(red);
+                NativeImplClient.InvokeModuleMethod(_color_create);
+                return Color__Pop();
             }
         }
 
@@ -563,6 +579,12 @@ namespace Org.Prefixed.GuiBase
                 Line__Push(this);
                 NativeImplClient.InvokeModuleMethod(_line_draw);
             }
+            public static Line CreateWithAttributedString(AttributedString str)
+            {
+                AttributedString__Push(str);
+                NativeImplClient.InvokeModuleMethod(_line_createWithAttributedString);
+                return Line__Pop();
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -588,24 +610,6 @@ namespace Org.Prefixed.GuiBase
             return Rect__Pop();
         }
 
-        public static Color CreateColor(double red, double green, double blue, double alpha)
-        {
-            NativeImplClient.PushDouble(alpha);
-            NativeImplClient.PushDouble(blue);
-            NativeImplClient.PushDouble(green);
-            NativeImplClient.PushDouble(red);
-            NativeImplClient.InvokeModuleMethod(_createColor);
-            return Color__Pop();
-        }
-
-        public static AttributedString CreateAttributedString(string s, AttributedStringOptions opts)
-        {
-            AttributedStringOptions__Push(opts, false);
-            NativeImplClient.PushString(s);
-            NativeImplClient.InvokeModuleMethod(_createAttributedString);
-            return AttributedString__Pop();
-        }
-
         public static FontDescriptorArray FontManagerCreateFontDescriptorsFromURL(URL fileUrl)
         {
             URL__Push(fileUrl);
@@ -622,13 +626,6 @@ namespace Org.Prefixed.GuiBase
             return Font__Pop();
         }
 
-        public static Line CreateLineWithAttributedString(AttributedString str)
-        {
-            AttributedString__Push(str);
-            NativeImplClient.InvokeModuleMethod(_createLineWithAttributedString);
-            return Line__Pop();
-        }
-
         internal static void Init()
         {
             _module = NativeImplClient.GetModule("Drawing");
@@ -637,11 +634,8 @@ namespace Org.Prefixed.GuiBase
             AffineTransformIdentity = AffineTransform__Pop();
 
             _makeRect = NativeImplClient.GetModuleMethod(_module, "makeRect");
-            _createColor = NativeImplClient.GetModuleMethod(_module, "createColor");
-            _createAttributedString = NativeImplClient.GetModuleMethod(_module, "createAttributedString");
             _fontManagerCreateFontDescriptorsFromURL = NativeImplClient.GetModuleMethod(_module, "fontManagerCreateFontDescriptorsFromURL");
             _fontCreateWithFontDescriptor = NativeImplClient.GetModuleMethod(_module, "fontCreateWithFontDescriptor");
-            _createLineWithAttributedString = NativeImplClient.GetModuleMethod(_module, "createLineWithAttributedString");
 
             _drawContext_saveGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_saveGState");
             _drawContext_restoreGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_restoreGState");
@@ -650,7 +644,9 @@ namespace Org.Prefixed.GuiBase
             _drawContext_setTextMatrix = NativeImplClient.GetModuleMethod(_module, "DrawContext_setTextMatrix");
             _drawContext_setTextPosition = NativeImplClient.GetModuleMethod(_module, "DrawContext_setTextPosition");
             _DrawContext_dispose = NativeImplClient.GetModuleMethod(_module, "DrawContext_dispose");
+            _color_create = NativeImplClient.GetModuleMethod(_module, "Color_create");
             _Color_dispose = NativeImplClient.GetModuleMethod(_module, "Color_dispose");
+            _attributedString_create = NativeImplClient.GetModuleMethod(_module, "AttributedString_create");
             _AttributedString_dispose = NativeImplClient.GetModuleMethod(_module, "AttributedString_dispose");
             _FontDescriptor_dispose = NativeImplClient.GetModuleMethod(_module, "FontDescriptor_dispose");
             _fontDescriptorArray_items = NativeImplClient.GetModuleMethod(_module, "FontDescriptorArray_items");
@@ -659,6 +655,7 @@ namespace Org.Prefixed.GuiBase
             _line_getTypographicBounds = NativeImplClient.GetModuleMethod(_module, "Line_getTypographicBounds");
             _line_getBoundsWithOptions = NativeImplClient.GetModuleMethod(_module, "Line_getBoundsWithOptions");
             _line_draw = NativeImplClient.GetModuleMethod(_module, "Line_draw");
+            _line_createWithAttributedString = NativeImplClient.GetModuleMethod(_module, "Line_createWithAttributedString");
             _Line_dispose = NativeImplClient.GetModuleMethod(_module, "Line_dispose");
 
             // no static init

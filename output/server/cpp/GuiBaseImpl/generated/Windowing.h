@@ -19,9 +19,6 @@ struct __MenuItem; typedef struct __MenuItem* MenuItem;
 struct __Menu; typedef struct __Menu* Menu;
 struct __MenuBar; typedef struct __MenuBar* MenuBar;
 
-
-
-
 enum class Key {
     Unknown,
     Escape,
@@ -132,17 +129,20 @@ enum class Key {
     MediaPlayPause
 };
 
-
-typedef void MenuActionFunc();
-
-
-
 enum Modifiers {
     Shift = 1,
     Control = 2,
     Alt = 4,
     MacControl = 8
 };
+
+
+typedef void MenuActionFunc();
+
+
+
+
+
 
 enum class MouseButton {
     None,
@@ -152,26 +152,7 @@ enum class MouseButton {
     Other
 };
 
-
-class WindowDelegate {
-public:
-    virtual bool canClose() = 0;
-    virtual void closed() = 0;
-    virtual void destroyed() = 0;
-    virtual void mouseDown(int32_t x, int32_t y, MouseButton button, uint32_t modifiers) = 0;
-    virtual void repaint(DrawContext context, int32_t x, int32_t y, int32_t width, int32_t height) = 0;
-    virtual void resized(int32_t width, int32_t height) = 0;
-};
-
-// inherit from this to create server instances of WindowDelegate
-class ServerWindowDelegate : public WindowDelegate, public ServerObject {
-public:
-    virtual ~ServerWindowDelegate() {}
-    static std::shared_ptr<ServerWindowDelegate> getByID(int id) {
-        auto obj = ServerObject::getByID(id);
-        return std::static_pointer_cast<ServerWindowDelegate>(obj);
-    }
-};
+class WindowDelegate; // fwd decl
 
 enum class WindowStyle {
     Default,
@@ -271,29 +252,50 @@ public:
     }
 };
 
+
+class WindowDelegate {
+public:
+    virtual bool canClose() = 0;
+    virtual void closed() = 0;
+    virtual void destroyed() = 0;
+    virtual void mouseDown(int32_t x, int32_t y, MouseButton button, uint32_t modifiers) = 0;
+    virtual void repaint(DrawContext context, int32_t x, int32_t y, int32_t width, int32_t height) = 0;
+    virtual void resized(int32_t width, int32_t height) = 0;
+};
+
+// inherit from this to create server instances of WindowDelegate
+class ServerWindowDelegate : public WindowDelegate, public ServerObject {
+public:
+    virtual ~ServerWindowDelegate() {}
+    static std::shared_ptr<ServerWindowDelegate> getByID(int id) {
+        auto obj = ServerObject::getByID(id);
+        return std::static_pointer_cast<ServerWindowDelegate>(obj);
+    }
+};
+
 void moduleInit();
 void moduleShutdown();
 void runloop();
 void exitRunloop();
-Window createWindow(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts);
-Icon createIcon(std::string filename, int32_t sizeToWidth);
-Accelerator createAccelerator(Key key, uint32_t modifiers);
-Action createAction(std::string label, Icon icon, Accelerator accel, std::function<MenuActionFunc> func);
-Menu createMenu();
-MenuBar createMenuBar();
-void Window_dispose(Window _this);
 void Window_show(Window _this);
 void Window_destroy(Window _this);
 void Window_setMenuBar(Window _this, MenuBar menuBar);
 void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu);
 void Window_invalidate(Window _this, int32_t x, int32_t y, int32_t width, int32_t height);
+Window Window_create(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts);
+void Window_dispose(Window _this);
+Icon Icon_create(std::string filename, int32_t sizeToWidth);
 void Icon_dispose(Icon _this);
+Accelerator Accelerator_create(Key key, uint32_t modifiers);
 void Accelerator_dispose(Accelerator _this);
+Action Action_create(std::string label, Icon icon, Accelerator accel, std::function<MenuActionFunc> func);
 void Action_dispose(Action _this);
 void MenuItem_dispose(MenuItem _this);
-void Menu_dispose(Menu _this);
 MenuItem Menu_addAction(Menu _this, Action action);
 MenuItem Menu_addSubmenu(Menu _this, std::string label, Menu sub);
 void Menu_addSeparator(Menu _this);
-void MenuBar_dispose(MenuBar _this);
+Menu Menu_create();
+void Menu_dispose(Menu _this);
 MenuItem MenuBar_addMenu(MenuBar _this, std::string label, Menu menu);
+MenuBar MenuBar_create();
+void MenuBar_dispose(MenuBar _this);

@@ -13,14 +13,14 @@ struct __CFString; typedef struct __CFString* CFString;
 struct __URL; typedef struct __URL* URL;
 
 
-
 enum class URLPathStyle {
     POSIX = 0,
     Windows = 2
 };
 
-CFString makeConstantString(std::string s);
-CFString createWithString(std::string s);
-URL createWithFileSystemPath(CFString path, URLPathStyle pathStyle, bool isDirectory);
+
+CFString CFString_makeConstant(std::string s);
+CFString CFString_create(std::string s);
 void CFString_dispose(CFString _this);
+URL URL_createWithFileSystemPath(CFString path, URLPathStyle pathStyle, bool isDirectory);
 void URL_dispose(URL _this);
