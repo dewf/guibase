@@ -96,9 +96,24 @@ void DrawContext_setLineDash(DrawContext _this, double phase, std::vector<double
     dl_CGContextSetLineDash((dl_CGContextRef)_this, phase, lengths.data(), lengths.size());
 }
 
+void DrawContext_clearLineDash(DrawContext _this)
+{
+    dl_CGContextSetLineDash((dl_CGContextRef)_this, 0, nullptr, 0);
+}
+
 void DrawContext_setLineWidth(DrawContext _this, double width)
 {
     dl_CGContextSetLineWidth((dl_CGContextRef)_this, width);
+}
+
+void DrawContext_clip(DrawContext _this)
+{
+    dl_CGContextClip((dl_CGContextRef)_this);
+}
+
+void DrawContext_translateCTM(DrawContext _this, double tx, double ty)
+{
+    dl_CGContextTranslateCTM((dl_CGContextRef)_this, tx, ty);
 }
 
 Color Color_create(double red, double green, double blue, double alpha)

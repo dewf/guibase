@@ -26,19 +26,19 @@ public class Page02(IWindowMethods windowMethods) : BasePage(windowMethods)
         using var line = Line.CreateWithAttributedString(_labelString);
 
         double yAdvance;
-        double x2 = 100;
-        double y2 = 200;
+        double x = 100;
+        double y = 200;
 
-        Common.DrawLineAt(context, line, x2, y2, out yAdvance);
+        Common.DrawLineAt(context, line, x, y, out yAdvance);
 
         // concentric circles to test arcs
         context.SetRGBStrokeColor(0, 0.4, 1, 1);
         context.SetLineWidth(2.0);
-        x2 = area.Width / 2.0;
-        y2 = (area.Height * 2.0) / 3.0;
+        x = area.Width / 2.0;
+        y = (area.Height * 2.0) / 3.0;
         //dl_CGContextMoveToPoint(c, x, y);
         context.BeginPath();
-        context.AddArc(x2, y2, 240, 0, 2 * Math.PI, true);
+        context.AddArc(x, y, 240, 0, 2 * Math.PI, true);
         context.StrokePath();
 
         context.SetLineWidth(10);
@@ -49,14 +49,14 @@ public class Page02(IWindowMethods windowMethods) : BasePage(windowMethods)
             var endAngle = startAngle + Math.PI;
             
             context.BeginPath();
-            context.AddArc(x2, y2, radius, startAngle, endAngle, true);
+            context.AddArc(x, y, radius, startAngle, endAngle, true);
             context.SetRGBStrokeColor(0, 0.6, 1, 1);
             context.StrokePath();
 
             startAngle += Math.PI;
             endAngle += Math.PI;
             context.BeginPath();
-            context.AddArc(x2, y2, radius, startAngle, endAngle, true);
+            context.AddArc(x, y, radius, startAngle, endAngle, true);
             context.SetRGBStrokeColor(0, 0, 0, 1);
             context.StrokePath();
 

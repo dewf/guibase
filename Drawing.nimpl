@@ -53,7 +53,10 @@ opaque DrawContext {
     void addLineToPoint(double x, double y);
     void strokePath();
     void setLineDash(double phase, Array<double> lengths);
+    void clearLineDash(); // maybe until we have an Option<> type or something to use in setLineDash()
     void setLineWidth(double width);
+    void clip();
+    void translateCTM(double tx, double ty);
 }
 
 opaque Color {

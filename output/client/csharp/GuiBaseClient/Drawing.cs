@@ -31,7 +31,10 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _drawContext_addLineToPoint;
         private static ModuleMethodHandle _drawContext_strokePath;
         private static ModuleMethodHandle _drawContext_setLineDash;
+        private static ModuleMethodHandle _drawContext_clearLineDash;
         private static ModuleMethodHandle _drawContext_setLineWidth;
+        private static ModuleMethodHandle _drawContext_clip;
+        private static ModuleMethodHandle _drawContext_translateCTM;
         private static ModuleMethodHandle _DrawContext_dispose;
         private static ModuleMethodHandle _color_create;
         private static ModuleMethodHandle _Color_dispose;
@@ -461,11 +464,28 @@ namespace Org.Prefixed.GuiBase
                 DrawContext__Push(this);
                 NativeImplClient.InvokeModuleMethod(_drawContext_setLineDash);
             }
+            public void ClearLineDash()
+            {
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_clearLineDash);
+            }
             public void SetLineWidth(double width)
             {
                 NativeImplClient.PushDouble(width);
                 DrawContext__Push(this);
                 NativeImplClient.InvokeModuleMethod(_drawContext_setLineWidth);
+            }
+            public void Clip()
+            {
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_clip);
+            }
+            public void TranslateCTM(double tx, double ty)
+            {
+                NativeImplClient.PushDouble(ty);
+                NativeImplClient.PushDouble(tx);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_translateCTM);
             }
         }
 
@@ -668,7 +688,10 @@ namespace Org.Prefixed.GuiBase
             _drawContext_addLineToPoint = NativeImplClient.GetModuleMethod(_module, "DrawContext_addLineToPoint");
             _drawContext_strokePath = NativeImplClient.GetModuleMethod(_module, "DrawContext_strokePath");
             _drawContext_setLineDash = NativeImplClient.GetModuleMethod(_module, "DrawContext_setLineDash");
+            _drawContext_clearLineDash = NativeImplClient.GetModuleMethod(_module, "DrawContext_clearLineDash");
             _drawContext_setLineWidth = NativeImplClient.GetModuleMethod(_module, "DrawContext_setLineWidth");
+            _drawContext_clip = NativeImplClient.GetModuleMethod(_module, "DrawContext_clip");
+            _drawContext_translateCTM = NativeImplClient.GetModuleMethod(_module, "DrawContext_translateCTM");
             _DrawContext_dispose = NativeImplClient.GetModuleMethod(_module, "DrawContext_dispose");
             _color_create = NativeImplClient.GetModuleMethod(_module, "Color_create");
             _Color_dispose = NativeImplClient.GetModuleMethod(_module, "Color_dispose");

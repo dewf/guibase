@@ -272,10 +272,27 @@ void DrawContext_setLineDash__wrapper() {
     DrawContext_setLineDash(_this, phase, lengths);
 }
 
+void DrawContext_clearLineDash__wrapper() {
+    auto _this = DrawContext__pop();
+    DrawContext_clearLineDash(_this);
+}
+
 void DrawContext_setLineWidth__wrapper() {
     auto _this = DrawContext__pop();
     auto width = ni_popDouble();
     DrawContext_setLineWidth(_this, width);
+}
+
+void DrawContext_clip__wrapper() {
+    auto _this = DrawContext__pop();
+    DrawContext_clip(_this);
+}
+
+void DrawContext_translateCTM__wrapper() {
+    auto _this = DrawContext__pop();
+    auto tx = ni_popDouble();
+    auto ty = ni_popDouble();
+    DrawContext_translateCTM(_this, tx, ty);
 }
 
 void DrawContext_dispose__wrapper() {
@@ -370,7 +387,10 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_addLineToPoint", &DrawContext_addLineToPoint__wrapper);
     ni_registerModuleMethod(m, "DrawContext_strokePath", &DrawContext_strokePath__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setLineDash", &DrawContext_setLineDash__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_clearLineDash", &DrawContext_clearLineDash__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setLineWidth", &DrawContext_setLineWidth__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_clip", &DrawContext_clip__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_translateCTM", &DrawContext_translateCTM__wrapper);
     ni_registerModuleMethod(m, "DrawContext_dispose", &DrawContext_dispose__wrapper);
     ni_registerModuleMethod(m, "Color_create", &Color_create__wrapper);
     ni_registerModuleMethod(m, "Color_dispose", &Color_dispose__wrapper);

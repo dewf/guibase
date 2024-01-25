@@ -43,9 +43,7 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     {
     }
 
-    public virtual void Render(Drawing.DrawContext context, RenderArea area)
-    {
-    }
+    public abstract void Render(Drawing.DrawContext context, RenderArea area);
 
     public virtual void Render2(Drawing.DrawContext context, RenderArea area)
     {

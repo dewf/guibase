@@ -9,6 +9,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     private int _width, _height;
     private readonly Menu _contextMenu;
     public Window? Window { get; set; }
+    private readonly Page01 _page01;
     private readonly Page02 _page02;
     private IPage _currentPage;
     
@@ -21,10 +22,12 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
         }));
 
         // page init
+        _page01 = new Page01(this);
+        _page01.Init();
         _page02 = new Page02(this);
         _page02.Init();
 
-        _currentPage = _page02;
+        _currentPage = _page01;
     }
 
     public override bool CanClose() => true;
@@ -82,11 +85,13 @@ internal static class Program
 
         var options = new WindowOptions
         {
-            MinWidth = 320,
-            MinHeight = 200
+            MinWidth = Constants.MinWidth,
+            MinHeight = Constants.MinHeight,
+            MaxWidth = Constants.MaxWidth,
+            MaxHeight = Constants.MaxHeight
         };
         var mainWinDel = new MainWindowDelegate();
-        var window = Window.Create(800, 600, "this is the first window! 🚀", mainWinDel, options);
+        var window = Window.Create(Constants.InitWidth, Constants.InitHeight, "this is the first window! 🚀", mainWinDel, options);
         mainWinDel.Window = window;
 
         var fileMenu = Menu.Create();

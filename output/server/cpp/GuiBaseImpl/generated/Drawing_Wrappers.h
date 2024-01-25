@@ -73,7 +73,13 @@ void DrawContext_strokePath__wrapper();
 
 void DrawContext_setLineDash__wrapper();
 
+void DrawContext_clearLineDash__wrapper();
+
 void DrawContext_setLineWidth__wrapper();
+
+void DrawContext_clip__wrapper();
+
+void DrawContext_translateCTM__wrapper();
 
 void DrawContext_dispose__wrapper();
 
