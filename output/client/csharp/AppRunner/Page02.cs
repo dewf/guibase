@@ -17,10 +17,10 @@ public class Page02(IWindowMethods windowMethods) : BasePage(windowMethods)
         // this is going to auto-dispose the font, but the attributed string's internal dictionary should have retained it
     }
 
-    public override void Render(DrawContext context, int x, int y, int width, int height)
+    public override void Render(DrawContext context, RenderArea area)
     {
         context.SetRGBFillColor(0.2, 0.2, 0.3, 1);
-        context.FillRect(MakeRect(0, 0, width, height));
+        context.FillRect(MakeRect(0, 0, area.Width, area.Height));
         context.SetTextMatrix(AffineTransformIdentity);
 
         using var line = Line.CreateWithAttributedString(_labelString);
@@ -31,36 +31,37 @@ public class Page02(IWindowMethods windowMethods) : BasePage(windowMethods)
 
         Common.DrawLineAt(context, line, x2, y2, out yAdvance);
 
-        // // concentric circles to test arcs
-        // dl_CGContextSetRGBStrokeColor(c, 0, 0.4, 1, 1);
-        // dl_CGContextSetLineWidth(c, 2.0);
-        // x = width / 2.0;
-        // y = (height * 2.0) / 3.0;
-        // //dl_CGContextMoveToPoint(c, x, y);
-        // dl_CGContextBeginPath(c);
-        // dl_CGContextAddArc(c, x, y, 240, 0, 2 * M_PI, 1);
-        // dl_CGContextStrokePath(c);
-        //
-        // dl_CGContextSetLineWidth(c, 10);
-        // dl_CGFloat radius = 230;
-        // dl_CGFloat startAngle = 0;
-        // for (int i = 0; i < 10; i++) {
-        //     auto endAngle = startAngle + M_PI;
-        //
-        //     dl_CGContextBeginPath(c);
-        //     dl_CGContextAddArc(c, x, y, radius, startAngle, endAngle, 1);
-        //     dl_CGContextSetRGBStrokeColor(c, 0, 0.6, 1, 1);
-        //     dl_CGContextStrokePath(c);
-        //
-        //     startAngle += M_PI;
-        //     endAngle += M_PI;
-        //     dl_CGContextBeginPath(c);
-        //     dl_CGContextAddArc(c, x, y, radius, startAngle, endAngle, 1);
-        //     dl_CGContextSetRGBStrokeColor(c, 0, 0, 0, 1);
-        //     dl_CGContextStrokePath(c);
-        //
-        //     startAngle += M_PI + M_PI / 6;
-        //     radius -= 15;
-        // }
+        // concentric circles to test arcs
+        context.SetRGBStrokeColor(0, 0.4, 1, 1);
+        context.SetLineWidth(2.0);
+        x2 = area.Width / 2.0;
+        y2 = (area.Height * 2.0) / 3.0;
+        //dl_CGContextMoveToPoint(c, x, y);
+        context.BeginPath();
+        context.AddArc(x2, y2, 240, 0, 2 * Math.PI, true);
+        context.StrokePath();
+
+        context.SetLineWidth(10);
+        double radius = 230;
+        double startAngle = 0;
+        for (var i = 0; i < 10; i++)
+        {
+            var endAngle = startAngle + Math.PI;
+            
+            context.BeginPath();
+            context.AddArc(x2, y2, radius, startAngle, endAngle, true);
+            context.SetRGBStrokeColor(0, 0.6, 1, 1);
+            context.StrokePath();
+
+            startAngle += Math.PI;
+            endAngle += Math.PI;
+            context.BeginPath();
+            context.AddArc(x2, y2, radius, startAngle, endAngle, true);
+            context.SetRGBStrokeColor(0, 0, 0, 1);
+            context.StrokePath();
+
+            startAngle += Math.PI + (Math.PI / 6);
+            radius -= 15;
+        }
     }
 }

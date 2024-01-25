@@ -117,6 +117,7 @@ Rect makeRect(double x, double y, double width, double height);
 void DrawContext_saveGState(DrawContext _this);
 void DrawContext_restoreGState(DrawContext _this);
 void DrawContext_setRGBFillColor(DrawContext _this, double red, double green, double blue, double alpha);
+void DrawContext_setRGBStrokeColor(DrawContext _this, double red, double green, double blue, double alpha);
 void DrawContext_fillRect(DrawContext _this, Rect rect);
 void DrawContext_setTextMatrix(DrawContext _this, AffineTransform t);
 void DrawContext_setTextPosition(DrawContext _this, double x, double y);

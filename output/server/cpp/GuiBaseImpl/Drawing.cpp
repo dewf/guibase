@@ -32,6 +32,11 @@ void DrawContext_setRGBFillColor(DrawContext _this, double red, double green, do
     dl_CGContextSetRGBFillColor((dl_CGContextRef)_this, red, green, blue, alpha);
 }
 
+void DrawContext_setRGBStrokeColor(DrawContext _this, double red, double green, double blue, double alpha)
+{
+    dl_CGContextSetRGBStrokeColor((dl_CGContextRef)_this, red, green, blue, alpha);
+}
+
 void DrawContext_fillRect(DrawContext _this, Rect rect) {
     dl_CGContextFillRect((dl_CGContextRef)_this, *((dl_CGRect*)&rect));
 }

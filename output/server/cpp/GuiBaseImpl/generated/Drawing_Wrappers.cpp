@@ -183,6 +183,15 @@ void DrawContext_setRGBFillColor__wrapper() {
     DrawContext_setRGBFillColor(_this, red, green, blue, alpha);
 }
 
+void DrawContext_setRGBStrokeColor__wrapper() {
+    auto _this = DrawContext__pop();
+    auto red = ni_popDouble();
+    auto green = ni_popDouble();
+    auto blue = ni_popDouble();
+    auto alpha = ni_popDouble();
+    DrawContext_setRGBStrokeColor(_this, red, green, blue, alpha);
+}
+
 void DrawContext_fillRect__wrapper() {
     auto _this = DrawContext__pop();
     auto rect = Rect__pop();
@@ -348,6 +357,7 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_saveGState", &DrawContext_saveGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_restoreGState", &DrawContext_restoreGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setRGBFillColor", &DrawContext_setRGBFillColor__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_setRGBStrokeColor", &DrawContext_setRGBStrokeColor__wrapper);
     ni_registerModuleMethod(m, "DrawContext_fillRect", &DrawContext_fillRect__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setTextMatrix", &DrawContext_setTextMatrix__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setTextPosition", &DrawContext_setTextPosition__wrapper);

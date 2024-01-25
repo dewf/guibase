@@ -47,6 +47,8 @@ void DrawContext_restoreGState__wrapper();
 
 void DrawContext_setRGBFillColor__wrapper();
 
+void DrawContext_setRGBStrokeColor__wrapper();
+
 void DrawContext_fillRect__wrapper();
 
 void DrawContext_setTextMatrix__wrapper();

@@ -18,6 +18,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _drawContext_saveGState;
         private static ModuleMethodHandle _drawContext_restoreGState;
         private static ModuleMethodHandle _drawContext_setRGBFillColor;
+        private static ModuleMethodHandle _drawContext_setRGBStrokeColor;
         private static ModuleMethodHandle _drawContext_fillRect;
         private static ModuleMethodHandle _drawContext_setTextMatrix;
         private static ModuleMethodHandle _drawContext_setTextPosition;
@@ -371,6 +372,15 @@ namespace Org.Prefixed.GuiBase
                 DrawContext__Push(this);
                 NativeImplClient.InvokeModuleMethod(_drawContext_setRGBFillColor);
             }
+            public void SetRGBStrokeColor(double red, double green, double blue, double alpha)
+            {
+                NativeImplClient.PushDouble(alpha);
+                NativeImplClient.PushDouble(blue);
+                NativeImplClient.PushDouble(green);
+                NativeImplClient.PushDouble(red);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_setRGBStrokeColor);
+            }
             public void FillRect(Rect rect)
             {
                 Rect__Push(rect, false);
@@ -645,6 +655,7 @@ namespace Org.Prefixed.GuiBase
             _drawContext_saveGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_saveGState");
             _drawContext_restoreGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_restoreGState");
             _drawContext_setRGBFillColor = NativeImplClient.GetModuleMethod(_module, "DrawContext_setRGBFillColor");
+            _drawContext_setRGBStrokeColor = NativeImplClient.GetModuleMethod(_module, "DrawContext_setRGBStrokeColor");
             _drawContext_fillRect = NativeImplClient.GetModuleMethod(_module, "DrawContext_fillRect");
             _drawContext_setTextMatrix = NativeImplClient.GetModuleMethod(_module, "DrawContext_setTextMatrix");
             _drawContext_setTextPosition = NativeImplClient.GetModuleMethod(_module, "DrawContext_setTextPosition");

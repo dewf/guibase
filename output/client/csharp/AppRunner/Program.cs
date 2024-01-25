@@ -57,7 +57,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     public override void Repaint(DrawContext context, int x, int y, int width, int height)
     {
         context.SaveGState();
-        _currentPage.Render(context, x, y, width, height);
+        _currentPage.Render(context, new RenderArea(x, y, width, height));
         context.RestoreGState();
     }
     public override void Resized(int width, int height)

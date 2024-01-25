@@ -7,11 +7,19 @@ public interface IWindowMethods
     void Invalidate(int x, int y, int width, int height);
 }
 
+public struct RenderArea(int x, int y, int width, int height)
+{
+    public int X { get; } = x;
+    public int Y { get; } = y;
+    public int Width { get; } = width;
+    public int Height { get; } = height;
+}
+
 public interface IPage
 {
     void Init();
-    void Render(Drawing.DrawContext context, int x, int y, int width, int height);
-    void Render2(Drawing.DrawContext context, int x, int y, int width, int height);
+    void Render(Drawing.DrawContext context, RenderArea area);
+    void Render2(Drawing.DrawContext context, RenderArea area);
     bool IsAnimating();
     void OnSize(int newWidth, int newHeight);
     void OnTimer(double secondsSinceLast);
@@ -35,13 +43,13 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     {
     }
 
-    public virtual void Render(Drawing.DrawContext context, int x, int y, int width, int height)
+    public virtual void Render(Drawing.DrawContext context, RenderArea area)
     {
     }
 
-    public virtual void Render2(Drawing.DrawContext context, int x, int y, int width, int height)
+    public virtual void Render2(Drawing.DrawContext context, RenderArea area)
     {
-        Render(context, x, y, width, height);
+        Render(context, area);
     }
 
     public virtual bool IsAnimating() => false;
