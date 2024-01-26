@@ -59,16 +59,15 @@ opaque Color {
     static Color getConstantColor(ColorConstants which);
 }
 
-sumtype ColorSpaceName {
+enum ColorSpaceName {
     GenericGray,
     GenericRGB,
     GenericCMYK,
     GenericRGBLinear,
     AdobeRGB1998,
     SRGB,
-    GenericGrayGamma2_2,
-    //
-    Other(string name)
+    GenericGrayGamma2_2
+    // many more we don't have yet!
 }
 
 opaque ColorSpace {

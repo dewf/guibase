@@ -377,22 +377,7 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Color(ptr) : null;
         }
 
-        public abstract record ColorSpaceName
-        {
-            public sealed record GenericGray : ColorSpaceName;
-            public sealed record GenericRGB : ColorSpaceName;
-            public sealed record GenericCMYK : ColorSpaceName;
-            public sealed record GenericRGBLinear : ColorSpaceName;
-            public sealed record AdobeRGB1998 : ColorSpaceName;
-            public sealed record SRGB : ColorSpaceName;
-            public sealed record GenericGrayGamma2_2 : ColorSpaceName;
-            public sealed record Other(string Name) : ColorSpaceName
-            {
-                public string Name { get; } = Name;
-            }
-        }
-
-        private enum ColorSpaceName__Tag
+        public enum ColorSpaceName
         {
             GenericGray,
             GenericRGB,
@@ -400,87 +385,20 @@ namespace Org.Prefixed.GuiBase
             GenericRGBLinear,
             AdobeRGB1998,
             SRGB,
-            GenericGrayGamma2_2,
-            Other
+            GenericGrayGamma2_2
         }
 
-        internal static void ColorSpaceName__Push(ColorSpaceName thing, bool isReturn)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void ColorSpaceName__Push(ColorSpaceName value)
         {
-            ColorSpaceName__Tag which;
-            switch (thing)
-            {
-                case ColorSpaceName.GenericGray genericGray:
-                    which = ColorSpaceName__Tag.GenericGray;
-                    break;
-                case ColorSpaceName.GenericRGB genericRGB:
-                    which = ColorSpaceName__Tag.GenericRGB;
-                    break;
-                case ColorSpaceName.GenericCMYK genericCMYK:
-                    which = ColorSpaceName__Tag.GenericCMYK;
-                    break;
-                case ColorSpaceName.GenericRGBLinear genericRGBLinear:
-                    which = ColorSpaceName__Tag.GenericRGBLinear;
-                    break;
-                case ColorSpaceName.AdobeRGB1998 adobeRGB1998:
-                    which = ColorSpaceName__Tag.AdobeRGB1998;
-                    break;
-                case ColorSpaceName.SRGB sRGB:
-                    which = ColorSpaceName__Tag.SRGB;
-                    break;
-                case ColorSpaceName.GenericGrayGamma2_2 genericGrayGamma2_2:
-                    which = ColorSpaceName__Tag.GenericGrayGamma2_2;
-                    break;
-                case ColorSpaceName.Other other:
-                    which = ColorSpaceName__Tag.Other;
-                    NativeImplClient.PushString(other.Name);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(thing));
-            }
-            NativeImplClient.PushInt32((int)which);
+            NativeImplClient.PushInt32((int)value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static ColorSpaceName ColorSpaceName__Pop()
         {
-            var which = NativeImplClient.PopInt32();
-            switch ((ColorSpaceName__Tag)which)
-            {
-                case ColorSpaceName__Tag.GenericGray:
-                {
-                    return new ColorSpaceName.GenericGray();
-                }
-                case ColorSpaceName__Tag.GenericRGB:
-                {
-                    return new ColorSpaceName.GenericRGB();
-                }
-                case ColorSpaceName__Tag.GenericCMYK:
-                {
-                    return new ColorSpaceName.GenericCMYK();
-                }
-                case ColorSpaceName__Tag.GenericRGBLinear:
-                {
-                    return new ColorSpaceName.GenericRGBLinear();
-                }
-                case ColorSpaceName__Tag.AdobeRGB1998:
-                {
-                    return new ColorSpaceName.AdobeRGB1998();
-                }
-                case ColorSpaceName__Tag.SRGB:
-                {
-                    return new ColorSpaceName.SRGB();
-                }
-                case ColorSpaceName__Tag.GenericGrayGamma2_2:
-                {
-                    return new ColorSpaceName.GenericGrayGamma2_2();
-                }
-                case ColorSpaceName__Tag.Other:
-                {
-                    var name = NativeImplClient.PopString();
-                    return new ColorSpaceName.Other(name);
-                }
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            var ret = NativeImplClient.PopInt32();
+            return (ColorSpaceName)ret;
         }
 
         public class ColorSpace : IDisposable
@@ -502,7 +420,7 @@ namespace Org.Prefixed.GuiBase
             }
             public static ColorSpace CreateWithName(ColorSpaceName name)
             {
-                ColorSpaceName__Push(name, false);
+                ColorSpaceName__Push(name);
                 NativeImplClient.InvokeModuleMethod(_colorSpace_createWithName);
                 return ColorSpace__Pop();
             }

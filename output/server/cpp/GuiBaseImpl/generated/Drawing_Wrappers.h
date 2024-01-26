@@ -14,7 +14,8 @@ ColorConstants ColorConstants__pop();
 
 void Color__push(Color value);
 Color Color__pop();
-void ColorSpaceName__push(ColorSpaceName value, bool isReturn);
+
+void ColorSpaceName__push(ColorSpaceName value);
 ColorSpaceName ColorSpaceName__pop();
 
 void ColorSpace__push(ColorSpace value);

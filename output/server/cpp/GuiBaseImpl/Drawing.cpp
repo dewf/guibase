@@ -240,43 +240,34 @@ void Color_dispose(Color _this)
 
 ColorSpace ColorSpace_createWithName(ColorSpaceName name)
 {
-    dl_CFStringRef cfStringName = nullptr;
-    bool needsRelease = false;
-    switch (name.tag) {
-    case ColorSpaceName::Tag::GenericGray:
-        cfStringName = dl_kCGColorSpaceGenericGray;
+    dl_CFStringRef cfName = nullptr;
+    switch (name) {
+    case ColorSpaceName::GenericGray:
+        cfName = dl_kCGColorSpaceGenericGray;
         break;
-    case ColorSpaceName::Tag::GenericRGB:
-        cfStringName = dl_kCGColorSpaceGenericRGB;
+    case ColorSpaceName::GenericRGB:
+        cfName = dl_kCGColorSpaceGenericRGB;
         break;
-    case ColorSpaceName::Tag::GenericCMYK:
-        cfStringName = dl_kCGColorSpaceGenericCMYK;
+    case ColorSpaceName::GenericCMYK:
+        cfName = dl_kCGColorSpaceGenericCMYK;
         break;
-    case ColorSpaceName::Tag::GenericRGBLinear:
-        cfStringName = dl_kCGColorSpaceGenericRGBLinear;
+    case ColorSpaceName::GenericRGBLinear:
+        cfName = dl_kCGColorSpaceGenericRGBLinear;
         break;
-    case ColorSpaceName::Tag::AdobeRGB1998:
-        cfStringName = dl_kCGColorSpaceAdobeRGB1998;
+    case ColorSpaceName::AdobeRGB1998:
+        cfName = dl_kCGColorSpaceAdobeRGB1998;
         break;
-    case ColorSpaceName::Tag::SRGB:
-        cfStringName = dl_kCGColorSpaceSRGB;
+    case ColorSpaceName::SRGB:
+        cfName = dl_kCGColorSpaceSRGB;
         break;
-    case ColorSpaceName::Tag::GenericGrayGamma2_2:
-        cfStringName = dl_kCGColorSpaceGenericGrayGamma2_2;
-        break;
-    case ColorSpaceName::Tag::Other:
-        cfStringName = dl_CFStringCreateWithCString(name.other->name.c_str());
-        needsRelease = true;
+    case ColorSpaceName::GenericGrayGamma2_2:
+        cfName = dl_kCGColorSpaceGenericGrayGamma2_2;
         break;
     default:
-        printf("ColorSpace_createWithName: unknown ColorSpaceName, returning null!\n");
+        printf("ColorSpace_createWithName: unknown ColorSpaceName (%d), returning null!\n", name);
         return nullptr;
     }
-    auto space = dl_CGColorSpaceCreateWithName(cfStringName);
-    if (needsRelease) {
-        dl_CFRelease(cfStringName);
-    }
-    return (ColorSpace)space;
+    return (ColorSpace)dl_CGColorSpaceCreateWithName(cfName);
 }
 
 ColorSpace ColorSpace_createDeviceGray()

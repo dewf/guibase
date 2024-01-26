@@ -97,7 +97,7 @@ public static class Common
     {
         var start = new GradientStop(0, fromRed, fromGreen, fromBlue, fromAlpha);
         var end = new GradientStop(1, toRed, toGreen, toBlue, toAlpha);
-        using var space = ColorSpace.CreateWithName(new ColorSpaceName.GenericRGB());
+        using var space = ColorSpace.CreateWithName(ColorSpaceName.GenericRGB);
         return Gradient.CreateWithColorComponents(space, [start, end]);
     }
     

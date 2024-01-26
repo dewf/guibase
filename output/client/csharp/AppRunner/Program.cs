@@ -121,7 +121,10 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
 
     public void TimerTick(double secondsSinceLast)
     {
-        _currentPage.OnTimer(secondsSinceLast);
+        if (_currentPage.IsAnimating())
+        {
+            _currentPage.OnTimer(secondsSinceLast);
+        }
     }
 }
 

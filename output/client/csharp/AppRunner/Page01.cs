@@ -15,10 +15,7 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
     private const double AnimTurnsPerSec = 1.0 / 5.0;
     private double _animAngle = 0;
 
-    public override bool IsAnimating()
-    {
-        return _animating;
-    }
+    public override bool IsAnimating() => _animating;
 
     public override void OnTimer(double secondsSinceLast)
     {

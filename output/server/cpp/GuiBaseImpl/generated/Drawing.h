@@ -116,84 +116,14 @@ enum class ColorConstants {
 };
 
 
-struct ColorSpaceName {
-public:
-    enum class Tag {
-        GenericGray,
-        GenericRGB,
-        GenericCMYK,
-        GenericRGBLinear,
-        AdobeRGB1998,
-        SRGB,
-        GenericGrayGamma2_2,
-        Other
-    };
-    const Tag tag;
-    struct GenericGray {
-        static ColorSpaceName make() {
-            ColorSpaceName ret{ Tag::GenericGray };
-            ret.genericGray = std::shared_ptr<GenericGray>(new GenericGray{  });
-            return ret;
-        }
-    };
-    struct GenericRGB {
-        static ColorSpaceName make() {
-            ColorSpaceName ret{ Tag::GenericRGB };
-            ret.genericRGB = std::shared_ptr<GenericRGB>(new GenericRGB{  });
-            return ret;
-        }
-    };
-    struct GenericCMYK {
-        static ColorSpaceName make() {
-            ColorSpaceName ret{ Tag::GenericCMYK };
-            ret.genericCMYK = std::shared_ptr<GenericCMYK>(new GenericCMYK{  });
-            return ret;
-        }
-    };
-    struct GenericRGBLinear {
-        static ColorSpaceName make() {
-            ColorSpaceName ret{ Tag::GenericRGBLinear };
-            ret.genericRGBLinear = std::shared_ptr<GenericRGBLinear>(new GenericRGBLinear{  });
-            return ret;
-        }
-    };
-    struct AdobeRGB1998 {
-        static ColorSpaceName make() {
-            ColorSpaceName ret{ Tag::AdobeRGB1998 };
-            ret.adobeRGB1998 = std::shared_ptr<AdobeRGB1998>(new AdobeRGB1998{  });
-            return ret;
-        }
-    };
-    struct SRGB {
-        static ColorSpaceName make() {
-            ColorSpaceName ret{ Tag::SRGB };
-            ret.sRGB = std::shared_ptr<SRGB>(new SRGB{  });
-            return ret;
-        }
-    };
-    struct GenericGrayGamma2_2 {
-        static ColorSpaceName make() {
-            ColorSpaceName ret{ Tag::GenericGrayGamma2_2 };
-            ret.genericGrayGamma2_2 = std::shared_ptr<GenericGrayGamma2_2>(new GenericGrayGamma2_2{  });
-            return ret;
-        }
-    };
-    struct Other {
-        const std::string name;
-        static ColorSpaceName make(std::string name) {
-            ColorSpaceName ret{ Tag::Other };
-            ret.other = std::shared_ptr<Other>(new Other{ name });
-            return ret;
-        }
-    };
-    std::shared_ptr<GenericGray> genericGray;
-    std::shared_ptr<GenericRGB> genericRGB;
-    std::shared_ptr<GenericCMYK> genericCMYK;
-    std::shared_ptr<GenericRGBLinear> genericRGBLinear;
-    std::shared_ptr<AdobeRGB1998> adobeRGB1998;
-    std::shared_ptr<SRGB> sRGB;
-    std::shared_ptr<GenericGrayGamma2_2> genericGrayGamma2_2;
-    std::shared_ptr<Other> other;
+enum class ColorSpaceName {
+    GenericGray,
+    GenericRGB,
+    GenericCMYK,
+    GenericRGBLinear,
+    AdobeRGB1998,
+    SRGB,
+    GenericGrayGamma2_2
 };
 
 

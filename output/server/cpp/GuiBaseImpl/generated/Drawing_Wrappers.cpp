@@ -98,52 +98,13 @@ Color Color__pop() {
     return (Color)ni_popPtr();
 }
 
-void ColorSpaceName__push(ColorSpaceName value, bool isReturn) {
-    switch (value.tag) {
-    case ColorSpaceName::Tag::GenericGray:
-        break;
-    case ColorSpaceName::Tag::GenericRGB:
-        break;
-    case ColorSpaceName::Tag::GenericCMYK:
-        break;
-    case ColorSpaceName::Tag::GenericRGBLinear:
-        break;
-    case ColorSpaceName::Tag::AdobeRGB1998:
-        break;
-    case ColorSpaceName::Tag::SRGB:
-        break;
-    case ColorSpaceName::Tag::GenericGrayGamma2_2:
-        break;
-    case ColorSpaceName::Tag::Other:
-        pushStringInternal(value.other->name);
-        break;
-    }
-    ni_pushInt32((int32_t)value.tag);
+inline void ColorSpaceName__push(ColorSpaceName value) {
+    ni_pushInt32((int32_t)value);
 }
 
-ColorSpaceName ColorSpaceName__pop() {
-    auto which = ni_popInt32();
-    switch ((ColorSpaceName::Tag)which) {
-    case ColorSpaceName::Tag::GenericGray: {
-        return ColorSpaceName::GenericGray::make(); }
-    case ColorSpaceName::Tag::GenericRGB: {
-        return ColorSpaceName::GenericRGB::make(); }
-    case ColorSpaceName::Tag::GenericCMYK: {
-        return ColorSpaceName::GenericCMYK::make(); }
-    case ColorSpaceName::Tag::GenericRGBLinear: {
-        return ColorSpaceName::GenericRGBLinear::make(); }
-    case ColorSpaceName::Tag::AdobeRGB1998: {
-        return ColorSpaceName::AdobeRGB1998::make(); }
-    case ColorSpaceName::Tag::SRGB: {
-        return ColorSpaceName::SRGB::make(); }
-    case ColorSpaceName::Tag::GenericGrayGamma2_2: {
-        return ColorSpaceName::GenericGrayGamma2_2::make(); }
-    case ColorSpaceName::Tag::Other: {
-        auto name = popStringInternal();
-        return ColorSpaceName::Other::make(name); }
-    default:
-        throw "ColorSpaceName__pop(): unknown tag!";
-    }
+inline ColorSpaceName ColorSpaceName__pop() {
+    auto tag = ni_popInt32();
+    return (ColorSpaceName)tag;
 }
 
 void ColorSpace__push(ColorSpace value) {
