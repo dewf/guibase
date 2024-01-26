@@ -12,6 +12,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     private readonly Page01 _page01;
     private readonly Page02 _page02;
     private readonly Page03 _page03;
+    private readonly Page04 _page04;
     private IPage _currentPage;
 
     public bool IsDestroyed { get; private set; }
@@ -28,6 +29,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
         _page01 = new Page01(this);
         _page02 = new Page02(this);
         _page03 = new Page03(this);
+        _page04 = new Page04(this);
         _currentPage = _page01;
     }
 
@@ -82,6 +84,9 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
                 break;
             case Key._3:
                 SelectPage(_page03);
+                break;
+            case Key._4:
+                SelectPage(_page04);
                 break;
             default:
                 _currentPage.OnKeyDown(key, modifiers);
