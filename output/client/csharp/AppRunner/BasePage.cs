@@ -17,7 +17,6 @@ public readonly struct RenderArea(int x, int y, int width, int height)
 
 public interface IPage
 {
-    void Init();
     void Render(Drawing.DrawContext context, RenderArea area);
     void Render2(Drawing.DrawContext context, RenderArea area);
     bool IsAnimating();
@@ -40,10 +39,6 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     protected void Invalidate(int x, int y, int width, int height)
     {
         windowMethods.Invalidate(x, y, width, height);
-    }
-
-    public virtual void Init()
-    {
     }
 
     public virtual void OnMouseMove(int x, int y, Windowing.Modifiers modifiers)

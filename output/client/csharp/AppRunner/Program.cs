@@ -26,12 +26,8 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
 
         // page init
         _page01 = new Page01(this);
-        _page01.Init();
         _page02 = new Page02(this);
-        _page02.Init();
         _page03 = new Page03(this);
-        _page03.Init();
-
         _currentPage = _page01;
     }
 
