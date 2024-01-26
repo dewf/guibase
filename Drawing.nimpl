@@ -1,7 +1,5 @@
 module Drawing;
 
-import Foundation;
-
 struct Point {
     double x;
     double y;

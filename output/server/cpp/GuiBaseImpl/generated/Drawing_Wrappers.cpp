@@ -1,7 +1,6 @@
 #include "../support/NativeImplServer.h"
 #include "Drawing_wrappers.h"
 #include "Drawing.h"
-#include "Foundation_wrappers.h"
 
 
 void AffineTransform__push(AffineTransform value, bool isReturn) {

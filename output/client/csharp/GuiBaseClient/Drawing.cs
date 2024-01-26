@@ -7,8 +7,6 @@ using System.Runtime.InteropServices;
 using Org.Prefixed.GuiBase.Support;
 using ModuleHandle = Org.Prefixed.GuiBase.Support.ModuleHandle;
 
-using static Org.Prefixed.GuiBase.Foundation;
-
 namespace Org.Prefixed.GuiBase
 {
     public static class Drawing

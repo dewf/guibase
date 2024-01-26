@@ -135,23 +135,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\common\comstuff.h" />
-    <ClInclude Include="..\common\unicodestuff.h" />
     <ClInclude Include="..\generated\Drawing.h" />
     <ClInclude Include="..\generated\Drawing_Wrappers.h" />
-    <ClInclude Include="..\generated\Foundation.h" />
-    <ClInclude Include="..\generated\Foundation_Wrappers.h" />
     <ClInclude Include="..\generated\Windowing.h" />
     <ClInclude Include="..\generated\Windowing_Wrappers.h" />
     <ClInclude Include="..\support\CoreStuff.h" />
     <ClInclude Include="..\support\NativeImplServer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\common\unicodestuff.cpp" />
     <ClCompile Include="..\Drawing.cpp" />
-    <ClCompile Include="..\Foundation.cpp" />
     <ClCompile Include="..\generated\Drawing_Wrappers.cpp" />
-    <ClCompile Include="..\generated\Foundation_Wrappers.cpp" />
     <ClCompile Include="..\generated\Library.cpp" />
     <ClCompile Include="..\generated\Windowing_Wrappers.cpp" />
     <ClCompile Include="..\support\NativeImplServer.cpp" />

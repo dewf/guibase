@@ -9,8 +9,6 @@
 #include <tuple>
 #include <set>
 
-#include "Foundation.h"
-
 struct __Color; typedef struct __Color* Color;
 struct __ColorSpace; typedef struct __ColorSpace* ColorSpace;
 struct __Gradient; typedef struct __Gradient* Gradient;

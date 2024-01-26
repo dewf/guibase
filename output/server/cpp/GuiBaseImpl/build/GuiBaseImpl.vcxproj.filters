@@ -15,9 +15,6 @@
     <Filter Include="Source Files\support">
       <UniqueIdentifier>{d921281b-b3b3-4024-bbf3-bce56e03b2f6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\common">
-      <UniqueIdentifier>{aa34b4c2-73fa-4c6f-addf-7275fd92b12a}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\generated\Windowing_Wrappers.cpp">
@@ -29,9 +26,6 @@
     <ClCompile Include="..\Windowing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\common\unicodestuff.cpp">
-      <Filter>Source Files\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\Drawing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -40,12 +34,6 @@
     </ClCompile>
     <ClCompile Include="..\generated\Library.cpp">
       <Filter>Source Files\generated</Filter>
-    </ClCompile>
-    <ClCompile Include="..\generated\Foundation_Wrappers.cpp">
-      <Filter>Source Files\generated</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Foundation.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -58,12 +46,6 @@
     <ClInclude Include="..\support\NativeImplServer.h">
       <Filter>Source Files\support</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\comstuff.h">
-      <Filter>Source Files\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\unicodestuff.h">
-      <Filter>Source Files\common</Filter>
-    </ClInclude>
     <ClInclude Include="..\generated\Drawing.h">
       <Filter>Source Files\generated</Filter>
     </ClInclude>
@@ -71,12 +53,6 @@
       <Filter>Source Files\generated</Filter>
     </ClInclude>
     <ClInclude Include="..\generated\Windowing_Wrappers.h">
-      <Filter>Source Files\generated</Filter>
-    </ClInclude>
-    <ClInclude Include="..\generated\Foundation.h">
-      <Filter>Source Files\generated</Filter>
-    </ClInclude>
-    <ClInclude Include="..\generated\Foundation_Wrappers.h">
       <Filter>Source Files\generated</Filter>
     </ClInclude>
   </ItemGroup>
