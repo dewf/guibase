@@ -24,13 +24,25 @@ AffineTransform AffineTransform__pop() {
 }
 
 void AttributedStringOptions__push(AttributedStringOptions value, bool isReturn) {
-    Color foregroundColor;
-    if (value.hasForegroundColor(&foregroundColor)) {
-        Color__push(foregroundColor);
+    Color strokeColor;
+    if (value.hasStrokeColor(&strokeColor)) {
+        Color__push(strokeColor);
+    }
+    double strokeWidth;
+    if (value.hasStrokeWidth(&strokeWidth)) {
+        ni_pushDouble(strokeWidth);
     }
     Font font;
     if (value.hasFont(&font)) {
         Font__push(font);
+    }
+    bool foregroundColorFromContext;
+    if (value.hasForegroundColorFromContext(&foregroundColorFromContext)) {
+        ni_pushBool(foregroundColorFromContext);
+    }
+    Color foregroundColor;
+    if (value.hasForegroundColor(&foregroundColor)) {
+        Color__push(foregroundColor);
     }
     ni_pushInt32(value.getUsedFields());
 }
@@ -38,13 +50,25 @@ void AttributedStringOptions__push(AttributedStringOptions value, bool isReturn)
 AttributedStringOptions AttributedStringOptions__pop() {
     AttributedStringOptions value = {};
     value._usedFields =  ni_popInt32();
+    if (value._usedFields & AttributedStringOptions::Fields::ForegroundColorField) {
+        auto x = Color__pop();
+        value.setForegroundColor(x);
+    }
+    if (value._usedFields & AttributedStringOptions::Fields::ForegroundColorFromContextField) {
+        auto x = ni_popBool();
+        value.setForegroundColorFromContext(x);
+    }
     if (value._usedFields & AttributedStringOptions::Fields::FontField) {
         auto x = Font__pop();
         value.setFont(x);
     }
-    if (value._usedFields & AttributedStringOptions::Fields::ForegroundColorField) {
+    if (value._usedFields & AttributedStringOptions::Fields::StrokeWidthField) {
+        auto x = ni_popDouble();
+        value.setStrokeWidth(x);
+    }
+    if (value._usedFields & AttributedStringOptions::Fields::StrokeColorField) {
         auto x = Color__pop();
-        value.setForegroundColor(x);
+        value.setStrokeColor(x);
     }
     return value;
 }
@@ -57,12 +81,77 @@ AttributedString AttributedString__pop() {
     return (AttributedString)ni_popPtr();
 }
 
+inline void ColorConstants__push(ColorConstants value) {
+    ni_pushInt32((int32_t)value);
+}
+
+inline ColorConstants ColorConstants__pop() {
+    auto tag = ni_popInt32();
+    return (ColorConstants)tag;
+}
+
 void Color__push(Color value) {
     ni_pushPtr(value);
 }
 
 Color Color__pop() {
     return (Color)ni_popPtr();
+}
+
+void ColorSpaceName__push(ColorSpaceName value, bool isReturn) {
+    switch (value.tag) {
+    case ColorSpaceName::Tag::GenericGray:
+        break;
+    case ColorSpaceName::Tag::GenericRGB:
+        break;
+    case ColorSpaceName::Tag::GenericCMYK:
+        break;
+    case ColorSpaceName::Tag::GenericRGBLinear:
+        break;
+    case ColorSpaceName::Tag::AdobeRGB1998:
+        break;
+    case ColorSpaceName::Tag::SRGB:
+        break;
+    case ColorSpaceName::Tag::GenericGrayGamma2_2:
+        break;
+    case ColorSpaceName::Tag::Other:
+        pushStringInternal(value.other->name);
+        break;
+    }
+    ni_pushInt32((int32_t)value.tag);
+}
+
+ColorSpaceName ColorSpaceName__pop() {
+    auto which = ni_popInt32();
+    switch ((ColorSpaceName::Tag)which) {
+    case ColorSpaceName::Tag::GenericGray: {
+        return ColorSpaceName::GenericGray::make(); }
+    case ColorSpaceName::Tag::GenericRGB: {
+        return ColorSpaceName::GenericRGB::make(); }
+    case ColorSpaceName::Tag::GenericCMYK: {
+        return ColorSpaceName::GenericCMYK::make(); }
+    case ColorSpaceName::Tag::GenericRGBLinear: {
+        return ColorSpaceName::GenericRGBLinear::make(); }
+    case ColorSpaceName::Tag::AdobeRGB1998: {
+        return ColorSpaceName::AdobeRGB1998::make(); }
+    case ColorSpaceName::Tag::SRGB: {
+        return ColorSpaceName::SRGB::make(); }
+    case ColorSpaceName::Tag::GenericGrayGamma2_2: {
+        return ColorSpaceName::GenericGrayGamma2_2::make(); }
+    case ColorSpaceName::Tag::Other: {
+        auto name = popStringInternal();
+        return ColorSpaceName::Other::make(name); }
+    default:
+        throw "ColorSpaceName__pop(): unknown tag!";
+    }
+}
+
+void ColorSpace__push(ColorSpace value) {
+    ni_pushPtr(value);
+}
+
+ColorSpace ColorSpace__pop() {
+    return (ColorSpace)ni_popPtr();
 }
 
 void Point__push(Point value, bool isReturn) {
@@ -109,6 +198,14 @@ inline PathDrawingMode PathDrawingMode__pop() {
 
 // built-in array type: std::vector<double>
 
+inline void GradientDrawingOptions__push(uint32_t value) {
+    ni_pushUInt32(value);
+}
+
+inline uint32_t GradientDrawingOptions__pop() {
+    return ni_popUInt32();
+}
+
 void DrawContext__push(DrawContext value) {
     ni_pushPtr(value);
 }
@@ -141,6 +238,70 @@ void Font__push(Font value) {
 
 Font Font__pop() {
     return (Font)ni_popPtr();
+}
+
+void GradientStop__push(GradientStop value, bool isReturn) {
+    ni_pushDouble(value.alpha);
+    ni_pushDouble(value.blue);
+    ni_pushDouble(value.green);
+    ni_pushDouble(value.red);
+    ni_pushDouble(value.location);
+}
+
+GradientStop GradientStop__pop() {
+    auto location = ni_popDouble();
+    auto red = ni_popDouble();
+    auto green = ni_popDouble();
+    auto blue = ni_popDouble();
+    auto alpha = ni_popDouble();
+    return GradientStop { location, red, green, blue, alpha };
+}
+
+void __GradientStop_Array__push(std::vector<GradientStop> values, bool isReturn) {
+    std::vector<double> alpha_values;
+    std::vector<double> blue_values;
+    std::vector<double> green_values;
+    std::vector<double> red_values;
+    std::vector<double> location_values;
+    for (auto v = values.begin(); v != values.end(); v++) {
+        alpha_values.push_back(v->alpha);
+        blue_values.push_back(v->blue);
+        green_values.push_back(v->green);
+        red_values.push_back(v->red);
+        location_values.push_back(v->location);
+    }
+    pushDoubleArrayInternal(alpha_values);
+    pushDoubleArrayInternal(blue_values);
+    pushDoubleArrayInternal(green_values);
+    pushDoubleArrayInternal(red_values);
+    pushDoubleArrayInternal(location_values);
+}
+
+std::vector<GradientStop> __GradientStop_Array__pop() {
+    auto location_values = popDoubleArrayInternal();
+    auto red_values = popDoubleArrayInternal();
+    auto green_values = popDoubleArrayInternal();
+    auto blue_values = popDoubleArrayInternal();
+    auto alpha_values = popDoubleArrayInternal();
+    std::vector<GradientStop> __ret;
+    for (auto i = 0; i < location_values.size(); i++) {
+        GradientStop __value;
+        __value.location = location_values[i];
+        __value.red = red_values[i];
+        __value.green = green_values[i];
+        __value.blue = blue_values[i];
+        __value.alpha = alpha_values[i];
+        __ret.push_back(__value);
+    }
+    return __ret;
+}
+
+void Gradient__push(Gradient value) {
+    ni_pushPtr(value);
+}
+
+Gradient Gradient__pop() {
+    return (Gradient)ni_popPtr();
 }
 
 void TypographicBounds__push(TypographicBounds value, bool isReturn) {
@@ -180,6 +341,49 @@ void Path__push(Path value) {
 
 Path Path__pop() {
     return (Path)ni_popPtr();
+}
+
+void Color_createGenericRGB__wrapper() {
+    auto red = ni_popDouble();
+    auto green = ni_popDouble();
+    auto blue = ni_popDouble();
+    auto alpha = ni_popDouble();
+    Color__push(Color_createGenericRGB(red, green, blue, alpha));
+}
+
+void Color_getConstantColor__wrapper() {
+    auto which = ColorConstants__pop();
+    Color__push(Color_getConstantColor(which));
+}
+
+void Color_dispose__wrapper() {
+    auto _this = Color__pop();
+    Color_dispose(_this);
+}
+
+void ColorSpace_createWithName__wrapper() {
+    auto name = ColorSpaceName__pop();
+    ColorSpace__push(ColorSpace_createWithName(name));
+}
+
+void ColorSpace_createDeviceGray__wrapper() {
+    ColorSpace__push(ColorSpace_createDeviceGray());
+}
+
+void ColorSpace_dispose__wrapper() {
+    auto _this = ColorSpace__pop();
+    ColorSpace_dispose(_this);
+}
+
+void Gradient_createWithColorComponents__wrapper() {
+    auto space = ColorSpace__pop();
+    auto stops = __GradientStop_Array__pop();
+    Gradient__push(Gradient_createWithColorComponents(space, stops));
+}
+
+void Gradient_dispose__wrapper() {
+    auto _this = Gradient__pop();
+    Gradient_dispose(_this);
 }
 
 void Path_createWithRect__wrapper() {
@@ -341,6 +545,12 @@ void DrawContext_clip__wrapper() {
     DrawContext_clip(_this);
 }
 
+void DrawContext_clipToRect__wrapper() {
+    auto _this = DrawContext__pop();
+    auto clipRect = Rect__pop();
+    DrawContext_clipToRect(_this, clipRect);
+}
+
 void DrawContext_translateCTM__wrapper() {
     auto _this = DrawContext__pop();
     auto tx = ni_popDouble();
@@ -395,22 +605,18 @@ void DrawContext_closePath__wrapper() {
     DrawContext_closePath(_this);
 }
 
+void DrawContext_drawLinearGradient__wrapper() {
+    auto _this = DrawContext__pop();
+    auto gradient = Gradient__pop();
+    auto startPoint = Point__pop();
+    auto endPoint = Point__pop();
+    auto drawOpts = GradientDrawingOptions__pop();
+    DrawContext_drawLinearGradient(_this, gradient, startPoint, endPoint, drawOpts);
+}
+
 void DrawContext_dispose__wrapper() {
     auto _this = DrawContext__pop();
     DrawContext_dispose(_this);
-}
-
-void Color_create__wrapper() {
-    auto red = ni_popDouble();
-    auto green = ni_popDouble();
-    auto blue = ni_popDouble();
-    auto alpha = ni_popDouble();
-    Color__push(Color_create(red, green, blue, alpha));
-}
-
-void Color_dispose__wrapper() {
-    auto _this = Color__pop();
-    Color_dispose(_this);
 }
 
 void AttributedString_create__wrapper() {
@@ -429,6 +635,13 @@ void Font_createFromFile__wrapper() {
     auto size = ni_popDouble();
     auto optArgs = OptArgs__pop();
     Font__push(Font_createFromFile(path, size, optArgs));
+}
+
+void Font_createWithName__wrapper() {
+    auto name = popStringInternal();
+    auto size = ni_popDouble();
+    auto optArgs = OptArgs__pop();
+    Font__push(Font_createWithName(name, size, optArgs));
 }
 
 void Font_dispose__wrapper() {
@@ -470,6 +683,14 @@ void __constantsFunc() {
 int Drawing__register() {
     auto m = ni_registerModule("Drawing");
     ni_registerModuleConstants(m, &__constantsFunc);
+    ni_registerModuleMethod(m, "Color_createGenericRGB", &Color_createGenericRGB__wrapper);
+    ni_registerModuleMethod(m, "Color_getConstantColor", &Color_getConstantColor__wrapper);
+    ni_registerModuleMethod(m, "Color_dispose", &Color_dispose__wrapper);
+    ni_registerModuleMethod(m, "ColorSpace_createWithName", &ColorSpace_createWithName__wrapper);
+    ni_registerModuleMethod(m, "ColorSpace_createDeviceGray", &ColorSpace_createDeviceGray__wrapper);
+    ni_registerModuleMethod(m, "ColorSpace_dispose", &ColorSpace_dispose__wrapper);
+    ni_registerModuleMethod(m, "Gradient_createWithColorComponents", &Gradient_createWithColorComponents__wrapper);
+    ni_registerModuleMethod(m, "Gradient_dispose", &Gradient_dispose__wrapper);
     ni_registerModuleMethod(m, "Path_createWithRect", &Path_createWithRect__wrapper);
     ni_registerModuleMethod(m, "Path_createWithEllipseInRect", &Path_createWithEllipseInRect__wrapper);
     ni_registerModuleMethod(m, "Path_createWithRoundedRect", &Path_createWithRoundedRect__wrapper);
@@ -494,6 +715,7 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_clearLineDash", &DrawContext_clearLineDash__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setLineWidth", &DrawContext_setLineWidth__wrapper);
     ni_registerModuleMethod(m, "DrawContext_clip", &DrawContext_clip__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_clipToRect", &DrawContext_clipToRect__wrapper);
     ni_registerModuleMethod(m, "DrawContext_translateCTM", &DrawContext_translateCTM__wrapper);
     ni_registerModuleMethod(m, "DrawContext_scaleCTM", &DrawContext_scaleCTM__wrapper);
     ni_registerModuleMethod(m, "DrawContext_rotateCTM", &DrawContext_rotateCTM__wrapper);
@@ -503,12 +725,12 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_strokeRect", &DrawContext_strokeRect__wrapper);
     ni_registerModuleMethod(m, "DrawContext_addRect", &DrawContext_addRect__wrapper);
     ni_registerModuleMethod(m, "DrawContext_closePath", &DrawContext_closePath__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_drawLinearGradient", &DrawContext_drawLinearGradient__wrapper);
     ni_registerModuleMethod(m, "DrawContext_dispose", &DrawContext_dispose__wrapper);
-    ni_registerModuleMethod(m, "Color_create", &Color_create__wrapper);
-    ni_registerModuleMethod(m, "Color_dispose", &Color_dispose__wrapper);
     ni_registerModuleMethod(m, "AttributedString_create", &AttributedString_create__wrapper);
     ni_registerModuleMethod(m, "AttributedString_dispose", &AttributedString_dispose__wrapper);
     ni_registerModuleMethod(m, "Font_createFromFile", &Font_createFromFile__wrapper);
+    ni_registerModuleMethod(m, "Font_createWithName", &Font_createWithName__wrapper);
     ni_registerModuleMethod(m, "Font_dispose", &Font_dispose__wrapper);
     ni_registerModuleMethod(m, "Line_getTypographicBounds", &Line_getTypographicBounds__wrapper);
     ni_registerModuleMethod(m, "Line_getBoundsWithOptions", &Line_getBoundsWithOptions__wrapper);

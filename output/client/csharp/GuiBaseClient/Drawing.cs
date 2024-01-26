@@ -14,6 +14,14 @@ namespace Org.Prefixed.GuiBase
     public static class Drawing
     {
         private static ModuleHandle _module;
+        private static ModuleMethodHandle _color_createGenericRGB;
+        private static ModuleMethodHandle _color_getConstantColor;
+        private static ModuleMethodHandle _Color_dispose;
+        private static ModuleMethodHandle _colorSpace_createWithName;
+        private static ModuleMethodHandle _colorSpace_createDeviceGray;
+        private static ModuleMethodHandle _ColorSpace_dispose;
+        private static ModuleMethodHandle _gradient_createWithColorComponents;
+        private static ModuleMethodHandle _Gradient_dispose;
         private static ModuleMethodHandle _path_createWithRect;
         private static ModuleMethodHandle _path_createWithEllipseInRect;
         private static ModuleMethodHandle _path_createWithRoundedRect;
@@ -38,6 +46,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _drawContext_clearLineDash;
         private static ModuleMethodHandle _drawContext_setLineWidth;
         private static ModuleMethodHandle _drawContext_clip;
+        private static ModuleMethodHandle _drawContext_clipToRect;
         private static ModuleMethodHandle _drawContext_translateCTM;
         private static ModuleMethodHandle _drawContext_scaleCTM;
         private static ModuleMethodHandle _drawContext_rotateCTM;
@@ -47,12 +56,12 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _drawContext_strokeRect;
         private static ModuleMethodHandle _drawContext_addRect;
         private static ModuleMethodHandle _drawContext_closePath;
+        private static ModuleMethodHandle _drawContext_drawLinearGradient;
         private static ModuleMethodHandle _DrawContext_dispose;
-        private static ModuleMethodHandle _color_create;
-        private static ModuleMethodHandle _Color_dispose;
         private static ModuleMethodHandle _attributedString_create;
         private static ModuleMethodHandle _AttributedString_dispose;
         private static ModuleMethodHandle _font_createFromFile;
+        private static ModuleMethodHandle _font_createWithName;
         private static ModuleMethodHandle _Font_dispose;
         private static ModuleMethodHandle _line_getTypographicBounds;
         private static ModuleMethodHandle _line_getBoundsWithOptions;
@@ -105,30 +114,14 @@ namespace Org.Prefixed.GuiBase
             [Flags]
             internal enum Fields
             {
-                Font = 1,
-                ForegroundColor = 2
+                ForegroundColor = 1,
+                ForegroundColorFromContext = 2,
+                Font = 4,
+                StrokeWidth = 8,
+                StrokeColor = 16
             }
             internal Fields UsedFields;
 
-            private Font _font;
-            public Font Font
-            {
-                set
-                {
-                    _font = value;
-                    UsedFields |= Fields.Font;
-                }
-            }
-            public bool HasFont(out Font value)
-            {
-                if (UsedFields.HasFlag(Fields.Font))
-                {
-                    value = _font;
-                    return true;
-                }
-                value = default;
-                return false;
-            }
             private Color _foregroundColor;
             public Color ForegroundColor
             {
@@ -148,16 +141,104 @@ namespace Org.Prefixed.GuiBase
                 value = default;
                 return false;
             }
+            private bool _foregroundColorFromContext;
+            public bool ForegroundColorFromContext
+            {
+                set
+                {
+                    _foregroundColorFromContext = value;
+                    UsedFields |= Fields.ForegroundColorFromContext;
+                }
+            }
+            public bool HasForegroundColorFromContext(out bool value)
+            {
+                if (UsedFields.HasFlag(Fields.ForegroundColorFromContext))
+                {
+                    value = _foregroundColorFromContext;
+                    return true;
+                }
+                value = default;
+                return false;
+            }
+            private Font _font;
+            public Font Font
+            {
+                set
+                {
+                    _font = value;
+                    UsedFields |= Fields.Font;
+                }
+            }
+            public bool HasFont(out Font value)
+            {
+                if (UsedFields.HasFlag(Fields.Font))
+                {
+                    value = _font;
+                    return true;
+                }
+                value = default;
+                return false;
+            }
+            private double _strokeWidth;
+            public double StrokeWidth
+            {
+                set
+                {
+                    _strokeWidth = value;
+                    UsedFields |= Fields.StrokeWidth;
+                }
+            }
+            public bool HasStrokeWidth(out double value)
+            {
+                if (UsedFields.HasFlag(Fields.StrokeWidth))
+                {
+                    value = _strokeWidth;
+                    return true;
+                }
+                value = default;
+                return false;
+            }
+            private Color _strokeColor;
+            public Color StrokeColor
+            {
+                set
+                {
+                    _strokeColor = value;
+                    UsedFields |= Fields.StrokeColor;
+                }
+            }
+            public bool HasStrokeColor(out Color value)
+            {
+                if (UsedFields.HasFlag(Fields.StrokeColor))
+                {
+                    value = _strokeColor;
+                    return true;
+                }
+                value = default;
+                return false;
+            }
         }
         internal static void AttributedStringOptions__Push(AttributedStringOptions value, bool isReturn)
         {
-            if (value.HasForegroundColor(out var foregroundColor))
+            if (value.HasStrokeColor(out var strokeColor))
             {
-                Color__Push(foregroundColor);
+                Color__Push(strokeColor);
+            }
+            if (value.HasStrokeWidth(out var strokeWidth))
+            {
+                NativeImplClient.PushDouble(strokeWidth);
             }
             if (value.HasFont(out var font))
             {
                 Font__Push(font);
+            }
+            if (value.HasForegroundColorFromContext(out var foregroundColorFromContext))
+            {
+                NativeImplClient.PushBool(foregroundColorFromContext);
+            }
+            if (value.HasForegroundColor(out var foregroundColor))
+            {
+                Color__Push(foregroundColor);
             }
             NativeImplClient.PushInt32((int)value.UsedFields);
         }
@@ -167,13 +248,25 @@ namespace Org.Prefixed.GuiBase
             {
                 UsedFields = (AttributedStringOptions.Fields)NativeImplClient.PopInt32()
             };
+            if (opts.UsedFields.HasFlag(AttributedStringOptions.Fields.ForegroundColor))
+            {
+                opts.ForegroundColor = Color__Pop();
+            }
+            if (opts.UsedFields.HasFlag(AttributedStringOptions.Fields.ForegroundColorFromContext))
+            {
+                opts.ForegroundColorFromContext = NativeImplClient.PopBool();
+            }
             if (opts.UsedFields.HasFlag(AttributedStringOptions.Fields.Font))
             {
                 opts.Font = Font__Pop();
             }
-            if (opts.UsedFields.HasFlag(AttributedStringOptions.Fields.ForegroundColor))
+            if (opts.UsedFields.HasFlag(AttributedStringOptions.Fields.StrokeWidth))
             {
-                opts.ForegroundColor = Color__Pop();
+                opts.StrokeWidth = NativeImplClient.PopDouble();
+            }
+            if (opts.UsedFields.HasFlag(AttributedStringOptions.Fields.StrokeColor))
+            {
+                opts.StrokeColor = Color__Pop();
             }
             return opts;
         }
@@ -217,6 +310,26 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new AttributedString(ptr) : null;
         }
 
+        public enum ColorConstants
+        {
+            White,
+            Black,
+            Clear
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void ColorConstants__Push(ColorConstants value)
+        {
+            NativeImplClient.PushInt32((int)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ColorConstants ColorConstants__Pop()
+        {
+            var ret = NativeImplClient.PopInt32();
+            return (ColorConstants)ret;
+        }
+
         public class Color : IDisposable
         {
             internal readonly IntPtr NativeHandle;
@@ -234,13 +347,19 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
-            public static Color Create(double red, double green, double blue, double alpha)
+            public static Color CreateGenericRGB(double red, double green, double blue, double alpha)
             {
                 NativeImplClient.PushDouble(alpha);
                 NativeImplClient.PushDouble(blue);
                 NativeImplClient.PushDouble(green);
                 NativeImplClient.PushDouble(red);
-                NativeImplClient.InvokeModuleMethod(_color_create);
+                NativeImplClient.InvokeModuleMethod(_color_createGenericRGB);
+                return Color__Pop();
+            }
+            public static Color GetConstantColor(ColorConstants which)
+            {
+                ColorConstants__Push(which);
+                NativeImplClient.InvokeModuleMethod(_color_getConstantColor);
                 return Color__Pop();
             }
         }
@@ -256,6 +375,155 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new Color(ptr) : null;
+        }
+
+        public abstract record ColorSpaceName
+        {
+            public sealed record GenericGray : ColorSpaceName;
+            public sealed record GenericRGB : ColorSpaceName;
+            public sealed record GenericCMYK : ColorSpaceName;
+            public sealed record GenericRGBLinear : ColorSpaceName;
+            public sealed record AdobeRGB1998 : ColorSpaceName;
+            public sealed record SRGB : ColorSpaceName;
+            public sealed record GenericGrayGamma2_2 : ColorSpaceName;
+            public sealed record Other(string Name) : ColorSpaceName
+            {
+                public string Name { get; } = Name;
+            }
+        }
+
+        private enum ColorSpaceName__Tag
+        {
+            GenericGray,
+            GenericRGB,
+            GenericCMYK,
+            GenericRGBLinear,
+            AdobeRGB1998,
+            SRGB,
+            GenericGrayGamma2_2,
+            Other
+        }
+
+        internal static void ColorSpaceName__Push(ColorSpaceName thing, bool isReturn)
+        {
+            ColorSpaceName__Tag which;
+            switch (thing)
+            {
+                case ColorSpaceName.GenericGray genericGray:
+                    which = ColorSpaceName__Tag.GenericGray;
+                    break;
+                case ColorSpaceName.GenericRGB genericRGB:
+                    which = ColorSpaceName__Tag.GenericRGB;
+                    break;
+                case ColorSpaceName.GenericCMYK genericCMYK:
+                    which = ColorSpaceName__Tag.GenericCMYK;
+                    break;
+                case ColorSpaceName.GenericRGBLinear genericRGBLinear:
+                    which = ColorSpaceName__Tag.GenericRGBLinear;
+                    break;
+                case ColorSpaceName.AdobeRGB1998 adobeRGB1998:
+                    which = ColorSpaceName__Tag.AdobeRGB1998;
+                    break;
+                case ColorSpaceName.SRGB sRGB:
+                    which = ColorSpaceName__Tag.SRGB;
+                    break;
+                case ColorSpaceName.GenericGrayGamma2_2 genericGrayGamma2_2:
+                    which = ColorSpaceName__Tag.GenericGrayGamma2_2;
+                    break;
+                case ColorSpaceName.Other other:
+                    which = ColorSpaceName__Tag.Other;
+                    NativeImplClient.PushString(other.Name);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(thing));
+            }
+            NativeImplClient.PushInt32((int)which);
+        }
+
+        internal static ColorSpaceName ColorSpaceName__Pop()
+        {
+            var which = NativeImplClient.PopInt32();
+            switch ((ColorSpaceName__Tag)which)
+            {
+                case ColorSpaceName__Tag.GenericGray:
+                {
+                    return new ColorSpaceName.GenericGray();
+                }
+                case ColorSpaceName__Tag.GenericRGB:
+                {
+                    return new ColorSpaceName.GenericRGB();
+                }
+                case ColorSpaceName__Tag.GenericCMYK:
+                {
+                    return new ColorSpaceName.GenericCMYK();
+                }
+                case ColorSpaceName__Tag.GenericRGBLinear:
+                {
+                    return new ColorSpaceName.GenericRGBLinear();
+                }
+                case ColorSpaceName__Tag.AdobeRGB1998:
+                {
+                    return new ColorSpaceName.AdobeRGB1998();
+                }
+                case ColorSpaceName__Tag.SRGB:
+                {
+                    return new ColorSpaceName.SRGB();
+                }
+                case ColorSpaceName__Tag.GenericGrayGamma2_2:
+                {
+                    return new ColorSpaceName.GenericGrayGamma2_2();
+                }
+                case ColorSpaceName__Tag.Other:
+                {
+                    var name = NativeImplClient.PopString();
+                    return new ColorSpaceName.Other(name);
+                }
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public class ColorSpace : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal ColorSpace(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    ColorSpace__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_ColorSpace_dispose);
+                    _disposed = true;
+                }
+            }
+            public static ColorSpace CreateWithName(ColorSpaceName name)
+            {
+                ColorSpaceName__Push(name, false);
+                NativeImplClient.InvokeModuleMethod(_colorSpace_createWithName);
+                return ColorSpace__Pop();
+            }
+            public static ColorSpace CreateDeviceGray()
+            {
+                NativeImplClient.InvokeModuleMethod(_colorSpace_createDeviceGray);
+                return ColorSpace__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void ColorSpace__Push(ColorSpace thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ColorSpace ColorSpace__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new ColorSpace(ptr) : null;
         }
 
         public struct Point {
@@ -350,6 +618,26 @@ namespace Org.Prefixed.GuiBase
         }
 
         // built-in array type: double[]
+
+        [Flags]
+        public enum GradientDrawingOptions
+        {
+            DrawsBeforeStartLocation = 1,
+            DrawsAfterEndLocation = 2
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void GradientDrawingOptions__Push(GradientDrawingOptions value)
+        {
+            NativeImplClient.PushUInt32((uint)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static GradientDrawingOptions GradientDrawingOptions__Pop()
+        {
+            var ret = NativeImplClient.PopUInt32();
+            return (GradientDrawingOptions)ret;
+        }
 
         public class DrawContext : IDisposable
         {
@@ -502,6 +790,12 @@ namespace Org.Prefixed.GuiBase
                 DrawContext__Push(this);
                 NativeImplClient.InvokeModuleMethod(_drawContext_clip);
             }
+            public void ClipToRect(Rect clipRect)
+            {
+                Rect__Push(clipRect, false);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_clipToRect);
+            }
             public void TranslateCTM(double tx, double ty)
             {
                 NativeImplClient.PushDouble(ty);
@@ -555,6 +849,15 @@ namespace Org.Prefixed.GuiBase
             {
                 DrawContext__Push(this);
                 NativeImplClient.InvokeModuleMethod(_drawContext_closePath);
+            }
+            public void DrawLinearGradient(Gradient gradient, Point startPoint, Point endPoint, GradientDrawingOptions drawOpts)
+            {
+                GradientDrawingOptions__Push(drawOpts);
+                Point__Push(endPoint, false);
+                Point__Push(startPoint, false);
+                Gradient__Push(gradient);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_drawLinearGradient);
             }
         }
 
@@ -646,6 +949,14 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.InvokeModuleMethod(_font_createFromFile);
                 return Font__Pop();
             }
+            public static Font CreateWithName(string name, double size, OptArgs optArgs)
+            {
+                OptArgs__Push(optArgs, false);
+                NativeImplClient.PushDouble(size);
+                NativeImplClient.PushString(name);
+                NativeImplClient.InvokeModuleMethod(_font_createWithName);
+                return Font__Pop();
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -659,6 +970,124 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new Font(ptr) : null;
+        }
+
+        public struct GradientStop {
+            public double Location;
+            public double Red;
+            public double Green;
+            public double Blue;
+            public double Alpha;
+            public GradientStop(double location, double red, double green, double blue, double alpha)
+            {
+                this.Location = location;
+                this.Red = red;
+                this.Green = green;
+                this.Blue = blue;
+                this.Alpha = alpha;
+            }
+        }
+
+        internal static void GradientStop__Push(GradientStop value, bool isReturn)
+        {
+            NativeImplClient.PushDouble(value.Alpha);
+            NativeImplClient.PushDouble(value.Blue);
+            NativeImplClient.PushDouble(value.Green);
+            NativeImplClient.PushDouble(value.Red);
+            NativeImplClient.PushDouble(value.Location);
+        }
+
+        internal static GradientStop GradientStop__Pop()
+        {
+            var location = NativeImplClient.PopDouble();
+            var red = NativeImplClient.PopDouble();
+            var green = NativeImplClient.PopDouble();
+            var blue = NativeImplClient.PopDouble();
+            var alpha = NativeImplClient.PopDouble();
+            return new GradientStop(location, red, green, blue, alpha);
+        }
+
+        internal static void __GradientStop_Array__Push(GradientStop[] items, bool isReturn)
+        {
+            var count = items.Length;
+            var f0Values = new double[count];
+            var f1Values = new double[count];
+            var f2Values = new double[count];
+            var f3Values = new double[count];
+            var f4Values = new double[count];
+            for (var i = 0; i < count; i++)
+            {
+                f0Values[i] = items[i].Location;
+                f1Values[i] = items[i].Red;
+                f2Values[i] = items[i].Green;
+                f3Values[i] = items[i].Blue;
+                f4Values[i] = items[i].Alpha;
+            }
+            NativeImplClient.PushDoubleArray(f4Values);
+            NativeImplClient.PushDoubleArray(f3Values);
+            NativeImplClient.PushDoubleArray(f2Values);
+            NativeImplClient.PushDoubleArray(f1Values);
+            NativeImplClient.PushDoubleArray(f0Values);
+        }
+
+        internal static GradientStop[] __GradientStop_Array__Pop()
+        {
+            var f0Values = NativeImplClient.PopDoubleArray();
+            var f1Values = NativeImplClient.PopDoubleArray();
+            var f2Values = NativeImplClient.PopDoubleArray();
+            var f3Values = NativeImplClient.PopDoubleArray();
+            var f4Values = NativeImplClient.PopDoubleArray();
+            var count = f0Values.Length;
+            var ret = new GradientStop[count];
+            for (var i = 0; i < count; i++)
+            {
+                var f0 = f0Values[i];
+                var f1 = f1Values[i];
+                var f2 = f2Values[i];
+                var f3 = f3Values[i];
+                var f4 = f4Values[i];
+                ret[i] = new GradientStop(f0, f1, f2, f3, f4);
+            }
+            return ret;
+        }
+
+        public class Gradient : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal Gradient(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    Gradient__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Gradient_dispose);
+                    _disposed = true;
+                }
+            }
+            public static Gradient CreateWithColorComponents(ColorSpace space, GradientStop[] stops)
+            {
+                __GradientStop_Array__Push(stops, false);
+                ColorSpace__Push(space);
+                NativeImplClient.InvokeModuleMethod(_gradient_createWithColorComponents);
+                return Gradient__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Gradient__Push(Gradient thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Gradient Gradient__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new Gradient(ptr) : null;
         }
 
         public struct TypographicBounds {
@@ -834,6 +1263,14 @@ namespace Org.Prefixed.GuiBase
             NativeImplClient.PushModuleConstants(_module);
             AffineTransformIdentity = AffineTransform__Pop();
 
+            _color_createGenericRGB = NativeImplClient.GetModuleMethod(_module, "Color_createGenericRGB");
+            _color_getConstantColor = NativeImplClient.GetModuleMethod(_module, "Color_getConstantColor");
+            _Color_dispose = NativeImplClient.GetModuleMethod(_module, "Color_dispose");
+            _colorSpace_createWithName = NativeImplClient.GetModuleMethod(_module, "ColorSpace_createWithName");
+            _colorSpace_createDeviceGray = NativeImplClient.GetModuleMethod(_module, "ColorSpace_createDeviceGray");
+            _ColorSpace_dispose = NativeImplClient.GetModuleMethod(_module, "ColorSpace_dispose");
+            _gradient_createWithColorComponents = NativeImplClient.GetModuleMethod(_module, "Gradient_createWithColorComponents");
+            _Gradient_dispose = NativeImplClient.GetModuleMethod(_module, "Gradient_dispose");
             _path_createWithRect = NativeImplClient.GetModuleMethod(_module, "Path_createWithRect");
             _path_createWithEllipseInRect = NativeImplClient.GetModuleMethod(_module, "Path_createWithEllipseInRect");
             _path_createWithRoundedRect = NativeImplClient.GetModuleMethod(_module, "Path_createWithRoundedRect");
@@ -858,6 +1295,7 @@ namespace Org.Prefixed.GuiBase
             _drawContext_clearLineDash = NativeImplClient.GetModuleMethod(_module, "DrawContext_clearLineDash");
             _drawContext_setLineWidth = NativeImplClient.GetModuleMethod(_module, "DrawContext_setLineWidth");
             _drawContext_clip = NativeImplClient.GetModuleMethod(_module, "DrawContext_clip");
+            _drawContext_clipToRect = NativeImplClient.GetModuleMethod(_module, "DrawContext_clipToRect");
             _drawContext_translateCTM = NativeImplClient.GetModuleMethod(_module, "DrawContext_translateCTM");
             _drawContext_scaleCTM = NativeImplClient.GetModuleMethod(_module, "DrawContext_scaleCTM");
             _drawContext_rotateCTM = NativeImplClient.GetModuleMethod(_module, "DrawContext_rotateCTM");
@@ -867,12 +1305,12 @@ namespace Org.Prefixed.GuiBase
             _drawContext_strokeRect = NativeImplClient.GetModuleMethod(_module, "DrawContext_strokeRect");
             _drawContext_addRect = NativeImplClient.GetModuleMethod(_module, "DrawContext_addRect");
             _drawContext_closePath = NativeImplClient.GetModuleMethod(_module, "DrawContext_closePath");
+            _drawContext_drawLinearGradient = NativeImplClient.GetModuleMethod(_module, "DrawContext_drawLinearGradient");
             _DrawContext_dispose = NativeImplClient.GetModuleMethod(_module, "DrawContext_dispose");
-            _color_create = NativeImplClient.GetModuleMethod(_module, "Color_create");
-            _Color_dispose = NativeImplClient.GetModuleMethod(_module, "Color_dispose");
             _attributedString_create = NativeImplClient.GetModuleMethod(_module, "AttributedString_create");
             _AttributedString_dispose = NativeImplClient.GetModuleMethod(_module, "AttributedString_dispose");
             _font_createFromFile = NativeImplClient.GetModuleMethod(_module, "Font_createFromFile");
+            _font_createWithName = NativeImplClient.GetModuleMethod(_module, "Font_createWithName");
             _Font_dispose = NativeImplClient.GetModuleMethod(_module, "Font_dispose");
             _line_getTypographicBounds = NativeImplClient.GetModuleMethod(_module, "Line_getTypographicBounds");
             _line_getBoundsWithOptions = NativeImplClient.GetModuleMethod(_module, "Line_getBoundsWithOptions");

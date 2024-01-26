@@ -148,6 +148,11 @@ void DrawContext_clip(DrawContext _this)
     dl_CGContextClip((dl_CGContextRef)_this);
 }
 
+void DrawContext_clipToRect(DrawContext _this, Rect clipRect)
+{
+    dl_CGContextClipToRect((dl_CGContextRef)_this, STRUCT_CAST(dl_CGRect, clipRect));
+}
+
 void DrawContext_translateCTM(DrawContext _this, double tx, double ty)
 {
     dl_CGContextTranslateCTM((dl_CGContextRef)_this, tx, ty);
@@ -193,9 +198,39 @@ void DrawContext_closePath(DrawContext _this)
     dl_CGContextClosePath((dl_CGContextRef)_this);
 }
 
-Color Color_create(double red, double green, double blue, double alpha)
+void DrawContext_drawLinearGradient(DrawContext _this, Gradient gradient, Point startPoint, Point endPoint, uint32_t drawOpts)
+{
+    dl_CGContextDrawLinearGradient(
+        (dl_CGContextRef)_this,
+        (dl_CGGradientRef)gradient,
+        STRUCT_CAST(dl_CGPoint, startPoint),
+        STRUCT_CAST(dl_CGPoint, endPoint),
+        drawOpts);
+}
+
+Color Color_createGenericRGB(double red, double green, double blue, double alpha)
 {
     return (Color)dl_CGColorCreateGenericRGB(red, green, blue, alpha);
+}
+
+Color Color_getConstantColor(ColorConstants which)
+{
+    dl_CFStringRef key;
+    switch (which) {
+    case ColorConstants::Black:
+        key = dl_kCGColorBlack;
+        break;
+    case ColorConstants::White:
+        key = dl_kCGColorWhite;
+        break;
+    case ColorConstants::Clear:
+        key = dl_kCGColorClear;
+        break;
+    default:
+        printf("Color_getConstantColor: unrecognized color %d, returning null\n", which);
+        return nullptr;
+    }
+    return (Color)dl_CGColorGetConstantColor(key);
 }
 
 void Color_dispose(Color _this)
@@ -203,19 +238,114 @@ void Color_dispose(Color _this)
     dl_CGColorRelease((dl_CGColorRef)_this);
 }
 
+ColorSpace ColorSpace_createWithName(ColorSpaceName name)
+{
+    dl_CFStringRef cfStringName = nullptr;
+    bool needsRelease = false;
+    switch (name.tag) {
+    case ColorSpaceName::Tag::GenericGray:
+        cfStringName = dl_kCGColorSpaceGenericGray;
+        break;
+    case ColorSpaceName::Tag::GenericRGB:
+        cfStringName = dl_kCGColorSpaceGenericRGB;
+        break;
+    case ColorSpaceName::Tag::GenericCMYK:
+        cfStringName = dl_kCGColorSpaceGenericCMYK;
+        break;
+    case ColorSpaceName::Tag::GenericRGBLinear:
+        cfStringName = dl_kCGColorSpaceGenericRGBLinear;
+        break;
+    case ColorSpaceName::Tag::AdobeRGB1998:
+        cfStringName = dl_kCGColorSpaceAdobeRGB1998;
+        break;
+    case ColorSpaceName::Tag::SRGB:
+        cfStringName = dl_kCGColorSpaceSRGB;
+        break;
+    case ColorSpaceName::Tag::GenericGrayGamma2_2:
+        cfStringName = dl_kCGColorSpaceGenericGrayGamma2_2;
+        break;
+    case ColorSpaceName::Tag::Other:
+        cfStringName = dl_CFStringCreateWithCString(name.other->name.c_str());
+        needsRelease = true;
+        break;
+    default:
+        printf("ColorSpace_createWithName: unknown ColorSpaceName, returning null!\n");
+        return nullptr;
+    }
+    auto space = dl_CGColorSpaceCreateWithName(cfStringName);
+    if (needsRelease) {
+        dl_CFRelease(cfStringName);
+    }
+    return (ColorSpace)space;
+}
+
+ColorSpace ColorSpace_createDeviceGray()
+{
+    return (ColorSpace)dl_CGColorSpaceCreateDeviceGray();
+}
+
+void ColorSpace_dispose(ColorSpace _this)
+{
+    dl_CGColorSpaceRelease((dl_CGColorSpaceRef)_this);
+}
+
+Gradient Gradient_createWithColorComponents(ColorSpace space, std::vector<GradientStop> stops)
+{
+    auto count = stops.size();
+
+    auto components = new double[count * 4];
+    auto locations = new double[count];
+
+    for (int i = 0; i < count; i++) {
+        locations[i] = stops[i].location;
+        components[i * 4] = stops[i].red;
+        components[i * 4 + 1] = stops[i].green;
+        components[i * 4 + 2] = stops[i].blue;
+        components[i * 4 + 3] = stops[i].alpha;
+    }
+    auto gradient = dl_CGGradientCreateWithColorComponents((dl_CGColorSpaceRef)space, components, locations, count);
+
+    delete[] locations;
+    delete[] components;
+
+    return (Gradient)gradient;
+}
+
+void Gradient_dispose(Gradient _this)
+{
+    dl_CGGradientRelease((dl_CGGradientRef)_this);
+}
+
 AttributedString AttributedString_create(std::string s, AttributedStringOptions opts)
 {
     Font f;
-    Color fg;
+    Color foregroundColor;
+    bool foregroundColorFromContext;
+    double strokeWidth;
+    Color strokeColor;
 
     auto text = dl_CFStringCreateWithCString(s.c_str());
     auto dict = dl_CFDictionaryCreateMutable(0);
+
+    if (opts.hasForegroundColor(&foregroundColor)) {
+        dl_CFDictionarySetValue(dict, dl_kCTForegroundColorAttributeName, (dl_CGColorRef)foregroundColor);
+    }
+    if (opts.hasForegroundColorFromContext(&foregroundColorFromContext)) {
+        auto cfBool = foregroundColorFromContext ? dl_kCFBooleanTrue : dl_kCFBooleanFalse;
+        dl_CFDictionarySetValue(dict, dl_kCTForegroundColorFromContextAttributeName, cfBool);
+    }
     if (opts.hasFont(&f)) {
-        dl_CFDictionarySetValue(dict, dl_kCTFontAttributeName, (dl_CTFontRef)f);
+        dl_CFDictionarySetValue(dict, dl_kCTFontAttributeName, (dl_CTFontRef)f); // cast not actually necessary, but makes clear we're using CTFont
     }
-    if (opts.hasForegroundColor(&fg)) {
-        dl_CFDictionarySetValue(dict, dl_kCTForegroundColorAttributeName, (dl_CGColorRef)fg);
+    if (opts.hasStrokeWidth(&strokeWidth)) {
+        auto cfNumber = dl_CFNumberWithFloat((float)strokeWidth);
+        dl_CFDictionarySetValue(dict, dl_kCTStrokeWidthAttributeName, cfNumber);
+        dl_CFRelease(cfNumber);
     }
+    if (opts.hasStrokeColor(&strokeColor)) {
+        dl_CFDictionarySetValue(dict, dl_kCTStrokeColorAttributeName, (dl_CGColorRef)strokeColor);
+    }
+
     auto str = dl_CFAttributedStringCreate(text, dict);
 
     dl_CFRelease(dict);
@@ -251,6 +381,24 @@ Font Font_createFromFile(std::string path, double size, OptArgs optArgs)
     dl_CFRelease(url);
     dl_CFRelease(pathStr);
     return result;
+}
+
+Font Font_createWithName(std::string name, double size, OptArgs optArgs)
+{
+    dl_CTFontRef ret;
+
+    auto nameStr = dl_CFStringCreateWithCString(name.c_str());
+
+    AffineTransform matrix;
+    if (optArgs.hasTransform(&matrix)) {
+        ret = dl_CTFontCreateWithName(nameStr, size, (dl_CGAffineTransform*)&matrix);
+    }
+    else {
+        ret = dl_CTFontCreateWithName(nameStr, size, nullptr);
+    }
+    dl_CFRelease(nameStr);
+
+    return (Font)ret;
 }
 
 void Font_dispose(Font _this)

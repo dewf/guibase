@@ -9,8 +9,16 @@ AttributedStringOptions AttributedStringOptions__pop();
 void AttributedString__push(AttributedString value);
 AttributedString AttributedString__pop();
 
+void ColorConstants__push(ColorConstants value);
+ColorConstants ColorConstants__pop();
+
 void Color__push(Color value);
 Color Color__pop();
+void ColorSpaceName__push(ColorSpaceName value, bool isReturn);
+ColorSpaceName ColorSpaceName__pop();
+
+void ColorSpace__push(ColorSpace value);
+ColorSpace ColorSpace__pop();
 
 void Point__push(Point value, bool isReturn);
 Point Point__pop();
@@ -24,6 +32,9 @@ Rect Rect__pop();
 void PathDrawingMode__push(PathDrawingMode value);
 PathDrawingMode PathDrawingMode__pop();
 
+void GradientDrawingOptions__push(uint32_t value);
+uint32_t GradientDrawingOptions__pop();
+
 void DrawContext__push(DrawContext value);
 DrawContext DrawContext__pop();
 
@@ -32,6 +43,12 @@ OptArgs OptArgs__pop();
 
 void Font__push(Font value);
 Font Font__pop();
+
+void GradientStop__push(GradientStop value, bool isReturn);
+GradientStop GradientStop__pop();
+
+void Gradient__push(Gradient value);
+Gradient Gradient__pop();
 
 void TypographicBounds__push(TypographicBounds value, bool isReturn);
 TypographicBounds TypographicBounds__pop();
@@ -44,6 +61,22 @@ Line Line__pop();
 
 void Path__push(Path value);
 Path Path__pop();
+
+void Color_createGenericRGB__wrapper();
+
+void Color_getConstantColor__wrapper();
+
+void Color_dispose__wrapper();
+
+void ColorSpace_createWithName__wrapper();
+
+void ColorSpace_createDeviceGray__wrapper();
+
+void ColorSpace_dispose__wrapper();
+
+void Gradient_createWithColorComponents__wrapper();
+
+void Gradient_dispose__wrapper();
 
 void Path_createWithRect__wrapper();
 
@@ -93,6 +126,8 @@ void DrawContext_setLineWidth__wrapper();
 
 void DrawContext_clip__wrapper();
 
+void DrawContext_clipToRect__wrapper();
+
 void DrawContext_translateCTM__wrapper();
 
 void DrawContext_scaleCTM__wrapper();
@@ -111,17 +146,17 @@ void DrawContext_addRect__wrapper();
 
 void DrawContext_closePath__wrapper();
 
+void DrawContext_drawLinearGradient__wrapper();
+
 void DrawContext_dispose__wrapper();
-
-void Color_create__wrapper();
-
-void Color_dispose__wrapper();
 
 void AttributedString_create__wrapper();
 
 void AttributedString_dispose__wrapper();
 
 void Font_createFromFile__wrapper();
+
+void Font_createWithName__wrapper();
 
 void Font_dispose__wrapper();
 

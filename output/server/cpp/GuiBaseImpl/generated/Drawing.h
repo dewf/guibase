@@ -11,9 +11,11 @@
 
 #include "Foundation.h"
 
+struct __Color; typedef struct __Color* Color;
+struct __ColorSpace; typedef struct __ColorSpace* ColorSpace;
+struct __Gradient; typedef struct __Gradient* Gradient;
 struct __Path; typedef struct __Path* Path;
 struct __DrawContext; typedef struct __DrawContext* DrawContext;
-struct __Color; typedef struct __Color* Color;
 struct __AttributedString; typedef struct __AttributedString* AttributedString;
 struct __Font; typedef struct __Font* Font;
 struct __Line; typedef struct __Line* Line;
@@ -30,12 +32,18 @@ struct AffineTransform {
 struct AttributedStringOptions {
 private:
     enum Fields {
-        FontField = 1,
-        ForegroundColorField = 2
+        ForegroundColorField = 1,
+        ForegroundColorFromContextField = 2,
+        FontField = 4,
+        StrokeWidthField = 8,
+        StrokeColorField = 16
     };
     int32_t _usedFields;
-    Font _font;
     Color _foregroundColor;
+    bool _foregroundColorFromContext;
+    Font _font;
+    double _strokeWidth;
+    Color _strokeColor;
 protected:
     int32_t getUsedFields() {
         return _usedFields;
@@ -43,17 +51,6 @@ protected:
     friend void AttributedStringOptions__push(AttributedStringOptions value, bool isReturn);
     friend AttributedStringOptions AttributedStringOptions__pop();
 public:
-    void setFont(Font value) {
-        _font = value;
-        _usedFields |= Fields::FontField;
-    }
-    bool hasFont(Font *value) {
-        if (_usedFields & Fields::FontField) {
-            *value = _font;
-            return true;
-        }
-        return false;
-    }
     void setForegroundColor(Color value) {
         _foregroundColor = value;
         _usedFields |= Fields::ForegroundColorField;
@@ -65,8 +62,139 @@ public:
         }
         return false;
     }
+    void setForegroundColorFromContext(bool value) {
+        _foregroundColorFromContext = value;
+        _usedFields |= Fields::ForegroundColorFromContextField;
+    }
+    bool hasForegroundColorFromContext(bool *value) {
+        if (_usedFields & Fields::ForegroundColorFromContextField) {
+            *value = _foregroundColorFromContext;
+            return true;
+        }
+        return false;
+    }
+    void setFont(Font value) {
+        _font = value;
+        _usedFields |= Fields::FontField;
+    }
+    bool hasFont(Font *value) {
+        if (_usedFields & Fields::FontField) {
+            *value = _font;
+            return true;
+        }
+        return false;
+    }
+    void setStrokeWidth(double value) {
+        _strokeWidth = value;
+        _usedFields |= Fields::StrokeWidthField;
+    }
+    bool hasStrokeWidth(double *value) {
+        if (_usedFields & Fields::StrokeWidthField) {
+            *value = _strokeWidth;
+            return true;
+        }
+        return false;
+    }
+    void setStrokeColor(Color value) {
+        _strokeColor = value;
+        _usedFields |= Fields::StrokeColorField;
+    }
+    bool hasStrokeColor(Color *value) {
+        if (_usedFields & Fields::StrokeColorField) {
+            *value = _strokeColor;
+            return true;
+        }
+        return false;
+    }
 };
 
+
+enum class ColorConstants {
+    White,
+    Black,
+    Clear
+};
+
+
+struct ColorSpaceName {
+public:
+    enum class Tag {
+        GenericGray,
+        GenericRGB,
+        GenericCMYK,
+        GenericRGBLinear,
+        AdobeRGB1998,
+        SRGB,
+        GenericGrayGamma2_2,
+        Other
+    };
+    const Tag tag;
+    struct GenericGray {
+        static ColorSpaceName make() {
+            ColorSpaceName ret{ Tag::GenericGray };
+            ret.genericGray = std::shared_ptr<GenericGray>(new GenericGray{  });
+            return ret;
+        }
+    };
+    struct GenericRGB {
+        static ColorSpaceName make() {
+            ColorSpaceName ret{ Tag::GenericRGB };
+            ret.genericRGB = std::shared_ptr<GenericRGB>(new GenericRGB{  });
+            return ret;
+        }
+    };
+    struct GenericCMYK {
+        static ColorSpaceName make() {
+            ColorSpaceName ret{ Tag::GenericCMYK };
+            ret.genericCMYK = std::shared_ptr<GenericCMYK>(new GenericCMYK{  });
+            return ret;
+        }
+    };
+    struct GenericRGBLinear {
+        static ColorSpaceName make() {
+            ColorSpaceName ret{ Tag::GenericRGBLinear };
+            ret.genericRGBLinear = std::shared_ptr<GenericRGBLinear>(new GenericRGBLinear{  });
+            return ret;
+        }
+    };
+    struct AdobeRGB1998 {
+        static ColorSpaceName make() {
+            ColorSpaceName ret{ Tag::AdobeRGB1998 };
+            ret.adobeRGB1998 = std::shared_ptr<AdobeRGB1998>(new AdobeRGB1998{  });
+            return ret;
+        }
+    };
+    struct SRGB {
+        static ColorSpaceName make() {
+            ColorSpaceName ret{ Tag::SRGB };
+            ret.sRGB = std::shared_ptr<SRGB>(new SRGB{  });
+            return ret;
+        }
+    };
+    struct GenericGrayGamma2_2 {
+        static ColorSpaceName make() {
+            ColorSpaceName ret{ Tag::GenericGrayGamma2_2 };
+            ret.genericGrayGamma2_2 = std::shared_ptr<GenericGrayGamma2_2>(new GenericGrayGamma2_2{  });
+            return ret;
+        }
+    };
+    struct Other {
+        const std::string name;
+        static ColorSpaceName make(std::string name) {
+            ColorSpaceName ret{ Tag::Other };
+            ret.other = std::shared_ptr<Other>(new Other{ name });
+            return ret;
+        }
+    };
+    std::shared_ptr<GenericGray> genericGray;
+    std::shared_ptr<GenericRGB> genericRGB;
+    std::shared_ptr<GenericCMYK> genericCMYK;
+    std::shared_ptr<GenericRGBLinear> genericRGBLinear;
+    std::shared_ptr<AdobeRGB1998> adobeRGB1998;
+    std::shared_ptr<SRGB> sRGB;
+    std::shared_ptr<GenericGrayGamma2_2> genericGrayGamma2_2;
+    std::shared_ptr<Other> other;
+};
 
 
 struct Point {
@@ -93,6 +221,11 @@ enum class PathDrawingMode {
 };
 
 // std::vector<double>
+
+enum GradientDrawingOptions {
+    DrawsBeforeStartLocation = 1,
+    DrawsAfterEndLocation = 2
+};
 
 
 struct OptArgs {
@@ -123,6 +256,17 @@ public:
 };
 
 
+struct GradientStop {
+    double location;
+    double red;
+    double green;
+    double blue;
+    double alpha;
+};
+
+// std::vector<GradientStop>
+
+
 struct TypographicBounds {
     double width;
     double ascent;
@@ -142,6 +286,14 @@ enum LineBoundsOptions {
 
 extern const AffineTransform AffineTransformIdentity;
 
+Color Color_createGenericRGB(double red, double green, double blue, double alpha);
+Color Color_getConstantColor(ColorConstants which);
+void Color_dispose(Color _this);
+ColorSpace ColorSpace_createWithName(ColorSpaceName name);
+ColorSpace ColorSpace_createDeviceGray();
+void ColorSpace_dispose(ColorSpace _this);
+Gradient Gradient_createWithColorComponents(ColorSpace space, std::vector<GradientStop> stops);
+void Gradient_dispose(Gradient _this);
 Path Path_createWithRect(Rect rect, OptArgs optArgs);
 Path Path_createWithEllipseInRect(Rect rect, OptArgs optArgs);
 Path Path_createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
@@ -166,6 +318,7 @@ void DrawContext_setLineDash(DrawContext _this, double phase, std::vector<double
 void DrawContext_clearLineDash(DrawContext _this);
 void DrawContext_setLineWidth(DrawContext _this, double width);
 void DrawContext_clip(DrawContext _this);
+void DrawContext_clipToRect(DrawContext _this, Rect clipRect);
 void DrawContext_translateCTM(DrawContext _this, double tx, double ty);
 void DrawContext_scaleCTM(DrawContext _this, double scaleX, double scaleY);
 void DrawContext_rotateCTM(DrawContext _this, double angle);
@@ -175,12 +328,12 @@ void DrawContext_fillPath(DrawContext _this);
 void DrawContext_strokeRect(DrawContext _this, Rect rect);
 void DrawContext_addRect(DrawContext _this, Rect rect);
 void DrawContext_closePath(DrawContext _this);
+void DrawContext_drawLinearGradient(DrawContext _this, Gradient gradient, Point startPoint, Point endPoint, uint32_t drawOpts);
 void DrawContext_dispose(DrawContext _this);
-Color Color_create(double red, double green, double blue, double alpha);
-void Color_dispose(Color _this);
 AttributedString AttributedString_create(std::string s, AttributedStringOptions opts);
 void AttributedString_dispose(AttributedString _this);
 Font Font_createFromFile(std::string path, double size, OptArgs optArgs);
+Font Font_createWithName(std::string name, double size, OptArgs optArgs);
 void Font_dispose(Font _this);
 TypographicBounds Line_getTypographicBounds(Line _this);
 Rect Line_getBoundsWithOptions(Line _this, uint32_t opts);

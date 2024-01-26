@@ -40,6 +40,59 @@ options OptArgs {
     AffineTransform transform;
 }
 
+
+// ideally these would be directly accessible as Color::White etc - like global constants, but namespaced under the opaque
+// ColorSpaces should have the same thing: ColorSpace::GenericGray etc
+// hmm but what if they are expensive to create? no idea if they are or not ...
+// and if we're maintaining them then we're going to see them as leaks on the C++ size, since they would last the entire program
+// unless they were explicitly disposed in the module shutdown ...
+// lazy initialization perhaps? looks like a property but is actually a function?
+
+enum ColorConstants {
+    White,
+    Black,
+    Clear
+}
+
+opaque Color {
+    static Color createGenericRGB(double red, double green, double blue, double alpha);
+    static Color getConstantColor(ColorConstants which);
+}
+
+sumtype ColorSpaceName {
+    GenericGray,
+    GenericRGB,
+    GenericCMYK,
+    GenericRGBLinear,
+    AdobeRGB1998,
+    SRGB,
+    GenericGrayGamma2_2,
+    //
+    Other(string name)
+}
+
+opaque ColorSpace {
+    static ColorSpace createWithName(ColorSpaceName name);
+    static ColorSpace createDeviceGray();
+}
+
+flags GradientDrawingOptions {
+    DrawsBeforeStartLocation = 1 << 0,
+    DrawsAfterEndLocation = 1 << 1
+}
+
+struct GradientStop {
+    double location;
+    double red;
+    double green;
+    double blue;
+    double alpha;
+}
+
+opaque Gradient {
+    static Gradient createWithColorComponents(ColorSpace space, Array<GradientStop> stops);
+}
+
 opaque Path {
     static Path createWithRect(Rect rect, OptArgs optArgs);
     static Path createWithEllipseInRect(Rect rect, OptArgs optArgs);
@@ -67,6 +120,7 @@ opaque DrawContext {
     void clearLineDash();                           // maybe until we have an Option<> type or something to use in setLineDash()
     void setLineWidth(double width);
     void clip();
+    void clipToRect(Rect clipRect);
     void translateCTM(double tx, double ty);
     void scaleCTM(double scaleX, double scaleY);
     void rotateCTM(double angle);
@@ -76,17 +130,17 @@ opaque DrawContext {
     void strokeRect(Rect rect);
     void addRect(Rect rect);
     void closePath();
-}
-
-opaque Color {
-    static Color create(double red, double green, double blue, double alpha);
+    void drawLinearGradient(Gradient gradient, Point startPoint, Point endPoint, GradientDrawingOptions drawOpts);
 }
 
 // text stuff
 
 options AttributedStringOptions {
-    Font font;
     Color foregroundColor;
+    bool foregroundColorFromContext;
+    Font font;
+    double strokeWidth;
+    Color strokeColor;
 }
 
 opaque AttributedString {
@@ -95,6 +149,7 @@ opaque AttributedString {
 
 opaque Font {
     static Font createFromFile(string path, double size, OptArgs optArgs);
+    static Font createWithName(string name, double size, OptArgs optArgs);
 }
 
 struct TypographicBounds {

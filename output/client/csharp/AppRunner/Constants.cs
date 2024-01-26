@@ -2,10 +2,15 @@
 
 internal static class Constants
 {
-    public static readonly int MinWidth = 320;
-    public static readonly int MinHeight = 240;
-    public static readonly int MaxWidth = 1600;
-    public static readonly int MaxHeight = 900;
-    public static readonly int InitWidth = 1024;
-    public static readonly int InitHeight = 768;
+    public const int MinWidth = 320;
+    public const int MinHeight = 240;
+    public const int MaxWidth = 1600;
+    public const int MaxHeight = 900;
+    public const int InitWidth = 1024;
+    public const int InitHeight = 768;
+
+    public const string HelveticaFontName = "Arial";
+    public const string TimesFontName = "Times New Roman";
+    public const string TimesItalicFontName = "TimesNewRomanPS-ItalicMT";
+    public const string FuturaFontName = "Impact";
 }

@@ -38,11 +38,11 @@ public static class Common
     {
         context.SaveGState();
 
-        using var green = Color.Create(0, 1, 0, 1);
-        using var magenta = Color.Create(1, 0, 1, 1);
-        using var blue = Color.Create(0, 0.3, 1, 1);
-        using var yellow = Color.Create(1, 1, 0, 1);
-        using var orange = Color.Create(1, 0.6, 0, 1);
+        using var green = Color.CreateGenericRGB(0, 1, 0, 1);
+        using var magenta = Color.CreateGenericRGB(1, 0, 1, 1);
+        using var blue = Color.CreateGenericRGB(0, 0.3, 1, 1);
+        using var yellow = Color.CreateGenericRGB(1, 1, 0, 1);
+        using var orange = Color.CreateGenericRGB(1, 0.6, 0, 1);
 
         var typoBounds = line.GetTypographicBounds();
         
@@ -89,5 +89,73 @@ public static class Common
         var x = (a.X + b.X) / 2;
         var y = (a.Y + b.Y) / 2;
         return new Point(x, y);
+    }
+
+    public static Gradient GetGradient(
+        double fromRed, double fromGreen, double fromBlue, double fromAlpha,
+        double toRed, double toGreen, double toBlue, double toAlpha)
+    {
+        var start = new GradientStop(0, fromRed, fromGreen, fromBlue, fromAlpha);
+        var end = new GradientStop(1, toRed, toGreen, toBlue, toAlpha);
+        using var space = ColorSpace.CreateWithName(new ColorSpaceName.GenericRGB());
+        return Gradient.CreateWithColorComponents(space, [start, end]);
+    }
+    
+    private static readonly double[] Dashes = [2, 2];
+    public static void DashedRect(DrawContext context, Rect r)
+    {
+        context.SetRGBStrokeColor(0, 0, 0, 1);
+        context.SetLineDash(0, Dashes);
+        context.StrokeRect(r);
+    }
+    
+    private static readonly Gradient DashedRectGradient = GetGradient(0.8, 0.8, 0.3, 1, 1, 0.5, 0.4, 1);
+    public static void GradientDashedRect(DrawContext context, Rect r)
+    {
+        context.SaveGState();
+        context.ClipToRect(r);
+        Point start, end;
+        start = r.Origin;
+        end.X = r.Origin.X + r.Size.Width;
+        end.Y = r.Origin.Y + r.Size.Height;
+        context.DrawLinearGradient(DashedRectGradient, start, end, 0);
+        // gradient is static, don't release
+
+        context.RestoreGState(); // clear clip rect
+
+        context.SaveGState();
+        context.SetLineWidth(1);
+        DashedRect(context, r);
+        context.RestoreGState();
+    }
+    
+    public static void TextLine(DrawContext context, double x, double y, string text, AttributedStringOptions attrOpts, bool withGradient = true, bool fromBaseline = false)
+    {
+        using var labelString = AttributedString.Create(text, attrOpts);
+        using var line = Line.CreateWithAttributedString(labelString);
+
+        var typoBounds = line.GetTypographicBounds();
+
+        var bounds = line.GetBoundsWithOptions(0);
+        bounds.Origin = new Point(x, y);
+        bounds.Origin.X -= 0.5;
+        bounds.Origin.Y -= 0.5;
+        bounds.Size.Width += 1;
+        bounds.Size.Height += 1;
+        if (withGradient)
+        {
+            GradientDashedRect(context, bounds);
+        }
+
+        if (fromBaseline)
+        {
+            context.SetTextPosition(x, y);
+        }
+        else
+        {
+            context.SetTextPosition(x, y + typoBounds.Ascent);
+        }
+        
+        line.Draw(context);
     }
 }

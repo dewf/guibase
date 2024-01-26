@@ -13,7 +13,7 @@ public class Page02(IWindowMethods windowMethods) : BasePage(windowMethods)
         _labelString = AttributedString.Create("Quartz♪❦♛あぎ", new AttributedStringOptions
         {
             Font = font,
-            ForegroundColor = Color.Create(0, 1, 1, 0.5)
+            ForegroundColor = Color.CreateGenericRGB(0, 1, 1, 0.5)
         });
         // this is going to auto-dispose the font, but the attributed string's internal dictionary should have retained it
     }

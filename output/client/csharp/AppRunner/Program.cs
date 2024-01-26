@@ -11,6 +11,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     public Window? Window { get; set; }
     private readonly Page01 _page01;
     private readonly Page02 _page02;
+    private readonly Page03 _page03;
     private IPage _currentPage;
 
     public bool IsDestroyed { get; private set; }
@@ -28,6 +29,8 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
         _page01.Init();
         _page02 = new Page02(this);
         _page02.Init();
+        _page03 = new Page03(this);
+        _page03.Init();
 
         _currentPage = _page01;
     }
@@ -81,6 +84,9 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
             case Key._2:
                 SelectPage(_page02);
                 break;
+            case Key._3:
+                SelectPage(_page03);
+                break;
             default:
                 _currentPage.OnKeyDown(key, modifiers);
                 break;
@@ -97,9 +103,9 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     {
         // don't think we need to save/restore state, created afresh every time?
         // will have to see how macOS behaves ...
-        // context.SaveGState();
+        context.SaveGState();
         _currentPage.Render(context, new RenderArea(x, y, width, height));
-        // context.RestoreGState();
+        context.RestoreGState();
     }
     public override void Resized(int width, int height)
     {
