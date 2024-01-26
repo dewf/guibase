@@ -95,6 +95,33 @@ enum class PathDrawingMode {
 // std::vector<double>
 
 
+struct OptArgs {
+private:
+    enum Fields {
+        TransformField = 1
+    };
+    int32_t _usedFields;
+    AffineTransform _transform;
+protected:
+    int32_t getUsedFields() {
+        return _usedFields;
+    }
+    friend void OptArgs__push(OptArgs value, bool isReturn);
+    friend OptArgs OptArgs__pop();
+public:
+    void setTransform(AffineTransform value) {
+        _transform = value;
+        _usedFields |= Fields::TransformField;
+    }
+    bool hasTransform(AffineTransform *value) {
+        if (_usedFields & Fields::TransformField) {
+            *value = _transform;
+            return true;
+        }
+        return false;
+    }
+};
+
 
 struct TypographicBounds {
     double width;
@@ -115,9 +142,9 @@ enum LineBoundsOptions {
 
 extern const AffineTransform AffineTransformIdentity;
 
-Path Path_createWithRect(Rect rect, AffineTransform transform);
-Path Path_createWithEllipseInRect(Rect rect, AffineTransform transform);
-Path Path_createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, AffineTransform transform);
+Path Path_createWithRect(Rect rect, OptArgs optArgs);
+Path Path_createWithEllipseInRect(Rect rect, OptArgs optArgs);
+Path Path_createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
 void Path_dispose(Path _this);
 void DrawContext_saveGState(DrawContext _this);
 void DrawContext_restoreGState(DrawContext _this);
@@ -153,7 +180,7 @@ Color Color_create(double red, double green, double blue, double alpha);
 void Color_dispose(Color _this);
 AttributedString AttributedString_create(std::string s, AttributedStringOptions opts);
 void AttributedString_dispose(AttributedString _this);
-Font Font_createFromFile(std::string path, double size, AffineTransform matrix);
+Font Font_createFromFile(std::string path, double size, OptArgs optArgs);
 void Font_dispose(Font _this);
 TypographicBounds Line_getTypographicBounds(Line _this);
 Rect Line_getBoundsWithOptions(Line _this, uint32_t opts);

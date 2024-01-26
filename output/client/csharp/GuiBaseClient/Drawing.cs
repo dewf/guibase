@@ -571,6 +571,56 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new DrawContext(ptr) : null;
         }
 
+        public struct OptArgs
+        {
+            [Flags]
+            internal enum Fields
+            {
+                Transform = 1
+            }
+            internal Fields UsedFields;
+
+            private AffineTransform _transform;
+            public AffineTransform Transform
+            {
+                set
+                {
+                    _transform = value;
+                    UsedFields |= Fields.Transform;
+                }
+            }
+            public bool HasTransform(out AffineTransform value)
+            {
+                if (UsedFields.HasFlag(Fields.Transform))
+                {
+                    value = _transform;
+                    return true;
+                }
+                value = default;
+                return false;
+            }
+        }
+        internal static void OptArgs__Push(OptArgs value, bool isReturn)
+        {
+            if (value.HasTransform(out var transform))
+            {
+                AffineTransform__Push(transform, isReturn);
+            }
+            NativeImplClient.PushInt32((int)value.UsedFields);
+        }
+        internal static OptArgs OptArgs__Pop()
+        {
+            var opts = new OptArgs
+            {
+                UsedFields = (OptArgs.Fields)NativeImplClient.PopInt32()
+            };
+            if (opts.UsedFields.HasFlag(OptArgs.Fields.Transform))
+            {
+                opts.Transform = AffineTransform__Pop();
+            }
+            return opts;
+        }
+
         public class Font : IDisposable
         {
             internal readonly IntPtr NativeHandle;
@@ -588,9 +638,9 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
-            public static Font CreateFromFile(string path, double size, AffineTransform matrix)
+            public static Font CreateFromFile(string path, double size, OptArgs optArgs)
             {
-                AffineTransform__Push(matrix, false);
+                OptArgs__Push(optArgs, false);
                 NativeImplClient.PushDouble(size);
                 NativeImplClient.PushString(path);
                 NativeImplClient.InvokeModuleMethod(_font_createFromFile);
@@ -739,23 +789,23 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
-            public static Path CreateWithRect(Rect rect, AffineTransform transform)
+            public static Path CreateWithRect(Rect rect, OptArgs optArgs)
             {
-                AffineTransform__Push(transform, false);
+                OptArgs__Push(optArgs, false);
                 Rect__Push(rect, false);
                 NativeImplClient.InvokeModuleMethod(_path_createWithRect);
                 return Path__Pop();
             }
-            public static Path CreateWithEllipseInRect(Rect rect, AffineTransform transform)
+            public static Path CreateWithEllipseInRect(Rect rect, OptArgs optArgs)
             {
-                AffineTransform__Push(transform, false);
+                OptArgs__Push(optArgs, false);
                 Rect__Push(rect, false);
                 NativeImplClient.InvokeModuleMethod(_path_createWithEllipseInRect);
                 return Path__Pop();
             }
-            public static Path CreateWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, AffineTransform transform)
+            public static Path CreateWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs)
             {
-                AffineTransform__Push(transform, false);
+                OptArgs__Push(optArgs, false);
                 NativeImplClient.PushDouble(cornerHeight);
                 NativeImplClient.PushDouble(cornerWidth);
                 Rect__Push(rect, false);

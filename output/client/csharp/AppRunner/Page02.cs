@@ -9,7 +9,7 @@ public class Page02(IWindowMethods windowMethods) : BasePage(windowMethods)
     public override void Init()
     {
         // test create some fonts and layouts and stuff
-        using var font = Font.CreateFromFile("./_democontent/LiberationSerif-Regular.ttf", 120.0, AffineTransformIdentity);
+        using var font = Font.CreateFromFile("./_democontent/LiberationSerif-Regular.ttf", 120.0, new OptArgs());
         _labelString = AttributedString.Create("Quartz♪❦♛あぎ", new AttributedStringOptions
         {
             Font = font,

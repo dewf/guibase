@@ -117,6 +117,24 @@ DrawContext DrawContext__pop() {
     return (DrawContext)ni_popPtr();
 }
 
+void OptArgs__push(OptArgs value, bool isReturn) {
+    AffineTransform transform;
+    if (value.hasTransform(&transform)) {
+        AffineTransform__push(transform, isReturn);
+    }
+    ni_pushInt32(value.getUsedFields());
+}
+
+OptArgs OptArgs__pop() {
+    OptArgs value = {};
+    value._usedFields =  ni_popInt32();
+    if (value._usedFields & OptArgs::Fields::TransformField) {
+        auto x = AffineTransform__pop();
+        value.setTransform(x);
+    }
+    return value;
+}
+
 void Font__push(Font value) {
     ni_pushPtr(value);
 }
@@ -166,22 +184,22 @@ Path Path__pop() {
 
 void Path_createWithRect__wrapper() {
     auto rect = Rect__pop();
-    auto transform = AffineTransform__pop();
-    Path__push(Path_createWithRect(rect, transform));
+    auto optArgs = OptArgs__pop();
+    Path__push(Path_createWithRect(rect, optArgs));
 }
 
 void Path_createWithEllipseInRect__wrapper() {
     auto rect = Rect__pop();
-    auto transform = AffineTransform__pop();
-    Path__push(Path_createWithEllipseInRect(rect, transform));
+    auto optArgs = OptArgs__pop();
+    Path__push(Path_createWithEllipseInRect(rect, optArgs));
 }
 
 void Path_createWithRoundedRect__wrapper() {
     auto rect = Rect__pop();
     auto cornerWidth = ni_popDouble();
     auto cornerHeight = ni_popDouble();
-    auto transform = AffineTransform__pop();
-    Path__push(Path_createWithRoundedRect(rect, cornerWidth, cornerHeight, transform));
+    auto optArgs = OptArgs__pop();
+    Path__push(Path_createWithRoundedRect(rect, cornerWidth, cornerHeight, optArgs));
 }
 
 void Path_dispose__wrapper() {
@@ -409,8 +427,8 @@ void AttributedString_dispose__wrapper() {
 void Font_createFromFile__wrapper() {
     auto path = popStringInternal();
     auto size = ni_popDouble();
-    auto matrix = AffineTransform__pop();
-    Font__push(Font_createFromFile(path, size, matrix));
+    auto optArgs = OptArgs__pop();
+    Font__push(Font_createFromFile(path, size, optArgs));
 }
 
 void Font_dispose__wrapper() {

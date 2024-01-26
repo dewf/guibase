@@ -35,10 +35,15 @@ enum PathDrawingMode {
     EOFillStroke
 }
 
+// a way of handling optional args until we come up with something direct?
+options OptArgs {
+    AffineTransform transform;
+}
+
 opaque Path {
-    static Path createWithRect(Rect rect, AffineTransform transform);
-    static Path createWithEllipseInRect(Rect rect, AffineTransform transform);
-    static Path createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, AffineTransform transform);
+    static Path createWithRect(Rect rect, OptArgs optArgs);
+    static Path createWithEllipseInRect(Rect rect, OptArgs optArgs);
+    static Path createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
 }
 
 opaque DrawContext {
@@ -59,7 +64,7 @@ opaque DrawContext {
     void addLineToPoint(double x, double y);
     void strokePath();
     void setLineDash(double phase, Array<double> lengths);
-    void clearLineDash(); // maybe until we have an Option<> type or something to use in setLineDash()
+    void clearLineDash();                           // maybe until we have an Option<> type or something to use in setLineDash()
     void setLineWidth(double width);
     void clip();
     void translateCTM(double tx, double ty);
@@ -89,7 +94,7 @@ opaque AttributedString {
 }
 
 opaque Font {
-    static Font createFromFile(string path, double size, AffineTransform matrix);
+    static Font createFromFile(string path, double size, OptArgs optArgs);
 }
 
 struct TypographicBounds {

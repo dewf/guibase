@@ -260,8 +260,8 @@ public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
 
         context.RotateCTM(_animAngle);
 
-        using var rounded = Drawing.Path.CreateWithRoundedRect(r6, 10, 10, AffineTransformIdentity);
-        using var cornerCircle = Drawing.Path.CreateWithEllipseInRect(r7, AffineTransformIdentity);
+        using var rounded = Drawing.Path.CreateWithRoundedRect(r6, 10, 10, new OptArgs());
+        using var cornerCircle = Drawing.Path.CreateWithEllipseInRect(r7, new OptArgs());
         for (var i = 0; i < numRects; i++)
         {
             context.SetRGBFillColor(tint, tint / 2, 0, tint);

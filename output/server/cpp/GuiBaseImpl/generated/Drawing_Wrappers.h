@@ -27,6 +27,9 @@ PathDrawingMode PathDrawingMode__pop();
 void DrawContext__push(DrawContext value);
 DrawContext DrawContext__pop();
 
+void OptArgs__push(OptArgs value, bool isReturn);
+OptArgs OptArgs__pop();
+
 void Font__push(Font value);
 Font Font__pop();
 

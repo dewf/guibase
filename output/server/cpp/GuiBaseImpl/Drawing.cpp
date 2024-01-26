@@ -5,19 +5,37 @@
 
 const AffineTransform AffineTransformIdentity = *((AffineTransform*)&dl_CGAffineTransformIdentity);
 
-Path Path_createWithRect(Rect rect, AffineTransform transform)
+Path Path_createWithRect(Rect rect, OptArgs optArgs)
 {
-    return (Path)dl_CGPathCreateWithRect(STRUCT_CAST(dl_CGRect, rect), (dl_CGAffineTransform*)&transform);
+    AffineTransform transform;
+    if (optArgs.hasTransform(&transform)) {
+        return (Path)dl_CGPathCreateWithRect(STRUCT_CAST(dl_CGRect, rect), (dl_CGAffineTransform*)&transform);
+    }
+    else {
+        return (Path)dl_CGPathCreateWithRect(STRUCT_CAST(dl_CGRect, rect), nullptr);
+    }
 }
 
-Path Path_createWithEllipseInRect(Rect rect, AffineTransform transform)
+Path Path_createWithEllipseInRect(Rect rect, OptArgs optArgs)
 {
-    return (Path)dl_CGPathCreateWithEllipseInRect(STRUCT_CAST(dl_CGRect, rect), (dl_CGAffineTransform*)&transform);
+    AffineTransform transform;
+    if (optArgs.hasTransform(&transform)) {
+        return (Path)dl_CGPathCreateWithEllipseInRect(STRUCT_CAST(dl_CGRect, rect), (dl_CGAffineTransform*)&transform);
+    }
+    else {
+        return (Path)dl_CGPathCreateWithEllipseInRect(STRUCT_CAST(dl_CGRect, rect), nullptr);
+    }
 }
 
-Path Path_createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, AffineTransform transform)
+Path Path_createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs)
 {
-    return (Path)dl_CGPathCreateWithRoundedRect(STRUCT_CAST(dl_CGRect, rect), cornerWidth, cornerHeight, (dl_CGAffineTransform*)&transform);
+    AffineTransform transform;
+    if (optArgs.hasTransform(&transform)) {
+        return (Path)dl_CGPathCreateWithRoundedRect(STRUCT_CAST(dl_CGRect, rect), cornerWidth, cornerHeight, (dl_CGAffineTransform*)&transform);
+    }
+    else {
+        return (Path)dl_CGPathCreateWithRoundedRect(STRUCT_CAST(dl_CGRect, rect), cornerWidth, cornerHeight, nullptr);
+    }
 }
 
 void Path_dispose(Path _this)
@@ -211,15 +229,23 @@ void AttributedString_dispose(AttributedString _this)
     dl_CFRelease(_this);
 }
 
-Font Font_createFromFile(std::string path, double size, AffineTransform matrix)
+Font Font_createFromFile(std::string path, double size, OptArgs optArgs)
 {
     auto pathStr = dl_CFStringCreateWithCString(path.c_str());
     auto url = dl_CFURLCreateWithFileSystemPath(pathStr, dl_CFURLPathStyle::dl_kCFURLPOSIXPathStyle, false);
     auto descriptors = dl_CTFontManagerCreateFontDescriptorsFromURL(url);
+
     Font result = nullptr;
     if (dl_CFArrayGetCount(descriptors) > 0) {
+        AffineTransform matrix;
+
         auto first = (dl_CTFontDescriptorRef)dl_CFArrayGetValueAtIndex(descriptors, 0);
-        result = (Font)dl_CTFontCreateWithFontDescriptor(first, size, (dl_CGAffineTransform*)&matrix);
+        if (optArgs.hasTransform(&matrix)) {
+            result = (Font)dl_CTFontCreateWithFontDescriptor(first, size, (dl_CGAffineTransform*)&matrix);
+        }
+        else {
+            result = (Font)dl_CTFontCreateWithFontDescriptor(first, size, nullptr);
+        }
     }
     dl_CFRelease(descriptors);
     dl_CFRelease(url);
