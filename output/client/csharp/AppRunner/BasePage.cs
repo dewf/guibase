@@ -7,7 +7,7 @@ public interface IWindowMethods
     void Invalidate(int x, int y, int width, int height);
 }
 
-public struct RenderArea(int x, int y, int width, int height)
+public readonly struct RenderArea(int x, int y, int width, int height)
 {
     public int X { get; } = x;
     public int Y { get; } = y;
@@ -24,6 +24,7 @@ public interface IPage
     void OnSize(int newWidth, int newHeight);
     void OnTimer(double secondsSinceLast);
     void OnMouseMove(int x, int y, Windowing.Modifiers modifiers);
+    void OnMouseDown(int x, int y, Windowing.MouseButton button, Windowing.Modifiers modifiers);
     void OnKeyDown(Windowing.Key key, Windowing.Modifiers modifiers);
 }
 
@@ -46,6 +47,10 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     }
 
     public virtual void OnMouseMove(int x, int y, Windowing.Modifiers modifiers)
+    {
+    }
+
+    public virtual void OnMouseDown(int x, int y, Windowing.MouseButton button, Windowing.Modifiers modifiers)
     {
     }
 

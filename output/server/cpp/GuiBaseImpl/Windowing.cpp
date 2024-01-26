@@ -116,11 +116,29 @@ public:
     }
 };
 
+struct __Timer {
+private:
+    wl_TimerRef wlTimer = nullptr;
+    std::function<TimerFunc> func;
+public:
+    ~__Timer() {
+        wl_TimerDestroy(wlTimer);
+    }
+    void tick(double secondsSinceLast) {
+        func(secondsSinceLast);
+    }
+    static Timer create(int32_t msTimeout, std::function<TimerFunc> func)
+    {
+        auto ret = new __Timer();
+        ret->func = func;
+        ret->wlTimer = wl_TimerCreate(msTimeout, ret);
+        return ret;
+    }
+};
 
 CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* userData) {
     if (userData != nullptr) {
         auto win = (InternalWindow*)userData;
-
         event->handled = true;
         switch (event->eventType) {
         case wl_kEventTypeWindowCloseRequest:
@@ -156,8 +174,16 @@ CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* user
         }
     }
     else {
-        //printf("unhandled event type (null userData): %d\n", event->eventType);
-        event->handled = false;
+        // stuff unrelated to any window (app-level events)
+        event->handled = true;
+        switch (event->eventType) {
+        case wl_kEventTypeTimer:
+            ((Timer)event->timerEvent.userData)->tick(event->timerEvent.secondsSinceLast);
+            break;
+        default:
+            printf("app-level unhandled event (null userData): %d\n", event->eventType);
+            event->handled = false;
+        }
     }
     return 0;
 }
@@ -214,6 +240,16 @@ Window Window_create(int32_t width, int32_t height, std::string title, std::shar
 void Window_dispose(Window _this)
 {
     // not using this currently, requires formal destruction
+}
+
+Timer Timer_create(int32_t msTimeout, std::function<TimerFunc> func)
+{
+    return __Timer::create(msTimeout, func);
+}
+
+void Timer_dispose(Timer _this)
+{
+    delete _this;
 }
 
 Icon Icon_create(std::string filename, int32_t sizeToWidth)

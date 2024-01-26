@@ -6,18 +6,43 @@ namespace AppRunner;
 
 public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
-    private double _animAngle = 0;
+    private bool _animating;
+    
     private int _mouseX, _mouseY;
-    private bool _doCrossMask = false;
+    private bool _doCrossMask;
+    
+    private const double AnimAngle = (Math.PI * 2 * 30) / 360;
+    private const double AnimTurnsPerSec = 1.0 / 5.0;
+    private double _animAngle = 0;
+
+    public override bool IsAnimating()
+    {
+        return _animating;
+    }
+
+    public override void OnTimer(double secondsSinceLast)
+    {
+        if (_animating)
+        {
+            var turnRadians = AnimTurnsPerSec * secondsSinceLast * Math.PI * 2;
+            _animAngle = (_animAngle + turnRadians) % (Math.PI * 2); // fmod()
+            Invalidate();
+        }
+    }
 
     public override void OnMouseMove(int x, int y, Windowing.Modifiers modifiers)
     {
         _mouseX = x;
         _mouseY = y;
-        if (_doCrossMask) // or animating
+        if (!_animating && _doCrossMask)
         {
             Invalidate();
         }
+    }
+
+    public override void OnMouseDown(int x, int y, Windowing.MouseButton button, Windowing.Modifiers modifiers)
+    {
+        _animating = !_animating;
     }
 
     public override void OnKeyDown(Windowing.Key key, Windowing.Modifiers modifiers)

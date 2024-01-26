@@ -118,6 +118,39 @@ inline MouseButton MouseButton__pop() {
     return (MouseButton)tag;
 }
 
+void TimerFunc__push(std::function<TimerFunc> f) {
+    size_t uniqueKey = 0;
+    if (f) {
+        TimerFunc* ptr_fun = f.target<TimerFunc>();
+        if (ptr_fun != nullptr) {
+            uniqueKey = (size_t)ptr_fun;
+        }
+    }
+    auto wrapper = [f]() {
+        auto secondsSinceLast = ni_popDouble();
+        f(secondsSinceLast);
+    };
+    pushServerFuncVal(wrapper, uniqueKey);
+}
+
+std::function<TimerFunc> TimerFunc__pop() {
+    auto id = ni_popClientFunc();
+    auto cf = std::shared_ptr<ClientFuncVal>(new ClientFuncVal(id));
+    auto wrapper = [cf](double secondsSinceLast) {
+        ni_pushDouble(secondsSinceLast);
+        cf->remoteExec();
+    };
+    return wrapper;
+}
+
+void Timer__push(Timer value) {
+    ni_pushPtr(value);
+}
+
+Timer Timer__pop() {
+    return (Timer)ni_popPtr();
+}
+
 
 inline void WindowStyle__push(WindowStyle value) {
     ni_pushInt32((int32_t)value);
@@ -330,6 +363,17 @@ void Window_dispose__wrapper() {
     Window_dispose(_this);
 }
 
+void Timer_create__wrapper() {
+    auto msTimeout = ni_popInt32();
+    auto func = TimerFunc__pop();
+    Timer__push(Timer_create(msTimeout, func));
+}
+
+void Timer_dispose__wrapper() {
+    auto _this = Timer__pop();
+    Timer_dispose(_this);
+}
+
 void Icon_create__wrapper() {
     auto filename = popStringInternal();
     auto sizeToWidth = ni_popInt32();
@@ -483,6 +527,8 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "Window_invalidate", &Window_invalidate__wrapper);
     ni_registerModuleMethod(m, "Window_create", &Window_create__wrapper);
     ni_registerModuleMethod(m, "Window_dispose", &Window_dispose__wrapper);
+    ni_registerModuleMethod(m, "Timer_create", &Timer_create__wrapper);
+    ni_registerModuleMethod(m, "Timer_dispose", &Timer_dispose__wrapper);
     ni_registerModuleMethod(m, "Icon_create", &Icon_create__wrapper);
     ni_registerModuleMethod(m, "Icon_dispose", &Icon_dispose__wrapper);
     ni_registerModuleMethod(m, "Accelerator_create", &Accelerator_create__wrapper);

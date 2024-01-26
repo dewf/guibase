@@ -25,6 +25,8 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _window_invalidate;
         private static ModuleMethodHandle _window_create;
         private static ModuleMethodHandle _Window_dispose;
+        private static ModuleMethodHandle _timer_create;
+        private static ModuleMethodHandle _Timer_dispose;
         private static ModuleMethodHandle _icon_create;
         private static ModuleMethodHandle _Icon_dispose;
         private static ModuleMethodHandle _accelerator_create;
@@ -514,6 +516,69 @@ namespace Org.Prefixed.GuiBase
             return (MouseButton)ret;
         }
 
+        public delegate void TimerFunc(double secondsSinceLast);
+
+        internal static void TimerFunc__Push(TimerFunc callback)
+        {
+            void CallbackWrapper()
+            {
+                var secondsSinceLast = NativeImplClient.PopDouble();
+                callback(secondsSinceLast);
+            }
+            NativeImplClient.PushClientFuncVal(CallbackWrapper, Marshal.GetFunctionPointerForDelegate(callback));
+        }
+
+        internal static TimerFunc TimerFunc__Pop()
+        {
+            var id = NativeImplClient.PopServerFuncValId();
+            var remoteFunc = new ServerFuncVal(id);
+            void Wrapper(double secondsSinceLast)
+            {
+                NativeImplClient.PushDouble(secondsSinceLast);
+                remoteFunc.Exec();
+            }
+            return Wrapper;
+        }
+
+        public class Timer : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal Timer(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    Timer__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Timer_dispose);
+                    _disposed = true;
+                }
+            }
+            public static Timer Create(int msTimeout, TimerFunc func)
+            {
+                TimerFunc__Push(func);
+                NativeImplClient.PushInt32(msTimeout);
+                NativeImplClient.InvokeModuleMethod(_timer_create);
+                return Timer__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Timer__Push(Timer thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Timer Timer__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new Timer(ptr) : null;
+        }
+
 
         public enum WindowStyle
         {
@@ -967,6 +1032,8 @@ namespace Org.Prefixed.GuiBase
             _window_invalidate = NativeImplClient.GetModuleMethod(_module, "Window_invalidate");
             _window_create = NativeImplClient.GetModuleMethod(_module, "Window_create");
             _Window_dispose = NativeImplClient.GetModuleMethod(_module, "Window_dispose");
+            _timer_create = NativeImplClient.GetModuleMethod(_module, "Timer_create");
+            _Timer_dispose = NativeImplClient.GetModuleMethod(_module, "Timer_dispose");
             _icon_create = NativeImplClient.GetModuleMethod(_module, "Icon_create");
             _Icon_dispose = NativeImplClient.GetModuleMethod(_module, "Icon_dispose");
             _accelerator_create = NativeImplClient.GetModuleMethod(_module, "Accelerator_create");

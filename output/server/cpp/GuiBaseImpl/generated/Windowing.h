@@ -12,6 +12,7 @@
 #include "Drawing.h"
 
 struct __Window; typedef struct __Window* Window;
+struct __Timer; typedef struct __Timer* Timer;
 struct __Icon; typedef struct __Icon* Icon;
 struct __Accelerator; typedef struct __Accelerator* Accelerator;
 struct __Action; typedef struct __Action* Action;
@@ -159,6 +160,9 @@ enum class MouseButton {
     Other
 };
 
+typedef void TimerFunc(double secondsSinceLast);
+
+
 class WindowDelegate; // fwd decl
 
 enum class WindowStyle {
@@ -293,6 +297,8 @@ void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu);
 void Window_invalidate(Window _this, int32_t x, int32_t y, int32_t width, int32_t height);
 Window Window_create(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts);
 void Window_dispose(Window _this);
+Timer Timer_create(int32_t msTimeout, std::function<TimerFunc> func);
+void Timer_dispose(Timer _this);
 Icon Icon_create(std::string filename, int32_t sizeToWidth);
 void Icon_dispose(Icon _this);
 Accelerator Accelerator_create(Key key, uint32_t modifiers);

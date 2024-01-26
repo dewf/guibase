@@ -31,6 +31,11 @@ MenuItem MenuItem__pop();
 
 void MouseButton__push(MouseButton value);
 MouseButton MouseButton__pop();
+void TimerFunc__push(std::function<TimerFunc> f);
+std::function<TimerFunc> TimerFunc__pop();
+
+void Timer__push(Timer value);
+Timer Timer__pop();
 
 void WindowStyle__push(WindowStyle value);
 WindowStyle WindowStyle__pop();
@@ -65,6 +70,10 @@ void Window_invalidate__wrapper();
 void Window_create__wrapper();
 
 void Window_dispose__wrapper();
+
+void Timer_create__wrapper();
+
+void Timer_dispose__wrapper();
 
 void Icon_create__wrapper();
 

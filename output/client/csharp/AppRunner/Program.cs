@@ -12,7 +12,9 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     private readonly Page01 _page01;
     private readonly Page02 _page02;
     private IPage _currentPage;
-    
+
+    public bool IsDestroyed { get; private set; }
+
     public MainWindowDelegate()
     {
         _contextMenu = Menu.Create();
@@ -39,16 +41,21 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
 
     public override void Destroyed()
     {
+        IsDestroyed = true;
         Console.WriteLine("window destroyed! exiting runloop");
         ExitRunloop();
     }
 
     public override void MouseDown(int x, int y, MouseButton button, Modifiers modifiers)
     {
-        Console.WriteLine($"button press @ {x}/{y}/{button}/{ModifiersToString(modifiers)}");
+        // Console.WriteLine($"button press @ {x}/{y}/{button}/{ModifiersToString(modifiers)}");
         if (button == MouseButton.Right)
         {
             Window!.ShowContextMenu(x, y, _contextMenu);
+        }
+        else
+        {
+            _currentPage.OnMouseDown(x, y, button, modifiers);
         }
     }
     
@@ -88,9 +95,11 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     }
     public override void Repaint(DrawContext context, int x, int y, int width, int height)
     {
-        context.SaveGState();
+        // don't think we need to save/restore state, created afresh every time?
+        // will have to see how macOS behaves ...
+        // context.SaveGState();
         _currentPage.Render(context, new RenderArea(x, y, width, height));
-        context.RestoreGState();
+        // context.RestoreGState();
     }
     public override void Resized(int width, int height)
     {
@@ -103,6 +112,11 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     {
         Window!.Invalidate(x, y, width, height);
     }
+
+    public void TimerTick(double secondsSinceLast)
+    {
+        _currentPage.OnTimer(secondsSinceLast);
+    }
 }
 
 internal static class Program
@@ -112,34 +126,46 @@ internal static class Program
     {
         Library.Init();
 
-        var options = new WindowOptions
+        // scope for opaque disposal, prior to library exit
         {
-            MinWidth = Constants.MinWidth,
-            MinHeight = Constants.MinHeight,
-            MaxWidth = Constants.MaxWidth,
-            MaxHeight = Constants.MaxHeight
-        };
-        var mainWinDel = new MainWindowDelegate();
-        var window = Window.Create(Constants.InitWidth, Constants.InitHeight, "this is the first window! 🚀", mainWinDel, options);
-        mainWinDel.Window = window;
-
-        var fileMenu = Menu.Create();
-        var exitAction =
-            Windowing.Action.Create("E&xit", null, Accelerator.Create(Key.Q, Modifiers.Control), () =>
+            var options = new WindowOptions
             {
-                Console.WriteLine("you chose 'exit'!");
-                ExitRunloop();
+                MinWidth = Constants.MinWidth,
+                MinHeight = Constants.MinHeight,
+                MaxWidth = Constants.MaxWidth,
+                MaxHeight = Constants.MaxHeight
+            };
+            var mainWinDel = new MainWindowDelegate();
+            using var window = Window.Create(Constants.InitWidth, Constants.InitHeight, "this is the first window! 🚀", mainWinDel, options);
+            mainWinDel.Window = window;
+
+            using var fileMenu = Menu.Create();
+            using var exitAction =
+                Windowing.Action.Create("E&xit", null, Accelerator.Create(Key.Q, Modifiers.Control), () =>
+                {
+                    Console.WriteLine("you chose 'exit'!");
+                    ExitRunloop();
+                });
+            fileMenu.AddAction(exitAction);
+
+            using var menuBar = MenuBar.Create();
+            menuBar.AddMenu("&File", fileMenu);
+        
+            window.SetMenuBar(menuBar);
+
+            using var timer = Windowing.Timer.Create(1000 / 60, secondsSinceLast =>
+            {
+                if (!mainWinDel.IsDestroyed)
+                {
+                    mainWinDel.TimerTick(secondsSinceLast);
+                }
             });
-        fileMenu.AddAction(exitAction);
-
-        var menuBar = MenuBar.Create();
-        menuBar.AddMenu("&File", fileMenu);
         
-        window.SetMenuBar(menuBar);
-        
-        window.Show();
-        Runloop();
-
+            window.Show();
+            Runloop();
+            
+            // disposal of everything upon leaving this scope!
+        }
         Library.Shutdown();
     }
 }

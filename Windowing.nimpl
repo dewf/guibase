@@ -62,6 +62,12 @@ opaque Window {
    static Window create(int width, int height, string title, WindowDelegate del, WindowOptions opts);
 }
 
+delegate void TimerFunc(double secondsSinceLast);
+
+opaque Timer {
+   static Timer create(int msTimeout, TimerFunc func);
+}
+
 // menu stuff
 
 opaque Icon {
