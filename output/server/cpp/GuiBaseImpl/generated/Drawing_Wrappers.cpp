@@ -174,6 +174,64 @@ DrawContext DrawContext__pop() {
     return (DrawContext)ni_popPtr();
 }
 
+void FontTraits__push(FontTraits value, bool isReturn) {
+    bool vertical;
+    if (value.hasVertical(&vertical)) {
+        ni_pushBool(vertical);
+    }
+    bool monospace;
+    if (value.hasMonospace(&monospace)) {
+        ni_pushBool(monospace);
+    }
+    bool condensed;
+    if (value.hasCondensed(&condensed)) {
+        ni_pushBool(condensed);
+    }
+    bool expanded;
+    if (value.hasExpanded(&expanded)) {
+        ni_pushBool(expanded);
+    }
+    bool bold;
+    if (value.hasBold(&bold)) {
+        ni_pushBool(bold);
+    }
+    bool italic;
+    if (value.hasItalic(&italic)) {
+        ni_pushBool(italic);
+    }
+    ni_pushInt32(value.getUsedFields());
+}
+
+FontTraits FontTraits__pop() {
+    FontTraits value = {};
+    value._usedFields =  ni_popInt32();
+    if (value._usedFields & FontTraits::Fields::ItalicField) {
+        auto x = ni_popBool();
+        value.setItalic(x);
+    }
+    if (value._usedFields & FontTraits::Fields::BoldField) {
+        auto x = ni_popBool();
+        value.setBold(x);
+    }
+    if (value._usedFields & FontTraits::Fields::ExpandedField) {
+        auto x = ni_popBool();
+        value.setExpanded(x);
+    }
+    if (value._usedFields & FontTraits::Fields::CondensedField) {
+        auto x = ni_popBool();
+        value.setCondensed(x);
+    }
+    if (value._usedFields & FontTraits::Fields::MonospaceField) {
+        auto x = ni_popBool();
+        value.setMonospace(x);
+    }
+    if (value._usedFields & FontTraits::Fields::VerticalField) {
+        auto x = ni_popBool();
+        value.setVertical(x);
+    }
+    return value;
+}
+
 void OptArgs__push(OptArgs value, bool isReturn) {
     AffineTransform transform;
     if (value.hasTransform(&transform)) {
@@ -198,6 +256,87 @@ void Font__push(Font value) {
 
 Font Font__pop() {
     return (Font)ni_popPtr();
+}
+
+void __Line_Array__push(std::vector<Line> items, bool isReturn) {
+    ni_pushPtrArray((void**)items.data(), items.size());
+}
+
+std::vector<Line> __Line_Array__pop() {
+    Line *values;
+    size_t count;
+    ni_popPtrArray((void***)&values, &count);
+    return std::vector<Line>(values, values + count);
+}
+
+void __Point_Array__push(std::vector<Point> values, bool isReturn) {
+    std::vector<double> y_values;
+    std::vector<double> x_values;
+    for (auto v = values.begin(); v != values.end(); v++) {
+        y_values.push_back(v->y);
+        x_values.push_back(v->x);
+    }
+    pushDoubleArrayInternal(y_values);
+    pushDoubleArrayInternal(x_values);
+}
+
+std::vector<Point> __Point_Array__pop() {
+    auto x_values = popDoubleArrayInternal();
+    auto y_values = popDoubleArrayInternal();
+    std::vector<Point> __ret;
+    for (auto i = 0; i < x_values.size(); i++) {
+        Point __value;
+        __value.x = x_values[i];
+        __value.y = y_values[i];
+        __ret.push_back(__value);
+    }
+    return __ret;
+}
+
+void Range__push(Range value, bool isReturn) {
+    switch (value.tag) {
+    case Range::Tag::NotFound:
+        break;
+    case Range::Tag::Zero:
+        break;
+    case Range::Tag::Valid:
+        ni_pushInt64(value.valid->length);
+        ni_pushInt64(value.valid->location);
+        break;
+    }
+    ni_pushInt32((int32_t)value.tag);
+}
+
+Range Range__pop() {
+    auto which = ni_popInt32();
+    switch ((Range::Tag)which) {
+    case Range::Tag::NotFound: {
+        return Range::NotFound::make(); }
+    case Range::Tag::Zero: {
+        return Range::Zero::make(); }
+    case Range::Tag::Valid: {
+        auto location = ni_popInt64();
+        auto length = ni_popInt64();
+        return Range::Valid::make(location, length); }
+    default:
+        throw "Range__pop(): unknown tag!";
+    }
+}
+
+void Frame__push(Frame value) {
+    ni_pushPtr(value);
+}
+
+Frame Frame__pop() {
+    return (Frame)ni_popPtr();
+}
+
+void FrameSetter__push(FrameSetter value) {
+    ni_pushPtr(value);
+}
+
+FrameSetter FrameSetter__pop() {
+    return (FrameSetter)ni_popPtr();
 }
 
 void GradientStop__push(GradientStop value, bool isReturn) {
@@ -287,6 +426,28 @@ inline uint32_t LineBoundsOptions__pop() {
     return ni_popUInt32();
 }
 
+void __Run_Array__push(std::vector<Run> items, bool isReturn) {
+    ni_pushPtrArray((void**)items.data(), items.size());
+}
+
+std::vector<Run> __Run_Array__pop() {
+    Run *values;
+    size_t count;
+    ni_popPtrArray((void***)&values, &count);
+    return std::vector<Run>(values, values + count);
+}
+
+void __DoubleDouble_Tuple__push(std::tuple<double,double> value, bool isReturn) {
+    ni_pushDouble(std::get<1>(value));
+    ni_pushDouble(std::get<0>(value));
+}
+
+std::tuple<double,double> __DoubleDouble_Tuple__pop() {
+    auto _0 = ni_popDouble();
+    auto _1 = ni_popDouble();
+    return std::tuple<double,double>{ _0, _1 };
+}
+
 void Line__push(Line value) {
     ni_pushPtr(value);
 }
@@ -295,12 +456,61 @@ Line Line__pop() {
     return (Line)ni_popPtr();
 }
 
+void MutableAttributedString__push(MutableAttributedString value) {
+    ni_pushPtr(value);
+}
+
+MutableAttributedString MutableAttributedString__pop() {
+    return (MutableAttributedString)ni_popPtr();
+}
+
 void Path__push(Path value) {
     ni_pushPtr(value);
 }
 
 Path Path__pop() {
     return (Path)ni_popPtr();
+}
+
+// built-in array type: std::vector<std::string>
+
+// built-in array type: std::vector<int64_t>
+
+void __String_Int64_Map__push(std::map<std::string,int64_t> _map, bool isReturn) {
+    std::vector<std::string> keys;
+    std::vector<int64_t> values;
+    for (auto i = _map.begin(); i != _map.end(); i++) {
+        keys.push_back(i->first);
+        values.push_back(i->second);
+    }
+    pushInt64ArrayInternal(values);
+    pushStringArrayInternal(keys);
+}
+
+std::map<std::string,int64_t> __String_Int64_Map__pop() {
+    std::map<std::string,int64_t> __ret;
+    auto keys = popStringArrayInternal();
+    auto values = popInt64ArrayInternal();
+    for (auto i = 0; i < keys.size(); i++) {
+        __ret[keys[i]] = values[i];
+    }
+    return __ret;
+}
+
+inline void RunStatus__push(uint32_t value) {
+    ni_pushUInt32(value);
+}
+
+inline uint32_t RunStatus__pop() {
+    return ni_popUInt32();
+}
+
+void Run__push(Run value) {
+    ni_pushPtr(value);
+}
+
+Run Run__pop() {
+    return (Run)ni_popPtr();
 }
 
 void Color_createGenericRGB__wrapper() {
@@ -590,6 +800,86 @@ void AttributedString_dispose__wrapper() {
     AttributedString_dispose(_this);
 }
 
+void MutableAttributedString_getLength__wrapper() {
+    auto _this = MutableAttributedString__pop();
+    ni_pushInt64(MutableAttributedString_getLength(_this));
+}
+
+void MutableAttributedString_replaceString__wrapper() {
+    auto _this = MutableAttributedString__pop();
+    auto range = Range__pop();
+    auto str = popStringInternal();
+    MutableAttributedString_replaceString(_this, range, str);
+}
+
+void MutableAttributedString_beginEditing__wrapper() {
+    auto _this = MutableAttributedString__pop();
+    MutableAttributedString_beginEditing(_this);
+}
+
+void MutableAttributedString_endEditing__wrapper() {
+    auto _this = MutableAttributedString__pop();
+    MutableAttributedString_endEditing(_this);
+}
+
+void MutableAttributedString_setAttribute__wrapper() {
+    auto _this = MutableAttributedString__pop();
+    auto range = Range__pop();
+    auto attr = AttributedStringOptions__pop();
+    MutableAttributedString_setAttribute(_this, range, attr);
+}
+
+void MutableAttributedString_setCustomAttribute__wrapper() {
+    auto _this = MutableAttributedString__pop();
+    auto range = Range__pop();
+    auto key = popStringInternal();
+    auto value = ni_popInt64();
+    MutableAttributedString_setCustomAttribute(_this, range, key, value);
+}
+
+void MutableAttributedString_getNormalAttributedString_REMOVEME__wrapper() {
+    auto _this = MutableAttributedString__pop();
+    AttributedString__push(MutableAttributedString_getNormalAttributedString_REMOVEME(_this));
+}
+
+void MutableAttributedString_create__wrapper() {
+    auto maxLength = ni_popInt64();
+    MutableAttributedString__push(MutableAttributedString_create(maxLength));
+}
+
+void MutableAttributedString_dispose__wrapper() {
+    auto _this = MutableAttributedString__pop();
+    MutableAttributedString_dispose(_this);
+}
+
+void Font_createCopyWithSymbolicTraits__wrapper() {
+    auto _this = Font__pop();
+    auto size = ni_popDouble();
+    auto newTraits = FontTraits__pop();
+    auto optArgs = OptArgs__pop();
+    Font__push(Font_createCopyWithSymbolicTraits(_this, size, newTraits, optArgs));
+}
+
+void Font_getAscent__wrapper() {
+    auto _this = Font__pop();
+    ni_pushDouble(Font_getAscent(_this));
+}
+
+void Font_getDescent__wrapper() {
+    auto _this = Font__pop();
+    ni_pushDouble(Font_getDescent(_this));
+}
+
+void Font_getUnderlineThickness__wrapper() {
+    auto _this = Font__pop();
+    ni_pushDouble(Font_getUnderlineThickness(_this));
+}
+
+void Font_getUnderlinePosition__wrapper() {
+    auto _this = Font__pop();
+    ni_pushDouble(Font_getUnderlinePosition(_this));
+}
+
 void Font_createFromFile__wrapper() {
     auto path = popStringInternal();
     auto size = ni_popDouble();
@@ -609,6 +899,38 @@ void Font_dispose__wrapper() {
     Font_dispose(_this);
 }
 
+void Run_getAttributes__wrapper() {
+    auto _this = Run__pop();
+    AttributedStringOptions__push(Run_getAttributes(_this), true);
+}
+
+void Run_getCustomAttributes__wrapper() {
+    auto _this = Run__pop();
+    auto keys = popStringArrayInternal();
+    __String_Int64_Map__push(Run_getCustomAttributes(_this, keys), true);
+}
+
+void Run_getTypographicBounds__wrapper() {
+    auto _this = Run__pop();
+    auto range = Range__pop();
+    TypographicBounds__push(Run_getTypographicBounds(_this, range), true);
+}
+
+void Run_getStringRange__wrapper() {
+    auto _this = Run__pop();
+    Range__push(Run_getStringRange(_this), true);
+}
+
+void Run_getStatus__wrapper() {
+    auto _this = Run__pop();
+    RunStatus__push(Run_getStatus(_this));
+}
+
+void Run_dispose__wrapper() {
+    auto _this = Run__pop();
+    Run_dispose(_this);
+}
+
 void Line_getTypographicBounds__wrapper() {
     auto _this = Line__pop();
     TypographicBounds__push(Line_getTypographicBounds(_this), true);
@@ -626,6 +948,17 @@ void Line_draw__wrapper() {
     Line_draw(_this, context);
 }
 
+void Line_getGlyphRuns__wrapper() {
+    auto _this = Line__pop();
+    __Run_Array__push(Line_getGlyphRuns(_this), true);
+}
+
+void Line_getLineOffsetForStringIndex__wrapper() {
+    auto _this = Line__pop();
+    auto charIndex = ni_popInt64();
+    __DoubleDouble_Tuple__push(Line_getLineOffsetForStringIndex(_this, charIndex), true);
+}
+
 void Line_createWithAttributedString__wrapper() {
     auto str = AttributedString__pop();
     Line__push(Line_createWithAttributedString(str));
@@ -634,6 +967,45 @@ void Line_createWithAttributedString__wrapper() {
 void Line_dispose__wrapper() {
     auto _this = Line__pop();
     Line_dispose(_this);
+}
+
+void Frame_draw__wrapper() {
+    auto _this = Frame__pop();
+    auto context = DrawContext__pop();
+    Frame_draw(_this, context);
+}
+
+void Frame_getLines__wrapper() {
+    auto _this = Frame__pop();
+    __Line_Array__push(Frame_getLines(_this), true);
+}
+
+void Frame_getLineOrigins__wrapper() {
+    auto _this = Frame__pop();
+    auto range = Range__pop();
+    __Point_Array__push(Frame_getLineOrigins(_this, range), true);
+}
+
+void Frame_dispose__wrapper() {
+    auto _this = Frame__pop();
+    Frame_dispose(_this);
+}
+
+void FrameSetter_createWithAttributedString__wrapper() {
+    auto str = AttributedString__pop();
+    FrameSetter__push(FrameSetter_createWithAttributedString(str));
+}
+
+void FrameSetter_createFrame__wrapper() {
+    auto _this = FrameSetter__pop();
+    auto range = Range__pop();
+    auto path = Path__pop();
+    Frame__push(FrameSetter_createFrame(_this, range, path));
+}
+
+void FrameSetter_dispose__wrapper() {
+    auto _this = FrameSetter__pop();
+    FrameSetter_dispose(_this);
 }
 
 void __constantsFunc() {
@@ -689,13 +1061,42 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_dispose", &DrawContext_dispose__wrapper);
     ni_registerModuleMethod(m, "AttributedString_create", &AttributedString_create__wrapper);
     ni_registerModuleMethod(m, "AttributedString_dispose", &AttributedString_dispose__wrapper);
+    ni_registerModuleMethod(m, "MutableAttributedString_getLength", &MutableAttributedString_getLength__wrapper);
+    ni_registerModuleMethod(m, "MutableAttributedString_replaceString", &MutableAttributedString_replaceString__wrapper);
+    ni_registerModuleMethod(m, "MutableAttributedString_beginEditing", &MutableAttributedString_beginEditing__wrapper);
+    ni_registerModuleMethod(m, "MutableAttributedString_endEditing", &MutableAttributedString_endEditing__wrapper);
+    ni_registerModuleMethod(m, "MutableAttributedString_setAttribute", &MutableAttributedString_setAttribute__wrapper);
+    ni_registerModuleMethod(m, "MutableAttributedString_setCustomAttribute", &MutableAttributedString_setCustomAttribute__wrapper);
+    ni_registerModuleMethod(m, "MutableAttributedString_getNormalAttributedString_REMOVEME", &MutableAttributedString_getNormalAttributedString_REMOVEME__wrapper);
+    ni_registerModuleMethod(m, "MutableAttributedString_create", &MutableAttributedString_create__wrapper);
+    ni_registerModuleMethod(m, "MutableAttributedString_dispose", &MutableAttributedString_dispose__wrapper);
+    ni_registerModuleMethod(m, "Font_createCopyWithSymbolicTraits", &Font_createCopyWithSymbolicTraits__wrapper);
+    ni_registerModuleMethod(m, "Font_getAscent", &Font_getAscent__wrapper);
+    ni_registerModuleMethod(m, "Font_getDescent", &Font_getDescent__wrapper);
+    ni_registerModuleMethod(m, "Font_getUnderlineThickness", &Font_getUnderlineThickness__wrapper);
+    ni_registerModuleMethod(m, "Font_getUnderlinePosition", &Font_getUnderlinePosition__wrapper);
     ni_registerModuleMethod(m, "Font_createFromFile", &Font_createFromFile__wrapper);
     ni_registerModuleMethod(m, "Font_createWithName", &Font_createWithName__wrapper);
     ni_registerModuleMethod(m, "Font_dispose", &Font_dispose__wrapper);
+    ni_registerModuleMethod(m, "Run_getAttributes", &Run_getAttributes__wrapper);
+    ni_registerModuleMethod(m, "Run_getCustomAttributes", &Run_getCustomAttributes__wrapper);
+    ni_registerModuleMethod(m, "Run_getTypographicBounds", &Run_getTypographicBounds__wrapper);
+    ni_registerModuleMethod(m, "Run_getStringRange", &Run_getStringRange__wrapper);
+    ni_registerModuleMethod(m, "Run_getStatus", &Run_getStatus__wrapper);
+    ni_registerModuleMethod(m, "Run_dispose", &Run_dispose__wrapper);
     ni_registerModuleMethod(m, "Line_getTypographicBounds", &Line_getTypographicBounds__wrapper);
     ni_registerModuleMethod(m, "Line_getBoundsWithOptions", &Line_getBoundsWithOptions__wrapper);
     ni_registerModuleMethod(m, "Line_draw", &Line_draw__wrapper);
+    ni_registerModuleMethod(m, "Line_getGlyphRuns", &Line_getGlyphRuns__wrapper);
+    ni_registerModuleMethod(m, "Line_getLineOffsetForStringIndex", &Line_getLineOffsetForStringIndex__wrapper);
     ni_registerModuleMethod(m, "Line_createWithAttributedString", &Line_createWithAttributedString__wrapper);
     ni_registerModuleMethod(m, "Line_dispose", &Line_dispose__wrapper);
+    ni_registerModuleMethod(m, "Frame_draw", &Frame_draw__wrapper);
+    ni_registerModuleMethod(m, "Frame_getLines", &Frame_getLines__wrapper);
+    ni_registerModuleMethod(m, "Frame_getLineOrigins", &Frame_getLineOrigins__wrapper);
+    ni_registerModuleMethod(m, "Frame_dispose", &Frame_dispose__wrapper);
+    ni_registerModuleMethod(m, "FrameSetter_createWithAttributedString", &FrameSetter_createWithAttributedString__wrapper);
+    ni_registerModuleMethod(m, "FrameSetter_createFrame", &FrameSetter_createFrame__wrapper);
+    ni_registerModuleMethod(m, "FrameSetter_dispose", &FrameSetter_dispose__wrapper);
     return 0; // = OK
 }

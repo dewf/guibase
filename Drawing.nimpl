@@ -138,13 +138,60 @@ options AttributedStringOptions {
     Font font;
     double strokeWidth;
     Color strokeColor;
+
+    // for custom types, this seems the simplest for now:
+    // client will maintain its own ID->value mapping, instead of having to have knowledge of CFDictionary types etc
+    // because Core Text ultimately returns a CFDictionary for us for each "run", there's really no way to inject anything with higher level behavior.
+    // for example if we wanted a single C# dictionary per run, because CoreText doesn't know anything about client-side data structures, and can't build them up
+    // during run analysis - but it can certainly deal with ints! and we can use those to construct our own queryable things per run
+    // another option would have been approximating CF* types via a sumtype, and storing things that way.
+    // but ints yield greater flexibiliy, because we can store absolutely whatever on the client side instead (not limiting us to known CF* types)
+}
+
+sumtype Range {
+    NotFound,
+    Zero,
+    Valid(long location, long length)
 }
 
 opaque AttributedString {
     static AttributedString create(string s, AttributedStringOptions opts);
 }
 
+opaque MutableAttributedString { // todo: inherit from AttributedString, meaning the backend can operate on it that way as well
+    // AttributedString methods, actually:
+    long getLength();
+
+    // Mutable methods:
+    void replaceString(Range range, string str);
+    void beginEditing();
+    void endEditing();
+    void setAttribute(Range range, AttributedStringOptions attr);
+    void setCustomAttribute(Range range, string key, long value); // ID key has client-specific meaning (use a dictionary or something)
+
+    // temporary, until we get inheritance working
+    AttributedString getNormalAttributedString_REMOVEME();
+
+    static MutableAttributedString create(long maxLength);
+}
+
+options FontTraits {
+    bool italic;
+    bool bold;
+    bool expanded;
+    bool condensed;
+    bool monospace;
+    bool vertical;
+    // some others not yet put here
+}
+
 opaque Font {
+    Font createCopyWithSymbolicTraits(double size, FontTraits newTraits, OptArgs optArgs); // optional matrix was originally next-to-last argument
+    double getAscent();
+    double getDescent();
+    double getUnderlineThickness();
+    double getUnderlinePosition();
+
     static Font createFromFile(string path, double size, OptArgs optArgs);
     static Font createWithName(string name, double size, OptArgs optArgs);
 }
@@ -164,10 +211,38 @@ flags LineBoundsOptions {
     UseOpticalBounds           = 1 << 4
 }
 
+flags RunStatus {
+    NoStatus = 0,
+    RightToLeft = 1 << 0,
+    NonMonotonic = 1 << 1,
+    HasNonIdentityMatrix = 1 << 2
+}
+
+opaque Run {
+    AttributedStringOptions getAttributes();
+    Map<string,long> getCustomAttributes(Array<string> keys);
+    TypographicBounds getTypographicBounds(Range range);
+    Range getStringRange();
+    RunStatus getStatus();
+}
+
 opaque Line {
     TypographicBounds getTypographicBounds();
     Rect getBoundsWithOptions(LineBoundsOptions opts);
     void draw(DrawContext context);
+    Array<Run> getGlyphRuns();
+    Tuple<double,double> getLineOffsetForStringIndex(long charIndex); // offset + secondaryOffset
 
     static Line createWithAttributedString(AttributedString str);
+}
+
+opaque Frame {
+    void draw(DrawContext context);
+    Array<Line> getLines();
+    Array<Point> getLineOrigins(Range range); // zero range = fetch all
+}
+
+opaque FrameSetter {
+    static FrameSetter createWithAttributedString(AttributedString str);
+    Frame createFrame(Range range, Path path); // no frameAttributes yet, not sure what they are!
 }

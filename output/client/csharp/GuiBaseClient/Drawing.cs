@@ -58,14 +58,43 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _DrawContext_dispose;
         private static ModuleMethodHandle _attributedString_create;
         private static ModuleMethodHandle _AttributedString_dispose;
+        private static ModuleMethodHandle _mutableAttributedString_getLength;
+        private static ModuleMethodHandle _mutableAttributedString_replaceString;
+        private static ModuleMethodHandle _mutableAttributedString_beginEditing;
+        private static ModuleMethodHandle _mutableAttributedString_endEditing;
+        private static ModuleMethodHandle _mutableAttributedString_setAttribute;
+        private static ModuleMethodHandle _mutableAttributedString_setCustomAttribute;
+        private static ModuleMethodHandle _mutableAttributedString_getNormalAttributedString_REMOVEME;
+        private static ModuleMethodHandle _mutableAttributedString_create;
+        private static ModuleMethodHandle _MutableAttributedString_dispose;
+        private static ModuleMethodHandle _font_createCopyWithSymbolicTraits;
+        private static ModuleMethodHandle _font_getAscent;
+        private static ModuleMethodHandle _font_getDescent;
+        private static ModuleMethodHandle _font_getUnderlineThickness;
+        private static ModuleMethodHandle _font_getUnderlinePosition;
         private static ModuleMethodHandle _font_createFromFile;
         private static ModuleMethodHandle _font_createWithName;
         private static ModuleMethodHandle _Font_dispose;
+        private static ModuleMethodHandle _run_getAttributes;
+        private static ModuleMethodHandle _run_getCustomAttributes;
+        private static ModuleMethodHandle _run_getTypographicBounds;
+        private static ModuleMethodHandle _run_getStringRange;
+        private static ModuleMethodHandle _run_getStatus;
+        private static ModuleMethodHandle _Run_dispose;
         private static ModuleMethodHandle _line_getTypographicBounds;
         private static ModuleMethodHandle _line_getBoundsWithOptions;
         private static ModuleMethodHandle _line_draw;
+        private static ModuleMethodHandle _line_getGlyphRuns;
+        private static ModuleMethodHandle _line_getLineOffsetForStringIndex;
         private static ModuleMethodHandle _line_createWithAttributedString;
         private static ModuleMethodHandle _Line_dispose;
+        private static ModuleMethodHandle _frame_draw;
+        private static ModuleMethodHandle _frame_getLines;
+        private static ModuleMethodHandle _frame_getLineOrigins;
+        private static ModuleMethodHandle _Frame_dispose;
+        private static ModuleMethodHandle _frameSetter_createWithAttributedString;
+        private static ModuleMethodHandle _frameSetter_createFrame;
+        private static ModuleMethodHandle _FrameSetter_dispose;
         public static AffineTransform AffineTransformIdentity { get; private set; }
 
         public struct AffineTransform {
@@ -790,6 +819,196 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new DrawContext(ptr) : null;
         }
 
+        public struct FontTraits
+        {
+            [Flags]
+            internal enum Fields
+            {
+                Italic = 1,
+                Bold = 2,
+                Expanded = 4,
+                Condensed = 8,
+                Monospace = 16,
+                Vertical = 32
+            }
+            internal Fields UsedFields;
+
+            private bool _italic;
+            public bool Italic
+            {
+                set
+                {
+                    _italic = value;
+                    UsedFields |= Fields.Italic;
+                }
+            }
+            public bool HasItalic(out bool value)
+            {
+                if (UsedFields.HasFlag(Fields.Italic))
+                {
+                    value = _italic;
+                    return true;
+                }
+                value = default;
+                return false;
+            }
+            private bool _bold;
+            public bool Bold
+            {
+                set
+                {
+                    _bold = value;
+                    UsedFields |= Fields.Bold;
+                }
+            }
+            public bool HasBold(out bool value)
+            {
+                if (UsedFields.HasFlag(Fields.Bold))
+                {
+                    value = _bold;
+                    return true;
+                }
+                value = default;
+                return false;
+            }
+            private bool _expanded;
+            public bool Expanded
+            {
+                set
+                {
+                    _expanded = value;
+                    UsedFields |= Fields.Expanded;
+                }
+            }
+            public bool HasExpanded(out bool value)
+            {
+                if (UsedFields.HasFlag(Fields.Expanded))
+                {
+                    value = _expanded;
+                    return true;
+                }
+                value = default;
+                return false;
+            }
+            private bool _condensed;
+            public bool Condensed
+            {
+                set
+                {
+                    _condensed = value;
+                    UsedFields |= Fields.Condensed;
+                }
+            }
+            public bool HasCondensed(out bool value)
+            {
+                if (UsedFields.HasFlag(Fields.Condensed))
+                {
+                    value = _condensed;
+                    return true;
+                }
+                value = default;
+                return false;
+            }
+            private bool _monospace;
+            public bool Monospace
+            {
+                set
+                {
+                    _monospace = value;
+                    UsedFields |= Fields.Monospace;
+                }
+            }
+            public bool HasMonospace(out bool value)
+            {
+                if (UsedFields.HasFlag(Fields.Monospace))
+                {
+                    value = _monospace;
+                    return true;
+                }
+                value = default;
+                return false;
+            }
+            private bool _vertical;
+            public bool Vertical
+            {
+                set
+                {
+                    _vertical = value;
+                    UsedFields |= Fields.Vertical;
+                }
+            }
+            public bool HasVertical(out bool value)
+            {
+                if (UsedFields.HasFlag(Fields.Vertical))
+                {
+                    value = _vertical;
+                    return true;
+                }
+                value = default;
+                return false;
+            }
+        }
+        internal static void FontTraits__Push(FontTraits value, bool isReturn)
+        {
+            if (value.HasVertical(out var vertical))
+            {
+                NativeImplClient.PushBool(vertical);
+            }
+            if (value.HasMonospace(out var monospace))
+            {
+                NativeImplClient.PushBool(monospace);
+            }
+            if (value.HasCondensed(out var condensed))
+            {
+                NativeImplClient.PushBool(condensed);
+            }
+            if (value.HasExpanded(out var expanded))
+            {
+                NativeImplClient.PushBool(expanded);
+            }
+            if (value.HasBold(out var bold))
+            {
+                NativeImplClient.PushBool(bold);
+            }
+            if (value.HasItalic(out var italic))
+            {
+                NativeImplClient.PushBool(italic);
+            }
+            NativeImplClient.PushInt32((int)value.UsedFields);
+        }
+        internal static FontTraits FontTraits__Pop()
+        {
+            var opts = new FontTraits
+            {
+                UsedFields = (FontTraits.Fields)NativeImplClient.PopInt32()
+            };
+            if (opts.UsedFields.HasFlag(FontTraits.Fields.Italic))
+            {
+                opts.Italic = NativeImplClient.PopBool();
+            }
+            if (opts.UsedFields.HasFlag(FontTraits.Fields.Bold))
+            {
+                opts.Bold = NativeImplClient.PopBool();
+            }
+            if (opts.UsedFields.HasFlag(FontTraits.Fields.Expanded))
+            {
+                opts.Expanded = NativeImplClient.PopBool();
+            }
+            if (opts.UsedFields.HasFlag(FontTraits.Fields.Condensed))
+            {
+                opts.Condensed = NativeImplClient.PopBool();
+            }
+            if (opts.UsedFields.HasFlag(FontTraits.Fields.Monospace))
+            {
+                opts.Monospace = NativeImplClient.PopBool();
+            }
+            if (opts.UsedFields.HasFlag(FontTraits.Fields.Vertical))
+            {
+                opts.Vertical = NativeImplClient.PopBool();
+            }
+            return opts;
+        }
+
         public struct OptArgs
         {
             [Flags]
@@ -857,6 +1076,39 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
+            public Font CreateCopyWithSymbolicTraits(double size, FontTraits newTraits, OptArgs optArgs)
+            {
+                OptArgs__Push(optArgs, false);
+                FontTraits__Push(newTraits, false);
+                NativeImplClient.PushDouble(size);
+                Font__Push(this);
+                NativeImplClient.InvokeModuleMethod(_font_createCopyWithSymbolicTraits);
+                return Font__Pop();
+            }
+            public double GetAscent()
+            {
+                Font__Push(this);
+                NativeImplClient.InvokeModuleMethod(_font_getAscent);
+                return NativeImplClient.PopDouble();
+            }
+            public double GetDescent()
+            {
+                Font__Push(this);
+                NativeImplClient.InvokeModuleMethod(_font_getDescent);
+                return NativeImplClient.PopDouble();
+            }
+            public double GetUnderlineThickness()
+            {
+                Font__Push(this);
+                NativeImplClient.InvokeModuleMethod(_font_getUnderlineThickness);
+                return NativeImplClient.PopDouble();
+            }
+            public double GetUnderlinePosition()
+            {
+                Font__Push(this);
+                NativeImplClient.InvokeModuleMethod(_font_getUnderlinePosition);
+                return NativeImplClient.PopDouble();
+            }
             public static Font CreateFromFile(string path, double size, OptArgs optArgs)
             {
                 OptArgs__Push(optArgs, false);
@@ -886,6 +1138,208 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new Font(ptr) : null;
+        }
+
+        internal static void __Line_Array__Push(Line[] items)
+        {
+            var ptrs = items.Select(item => item.NativeHandle).ToArray();
+            NativeImplClient.PushPtrArray(ptrs);
+        }
+        internal static Line[] __Line_Array__Pop()
+        {
+            return NativeImplClient.PopPtrArray()
+                .Select(ptr => ptr != IntPtr.Zero ? new Line(ptr) : null)
+                .ToArray();
+        }
+
+        internal static void __Point_Array__Push(Point[] items, bool isReturn)
+        {
+            var count = items.Length;
+            var f0Values = new double[count];
+            var f1Values = new double[count];
+            for (var i = 0; i < count; i++)
+            {
+                f0Values[i] = items[i].X;
+                f1Values[i] = items[i].Y;
+            }
+            NativeImplClient.PushDoubleArray(f1Values);
+            NativeImplClient.PushDoubleArray(f0Values);
+        }
+
+        internal static Point[] __Point_Array__Pop()
+        {
+            var f0Values = NativeImplClient.PopDoubleArray();
+            var f1Values = NativeImplClient.PopDoubleArray();
+            var count = f0Values.Length;
+            var ret = new Point[count];
+            for (var i = 0; i < count; i++)
+            {
+                var f0 = f0Values[i];
+                var f1 = f1Values[i];
+                ret[i] = new Point(f0, f1);
+            }
+            return ret;
+        }
+
+        public abstract record Range
+        {
+            public sealed record NotFound : Range;
+            public sealed record Zero : Range;
+            public sealed record Valid(long Location, long Length) : Range
+            {
+                public long Location { get; } = Location;
+                public long Length { get; } = Length;
+            }
+        }
+
+        private enum Range__Tag
+        {
+            NotFound,
+            Zero,
+            Valid
+        }
+
+        internal static void Range__Push(Range thing, bool isReturn)
+        {
+            Range__Tag which;
+            switch (thing)
+            {
+                case Range.NotFound notFound:
+                    which = Range__Tag.NotFound;
+                    break;
+                case Range.Zero zero:
+                    which = Range__Tag.Zero;
+                    break;
+                case Range.Valid valid:
+                    which = Range__Tag.Valid;
+                    NativeImplClient.PushInt64(valid.Length);
+                    NativeImplClient.PushInt64(valid.Location);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(thing));
+            }
+            NativeImplClient.PushInt32((int)which);
+        }
+
+        internal static Range Range__Pop()
+        {
+            var which = NativeImplClient.PopInt32();
+            switch ((Range__Tag)which)
+            {
+                case Range__Tag.NotFound:
+                {
+                    return new Range.NotFound();
+                }
+                case Range__Tag.Zero:
+                {
+                    return new Range.Zero();
+                }
+                case Range__Tag.Valid:
+                {
+                    var location = NativeImplClient.PopInt64();
+                    var length = NativeImplClient.PopInt64();
+                    return new Range.Valid(location, length);
+                }
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public class Frame : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal Frame(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    Frame__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Frame_dispose);
+                    _disposed = true;
+                }
+            }
+            public void Draw(DrawContext context)
+            {
+                DrawContext__Push(context);
+                Frame__Push(this);
+                NativeImplClient.InvokeModuleMethod(_frame_draw);
+            }
+            public Line[] GetLines()
+            {
+                Frame__Push(this);
+                NativeImplClient.InvokeModuleMethod(_frame_getLines);
+                return __Line_Array__Pop();
+            }
+            public Point[] GetLineOrigins(Range range)
+            {
+                Range__Push(range, false);
+                Frame__Push(this);
+                NativeImplClient.InvokeModuleMethod(_frame_getLineOrigins);
+                return __Point_Array__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Frame__Push(Frame thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Frame Frame__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new Frame(ptr) : null;
+        }
+
+        public class FrameSetter : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal FrameSetter(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    FrameSetter__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_FrameSetter_dispose);
+                    _disposed = true;
+                }
+            }
+            public static FrameSetter CreateWithAttributedString(AttributedString str)
+            {
+                AttributedString__Push(str);
+                NativeImplClient.InvokeModuleMethod(_frameSetter_createWithAttributedString);
+                return FrameSetter__Pop();
+            }
+            public Frame CreateFrame(Range range, Path path)
+            {
+                Path__Push(path);
+                Range__Push(range, false);
+                FrameSetter__Push(this);
+                NativeImplClient.InvokeModuleMethod(_frameSetter_createFrame);
+                return Frame__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void FrameSetter__Push(FrameSetter thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static FrameSetter FrameSetter__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new FrameSetter(ptr) : null;
         }
 
         public struct GradientStop {
@@ -1060,6 +1514,31 @@ namespace Org.Prefixed.GuiBase
             return (LineBoundsOptions)ret;
         }
 
+        internal static void __Run_Array__Push(Run[] items)
+        {
+            var ptrs = items.Select(item => item.NativeHandle).ToArray();
+            NativeImplClient.PushPtrArray(ptrs);
+        }
+        internal static Run[] __Run_Array__Pop()
+        {
+            return NativeImplClient.PopPtrArray()
+                .Select(ptr => ptr != IntPtr.Zero ? new Run(ptr) : null)
+                .ToArray();
+        }
+
+        internal static void __DoubleDouble_Tuple__Push((double, double) value, bool isReturn)
+        {
+            NativeImplClient.PushDouble(value.Item2);
+            NativeImplClient.PushDouble(value.Item1);
+        }
+
+        internal static (double, double) __DoubleDouble_Tuple__Pop()
+        {
+            var _0 = NativeImplClient.PopDouble();
+            var _1 = NativeImplClient.PopDouble();
+            return (_0, _1);
+        }
+
         public class Line : IDisposable
         {
             internal readonly IntPtr NativeHandle;
@@ -1096,6 +1575,19 @@ namespace Org.Prefixed.GuiBase
                 Line__Push(this);
                 NativeImplClient.InvokeModuleMethod(_line_draw);
             }
+            public Run[] GetGlyphRuns()
+            {
+                Line__Push(this);
+                NativeImplClient.InvokeModuleMethod(_line_getGlyphRuns);
+                return __Run_Array__Pop();
+            }
+            public (double, double) GetLineOffsetForStringIndex(long charIndex)
+            {
+                NativeImplClient.PushInt64(charIndex);
+                Line__Push(this);
+                NativeImplClient.InvokeModuleMethod(_line_getLineOffsetForStringIndex);
+                return __DoubleDouble_Tuple__Pop();
+            }
             public static Line CreateWithAttributedString(AttributedString str)
             {
                 AttributedString__Push(str);
@@ -1115,6 +1607,88 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new Line(ptr) : null;
+        }
+
+        public class MutableAttributedString : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal MutableAttributedString(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    MutableAttributedString__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_MutableAttributedString_dispose);
+                    _disposed = true;
+                }
+            }
+            public long GetLength()
+            {
+                MutableAttributedString__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_getLength);
+                return NativeImplClient.PopInt64();
+            }
+            public void ReplaceString(Range range, string str)
+            {
+                NativeImplClient.PushString(str);
+                Range__Push(range, false);
+                MutableAttributedString__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_replaceString);
+            }
+            public void BeginEditing()
+            {
+                MutableAttributedString__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_beginEditing);
+            }
+            public void EndEditing()
+            {
+                MutableAttributedString__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_endEditing);
+            }
+            public void SetAttribute(Range range, AttributedStringOptions attr)
+            {
+                AttributedStringOptions__Push(attr, false);
+                Range__Push(range, false);
+                MutableAttributedString__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_setAttribute);
+            }
+            public void SetCustomAttribute(Range range, string key, long value)
+            {
+                NativeImplClient.PushInt64(value);
+                NativeImplClient.PushString(key);
+                Range__Push(range, false);
+                MutableAttributedString__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_setCustomAttribute);
+            }
+            public AttributedString GetNormalAttributedString_REMOVEME()
+            {
+                MutableAttributedString__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_getNormalAttributedString_REMOVEME);
+                return AttributedString__Pop();
+            }
+            public static MutableAttributedString Create(long maxLength)
+            {
+                NativeImplClient.PushInt64(maxLength);
+                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_create);
+                return MutableAttributedString__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void MutableAttributedString__Push(MutableAttributedString thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static MutableAttributedString MutableAttributedString__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new MutableAttributedString(ptr) : null;
         }
 
         public class Path : IDisposable
@@ -1172,6 +1746,114 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Path(ptr) : null;
         }
 
+        // built-in array type: string[]
+
+        // built-in array type: long[]
+
+        internal static void __String_Long_Map__Push(Dictionary<string, long> map, bool isReturn)
+        {
+            NativeImplClient.PushInt64Array(map.Values.ToArray());
+            NativeImplClient.PushStringArray(map.Keys.ToArray());
+        }
+
+        internal static Dictionary<string, long> __String_Long_Map__Pop()
+        {
+            var keys = NativeImplClient.PopStringArray();
+            var values = NativeImplClient.PopInt64Array();
+            var ret = new Dictionary<string,long>();
+            for (var i = 0; i < keys.Length; i++)
+            {
+                ret[keys[i]] = values[i];
+            }
+            return ret;
+        }
+
+        [Flags]
+        public enum RunStatus
+        {
+            NoStatus = 0,
+            RightToLeft = 1,
+            NonMonotonic = 2,
+            HasNonIdentityMatrix = 4
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void RunStatus__Push(RunStatus value)
+        {
+            NativeImplClient.PushUInt32((uint)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static RunStatus RunStatus__Pop()
+        {
+            var ret = NativeImplClient.PopUInt32();
+            return (RunStatus)ret;
+        }
+
+        public class Run : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            private bool _disposed;
+            internal Run(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    Run__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_Run_dispose);
+                    _disposed = true;
+                }
+            }
+            public AttributedStringOptions GetAttributes()
+            {
+                Run__Push(this);
+                NativeImplClient.InvokeModuleMethod(_run_getAttributes);
+                return AttributedStringOptions__Pop();
+            }
+            public Dictionary<string,long> GetCustomAttributes(string[] keys)
+            {
+                NativeImplClient.PushStringArray(keys);
+                Run__Push(this);
+                NativeImplClient.InvokeModuleMethod(_run_getCustomAttributes);
+                return __String_Long_Map__Pop();
+            }
+            public TypographicBounds GetTypographicBounds(Range range)
+            {
+                Range__Push(range, false);
+                Run__Push(this);
+                NativeImplClient.InvokeModuleMethod(_run_getTypographicBounds);
+                return TypographicBounds__Pop();
+            }
+            public Range GetStringRange()
+            {
+                Run__Push(this);
+                NativeImplClient.InvokeModuleMethod(_run_getStringRange);
+                return Range__Pop();
+            }
+            public RunStatus GetStatus()
+            {
+                Run__Push(this);
+                NativeImplClient.InvokeModuleMethod(_run_getStatus);
+                return RunStatus__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Run__Push(Run thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Run Run__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new Run(ptr) : null;
+        }
+
         internal static void Init()
         {
             _module = NativeImplClient.GetModule("Drawing");
@@ -1225,14 +1907,43 @@ namespace Org.Prefixed.GuiBase
             _DrawContext_dispose = NativeImplClient.GetModuleMethod(_module, "DrawContext_dispose");
             _attributedString_create = NativeImplClient.GetModuleMethod(_module, "AttributedString_create");
             _AttributedString_dispose = NativeImplClient.GetModuleMethod(_module, "AttributedString_dispose");
+            _mutableAttributedString_getLength = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_getLength");
+            _mutableAttributedString_replaceString = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_replaceString");
+            _mutableAttributedString_beginEditing = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_beginEditing");
+            _mutableAttributedString_endEditing = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_endEditing");
+            _mutableAttributedString_setAttribute = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_setAttribute");
+            _mutableAttributedString_setCustomAttribute = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_setCustomAttribute");
+            _mutableAttributedString_getNormalAttributedString_REMOVEME = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_getNormalAttributedString_REMOVEME");
+            _mutableAttributedString_create = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_create");
+            _MutableAttributedString_dispose = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_dispose");
+            _font_createCopyWithSymbolicTraits = NativeImplClient.GetModuleMethod(_module, "Font_createCopyWithSymbolicTraits");
+            _font_getAscent = NativeImplClient.GetModuleMethod(_module, "Font_getAscent");
+            _font_getDescent = NativeImplClient.GetModuleMethod(_module, "Font_getDescent");
+            _font_getUnderlineThickness = NativeImplClient.GetModuleMethod(_module, "Font_getUnderlineThickness");
+            _font_getUnderlinePosition = NativeImplClient.GetModuleMethod(_module, "Font_getUnderlinePosition");
             _font_createFromFile = NativeImplClient.GetModuleMethod(_module, "Font_createFromFile");
             _font_createWithName = NativeImplClient.GetModuleMethod(_module, "Font_createWithName");
             _Font_dispose = NativeImplClient.GetModuleMethod(_module, "Font_dispose");
+            _run_getAttributes = NativeImplClient.GetModuleMethod(_module, "Run_getAttributes");
+            _run_getCustomAttributes = NativeImplClient.GetModuleMethod(_module, "Run_getCustomAttributes");
+            _run_getTypographicBounds = NativeImplClient.GetModuleMethod(_module, "Run_getTypographicBounds");
+            _run_getStringRange = NativeImplClient.GetModuleMethod(_module, "Run_getStringRange");
+            _run_getStatus = NativeImplClient.GetModuleMethod(_module, "Run_getStatus");
+            _Run_dispose = NativeImplClient.GetModuleMethod(_module, "Run_dispose");
             _line_getTypographicBounds = NativeImplClient.GetModuleMethod(_module, "Line_getTypographicBounds");
             _line_getBoundsWithOptions = NativeImplClient.GetModuleMethod(_module, "Line_getBoundsWithOptions");
             _line_draw = NativeImplClient.GetModuleMethod(_module, "Line_draw");
+            _line_getGlyphRuns = NativeImplClient.GetModuleMethod(_module, "Line_getGlyphRuns");
+            _line_getLineOffsetForStringIndex = NativeImplClient.GetModuleMethod(_module, "Line_getLineOffsetForStringIndex");
             _line_createWithAttributedString = NativeImplClient.GetModuleMethod(_module, "Line_createWithAttributedString");
             _Line_dispose = NativeImplClient.GetModuleMethod(_module, "Line_dispose");
+            _frame_draw = NativeImplClient.GetModuleMethod(_module, "Frame_draw");
+            _frame_getLines = NativeImplClient.GetModuleMethod(_module, "Frame_getLines");
+            _frame_getLineOrigins = NativeImplClient.GetModuleMethod(_module, "Frame_getLineOrigins");
+            _Frame_dispose = NativeImplClient.GetModuleMethod(_module, "Frame_dispose");
+            _frameSetter_createWithAttributedString = NativeImplClient.GetModuleMethod(_module, "FrameSetter_createWithAttributedString");
+            _frameSetter_createFrame = NativeImplClient.GetModuleMethod(_module, "FrameSetter_createFrame");
+            _FrameSetter_dispose = NativeImplClient.GetModuleMethod(_module, "FrameSetter_dispose");
 
             // no static init
         }

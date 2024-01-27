@@ -1,4 +1,5 @@
-﻿using static Org.Prefixed.GuiBase.Drawing;
+﻿using Org.Prefixed.GuiBase;
+using static Org.Prefixed.GuiBase.Drawing;
 
 namespace AppRunner;
 
@@ -7,6 +8,32 @@ public static class Common
     public static Rect MakeRect(double x, double y, double width, double height)
     {
         return new Rect(new Point(x, y), new Size(width, height));
+    }
+
+    public static Drawing.Range MakeRange(long location, long length)
+    {
+        return new Drawing.Range.Valid(location, length);
+    }
+
+    public static long Location(this Drawing.Range range)
+    {
+        return range switch
+        {
+            Drawing.Range.NotFound _ => -1,
+            Drawing.Range.Valid valid => valid.Location,
+            Drawing.Range.Zero _ => 0,
+            _ => throw new ArgumentOutOfRangeException(nameof(range))
+        };
+    }
+
+    public static Drawing.Range StringFind(string str, string substring)
+    {
+        var result = str.IndexOf(substring, StringComparison.Ordinal);
+        if (result >= 0)
+        {
+            return new Drawing.Range.Valid(result, substring.Length);
+        }
+        return new Drawing.Range.NotFound();
     }
     
     public static void PointAt(DrawContext context, Point p)

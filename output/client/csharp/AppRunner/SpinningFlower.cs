@@ -4,7 +4,7 @@ using static AppRunner.Common;
 
 namespace AppRunner;
 
-public class Page01(IWindowMethods windowMethods) : BasePage(windowMethods)
+public class SpinningFlower(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
     private bool _animating;
     

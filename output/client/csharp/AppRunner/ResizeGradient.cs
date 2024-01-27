@@ -4,15 +4,13 @@ using static AppRunner.Common;
 
 namespace AppRunner;
 
-public class Page04(IWindowMethods windowMethods) : BasePage(windowMethods)
+public class ResizeGradient(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
     public override void Render(DrawContext context, RenderArea area)
     {
-        Point start, end;
-
         using var grad1 = GetGradient(0.3, 0.2, 1, 1, 1, 0.3, 0, 1);
-        start = new Point(100, 100);
-        end = new Point(Width - 100, Height - 100);
+        var start = new Point(100, 100);
+        var end = new Point(Width - 100, Height - 100);
         context.DrawLinearGradient(grad1, start, end, GradientDrawingOptions.DrawsBeforeStartLocation | GradientDrawingOptions.DrawsAfterEndLocation);
 
         using var grad2 = GetGradient(0, 0, 0, 0.5, 1, 1, 1, 0.5);

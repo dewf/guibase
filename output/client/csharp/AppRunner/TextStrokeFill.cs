@@ -3,7 +3,7 @@ using static AppRunner.Common;
 
 namespace AppRunner;
 
-public class Page03(IWindowMethods windowMethods) : BasePage(windowMethods)
+public class TextStrokeFill(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
     public override void Render(Drawing.DrawContext context, RenderArea area)
     {

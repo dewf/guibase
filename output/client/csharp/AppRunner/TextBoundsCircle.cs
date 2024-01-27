@@ -3,11 +3,11 @@ using static AppRunner.Common;
 
 namespace AppRunner;
 
-public class Page02 : BasePage
+public class TextBoundsCircle : BasePage
 {
     private readonly AttributedString _labelString;
     
-    public Page02(IWindowMethods windowMethods) : base(windowMethods)
+    public TextBoundsCircle(IWindowMethods windowMethods) : base(windowMethods)
     {
         // test create some fonts and layouts and stuff
         using var font = Font.CreateFromFile("./_democontent/LiberationSerif-Regular.ttf", 120.0, new OptArgs());

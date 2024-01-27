@@ -39,11 +39,22 @@ uint32_t GradientDrawingOptions__pop();
 void DrawContext__push(DrawContext value);
 DrawContext DrawContext__pop();
 
+void FontTraits__push(FontTraits value, bool isReturn);
+FontTraits FontTraits__pop();
+
 void OptArgs__push(OptArgs value, bool isReturn);
 OptArgs OptArgs__pop();
 
 void Font__push(Font value);
 Font Font__pop();
+void Range__push(Range value, bool isReturn);
+Range Range__pop();
+
+void Frame__push(Frame value);
+Frame Frame__pop();
+
+void FrameSetter__push(FrameSetter value);
+FrameSetter FrameSetter__pop();
 
 void GradientStop__push(GradientStop value, bool isReturn);
 GradientStop GradientStop__pop();
@@ -57,11 +68,26 @@ TypographicBounds TypographicBounds__pop();
 void LineBoundsOptions__push(uint32_t value);
 uint32_t LineBoundsOptions__pop();
 
+void __DoubleDouble_Tuple__push(std::tuple<double,double> value, bool isReturn);
+std::tuple<double,double> __DoubleDouble_Tuple__pop();
+
 void Line__push(Line value);
 Line Line__pop();
 
+void MutableAttributedString__push(MutableAttributedString value);
+MutableAttributedString MutableAttributedString__pop();
+
 void Path__push(Path value);
 Path Path__pop();
+
+void __String_Int64_Map__push(std::map<std::string,int64_t> _map, bool isReturn);
+std::map<std::string,int64_t> __String_Int64_Map__pop();
+
+void RunStatus__push(uint32_t value);
+uint32_t RunStatus__pop();
+
+void Run__push(Run value);
+Run Run__pop();
 
 void Color_createGenericRGB__wrapper();
 
@@ -155,11 +181,51 @@ void AttributedString_create__wrapper();
 
 void AttributedString_dispose__wrapper();
 
+void MutableAttributedString_getLength__wrapper();
+
+void MutableAttributedString_replaceString__wrapper();
+
+void MutableAttributedString_beginEditing__wrapper();
+
+void MutableAttributedString_endEditing__wrapper();
+
+void MutableAttributedString_setAttribute__wrapper();
+
+void MutableAttributedString_setCustomAttribute__wrapper();
+
+void MutableAttributedString_getNormalAttributedString_REMOVEME__wrapper();
+
+void MutableAttributedString_create__wrapper();
+
+void MutableAttributedString_dispose__wrapper();
+
+void Font_createCopyWithSymbolicTraits__wrapper();
+
+void Font_getAscent__wrapper();
+
+void Font_getDescent__wrapper();
+
+void Font_getUnderlineThickness__wrapper();
+
+void Font_getUnderlinePosition__wrapper();
+
 void Font_createFromFile__wrapper();
 
 void Font_createWithName__wrapper();
 
 void Font_dispose__wrapper();
+
+void Run_getAttributes__wrapper();
+
+void Run_getCustomAttributes__wrapper();
+
+void Run_getTypographicBounds__wrapper();
+
+void Run_getStringRange__wrapper();
+
+void Run_getStatus__wrapper();
+
+void Run_dispose__wrapper();
 
 void Line_getTypographicBounds__wrapper();
 
@@ -167,9 +233,27 @@ void Line_getBoundsWithOptions__wrapper();
 
 void Line_draw__wrapper();
 
+void Line_getGlyphRuns__wrapper();
+
+void Line_getLineOffsetForStringIndex__wrapper();
+
 void Line_createWithAttributedString__wrapper();
 
 void Line_dispose__wrapper();
+
+void Frame_draw__wrapper();
+
+void Frame_getLines__wrapper();
+
+void Frame_getLineOrigins__wrapper();
+
+void Frame_dispose__wrapper();
+
+void FrameSetter_createWithAttributedString__wrapper();
+
+void FrameSetter_createFrame__wrapper();
+
+void FrameSetter_dispose__wrapper();
 
 void __constantsFunc();
 

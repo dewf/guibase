@@ -309,30 +309,33 @@ void Gradient_dispose(Gradient _this)
 
 AttributedString AttributedString_create(std::string s, AttributedStringOptions opts)
 {
-    Font f;
-    Color foregroundColor;
-    bool foregroundColorFromContext;
-    double strokeWidth;
-    Color strokeColor;
-
     auto text = dl_CFStringCreateWithCString(s.c_str());
     auto dict = dl_CFDictionaryCreateMutable(0);
 
+    Color foregroundColor;
     if (opts.hasForegroundColor(&foregroundColor)) {
         dl_CFDictionarySetValue(dict, dl_kCTForegroundColorAttributeName, (dl_CGColorRef)foregroundColor);
     }
+
+    bool foregroundColorFromContext;
     if (opts.hasForegroundColorFromContext(&foregroundColorFromContext)) {
         auto cfBool = foregroundColorFromContext ? dl_kCFBooleanTrue : dl_kCFBooleanFalse;
         dl_CFDictionarySetValue(dict, dl_kCTForegroundColorFromContextAttributeName, cfBool);
     }
+
+    Font f;
     if (opts.hasFont(&f)) {
         dl_CFDictionarySetValue(dict, dl_kCTFontAttributeName, (dl_CTFontRef)f); // cast not actually necessary, but makes clear we're using CTFont
     }
+
+    double strokeWidth;
     if (opts.hasStrokeWidth(&strokeWidth)) {
         auto cfNumber = dl_CFNumberWithFloat((float)strokeWidth);
         dl_CFDictionarySetValue(dict, dl_kCTStrokeWidthAttributeName, cfNumber);
         dl_CFRelease(cfNumber);
     }
+    
+    Color strokeColor;
     if (opts.hasStrokeColor(&strokeColor)) {
         dl_CFDictionarySetValue(dict, dl_kCTStrokeColorAttributeName, (dl_CGColorRef)strokeColor);
     }
@@ -348,6 +351,144 @@ AttributedString AttributedString_create(std::string s, AttributedStringOptions 
 void AttributedString_dispose(AttributedString _this)
 {
     dl_CFRelease(_this);
+}
+
+int64_t MutableAttributedString_getLength(MutableAttributedString _this)
+{
+    return (int64_t)dl_CFAttributedStringGetLength((dl_CFAttributedStringRef)_this);
+}
+
+void MutableAttributedString_replaceString(MutableAttributedString _this, Range range, std::string str)
+{
+    auto replacement = dl_CFStringCreateWithCString(str.c_str());
+    dl_CFAttributedStringReplaceString((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), replacement); // note the struct cast only works in 64-bit mode!
+    dl_CFRelease(replacement);
+}
+
+void MutableAttributedString_beginEditing(MutableAttributedString _this)
+{
+    dl_CFAttributedStringBeginEditing((dl_CFMutableAttributedStringRef)_this);
+}
+
+void MutableAttributedString_endEditing(MutableAttributedString _this)
+{
+    dl_CFAttributedStringEndEditing((dl_CFMutableAttributedStringRef)_this);
+}
+
+void MutableAttributedString_setAttribute(MutableAttributedString _this, Range range, AttributedStringOptions attr)
+{
+    Color foreground;
+    if (attr.hasForegroundColor(&foreground)) {
+        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), dl_kCTForegroundColorAttributeName, foreground);
+    }
+
+    bool foregroundFromContext;
+    if (attr.hasForegroundColorFromContext(&foregroundFromContext)) {
+        auto cfBool = foregroundFromContext ? dl_kCFBooleanTrue : dl_kCFBooleanFalse;
+        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), dl_kCTForegroundColorFromContextAttributeName, cfBool);
+    }
+
+    Font font;
+    if (attr.hasFont(&font)) {
+        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), dl_kCTFontAttributeName, font);
+    }
+
+    double strokeWidth;
+    if (attr.hasStrokeWidth(&strokeWidth)) {
+        auto cfWidth = dl_CFNumberWithFloat((float)strokeWidth); // because double isn't working (nothing supports casting yet)
+        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), dl_kCTStrokeWidthAttributeName, cfWidth);
+        dl_CFRelease(cfWidth);
+    }
+
+    Color strokeColor;
+    if (attr.hasStrokeColor(&strokeColor)) {
+        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), dl_kCTStrokeColorAttributeName, strokeColor);
+    }
+}
+
+void MutableAttributedString_setCustomAttribute(MutableAttributedString _this, Range range, std::string key, int64_t value)
+{
+    auto cfKey = dl_CFStringCreateWithCString(key.c_str());
+    auto cfValue = dl_CFNumberCreate(dl_CFNumberType::dl_kCFNumberLongType, &value);
+
+    dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), cfKey, cfValue);
+
+    dl_CFRelease(cfValue);
+    dl_CFRelease(cfKey);
+}
+
+AttributedString MutableAttributedString_getNormalAttributedString_REMOVEME(MutableAttributedString _this)
+{
+    printf("getNormalAttributedString_REMOVEME!!!\n");
+    return (AttributedString)_this;
+}
+
+MutableAttributedString MutableAttributedString_create(int64_t maxLength)
+{
+    return (MutableAttributedString)dl_CFAttributedStringCreateMutable(maxLength);
+}
+
+void MutableAttributedString_dispose(MutableAttributedString _this)
+{
+    dl_CFRelease(_this);
+}
+
+double Font_getAscent(Font _this)
+{
+    return dl_CTFontGetAscent((dl_CTFontRef)_this);
+}
+
+double Font_getDescent(Font _this)
+{
+    return dl_CTFontGetDescent((dl_CTFontRef)_this);
+}
+
+double Font_getUnderlineThickness(Font _this)
+{
+    return dl_CTFontGetUnderlineThickness((dl_CTFontRef)_this);
+}
+
+double Font_getUnderlinePosition(Font _this)
+{
+    return dl_CTFontGetUnderlinePosition((dl_CTFontRef)_this);
+}
+
+Font Font_createCopyWithSymbolicTraits(Font _this, double size, FontTraits newTraits, OptArgs optArgs)
+{
+    dl_CTFontSymbolicTraits value = 0, mask = 0;
+    bool b;
+    if (newTraits.hasItalic(&b)) {
+        value |= b ? dl_kCTFontTraitItalic : 0;
+        mask |= dl_kCTFontTraitItalic;
+    }
+    if (newTraits.hasBold(&b)) {
+        value |= b ? dl_kCTFontTraitBold : 0;
+        mask |= dl_kCTFontTraitBold;
+    }
+    if (newTraits.hasExpanded(&b)) {
+        value |= b ? dl_kCTFontTraitExpanded : 0;
+        mask |= dl_kCTFontTraitExpanded;
+    }
+    if (newTraits.hasCondensed(&b)) {
+        value |= b ? dl_kCTFontTraitCondensed : 0;
+        mask |= dl_kCTFontTraitCondensed;
+    }
+    if (newTraits.hasMonospace(&b)) {
+        value |= b ? dl_kCTFontTraitMonoSpace : 0;
+        mask |= dl_kCTFontTraitMonoSpace;
+    }
+    if (newTraits.hasVertical(&b)) {
+        value |= b ? dl_kCTFontTraitVertical : 0;
+        mask |= dl_kCTFontTraitVertical;
+    }
+
+    AffineTransform matrix;
+    AffineTransform* maybeMatrix = nullptr;
+    if (optArgs.hasTransform(&matrix)) {
+        maybeMatrix = &matrix;
+    }
+
+    return (Font)dl_CTFontCreateCopyWithSymbolicTraits((dl_CTFontRef)_this, size, (dl_CGAffineTransform*)maybeMatrix, value, mask);
 }
 
 Font Font_createFromFile(std::string path, double size, OptArgs optArgs)
@@ -397,6 +538,97 @@ void Font_dispose(Font _this)
     dl_CFRelease(_this);
 }
 
+AttributedStringOptions Run_getAttributes(Run _this, std::vector<std::string> customKeys)
+{
+    return AttributedStringOptions();
+}
+
+AttributedStringOptions Run_getAttributes(Run _this)
+{
+    AttributedStringOptions ret;
+    auto attrs = dl_CTRunGetAttributes((dl_CTRunRef)_this);
+
+    auto foregroundColor = (Color)dl_CFDictionaryGetValue(attrs, dl_kCTForegroundColorAttributeName);
+    if (foregroundColor != nullptr) {
+        ret.setForegroundColor(foregroundColor);
+    }
+
+    auto foregroundFromContext = (dl_CFBooleanRef)dl_CFDictionaryGetValue(attrs, dl_kCTForegroundColorFromContextAttributeName);
+    if (foregroundFromContext != nullptr) {
+        ret.setForegroundColorFromContext(foregroundFromContext == dl_kCFBooleanTrue);
+    }
+
+    auto font = (Font)dl_CFDictionaryGetValue(attrs, dl_kCTFontAttributeName);
+    if (font != nullptr) {
+        ret.setFont(font);
+    }
+
+    auto strokeWidth = (dl_CFNumberRef)dl_CFDictionaryGetValue(attrs, dl_kCTStrokeWidthAttributeName);
+    if (strokeWidth != nullptr) {
+        float value;
+        if (dl_CFNumberGetValue(strokeWidth, dl_kCFNumberFloatType, &value)) {
+            ret.setStrokeWidth(value);
+        }
+        else {
+            printf("Run_getAttributes: failed to get float value!\n");
+        }
+    }
+
+    auto strokeColor = (Color)dl_CFDictionaryGetValue(attrs, dl_kCTStrokeColorAttributeName);
+    if (strokeColor != nullptr) {
+        ret.setStrokeColor(strokeColor);
+    }
+
+    return ret;
+}
+
+std::map<std::string, int64_t> Run_getCustomAttributes(Run _this, std::vector<std::string> keys)
+{
+    std::map<std::string, int64_t> ret;
+    auto attrs = dl_CTRunGetAttributes((dl_CTRunRef)_this);
+
+    for (auto i = keys.begin(); i != keys.end(); i++) {
+        auto cfKey = dl_CFStringCreateWithCString(i->c_str());
+        auto cfNumber = (dl_CFNumberRef)dl_CFDictionaryGetValue(attrs, cfKey); // not owned!
+        if (cfNumber != nullptr) {
+            long value;
+            if (dl_CFNumberGetValue(cfNumber, dl_kCFNumberLongType, &value)) {
+                ret[*i] = value;
+            }
+            else {
+                printf("Run_getCustomAttributes: failed to get long value!\n");
+            }
+        }
+        dl_CFRelease(cfKey);
+    }
+    return ret;
+}
+
+TypographicBounds Run_getTypographicBounds(Run _this, Range range)
+{
+    TypographicBounds ret;
+    ret.width = dl_CTRunGetTypographicBounds((dl_CTRunRef)_this, STRUCT_CAST(dl_CFRange, range), &ret.ascent, &ret.descent, &ret.leading);
+    return ret;
+}
+
+Range Run_getStringRange(Run _this)
+{
+    auto ret = dl_CTRunGetStringRange((dl_CTRunRef)_this);
+    return STRUCT_CAST(Range, ret);
+}
+
+uint32_t Run_getStatus(Run _this)
+{
+    return dl_CTRunGetStatus((dl_CTRunRef)_this);
+}
+
+void Run_dispose(Run _this)
+{
+    // but I don't think these are ever owned by the existing API ...
+    // dl_CFRelease(_this);
+    printf("called Run_dispose ... why?\n");
+}
+
 TypographicBounds Line_getTypographicBounds(Line _this)
 {
     dl_CGFloat tb_width, ascent, descent, leading;
@@ -413,6 +645,18 @@ Rect Line_getBoundsWithOptions(Line _this, uint32_t opts)
 void Line_draw(Line _this, DrawContext context)
 {
     dl_CTLineDraw((dl_CTLineRef)_this, (dl_CGContextRef)context);
+}
+
+std::vector<Run> Line_getGlyphRuns(Line _this)
+{
+    std::vector<Run> ret;
+    auto arr = dl_CTLineGetGlyphRuns((dl_CTLineRef)_this);
+    auto count = dl_CFArrayGetCount(arr);
+    for (auto i = 0; i < count; i++) {
+        auto run = (Run)dl_CFArrayGetValueAtIndex(arr, i);
+        ret.push_back(run);
+    }
+    return ret;
 }
 
 Line Line_createWithAttributedString(AttributedString str)

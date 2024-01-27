@@ -15,8 +15,12 @@ struct __Gradient; typedef struct __Gradient* Gradient;
 struct __Path; typedef struct __Path* Path;
 struct __DrawContext; typedef struct __DrawContext* DrawContext;
 struct __AttributedString; typedef struct __AttributedString* AttributedString;
+struct __MutableAttributedString; typedef struct __MutableAttributedString* MutableAttributedString;
 struct __Font; typedef struct __Font* Font;
+struct __Run; typedef struct __Run* Run;
 struct __Line; typedef struct __Line* Line;
+struct __Frame; typedef struct __Frame* Frame;
+struct __FrameSetter; typedef struct __FrameSetter* FrameSetter;
 
 struct AffineTransform {
     double a;
@@ -36,7 +40,7 @@ private:
         StrokeWidthField = 8,
         StrokeColorField = 16
     };
-    int32_t _usedFields;
+    int32_t _usedFields = 0; // must be set!
     Color _foregroundColor;
     bool _foregroundColorFromContext;
     Font _font;
@@ -156,6 +160,98 @@ enum GradientDrawingOptions {
 };
 
 
+struct FontTraits {
+private:
+    enum Fields {
+        ItalicField = 1,
+        BoldField = 2,
+        ExpandedField = 4,
+        CondensedField = 8,
+        MonospaceField = 16,
+        VerticalField = 32
+    };
+    int32_t _usedFields;
+    bool _italic;
+    bool _bold;
+    bool _expanded;
+    bool _condensed;
+    bool _monospace;
+    bool _vertical;
+protected:
+    int32_t getUsedFields() {
+        return _usedFields;
+    }
+    friend void FontTraits__push(FontTraits value, bool isReturn);
+    friend FontTraits FontTraits__pop();
+public:
+    void setItalic(bool value) {
+        _italic = value;
+        _usedFields |= Fields::ItalicField;
+    }
+    bool hasItalic(bool *value) {
+        if (_usedFields & Fields::ItalicField) {
+            *value = _italic;
+            return true;
+        }
+        return false;
+    }
+    void setBold(bool value) {
+        _bold = value;
+        _usedFields |= Fields::BoldField;
+    }
+    bool hasBold(bool *value) {
+        if (_usedFields & Fields::BoldField) {
+            *value = _bold;
+            return true;
+        }
+        return false;
+    }
+    void setExpanded(bool value) {
+        _expanded = value;
+        _usedFields |= Fields::ExpandedField;
+    }
+    bool hasExpanded(bool *value) {
+        if (_usedFields & Fields::ExpandedField) {
+            *value = _expanded;
+            return true;
+        }
+        return false;
+    }
+    void setCondensed(bool value) {
+        _condensed = value;
+        _usedFields |= Fields::CondensedField;
+    }
+    bool hasCondensed(bool *value) {
+        if (_usedFields & Fields::CondensedField) {
+            *value = _condensed;
+            return true;
+        }
+        return false;
+    }
+    void setMonospace(bool value) {
+        _monospace = value;
+        _usedFields |= Fields::MonospaceField;
+    }
+    bool hasMonospace(bool *value) {
+        if (_usedFields & Fields::MonospaceField) {
+            *value = _monospace;
+            return true;
+        }
+        return false;
+    }
+    void setVertical(bool value) {
+        _vertical = value;
+        _usedFields |= Fields::VerticalField;
+    }
+    bool hasVertical(bool *value) {
+        if (_usedFields & Fields::VerticalField) {
+            *value = _vertical;
+            return true;
+        }
+        return false;
+    }
+};
+
 struct OptArgs {
 private:
     enum Fields {
@@ -184,6 +280,48 @@ public:
 };
 
 
+// std::vector<Line>
+
+// std::vector<Point>
+
+struct Range {
+public:
+    enum class Tag {
+        NotFound,
+        Zero,
+        Valid
+    };
+    const Tag tag;
+    struct NotFound {
+        static Range make() {
+            Range ret{ Tag::NotFound };
+            ret.notFound = std::shared_ptr<NotFound>(new NotFound{  });
+            return ret;
+        }
+    };
+    struct Zero {
+        static Range make() {
+            Range ret{ Tag::Zero };
+            ret.zero = std::shared_ptr<Zero>(new Zero{  });
+            return ret;
+        }
+    };
+    struct Valid {
+        const int64_t location;
+        const int64_t length;
+        static Range make(int64_t location, int64_t length) {
+            Range ret{ Tag::Valid };
+            ret.valid = std::shared_ptr<Valid>(new Valid{ location, length });
+            return ret;
+        }
+    };
+    std::shared_ptr<NotFound> notFound;
+    std::shared_ptr<Zero> zero;
+    std::shared_ptr<Valid> valid;
+};
+
+
+
 struct GradientStop {
     double location;
     double red;
@@ -210,6 +348,25 @@ enum LineBoundsOptions {
     UseOpticalBounds = 16
 };
 
+// std::vector<Run>
+
+// std::tuple<double,double>
+
+
+
+
+// std::vector<std::string>
+
+// std::vector<int64_t>
+
+// std::map<std::string,int64_t>
+
+enum RunStatus {
+    NoStatus = 0,
+    RightToLeft = 1,
+    NonMonotonic = 2,
+    HasNonIdentityMatrix = 4
+};
 
 
 extern const AffineTransform AffineTransformIdentity;
@@ -260,11 +417,40 @@ void DrawContext_drawLinearGradient(DrawContext _this, Gradient gradient, Point 
 void DrawContext_dispose(DrawContext _this);
 AttributedString AttributedString_create(std::string s, AttributedStringOptions opts);
 void AttributedString_dispose(AttributedString _this);
+int64_t MutableAttributedString_getLength(MutableAttributedString _this);
+void MutableAttributedString_replaceString(MutableAttributedString _this, Range range, std::string str);
+void MutableAttributedString_beginEditing(MutableAttributedString _this);
+void MutableAttributedString_endEditing(MutableAttributedString _this);
+void MutableAttributedString_setAttribute(MutableAttributedString _this, Range range, AttributedStringOptions attr);
+void MutableAttributedString_setCustomAttribute(MutableAttributedString _this, Range range, std::string key, int64_t value);
+AttributedString MutableAttributedString_getNormalAttributedString_REMOVEME(MutableAttributedString _this);
+MutableAttributedString MutableAttributedString_create(int64_t maxLength);
+void MutableAttributedString_dispose(MutableAttributedString _this);
+Font Font_createCopyWithSymbolicTraits(Font _this, double size, FontTraits newTraits, OptArgs optArgs);
+double Font_getAscent(Font _this);
+double Font_getDescent(Font _this);
+double Font_getUnderlineThickness(Font _this);
+double Font_getUnderlinePosition(Font _this);
 Font Font_createFromFile(std::string path, double size, OptArgs optArgs);
 Font Font_createWithName(std::string name, double size, OptArgs optArgs);
 void Font_dispose(Font _this);
+AttributedStringOptions Run_getAttributes(Run _this);
+std::map<std::string,int64_t> Run_getCustomAttributes(Run _this, std::vector<std::string> keys);
+TypographicBounds Run_getTypographicBounds(Run _this, Range range);
+Range Run_getStringRange(Run _this);
+uint32_t Run_getStatus(Run _this);
+void Run_dispose(Run _this);
 TypographicBounds Line_getTypographicBounds(Line _this);
 Rect Line_getBoundsWithOptions(Line _this, uint32_t opts);
 void Line_draw(Line _this, DrawContext context);
+std::vector<Run> Line_getGlyphRuns(Line _this);
+std::tuple<double,double> Line_getLineOffsetForStringIndex(Line _this, int64_t charIndex);
 Line Line_createWithAttributedString(AttributedString str);
 void Line_dispose(Line _this);
+void Frame_draw(Frame _this, DrawContext context);
+std::vector<Line> Frame_getLines(Frame _this);
+std::vector<Point> Frame_getLineOrigins(Frame _this, Range range);
+void Frame_dispose(Frame _this);
+FrameSetter FrameSetter_createWithAttributedString(AttributedString str);
+Frame FrameSetter_createFrame(FrameSetter _this, Range range, Path path);
+void FrameSetter_dispose(FrameSetter _this);
