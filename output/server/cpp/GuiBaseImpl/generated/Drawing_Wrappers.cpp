@@ -199,6 +199,269 @@ inline uint32_t GradientDrawingOptions__pop() {
     return ni_popUInt32();
 }
 
+void DrawCommand__push(DrawCommand value, bool isReturn) {
+    switch (value.tag) {
+    case DrawCommand::Tag::saveGState:
+        break;
+    case DrawCommand::Tag::restoreGState:
+        break;
+    case DrawCommand::Tag::setRGBFillColor:
+        ni_pushDouble(value.setRGBFillColor->alpha);
+        ni_pushDouble(value.setRGBFillColor->blue);
+        ni_pushDouble(value.setRGBFillColor->green);
+        ni_pushDouble(value.setRGBFillColor->red);
+        break;
+    case DrawCommand::Tag::setRGBStrokeColor:
+        ni_pushDouble(value.setRGBStrokeColor->alpha);
+        ni_pushDouble(value.setRGBStrokeColor->blue);
+        ni_pushDouble(value.setRGBStrokeColor->green);
+        ni_pushDouble(value.setRGBStrokeColor->red);
+        break;
+    case DrawCommand::Tag::setFillColorWithColor:
+        Color__push(value.setFillColorWithColor->color);
+        break;
+    case DrawCommand::Tag::fillRect:
+        Rect__push(value.fillRect->rect, isReturn);
+        break;
+    case DrawCommand::Tag::setTextMatrix:
+        AffineTransform__push(value.setTextMatrix->t, isReturn);
+        break;
+    case DrawCommand::Tag::setTextPosition:
+        ni_pushDouble(value.setTextPosition->y);
+        ni_pushDouble(value.setTextPosition->x);
+        break;
+    case DrawCommand::Tag::beginPath:
+        break;
+    case DrawCommand::Tag::addArc:
+        ni_pushBool(value.addArc->clockwise);
+        ni_pushDouble(value.addArc->endAngle);
+        ni_pushDouble(value.addArc->startAngle);
+        ni_pushDouble(value.addArc->radius);
+        ni_pushDouble(value.addArc->y);
+        ni_pushDouble(value.addArc->x);
+        break;
+    case DrawCommand::Tag::addArcToPoint:
+        ni_pushDouble(value.addArcToPoint->radius);
+        ni_pushDouble(value.addArcToPoint->y2);
+        ni_pushDouble(value.addArcToPoint->x2);
+        ni_pushDouble(value.addArcToPoint->y1);
+        ni_pushDouble(value.addArcToPoint->x1);
+        break;
+    case DrawCommand::Tag::drawPath:
+        PathDrawingMode__push(value.drawPath->mode);
+        break;
+    case DrawCommand::Tag::setStrokeColorWithColor:
+        Color__push(value.setStrokeColorWithColor->color);
+        break;
+    case DrawCommand::Tag::strokeRectWithWidth:
+        ni_pushDouble(value.strokeRectWithWidth->width);
+        Rect__push(value.strokeRectWithWidth->rect, isReturn);
+        break;
+    case DrawCommand::Tag::moveToPoint:
+        ni_pushDouble(value.moveToPoint->y);
+        ni_pushDouble(value.moveToPoint->x);
+        break;
+    case DrawCommand::Tag::addLineToPoint:
+        ni_pushDouble(value.addLineToPoint->y);
+        ni_pushDouble(value.addLineToPoint->x);
+        break;
+    case DrawCommand::Tag::strokePath:
+        break;
+    case DrawCommand::Tag::setLineDash:
+        pushDoubleArrayInternal(value.setLineDash->lengths);
+        ni_pushDouble(value.setLineDash->phase);
+        break;
+    case DrawCommand::Tag::clearLineDash:
+        break;
+    case DrawCommand::Tag::setLineWidth:
+        ni_pushDouble(value.setLineWidth->width);
+        break;
+    case DrawCommand::Tag::clip:
+        break;
+    case DrawCommand::Tag::clipToRect:
+        Rect__push(value.clipToRect->clipRect, isReturn);
+        break;
+    case DrawCommand::Tag::translateCTM:
+        ni_pushDouble(value.translateCTM->ty);
+        ni_pushDouble(value.translateCTM->tx);
+        break;
+    case DrawCommand::Tag::scaleCTM:
+        ni_pushDouble(value.scaleCTM->scaleY);
+        ni_pushDouble(value.scaleCTM->scaleX);
+        break;
+    case DrawCommand::Tag::rotateCTM:
+        ni_pushDouble(value.rotateCTM->angle);
+        break;
+    case DrawCommand::Tag::concatCTM:
+        AffineTransform__push(value.concatCTM->transform, isReturn);
+        break;
+    case DrawCommand::Tag::addPath:
+        Path__push(value.addPath->path);
+        break;
+    case DrawCommand::Tag::fillPath:
+        break;
+    case DrawCommand::Tag::strokeRect:
+        Rect__push(value.strokeRect->rect, isReturn);
+        break;
+    case DrawCommand::Tag::addRect:
+        Rect__push(value.addRect->rect, isReturn);
+        break;
+    case DrawCommand::Tag::closePath:
+        break;
+    case DrawCommand::Tag::drawLinearGradient:
+        GradientDrawingOptions__push(value.drawLinearGradient->drawOpts);
+        Point__push(value.drawLinearGradient->endPoint, isReturn);
+        Point__push(value.drawLinearGradient->startPoint, isReturn);
+        Gradient__push(value.drawLinearGradient->gradient);
+        break;
+    case DrawCommand::Tag::drawFrame:
+        Frame__push(value.drawFrame->frame);
+        break;
+    }
+    ni_pushInt32((int32_t)value.tag);
+}
+
+DrawCommand DrawCommand__pop() {
+    auto which = ni_popInt32();
+    switch ((DrawCommand::Tag)which) {
+    case DrawCommand::Tag::saveGState: {
+        return DrawCommand::saveGState::make(); }
+    case DrawCommand::Tag::restoreGState: {
+        return DrawCommand::restoreGState::make(); }
+    case DrawCommand::Tag::setRGBFillColor: {
+        auto red = ni_popDouble();
+        auto green = ni_popDouble();
+        auto blue = ni_popDouble();
+        auto alpha = ni_popDouble();
+        return DrawCommand::setRGBFillColor::make(red, green, blue, alpha); }
+    case DrawCommand::Tag::setRGBStrokeColor: {
+        auto red = ni_popDouble();
+        auto green = ni_popDouble();
+        auto blue = ni_popDouble();
+        auto alpha = ni_popDouble();
+        return DrawCommand::setRGBStrokeColor::make(red, green, blue, alpha); }
+    case DrawCommand::Tag::setFillColorWithColor: {
+        auto color = Color__pop();
+        return DrawCommand::setFillColorWithColor::make(color); }
+    case DrawCommand::Tag::fillRect: {
+        auto rect = Rect__pop();
+        return DrawCommand::fillRect::make(rect); }
+    case DrawCommand::Tag::setTextMatrix: {
+        auto t = AffineTransform__pop();
+        return DrawCommand::setTextMatrix::make(t); }
+    case DrawCommand::Tag::setTextPosition: {
+        auto x = ni_popDouble();
+        auto y = ni_popDouble();
+        return DrawCommand::setTextPosition::make(x, y); }
+    case DrawCommand::Tag::beginPath: {
+        return DrawCommand::beginPath::make(); }
+    case DrawCommand::Tag::addArc: {
+        auto x = ni_popDouble();
+        auto y = ni_popDouble();
+        auto radius = ni_popDouble();
+        auto startAngle = ni_popDouble();
+        auto endAngle = ni_popDouble();
+        auto clockwise = ni_popBool();
+        return DrawCommand::addArc::make(x, y, radius, startAngle, endAngle, clockwise); }
+    case DrawCommand::Tag::addArcToPoint: {
+        auto x1 = ni_popDouble();
+        auto y1 = ni_popDouble();
+        auto x2 = ni_popDouble();
+        auto y2 = ni_popDouble();
+        auto radius = ni_popDouble();
+        return DrawCommand::addArcToPoint::make(x1, y1, x2, y2, radius); }
+    case DrawCommand::Tag::drawPath: {
+        auto mode = PathDrawingMode__pop();
+        return DrawCommand::drawPath::make(mode); }
+    case DrawCommand::Tag::setStrokeColorWithColor: {
+        auto color = Color__pop();
+        return DrawCommand::setStrokeColorWithColor::make(color); }
+    case DrawCommand::Tag::strokeRectWithWidth: {
+        auto rect = Rect__pop();
+        auto width = ni_popDouble();
+        return DrawCommand::strokeRectWithWidth::make(rect, width); }
+    case DrawCommand::Tag::moveToPoint: {
+        auto x = ni_popDouble();
+        auto y = ni_popDouble();
+        return DrawCommand::moveToPoint::make(x, y); }
+    case DrawCommand::Tag::addLineToPoint: {
+        auto x = ni_popDouble();
+        auto y = ni_popDouble();
+        return DrawCommand::addLineToPoint::make(x, y); }
+    case DrawCommand::Tag::strokePath: {
+        return DrawCommand::strokePath::make(); }
+    case DrawCommand::Tag::setLineDash: {
+        auto phase = ni_popDouble();
+        auto lengths = popDoubleArrayInternal();
+        return DrawCommand::setLineDash::make(phase, lengths); }
+    case DrawCommand::Tag::clearLineDash: {
+        return DrawCommand::clearLineDash::make(); }
+    case DrawCommand::Tag::setLineWidth: {
+        auto width = ni_popDouble();
+        return DrawCommand::setLineWidth::make(width); }
+    case DrawCommand::Tag::clip: {
+        return DrawCommand::clip::make(); }
+    case DrawCommand::Tag::clipToRect: {
+        auto clipRect = Rect__pop();
+        return DrawCommand::clipToRect::make(clipRect); }
+    case DrawCommand::Tag::translateCTM: {
+        auto tx = ni_popDouble();
+        auto ty = ni_popDouble();
+        return DrawCommand::translateCTM::make(tx, ty); }
+    case DrawCommand::Tag::scaleCTM: {
+        auto scaleX = ni_popDouble();
+        auto scaleY = ni_popDouble();
+        return DrawCommand::scaleCTM::make(scaleX, scaleY); }
+    case DrawCommand::Tag::rotateCTM: {
+        auto angle = ni_popDouble();
+        return DrawCommand::rotateCTM::make(angle); }
+    case DrawCommand::Tag::concatCTM: {
+        auto transform = AffineTransform__pop();
+        return DrawCommand::concatCTM::make(transform); }
+    case DrawCommand::Tag::addPath: {
+        auto path = Path__pop();
+        return DrawCommand::addPath::make(path); }
+    case DrawCommand::Tag::fillPath: {
+        return DrawCommand::fillPath::make(); }
+    case DrawCommand::Tag::strokeRect: {
+        auto rect = Rect__pop();
+        return DrawCommand::strokeRect::make(rect); }
+    case DrawCommand::Tag::addRect: {
+        auto rect = Rect__pop();
+        return DrawCommand::addRect::make(rect); }
+    case DrawCommand::Tag::closePath: {
+        return DrawCommand::closePath::make(); }
+    case DrawCommand::Tag::drawLinearGradient: {
+        auto gradient = Gradient__pop();
+        auto startPoint = Point__pop();
+        auto endPoint = Point__pop();
+        auto drawOpts = GradientDrawingOptions__pop();
+        return DrawCommand::drawLinearGradient::make(gradient, startPoint, endPoint, drawOpts); }
+    case DrawCommand::Tag::drawFrame: {
+        auto frame = Frame__pop();
+        return DrawCommand::drawFrame::make(frame); }
+    default:
+        throw "DrawCommand__pop(): unknown tag!";
+    }
+}
+
+void __DrawCommand_Array__push(std::vector<DrawCommand> values, bool isReturn) {
+    for (auto v = values.rbegin(); v != values.rend(); v++) {
+        DrawCommand__push(*v, isReturn);
+    }
+    ni_pushSizeT(values.size());
+}
+
+std::vector<DrawCommand> __DrawCommand_Array__pop() {
+    std::vector<DrawCommand> __ret;
+    auto count = ni_popSizeT();
+    for (auto i = 0; i < count; i++) {
+        auto value = DrawCommand__pop();
+        __ret.push_back(value);
+    }
+    return __ret;
+}
+
 void DrawContext__push(DrawContext value) {
     ni_pushPtr(value);
 }
@@ -779,6 +1042,12 @@ void DrawContext_drawLinearGradient__wrapper() {
     DrawContext_drawLinearGradient(_this, gradient, startPoint, endPoint, drawOpts);
 }
 
+void DrawContext_batchDraw__wrapper() {
+    auto _this = DrawContext__pop();
+    auto commands = __DrawCommand_Array__pop();
+    DrawContext_batchDraw(_this, commands);
+}
+
 void DrawContext_dispose__wrapper() {
     auto _this = DrawContext__pop();
     DrawContext_dispose(_this);
@@ -1049,6 +1318,7 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_addRect", &DrawContext_addRect__wrapper);
     ni_registerModuleMethod(m, "DrawContext_closePath", &DrawContext_closePath__wrapper);
     ni_registerModuleMethod(m, "DrawContext_drawLinearGradient", &DrawContext_drawLinearGradient__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_batchDraw", &DrawContext_batchDraw__wrapper);
     ni_registerModuleMethod(m, "DrawContext_dispose", &DrawContext_dispose__wrapper);
     ni_registerModuleMethod(m, "AttributedString_create", &AttributedString_create__wrapper);
     ni_registerModuleMethod(m, "AttributedString_dispose", &AttributedString_dispose__wrapper);

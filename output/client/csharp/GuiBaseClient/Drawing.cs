@@ -56,6 +56,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _drawContext_addRect;
         private static ModuleMethodHandle _drawContext_closePath;
         private static ModuleMethodHandle _drawContext_drawLinearGradient;
+        private static ModuleMethodHandle _drawContext_batchDraw;
         private static ModuleMethodHandle _DrawContext_dispose;
         private static ModuleMethodHandle _attributedString_create;
         private static ModuleMethodHandle _AttributedString_dispose;
@@ -634,6 +635,552 @@ namespace Org.Prefixed.GuiBase
             return (GradientDrawingOptions)ret;
         }
 
+        public abstract record DrawCommand
+        {
+            public sealed record SaveGState : DrawCommand;
+            public sealed record RestoreGState : DrawCommand;
+            public sealed record SetRGBFillColor(double Red, double Green, double Blue, double Alpha) : DrawCommand
+            {
+                public double Red { get; } = Red;
+                public double Green { get; } = Green;
+                public double Blue { get; } = Blue;
+                public double Alpha { get; } = Alpha;
+            }
+            public sealed record SetRGBStrokeColor(double Red, double Green, double Blue, double Alpha) : DrawCommand
+            {
+                public double Red { get; } = Red;
+                public double Green { get; } = Green;
+                public double Blue { get; } = Blue;
+                public double Alpha { get; } = Alpha;
+            }
+            public sealed record SetFillColorWithColor(Color Color) : DrawCommand
+            {
+                public Color Color { get; } = Color;
+            }
+            public sealed record FillRect(Rect Rect) : DrawCommand
+            {
+                public Rect Rect { get; } = Rect;
+            }
+            public sealed record SetTextMatrix(AffineTransform T) : DrawCommand
+            {
+                public AffineTransform T { get; } = T;
+            }
+            public sealed record SetTextPosition(double X, double Y) : DrawCommand
+            {
+                public double X { get; } = X;
+                public double Y { get; } = Y;
+            }
+            public sealed record BeginPath : DrawCommand;
+            public sealed record AddArc(double X, double Y, double Radius, double StartAngle, double EndAngle, bool Clockwise) : DrawCommand
+            {
+                public double X { get; } = X;
+                public double Y { get; } = Y;
+                public double Radius { get; } = Radius;
+                public double StartAngle { get; } = StartAngle;
+                public double EndAngle { get; } = EndAngle;
+                public bool Clockwise { get; } = Clockwise;
+            }
+            public sealed record AddArcToPoint(double X1, double Y1, double X2, double Y2, double Radius) : DrawCommand
+            {
+                public double X1 { get; } = X1;
+                public double Y1 { get; } = Y1;
+                public double X2 { get; } = X2;
+                public double Y2 { get; } = Y2;
+                public double Radius { get; } = Radius;
+            }
+            public sealed record DrawPath(PathDrawingMode Mode) : DrawCommand
+            {
+                public PathDrawingMode Mode { get; } = Mode;
+            }
+            public sealed record SetStrokeColorWithColor(Color Color) : DrawCommand
+            {
+                public Color Color { get; } = Color;
+            }
+            public sealed record StrokeRectWithWidth(Rect Rect, double Width) : DrawCommand
+            {
+                public Rect Rect { get; } = Rect;
+                public double Width { get; } = Width;
+            }
+            public sealed record MoveToPoint(double X, double Y) : DrawCommand
+            {
+                public double X { get; } = X;
+                public double Y { get; } = Y;
+            }
+            public sealed record AddLineToPoint(double X, double Y) : DrawCommand
+            {
+                public double X { get; } = X;
+                public double Y { get; } = Y;
+            }
+            public sealed record StrokePath : DrawCommand;
+            public sealed record SetLineDash(double Phase, double[] Lengths) : DrawCommand
+            {
+                public double Phase { get; } = Phase;
+                public double[] Lengths { get; } = Lengths;
+            }
+            public sealed record ClearLineDash : DrawCommand;
+            public sealed record SetLineWidth(double Width) : DrawCommand
+            {
+                public double Width { get; } = Width;
+            }
+            public sealed record Clip : DrawCommand;
+            public sealed record ClipToRect(Rect ClipRect) : DrawCommand
+            {
+                public Rect ClipRect { get; } = ClipRect;
+            }
+            public sealed record TranslateCTM(double Tx, double Ty) : DrawCommand
+            {
+                public double Tx { get; } = Tx;
+                public double Ty { get; } = Ty;
+            }
+            public sealed record ScaleCTM(double ScaleX, double ScaleY) : DrawCommand
+            {
+                public double ScaleX { get; } = ScaleX;
+                public double ScaleY { get; } = ScaleY;
+            }
+            public sealed record RotateCTM(double Angle) : DrawCommand
+            {
+                public double Angle { get; } = Angle;
+            }
+            public sealed record ConcatCTM(AffineTransform Transform) : DrawCommand
+            {
+                public AffineTransform Transform { get; } = Transform;
+            }
+            public sealed record AddPath(Path Path) : DrawCommand
+            {
+                public Path Path { get; } = Path;
+            }
+            public sealed record FillPath : DrawCommand;
+            public sealed record StrokeRect(Rect Rect) : DrawCommand
+            {
+                public Rect Rect { get; } = Rect;
+            }
+            public sealed record AddRect(Rect Rect) : DrawCommand
+            {
+                public Rect Rect { get; } = Rect;
+            }
+            public sealed record ClosePath : DrawCommand;
+            public sealed record DrawLinearGradient(Gradient Gradient, Point StartPoint, Point EndPoint, GradientDrawingOptions DrawOpts) : DrawCommand
+            {
+                public Gradient Gradient { get; } = Gradient;
+                public Point StartPoint { get; } = StartPoint;
+                public Point EndPoint { get; } = EndPoint;
+                public GradientDrawingOptions DrawOpts { get; } = DrawOpts;
+            }
+            public sealed record DrawFrame(Frame Frame) : DrawCommand
+            {
+                public Frame Frame { get; } = Frame;
+            }
+        }
+
+        private enum DrawCommand__Tag
+        {
+            SaveGState,
+            RestoreGState,
+            SetRGBFillColor,
+            SetRGBStrokeColor,
+            SetFillColorWithColor,
+            FillRect,
+            SetTextMatrix,
+            SetTextPosition,
+            BeginPath,
+            AddArc,
+            AddArcToPoint,
+            DrawPath,
+            SetStrokeColorWithColor,
+            StrokeRectWithWidth,
+            MoveToPoint,
+            AddLineToPoint,
+            StrokePath,
+            SetLineDash,
+            ClearLineDash,
+            SetLineWidth,
+            Clip,
+            ClipToRect,
+            TranslateCTM,
+            ScaleCTM,
+            RotateCTM,
+            ConcatCTM,
+            AddPath,
+            FillPath,
+            StrokeRect,
+            AddRect,
+            ClosePath,
+            DrawLinearGradient,
+            DrawFrame
+        }
+
+        internal static void DrawCommand__Push(DrawCommand thing, bool isReturn)
+        {
+            DrawCommand__Tag which;
+            switch (thing)
+            {
+                case DrawCommand.SaveGState saveGState:
+                    which = DrawCommand__Tag.SaveGState;
+                    break;
+                case DrawCommand.RestoreGState restoreGState:
+                    which = DrawCommand__Tag.RestoreGState;
+                    break;
+                case DrawCommand.SetRGBFillColor setRGBFillColor:
+                    which = DrawCommand__Tag.SetRGBFillColor;
+                    NativeImplClient.PushDouble(setRGBFillColor.Alpha);
+                    NativeImplClient.PushDouble(setRGBFillColor.Blue);
+                    NativeImplClient.PushDouble(setRGBFillColor.Green);
+                    NativeImplClient.PushDouble(setRGBFillColor.Red);
+                    break;
+                case DrawCommand.SetRGBStrokeColor setRGBStrokeColor:
+                    which = DrawCommand__Tag.SetRGBStrokeColor;
+                    NativeImplClient.PushDouble(setRGBStrokeColor.Alpha);
+                    NativeImplClient.PushDouble(setRGBStrokeColor.Blue);
+                    NativeImplClient.PushDouble(setRGBStrokeColor.Green);
+                    NativeImplClient.PushDouble(setRGBStrokeColor.Red);
+                    break;
+                case DrawCommand.SetFillColorWithColor setFillColorWithColor:
+                    which = DrawCommand__Tag.SetFillColorWithColor;
+                    Color__Push(setFillColorWithColor.Color);
+                    break;
+                case DrawCommand.FillRect fillRect:
+                    which = DrawCommand__Tag.FillRect;
+                    Rect__Push(fillRect.Rect, isReturn);
+                    break;
+                case DrawCommand.SetTextMatrix setTextMatrix:
+                    which = DrawCommand__Tag.SetTextMatrix;
+                    AffineTransform__Push(setTextMatrix.T, isReturn);
+                    break;
+                case DrawCommand.SetTextPosition setTextPosition:
+                    which = DrawCommand__Tag.SetTextPosition;
+                    NativeImplClient.PushDouble(setTextPosition.Y);
+                    NativeImplClient.PushDouble(setTextPosition.X);
+                    break;
+                case DrawCommand.BeginPath beginPath:
+                    which = DrawCommand__Tag.BeginPath;
+                    break;
+                case DrawCommand.AddArc addArc:
+                    which = DrawCommand__Tag.AddArc;
+                    NativeImplClient.PushBool(addArc.Clockwise);
+                    NativeImplClient.PushDouble(addArc.EndAngle);
+                    NativeImplClient.PushDouble(addArc.StartAngle);
+                    NativeImplClient.PushDouble(addArc.Radius);
+                    NativeImplClient.PushDouble(addArc.Y);
+                    NativeImplClient.PushDouble(addArc.X);
+                    break;
+                case DrawCommand.AddArcToPoint addArcToPoint:
+                    which = DrawCommand__Tag.AddArcToPoint;
+                    NativeImplClient.PushDouble(addArcToPoint.Radius);
+                    NativeImplClient.PushDouble(addArcToPoint.Y2);
+                    NativeImplClient.PushDouble(addArcToPoint.X2);
+                    NativeImplClient.PushDouble(addArcToPoint.Y1);
+                    NativeImplClient.PushDouble(addArcToPoint.X1);
+                    break;
+                case DrawCommand.DrawPath drawPath:
+                    which = DrawCommand__Tag.DrawPath;
+                    PathDrawingMode__Push(drawPath.Mode);
+                    break;
+                case DrawCommand.SetStrokeColorWithColor setStrokeColorWithColor:
+                    which = DrawCommand__Tag.SetStrokeColorWithColor;
+                    Color__Push(setStrokeColorWithColor.Color);
+                    break;
+                case DrawCommand.StrokeRectWithWidth strokeRectWithWidth:
+                    which = DrawCommand__Tag.StrokeRectWithWidth;
+                    NativeImplClient.PushDouble(strokeRectWithWidth.Width);
+                    Rect__Push(strokeRectWithWidth.Rect, isReturn);
+                    break;
+                case DrawCommand.MoveToPoint moveToPoint:
+                    which = DrawCommand__Tag.MoveToPoint;
+                    NativeImplClient.PushDouble(moveToPoint.Y);
+                    NativeImplClient.PushDouble(moveToPoint.X);
+                    break;
+                case DrawCommand.AddLineToPoint addLineToPoint:
+                    which = DrawCommand__Tag.AddLineToPoint;
+                    NativeImplClient.PushDouble(addLineToPoint.Y);
+                    NativeImplClient.PushDouble(addLineToPoint.X);
+                    break;
+                case DrawCommand.StrokePath strokePath:
+                    which = DrawCommand__Tag.StrokePath;
+                    break;
+                case DrawCommand.SetLineDash setLineDash:
+                    which = DrawCommand__Tag.SetLineDash;
+                    NativeImplClient.PushDoubleArray(setLineDash.Lengths);
+                    NativeImplClient.PushDouble(setLineDash.Phase);
+                    break;
+                case DrawCommand.ClearLineDash clearLineDash:
+                    which = DrawCommand__Tag.ClearLineDash;
+                    break;
+                case DrawCommand.SetLineWidth setLineWidth:
+                    which = DrawCommand__Tag.SetLineWidth;
+                    NativeImplClient.PushDouble(setLineWidth.Width);
+                    break;
+                case DrawCommand.Clip clip:
+                    which = DrawCommand__Tag.Clip;
+                    break;
+                case DrawCommand.ClipToRect clipToRect:
+                    which = DrawCommand__Tag.ClipToRect;
+                    Rect__Push(clipToRect.ClipRect, isReturn);
+                    break;
+                case DrawCommand.TranslateCTM translateCTM:
+                    which = DrawCommand__Tag.TranslateCTM;
+                    NativeImplClient.PushDouble(translateCTM.Ty);
+                    NativeImplClient.PushDouble(translateCTM.Tx);
+                    break;
+                case DrawCommand.ScaleCTM scaleCTM:
+                    which = DrawCommand__Tag.ScaleCTM;
+                    NativeImplClient.PushDouble(scaleCTM.ScaleY);
+                    NativeImplClient.PushDouble(scaleCTM.ScaleX);
+                    break;
+                case DrawCommand.RotateCTM rotateCTM:
+                    which = DrawCommand__Tag.RotateCTM;
+                    NativeImplClient.PushDouble(rotateCTM.Angle);
+                    break;
+                case DrawCommand.ConcatCTM concatCTM:
+                    which = DrawCommand__Tag.ConcatCTM;
+                    AffineTransform__Push(concatCTM.Transform, isReturn);
+                    break;
+                case DrawCommand.AddPath addPath:
+                    which = DrawCommand__Tag.AddPath;
+                    Path__Push(addPath.Path);
+                    break;
+                case DrawCommand.FillPath fillPath:
+                    which = DrawCommand__Tag.FillPath;
+                    break;
+                case DrawCommand.StrokeRect strokeRect:
+                    which = DrawCommand__Tag.StrokeRect;
+                    Rect__Push(strokeRect.Rect, isReturn);
+                    break;
+                case DrawCommand.AddRect addRect:
+                    which = DrawCommand__Tag.AddRect;
+                    Rect__Push(addRect.Rect, isReturn);
+                    break;
+                case DrawCommand.ClosePath closePath:
+                    which = DrawCommand__Tag.ClosePath;
+                    break;
+                case DrawCommand.DrawLinearGradient drawLinearGradient:
+                    which = DrawCommand__Tag.DrawLinearGradient;
+                    GradientDrawingOptions__Push(drawLinearGradient.DrawOpts);
+                    Point__Push(drawLinearGradient.EndPoint, isReturn);
+                    Point__Push(drawLinearGradient.StartPoint, isReturn);
+                    Gradient__Push(drawLinearGradient.Gradient);
+                    break;
+                case DrawCommand.DrawFrame drawFrame:
+                    which = DrawCommand__Tag.DrawFrame;
+                    Frame__Push(drawFrame.Frame);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(thing));
+            }
+            NativeImplClient.PushInt32((int)which);
+        }
+
+        internal static DrawCommand DrawCommand__Pop()
+        {
+            var which = NativeImplClient.PopInt32();
+            switch ((DrawCommand__Tag)which)
+            {
+                case DrawCommand__Tag.SaveGState:
+                {
+                    return new DrawCommand.SaveGState();
+                }
+                case DrawCommand__Tag.RestoreGState:
+                {
+                    return new DrawCommand.RestoreGState();
+                }
+                case DrawCommand__Tag.SetRGBFillColor:
+                {
+                    var red = NativeImplClient.PopDouble();
+                    var green = NativeImplClient.PopDouble();
+                    var blue = NativeImplClient.PopDouble();
+                    var alpha = NativeImplClient.PopDouble();
+                    return new DrawCommand.SetRGBFillColor(red, green, blue, alpha);
+                }
+                case DrawCommand__Tag.SetRGBStrokeColor:
+                {
+                    var red = NativeImplClient.PopDouble();
+                    var green = NativeImplClient.PopDouble();
+                    var blue = NativeImplClient.PopDouble();
+                    var alpha = NativeImplClient.PopDouble();
+                    return new DrawCommand.SetRGBStrokeColor(red, green, blue, alpha);
+                }
+                case DrawCommand__Tag.SetFillColorWithColor:
+                {
+                    var color = Color__Pop();
+                    return new DrawCommand.SetFillColorWithColor(color);
+                }
+                case DrawCommand__Tag.FillRect:
+                {
+                    var rect = Rect__Pop();
+                    return new DrawCommand.FillRect(rect);
+                }
+                case DrawCommand__Tag.SetTextMatrix:
+                {
+                    var t = AffineTransform__Pop();
+                    return new DrawCommand.SetTextMatrix(t);
+                }
+                case DrawCommand__Tag.SetTextPosition:
+                {
+                    var x = NativeImplClient.PopDouble();
+                    var y = NativeImplClient.PopDouble();
+                    return new DrawCommand.SetTextPosition(x, y);
+                }
+                case DrawCommand__Tag.BeginPath:
+                {
+                    return new DrawCommand.BeginPath();
+                }
+                case DrawCommand__Tag.AddArc:
+                {
+                    var x = NativeImplClient.PopDouble();
+                    var y = NativeImplClient.PopDouble();
+                    var radius = NativeImplClient.PopDouble();
+                    var startAngle = NativeImplClient.PopDouble();
+                    var endAngle = NativeImplClient.PopDouble();
+                    var clockwise = NativeImplClient.PopBool();
+                    return new DrawCommand.AddArc(x, y, radius, startAngle, endAngle, clockwise);
+                }
+                case DrawCommand__Tag.AddArcToPoint:
+                {
+                    var x1 = NativeImplClient.PopDouble();
+                    var y1 = NativeImplClient.PopDouble();
+                    var x2 = NativeImplClient.PopDouble();
+                    var y2 = NativeImplClient.PopDouble();
+                    var radius = NativeImplClient.PopDouble();
+                    return new DrawCommand.AddArcToPoint(x1, y1, x2, y2, radius);
+                }
+                case DrawCommand__Tag.DrawPath:
+                {
+                    var mode = PathDrawingMode__Pop();
+                    return new DrawCommand.DrawPath(mode);
+                }
+                case DrawCommand__Tag.SetStrokeColorWithColor:
+                {
+                    var color = Color__Pop();
+                    return new DrawCommand.SetStrokeColorWithColor(color);
+                }
+                case DrawCommand__Tag.StrokeRectWithWidth:
+                {
+                    var rect = Rect__Pop();
+                    var width = NativeImplClient.PopDouble();
+                    return new DrawCommand.StrokeRectWithWidth(rect, width);
+                }
+                case DrawCommand__Tag.MoveToPoint:
+                {
+                    var x = NativeImplClient.PopDouble();
+                    var y = NativeImplClient.PopDouble();
+                    return new DrawCommand.MoveToPoint(x, y);
+                }
+                case DrawCommand__Tag.AddLineToPoint:
+                {
+                    var x = NativeImplClient.PopDouble();
+                    var y = NativeImplClient.PopDouble();
+                    return new DrawCommand.AddLineToPoint(x, y);
+                }
+                case DrawCommand__Tag.StrokePath:
+                {
+                    return new DrawCommand.StrokePath();
+                }
+                case DrawCommand__Tag.SetLineDash:
+                {
+                    var phase = NativeImplClient.PopDouble();
+                    var lengths = NativeImplClient.PopDoubleArray();
+                    return new DrawCommand.SetLineDash(phase, lengths);
+                }
+                case DrawCommand__Tag.ClearLineDash:
+                {
+                    return new DrawCommand.ClearLineDash();
+                }
+                case DrawCommand__Tag.SetLineWidth:
+                {
+                    var width = NativeImplClient.PopDouble();
+                    return new DrawCommand.SetLineWidth(width);
+                }
+                case DrawCommand__Tag.Clip:
+                {
+                    return new DrawCommand.Clip();
+                }
+                case DrawCommand__Tag.ClipToRect:
+                {
+                    var clipRect = Rect__Pop();
+                    return new DrawCommand.ClipToRect(clipRect);
+                }
+                case DrawCommand__Tag.TranslateCTM:
+                {
+                    var tx = NativeImplClient.PopDouble();
+                    var ty = NativeImplClient.PopDouble();
+                    return new DrawCommand.TranslateCTM(tx, ty);
+                }
+                case DrawCommand__Tag.ScaleCTM:
+                {
+                    var scaleX = NativeImplClient.PopDouble();
+                    var scaleY = NativeImplClient.PopDouble();
+                    return new DrawCommand.ScaleCTM(scaleX, scaleY);
+                }
+                case DrawCommand__Tag.RotateCTM:
+                {
+                    var angle = NativeImplClient.PopDouble();
+                    return new DrawCommand.RotateCTM(angle);
+                }
+                case DrawCommand__Tag.ConcatCTM:
+                {
+                    var transform = AffineTransform__Pop();
+                    return new DrawCommand.ConcatCTM(transform);
+                }
+                case DrawCommand__Tag.AddPath:
+                {
+                    var path = Path__Pop();
+                    return new DrawCommand.AddPath(path);
+                }
+                case DrawCommand__Tag.FillPath:
+                {
+                    return new DrawCommand.FillPath();
+                }
+                case DrawCommand__Tag.StrokeRect:
+                {
+                    var rect = Rect__Pop();
+                    return new DrawCommand.StrokeRect(rect);
+                }
+                case DrawCommand__Tag.AddRect:
+                {
+                    var rect = Rect__Pop();
+                    return new DrawCommand.AddRect(rect);
+                }
+                case DrawCommand__Tag.ClosePath:
+                {
+                    return new DrawCommand.ClosePath();
+                }
+                case DrawCommand__Tag.DrawLinearGradient:
+                {
+                    var gradient = Gradient__Pop();
+                    var startPoint = Point__Pop();
+                    var endPoint = Point__Pop();
+                    var drawOpts = GradientDrawingOptions__Pop();
+                    return new DrawCommand.DrawLinearGradient(gradient, startPoint, endPoint, drawOpts);
+                }
+                case DrawCommand__Tag.DrawFrame:
+                {
+                    var frame = Frame__Pop();
+                    return new DrawCommand.DrawFrame(frame);
+                }
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        internal static void __DrawCommand_Array__Push(DrawCommand[] values, bool isReturn)
+        {
+            foreach (var value in values.Reverse())
+            {
+                DrawCommand__Push(value, isReturn);
+            }
+            NativeImplClient.PushSizeT((IntPtr)values.Length);
+        }
+
+        internal static DrawCommand[] __DrawCommand_Array__Pop()
+        {
+            var count = (int)NativeImplClient.PopSizeT();
+            var ret = new DrawCommand[count];
+            for (var i = 0; i < count; i++)
+            {
+                ret[i] = DrawCommand__Pop();
+            }
+            return ret;
+        }
+
         public class DrawContext : IDisposable
         {
             internal readonly IntPtr NativeHandle;
@@ -859,6 +1406,12 @@ namespace Org.Prefixed.GuiBase
                 Gradient__Push(gradient);
                 DrawContext__Push(this);
                 NativeImplClient.InvokeModuleMethod(_drawContext_drawLinearGradient);
+            }
+            public void BatchDraw(DrawCommand[] commands)
+            {
+                __DrawCommand_Array__Push(commands, false);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_batchDraw);
             }
         }
 
@@ -1892,6 +2445,7 @@ namespace Org.Prefixed.GuiBase
             _drawContext_addRect = NativeImplClient.GetModuleMethod(_module, "DrawContext_addRect");
             _drawContext_closePath = NativeImplClient.GetModuleMethod(_module, "DrawContext_closePath");
             _drawContext_drawLinearGradient = NativeImplClient.GetModuleMethod(_module, "DrawContext_drawLinearGradient");
+            _drawContext_batchDraw = NativeImplClient.GetModuleMethod(_module, "DrawContext_batchDraw");
             _DrawContext_dispose = NativeImplClient.GetModuleMethod(_module, "DrawContext_dispose");
             _attributedString_create = NativeImplClient.GetModuleMethod(_module, "AttributedString_create");
             _AttributedString_dispose = NativeImplClient.GetModuleMethod(_module, "AttributedString_dispose");

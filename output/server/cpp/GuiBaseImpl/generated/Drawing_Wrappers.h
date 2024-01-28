@@ -38,6 +38,8 @@ PathDrawingMode PathDrawingMode__pop();
 
 void GradientDrawingOptions__push(uint32_t value);
 uint32_t GradientDrawingOptions__pop();
+void DrawCommand__push(DrawCommand value, bool isReturn);
+DrawCommand DrawCommand__pop();
 
 void DrawContext__push(DrawContext value);
 DrawContext DrawContext__pop();
@@ -177,6 +179,8 @@ void DrawContext_addRect__wrapper();
 void DrawContext_closePath__wrapper();
 
 void DrawContext_drawLinearGradient__wrapper();
+
+void DrawContext_batchDraw__wrapper();
 
 void DrawContext_dispose__wrapper();
 

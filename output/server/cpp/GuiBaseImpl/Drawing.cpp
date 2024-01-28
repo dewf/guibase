@@ -724,3 +724,180 @@ void FrameSetter_dispose(FrameSetter _this)
 {
     dl_CFRelease(_this);
 }
+
+static inline void drawCommand(dl_CGContextRef context, DrawCommand command)
+{
+    switch (command.tag) {
+    case DrawCommand::Tag::restoreGState: {
+        dl_CGContextRestoreGState(context);
+        break;
+    }
+    case DrawCommand::Tag::saveGState: {
+        dl_CGContextSaveGState(context);
+        break;
+    }
+    case DrawCommand::Tag::setRGBFillColor: {
+        auto& cmd = command.setRGBFillColor;
+        dl_CGContextSetRGBFillColor(context, cmd->red, cmd->green, cmd->blue, cmd->alpha);
+        break;
+    }
+    case DrawCommand::Tag::setRGBStrokeColor: {
+        auto& cmd = command.setRGBStrokeColor;
+        dl_CGContextSetRGBStrokeColor(context, cmd->red, cmd->green, cmd->blue, cmd->alpha);
+        break;
+    }
+    case DrawCommand::Tag::setFillColorWithColor: {
+        auto& cmd = command.setFillColorWithColor;
+        dl_CGContextSetFillColorWithColor(context, (dl_CGColorRef)cmd->color);
+        break;
+    }
+    case DrawCommand::Tag::fillRect: {
+        auto& cmd = command.fillRect;
+        dl_CGContextFillRect(context, STRUCT_CAST(dl_CGRect, cmd->rect));
+        break;
+    }
+    case DrawCommand::Tag::setTextMatrix: {
+        auto& cmd = command.setTextMatrix;
+        dl_CGContextSetTextMatrix(context, STRUCT_CAST(dl_CGAffineTransform, cmd->t));
+        break;
+    }
+    case DrawCommand::Tag::setTextPosition: {
+        auto& cmd = command.setTextPosition;
+        dl_CGContextSetTextPosition(context, cmd->x, cmd->y);
+        break;
+    }
+    case DrawCommand::Tag::beginPath: {
+        dl_CGContextBeginPath(context);
+        break;
+    }
+    case DrawCommand::Tag::addArc: {
+        auto& cmd = command.addArc;
+        dl_CGContextAddArc(context, cmd->x, cmd->y, cmd->radius, cmd->startAngle, cmd->endAngle, cmd->clockwise);
+        break;
+    }
+    case DrawCommand::Tag::addArcToPoint: {
+        auto& cmd = command.addArcToPoint;
+        dl_CGContextAddArcToPoint(context, cmd->x1, cmd->y1, cmd->x2, cmd->y2, cmd->radius);
+        break;
+    }
+    case DrawCommand::Tag::drawPath: {
+        auto& cmd = command.drawPath;
+        dl_CGContextDrawPath(context, (dl_CGPathDrawingMode)cmd->mode);
+        break;
+    }
+    case DrawCommand::Tag::setStrokeColorWithColor: {
+        auto& cmd = command.setStrokeColorWithColor;
+        dl_CGContextSetStrokeColorWithColor(context, (dl_CGColorRef)cmd->color);
+        break;
+    }
+    case DrawCommand::Tag::strokeRectWithWidth: {
+        auto& cmd = command.strokeRectWithWidth;
+        dl_CGContextStrokeRectWithWidth(context, STRUCT_CAST(dl_CGRect, cmd->rect), cmd->width);
+        break;
+    }
+    case DrawCommand::Tag::moveToPoint: {
+        auto& cmd = command.moveToPoint;
+        dl_CGContextMoveToPoint(context, cmd->x, cmd->y);
+        break;
+    }
+    case DrawCommand::Tag::addLineToPoint: {
+        auto& cmd = command.addLineToPoint;
+        dl_CGContextAddLineToPoint(context, cmd->x, cmd->y);
+        break;
+    }
+    case DrawCommand::Tag::strokePath: {
+        dl_CGContextStrokePath(context);
+        break;
+    }
+    case DrawCommand::Tag::setLineDash: {
+        auto& cmd = command.setLineDash;
+        dl_CGContextSetLineDash(context, cmd->phase, cmd->lengths.data(), cmd->lengths.size());
+        break;
+    }
+    case DrawCommand::Tag::clearLineDash: {
+        dl_CGContextSetLineDash(context, 0, nullptr, 0);
+        break;
+    }
+    case DrawCommand::Tag::setLineWidth: {
+        auto& cmd = command.setLineWidth;
+        dl_CGContextSetLineWidth(context, cmd->width);
+        break;
+    }
+    case DrawCommand::Tag::clip: {
+        dl_CGContextClip(context);
+        break;
+    }
+    case DrawCommand::Tag::clipToRect: {
+        auto& cmd = command.clipToRect;
+        dl_CGContextClipToRect(context, STRUCT_CAST(dl_CGRect, cmd->clipRect));
+        break;
+    }
+    case DrawCommand::Tag::translateCTM: {
+        auto& cmd = command.translateCTM;
+        dl_CGContextTranslateCTM(context, cmd->tx, cmd->ty);
+        break;
+    }
+    case DrawCommand::Tag::scaleCTM: {
+        auto& cmd = command.scaleCTM;
+        dl_CGContextScaleCTM(context, cmd->scaleX, cmd->scaleY);
+        break;
+    }
+    case DrawCommand::Tag::rotateCTM: {
+        auto& cmd = command.rotateCTM;
+        dl_CGContextRotateCTM(context, cmd->angle);
+        break;
+    }
+    case DrawCommand::Tag::concatCTM: {
+        auto& cmd = command.concatCTM;
+        dl_CGContextConcatCTM(context, STRUCT_CAST(dl_CGAffineTransform, cmd->transform));
+        break;
+    }
+    case DrawCommand::Tag::addPath: {
+        auto& cmd = command.addPath;
+        dl_CGContextAddPath(context, (dl_CGPathRef)cmd->path);
+        break;
+    }
+    case DrawCommand::Tag::fillPath: {
+        dl_CGContextFillPath(context);
+        break;
+    }
+    case DrawCommand::Tag::strokeRect: {
+        auto& cmd = command.strokeRect;
+        dl_CGContextStrokeRect(context, STRUCT_CAST(dl_CGRect, cmd->rect));
+        break;
+    }
+    case DrawCommand::Tag::addRect: {
+        auto& cmd = command.addRect;
+        dl_CGContextAddRect(context, STRUCT_CAST(dl_CGRect, cmd->rect));
+        break;
+    }
+    case DrawCommand::Tag::closePath: {
+        dl_CGContextClosePath(context);
+        break;
+    }
+    case DrawCommand::Tag::drawLinearGradient: {
+        auto& cmd = command.drawLinearGradient;
+        dl_CGContextDrawLinearGradient(
+            context,
+            (dl_CGGradientRef)cmd->gradient,
+            STRUCT_CAST(dl_CGPoint, cmd->startPoint),
+            STRUCT_CAST(dl_CGPoint, cmd->endPoint),
+            (dl_CGGradientDrawingOptions)cmd->drawOpts);
+        break;
+    }
+    case DrawCommand::Tag::drawFrame: {
+        auto& cmd = command.drawFrame;
+        dl_CTFrameDraw((dl_CTFrameRef)cmd->frame, context);
+        break;
+    }
+    default:
+        printf("Drawing.cpp: unhandled drawCommand! %d\n", command.tag);
+    }
+}
+
+void DrawContext_batchDraw(DrawContext _this, std::vector<DrawCommand> commands)
+{
+    for (auto i = commands.begin(); i != commands.end(); i++) {
+        drawCommand((dl_CGContextRef)_this, *i);
+    }
+}

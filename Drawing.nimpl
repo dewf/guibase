@@ -96,6 +96,44 @@ opaque Path {
     static Path createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
 }
 
+sumtype DrawCommand {
+    saveGState(),
+    restoreGState(),
+    setRGBFillColor(double red, double green, double blue, double alpha),
+    setRGBStrokeColor(double red, double green, double blue, double alpha),
+    setFillColorWithColor(Color color),
+    fillRect(Rect rect),
+    setTextMatrix(AffineTransform t),
+    setTextPosition(double x, double y),
+    beginPath(),
+    addArc(double x, double y, double radius, double startAngle, double endAngle, bool clockwise),
+    addArcToPoint(double x1, double y1, double x2, double y2, double radius),
+    drawPath(PathDrawingMode mode),
+    setStrokeColorWithColor(Color color),
+    strokeRectWithWidth(Rect rect, double width),
+    moveToPoint(double x, double y),
+    addLineToPoint(double x, double y),
+    strokePath(),
+    setLineDash(double phase, Array<double> lengths),
+    clearLineDash(),
+    setLineWidth(double width),
+    clip(),
+    clipToRect(Rect clipRect),
+    translateCTM(double tx, double ty),
+    scaleCTM(double scaleX, double scaleY),
+    rotateCTM(double angle),
+    concatCTM(AffineTransform transform),
+    addPath(Path path),
+    fillPath(),
+    strokeRect(Rect rect),
+    addRect(Rect rect),
+    closePath(),
+    drawLinearGradient(Gradient gradient, Point startPoint, Point endPoint, GradientDrawingOptions drawOpts),
+
+    // inverted:
+    drawFrame(Frame frame)
+}
+
 opaque DrawContext {
     void saveGState();
     void restoreGState();
@@ -129,6 +167,8 @@ opaque DrawContext {
     void addRect(Rect rect);
     void closePath();
     void drawLinearGradient(Gradient gradient, Point startPoint, Point endPoint, GradientDrawingOptions drawOpts);
+
+    void batchDraw(Array<DrawCommand> commands);
 }
 
 // text stuff

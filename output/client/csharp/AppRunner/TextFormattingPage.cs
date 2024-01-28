@@ -51,12 +51,17 @@ public class TextFormattingPage : BasePage
 	    using var timesFont = Font.CreateWithName("Times New Roman", 40.0, new OptArgs());
 	    using var timesItalic = timesFont.CreateCopyWithSymbolicTraits(0, new FontTraits { Italic = true }, new OptArgs()); // 0 = preserve size
 	    
-	    using var magenta = Color.CreateGenericRGB(1, 0, 1, 1);
-	    using var alphaYellow = Color.CreateGenericRGB(1, 1, 0, 0.5);
-	    using var red = Color.CreateGenericRGB(1, 0, 0, 1);
-	    using var green = Color.CreateGenericRGB(0, 1, 0, 1);
-	    using var blue = Color.CreateGenericRGB(0, 0, 1, 1);
-	    using var yellow = Color.CreateGenericRGB(1, 1, 0, 1);
+	    // can't use "use" with these now, they will be released if the other side doesn't retain them
+	    // I understand why the local-only ones aren't being retained, but what about those passed directly
+	    // into the remote attribute dictionary? my own dictionary-splitting run analysis implementation is failing to retain them?
+	    // could be ...
+	    // don't tell me we need .retain on opaques, as well - sigh
+	    var magenta = Color.CreateGenericRGB(1, 0, 1, 1);
+	    var alphaYellow = Color.CreateGenericRGB(1, 1, 0, 0.5);
+	    var red = Color.CreateGenericRGB(1, 0, 0, 1);
+	    var green = Color.CreateGenericRGB(0, 1, 0, 1);
+	    var blue = Color.CreateGenericRGB(0, 0, 1, 1);
+	    var yellow = Color.CreateGenericRGB(1, 1, 0, 1);
         
 	    using var attrString = MutableAttributedString.Create(0); // 0 = amt of storage to reserve, no hint
 	    attrString.ReplaceString(RangeZero, Text); // was: MakeRange(0, 0), not sure if that's the same, should be
@@ -160,10 +165,12 @@ public class TextFormattingPage : BasePage
     
     public override void Render(DrawContext context, RenderArea area)
     {
-        context.SetRGBFillColor(100 / 255.0, 149 / 255.0, 237 / 255.0, 1);
-        context.FillRect(MakeRect(0, 0, Width, Height));
+	    var drawList = new DrawList(context);
+	    
+	    drawList.SetRGBFillColor(100 / 255.0, 149 / 255.0, 237 / 255.0, 1);
+	    drawList.FillRect(MakeRect(0, 0, Width, Height));
 
-        context.SetTextMatrix(AffineTransformIdentity);
+	    drawList.SetTextMatrix(AffineTransformIdentity);
 
         // RECT ===========================
         var rect = MakeRect(0, 0, Width, Height);
@@ -171,13 +178,16 @@ public class TextFormattingPage : BasePage
         using var frame = _frameSetter.CreateFrame(RangeZero, rectPath); // don't know what the final argument NULL could be (not implemented yet)
         
         // draw background color, underlines
-        DrawFrameEffects(context, frame, rect, EffectLayer.Background, _black, _attrManager);
+        DrawFrameEffects(drawList, frame, rect, EffectLayer.Background, _black, _attrManager);
         
         // draw text + built-in CT effects
-        frame.Draw(context);
+        drawList.DrawFrame(frame);
+        // frame.Draw(context);
         
         // draw strikethroughs, highlights
-        DrawFrameEffects(context, frame, rect, EffectLayer.Overlay, _black, _attrManager);
+        DrawFrameEffects(drawList, frame, rect, EffectLayer.Overlay, _black, _attrManager);
+        
+        drawList.Send();
     }
 
     private enum EffectLayer
@@ -186,7 +196,7 @@ public class TextFormattingPage : BasePage
 	    Overlay
     }
 
-    private static void DrawFrameEffects(DrawContext context, Frame frame, Rect rect, EffectLayer layer, Color defaultColor, ClientAttrMap attrMap)
+    private static void DrawFrameEffects(DrawList context, Frame frame, Rect rect, EffectLayer layer, Color defaultColor, ClientAttrMap attrMap)
     {
 	    // really should just combine these into a single call, since origins requires checking the lines array internally
 	    var lines = frame.GetLines();
@@ -248,7 +258,7 @@ public class TextFormattingPage : BasePage
 			    {
 				    runBounds.Size.Width = lineTypoBounds.Width;
 			    }
-
+			    
 			    if (layer == EffectLayer.Background)
 			    {
 				    if (bgColor != null)

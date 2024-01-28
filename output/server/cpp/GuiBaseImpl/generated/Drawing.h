@@ -178,6 +178,362 @@ enum GradientDrawingOptions {
     DrawsAfterEndLocation = 2
 };
 
+struct DrawCommand {
+public:
+    enum class Tag {
+        saveGState,
+        restoreGState,
+        setRGBFillColor,
+        setRGBStrokeColor,
+        setFillColorWithColor,
+        fillRect,
+        setTextMatrix,
+        setTextPosition,
+        beginPath,
+        addArc,
+        addArcToPoint,
+        drawPath,
+        setStrokeColorWithColor,
+        strokeRectWithWidth,
+        moveToPoint,
+        addLineToPoint,
+        strokePath,
+        setLineDash,
+        clearLineDash,
+        setLineWidth,
+        clip,
+        clipToRect,
+        translateCTM,
+        scaleCTM,
+        rotateCTM,
+        concatCTM,
+        addPath,
+        fillPath,
+        strokeRect,
+        addRect,
+        closePath,
+        drawLinearGradient,
+        drawFrame
+    };
+    const Tag tag;
+    struct saveGState {
+        static DrawCommand make() {
+            DrawCommand ret{ Tag::saveGState };
+            ret.saveGState = std::shared_ptr<saveGState>(new saveGState{  });
+            return ret;
+        }
+    };
+    struct restoreGState {
+        static DrawCommand make() {
+            DrawCommand ret{ Tag::restoreGState };
+            ret.restoreGState = std::shared_ptr<restoreGState>(new restoreGState{  });
+            return ret;
+        }
+    };
+    struct setRGBFillColor {
+        const double red;
+        const double green;
+        const double blue;
+        const double alpha;
+        static DrawCommand make(double red, double green, double blue, double alpha) {
+            DrawCommand ret{ Tag::setRGBFillColor };
+            ret.setRGBFillColor = std::shared_ptr<setRGBFillColor>(new setRGBFillColor{ red, green, blue, alpha });
+            return ret;
+        }
+    };
+    struct setRGBStrokeColor {
+        const double red;
+        const double green;
+        const double blue;
+        const double alpha;
+        static DrawCommand make(double red, double green, double blue, double alpha) {
+            DrawCommand ret{ Tag::setRGBStrokeColor };
+            ret.setRGBStrokeColor = std::shared_ptr<setRGBStrokeColor>(new setRGBStrokeColor{ red, green, blue, alpha });
+            return ret;
+        }
+    };
+    struct setFillColorWithColor {
+        const Color color;
+        static DrawCommand make(Color color) {
+            DrawCommand ret{ Tag::setFillColorWithColor };
+            ret.setFillColorWithColor = std::shared_ptr<setFillColorWithColor>(new setFillColorWithColor{ color });
+            return ret;
+        }
+    };
+    struct fillRect {
+        const Rect rect;
+        static DrawCommand make(Rect rect) {
+            DrawCommand ret{ Tag::fillRect };
+            ret.fillRect = std::shared_ptr<fillRect>(new fillRect{ rect });
+            return ret;
+        }
+    };
+    struct setTextMatrix {
+        const AffineTransform t;
+        static DrawCommand make(AffineTransform t) {
+            DrawCommand ret{ Tag::setTextMatrix };
+            ret.setTextMatrix = std::shared_ptr<setTextMatrix>(new setTextMatrix{ t });
+            return ret;
+        }
+    };
+    struct setTextPosition {
+        const double x;
+        const double y;
+        static DrawCommand make(double x, double y) {
+            DrawCommand ret{ Tag::setTextPosition };
+            ret.setTextPosition = std::shared_ptr<setTextPosition>(new setTextPosition{ x, y });
+            return ret;
+        }
+    };
+    struct beginPath {
+        static DrawCommand make() {
+            DrawCommand ret{ Tag::beginPath };
+            ret.beginPath = std::shared_ptr<beginPath>(new beginPath{  });
+            return ret;
+        }
+    };
+    struct addArc {
+        const double x;
+        const double y;
+        const double radius;
+        const double startAngle;
+        const double endAngle;
+        const bool clockwise;
+        static DrawCommand make(double x, double y, double radius, double startAngle, double endAngle, bool clockwise) {
+            DrawCommand ret{ Tag::addArc };
+            ret.addArc = std::shared_ptr<addArc>(new addArc{ x, y, radius, startAngle, endAngle, clockwise });
+            return ret;
+        }
+    };
+    struct addArcToPoint {
+        const double x1;
+        const double y1;
+        const double x2;
+        const double y2;
+        const double radius;
+        static DrawCommand make(double x1, double y1, double x2, double y2, double radius) {
+            DrawCommand ret{ Tag::addArcToPoint };
+            ret.addArcToPoint = std::shared_ptr<addArcToPoint>(new addArcToPoint{ x1, y1, x2, y2, radius });
+            return ret;
+        }
+    };
+    struct drawPath {
+        const PathDrawingMode mode;
+        static DrawCommand make(PathDrawingMode mode) {
+            DrawCommand ret{ Tag::drawPath };
+            ret.drawPath = std::shared_ptr<drawPath>(new drawPath{ mode });
+            return ret;
+        }
+    };
+    struct setStrokeColorWithColor {
+        const Color color;
+        static DrawCommand make(Color color) {
+            DrawCommand ret{ Tag::setStrokeColorWithColor };
+            ret.setStrokeColorWithColor = std::shared_ptr<setStrokeColorWithColor>(new setStrokeColorWithColor{ color });
+            return ret;
+        }
+    };
+    struct strokeRectWithWidth {
+        const Rect rect;
+        const double width;
+        static DrawCommand make(Rect rect, double width) {
+            DrawCommand ret{ Tag::strokeRectWithWidth };
+            ret.strokeRectWithWidth = std::shared_ptr<strokeRectWithWidth>(new strokeRectWithWidth{ rect, width });
+            return ret;
+        }
+    };
+    struct moveToPoint {
+        const double x;
+        const double y;
+        static DrawCommand make(double x, double y) {
+            DrawCommand ret{ Tag::moveToPoint };
+            ret.moveToPoint = std::shared_ptr<moveToPoint>(new moveToPoint{ x, y });
+            return ret;
+        }
+    };
+    struct addLineToPoint {
+        const double x;
+        const double y;
+        static DrawCommand make(double x, double y) {
+            DrawCommand ret{ Tag::addLineToPoint };
+            ret.addLineToPoint = std::shared_ptr<addLineToPoint>(new addLineToPoint{ x, y });
+            return ret;
+        }
+    };
+    struct strokePath {
+        static DrawCommand make() {
+            DrawCommand ret{ Tag::strokePath };
+            ret.strokePath = std::shared_ptr<strokePath>(new strokePath{  });
+            return ret;
+        }
+    };
+    struct setLineDash {
+        const double phase;
+        const std::vector<double> lengths;
+        static DrawCommand make(double phase, std::vector<double> lengths) {
+            DrawCommand ret{ Tag::setLineDash };
+            ret.setLineDash = std::shared_ptr<setLineDash>(new setLineDash{ phase, lengths });
+            return ret;
+        }
+    };
+    struct clearLineDash {
+        static DrawCommand make() {
+            DrawCommand ret{ Tag::clearLineDash };
+            ret.clearLineDash = std::shared_ptr<clearLineDash>(new clearLineDash{  });
+            return ret;
+        }
+    };
+    struct setLineWidth {
+        const double width;
+        static DrawCommand make(double width) {
+            DrawCommand ret{ Tag::setLineWidth };
+            ret.setLineWidth = std::shared_ptr<setLineWidth>(new setLineWidth{ width });
+            return ret;
+        }
+    };
+    struct clip {
+        static DrawCommand make() {
+            DrawCommand ret{ Tag::clip };
+            ret.clip = std::shared_ptr<clip>(new clip{  });
+            return ret;
+        }
+    };
+    struct clipToRect {
+        const Rect clipRect;
+        static DrawCommand make(Rect clipRect) {
+            DrawCommand ret{ Tag::clipToRect };
+            ret.clipToRect = std::shared_ptr<clipToRect>(new clipToRect{ clipRect });
+            return ret;
+        }
+    };
+    struct translateCTM {
+        const double tx;
+        const double ty;
+        static DrawCommand make(double tx, double ty) {
+            DrawCommand ret{ Tag::translateCTM };
+            ret.translateCTM = std::shared_ptr<translateCTM>(new translateCTM{ tx, ty });
+            return ret;
+        }
+    };
+    struct scaleCTM {
+        const double scaleX;
+        const double scaleY;
+        static DrawCommand make(double scaleX, double scaleY) {
+            DrawCommand ret{ Tag::scaleCTM };
+            ret.scaleCTM = std::shared_ptr<scaleCTM>(new scaleCTM{ scaleX, scaleY });
+            return ret;
+        }
+    };
+    struct rotateCTM {
+        const double angle;
+        static DrawCommand make(double angle) {
+            DrawCommand ret{ Tag::rotateCTM };
+            ret.rotateCTM = std::shared_ptr<rotateCTM>(new rotateCTM{ angle });
+            return ret;
+        }
+    };
+    struct concatCTM {
+        const AffineTransform transform;
+        static DrawCommand make(AffineTransform transform) {
+            DrawCommand ret{ Tag::concatCTM };
+            ret.concatCTM = std::shared_ptr<concatCTM>(new concatCTM{ transform });
+            return ret;
+        }
+    };
+    struct addPath {
+        const Path path;
+        static DrawCommand make(Path path) {
+            DrawCommand ret{ Tag::addPath };
+            ret.addPath = std::shared_ptr<addPath>(new addPath{ path });
+            return ret;
+        }
+    };
+    struct fillPath {
+        static DrawCommand make() {
+            DrawCommand ret{ Tag::fillPath };
+            ret.fillPath = std::shared_ptr<fillPath>(new fillPath{  });
+            return ret;
+        }
+    };
+    struct strokeRect {
+        const Rect rect;
+        static DrawCommand make(Rect rect) {
+            DrawCommand ret{ Tag::strokeRect };
+            ret.strokeRect = std::shared_ptr<strokeRect>(new strokeRect{ rect });
+            return ret;
+        }
+    };
+    struct addRect {
+        const Rect rect;
+        static DrawCommand make(Rect rect) {
+            DrawCommand ret{ Tag::addRect };
+            ret.addRect = std::shared_ptr<addRect>(new addRect{ rect });
+            return ret;
+        }
+    };
+    struct closePath {
+        static DrawCommand make() {
+            DrawCommand ret{ Tag::closePath };
+            ret.closePath = std::shared_ptr<closePath>(new closePath{  });
+            return ret;
+        }
+    };
+    struct drawLinearGradient {
+        const Gradient gradient;
+        const Point startPoint;
+        const Point endPoint;
+        const uint32_t drawOpts;
+        static DrawCommand make(Gradient gradient, Point startPoint, Point endPoint, uint32_t drawOpts) {
+            DrawCommand ret{ Tag::drawLinearGradient };
+            ret.drawLinearGradient = std::shared_ptr<drawLinearGradient>(new drawLinearGradient{ gradient, startPoint, endPoint, drawOpts });
+            return ret;
+        }
+    };
+    struct drawFrame {
+        const Frame frame;
+        static DrawCommand make(Frame frame) {
+            DrawCommand ret{ Tag::drawFrame };
+            ret.drawFrame = std::shared_ptr<drawFrame>(new drawFrame{ frame });
+            return ret;
+        }
+    };
+    std::shared_ptr<saveGState> saveGState;
+    std::shared_ptr<restoreGState> restoreGState;
+    std::shared_ptr<setRGBFillColor> setRGBFillColor;
+    std::shared_ptr<setRGBStrokeColor> setRGBStrokeColor;
+    std::shared_ptr<setFillColorWithColor> setFillColorWithColor;
+    std::shared_ptr<fillRect> fillRect;
+    std::shared_ptr<setTextMatrix> setTextMatrix;
+    std::shared_ptr<setTextPosition> setTextPosition;
+    std::shared_ptr<beginPath> beginPath;
+    std::shared_ptr<addArc> addArc;
+    std::shared_ptr<addArcToPoint> addArcToPoint;
+    std::shared_ptr<drawPath> drawPath;
+    std::shared_ptr<setStrokeColorWithColor> setStrokeColorWithColor;
+    std::shared_ptr<strokeRectWithWidth> strokeRectWithWidth;
+    std::shared_ptr<moveToPoint> moveToPoint;
+    std::shared_ptr<addLineToPoint> addLineToPoint;
+    std::shared_ptr<strokePath> strokePath;
+    std::shared_ptr<setLineDash> setLineDash;
+    std::shared_ptr<clearLineDash> clearLineDash;
+    std::shared_ptr<setLineWidth> setLineWidth;
+    std::shared_ptr<clip> clip;
+    std::shared_ptr<clipToRect> clipToRect;
+    std::shared_ptr<translateCTM> translateCTM;
+    std::shared_ptr<scaleCTM> scaleCTM;
+    std::shared_ptr<rotateCTM> rotateCTM;
+    std::shared_ptr<concatCTM> concatCTM;
+    std::shared_ptr<addPath> addPath;
+    std::shared_ptr<fillPath> fillPath;
+    std::shared_ptr<strokeRect> strokeRect;
+    std::shared_ptr<addRect> addRect;
+    std::shared_ptr<closePath> closePath;
+    std::shared_ptr<drawLinearGradient> drawLinearGradient;
+    std::shared_ptr<drawFrame> drawFrame;
+};
+
+// std::vector<DrawCommand>
+
 
 struct FontTraits {
 private:
@@ -397,6 +753,7 @@ void DrawContext_strokeRect(DrawContext _this, Rect rect);
 void DrawContext_addRect(DrawContext _this, Rect rect);
 void DrawContext_closePath(DrawContext _this);
 void DrawContext_drawLinearGradient(DrawContext _this, Gradient gradient, Point startPoint, Point endPoint, uint32_t drawOpts);
+void DrawContext_batchDraw(DrawContext _this, std::vector<DrawCommand> commands);
 void DrawContext_dispose(DrawContext _this);
 AttributedString AttributedString_create(std::string s, AttributedStringOptions opts);
 void AttributedString_dispose(AttributedString _this);

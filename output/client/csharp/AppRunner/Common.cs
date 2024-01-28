@@ -9,6 +9,10 @@ public static class Common
     {
         return new Rect(new Point(x, y), new Size(width, height));
     }
+    public static string RectToString(Rect r)
+    {
+        return $"{r.Origin.X}/{r.Origin.Y}/{r.Size.Width}/{r.Size.Height}";
+    }
     public static readonly Drawing.Rect RectZero = MakeRect(0, 0, 0, 0);
 
     public static Drawing.Range MakeRange(long location, long length)
