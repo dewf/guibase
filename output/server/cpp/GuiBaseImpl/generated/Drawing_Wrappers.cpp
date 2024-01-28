@@ -22,7 +22,36 @@ AffineTransform AffineTransform__pop() {
     return AffineTransform { a, b, c, d, tx, ty };
 }
 
+// built-in array type: std::vector<std::string>
+
+// built-in array type: std::vector<int64_t>
+
+void __String_Int64_Map__push(std::map<std::string,int64_t> _map, bool isReturn) {
+    std::vector<std::string> keys;
+    std::vector<int64_t> values;
+    for (auto i = _map.begin(); i != _map.end(); i++) {
+        keys.push_back(i->first);
+        values.push_back(i->second);
+    }
+    pushInt64ArrayInternal(values);
+    pushStringArrayInternal(keys);
+}
+
+std::map<std::string,int64_t> __String_Int64_Map__pop() {
+    std::map<std::string,int64_t> __ret;
+    auto keys = popStringArrayInternal();
+    auto values = popInt64ArrayInternal();
+    for (auto i = 0; i < keys.size(); i++) {
+        __ret[keys[i]] = values[i];
+    }
+    return __ret;
+}
+
 void AttributedStringOptions__push(AttributedStringOptions value, bool isReturn) {
+    std::map<std::string,int64_t> custom;
+    if (value.hasCustom(&custom)) {
+        __String_Int64_Map__push(custom, isReturn);
+    }
     Color strokeColor;
     if (value.hasStrokeColor(&strokeColor)) {
         Color__push(strokeColor);
@@ -68,6 +97,10 @@ AttributedStringOptions AttributedStringOptions__pop() {
     if (value._usedFields & AttributedStringOptions::Fields::StrokeColorField) {
         auto x = Color__pop();
         value.setStrokeColor(x);
+    }
+    if (value._usedFields & AttributedStringOptions::Fields::CustomField) {
+        auto x = __String_Int64_Map__pop();
+        value.setCustom(x);
     }
     return value;
 }
@@ -451,31 +484,6 @@ void Path__push(Path value) {
 
 Path Path__pop() {
     return (Path)ni_popPtr();
-}
-
-// built-in array type: std::vector<std::string>
-
-// built-in array type: std::vector<int64_t>
-
-void __String_Int64_Map__push(std::map<std::string,int64_t> _map, bool isReturn) {
-    std::vector<std::string> keys;
-    std::vector<int64_t> values;
-    for (auto i = _map.begin(); i != _map.end(); i++) {
-        keys.push_back(i->first);
-        values.push_back(i->second);
-    }
-    pushInt64ArrayInternal(values);
-    pushStringArrayInternal(keys);
-}
-
-std::map<std::string,int64_t> __String_Int64_Map__pop() {
-    std::map<std::string,int64_t> __ret;
-    auto keys = popStringArrayInternal();
-    auto values = popInt64ArrayInternal();
-    for (auto i = 0; i < keys.size(); i++) {
-        __ret[keys[i]] = values[i];
-    }
-    return __ret;
 }
 
 inline void RunStatus__push(uint32_t value) {
@@ -888,13 +896,8 @@ void Font_dispose__wrapper() {
 
 void Run_getAttributes__wrapper() {
     auto _this = Run__pop();
-    AttributedStringOptions__push(Run_getAttributes(_this), true);
-}
-
-void Run_getCustomAttributes__wrapper() {
-    auto _this = Run__pop();
-    auto keys = popStringArrayInternal();
-    __String_Int64_Map__push(Run_getCustomAttributes(_this, keys), true);
+    auto customKeys = popStringArrayInternal();
+    AttributedStringOptions__push(Run_getAttributes(_this, customKeys), true);
 }
 
 void Run_getTypographicBounds__wrapper() {
@@ -1067,7 +1070,6 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "Font_createWithName", &Font_createWithName__wrapper);
     ni_registerModuleMethod(m, "Font_dispose", &Font_dispose__wrapper);
     ni_registerModuleMethod(m, "Run_getAttributes", &Run_getAttributes__wrapper);
-    ni_registerModuleMethod(m, "Run_getCustomAttributes", &Run_getCustomAttributes__wrapper);
     ni_registerModuleMethod(m, "Run_getTypographicBounds", &Run_getTypographicBounds__wrapper);
     ni_registerModuleMethod(m, "Run_getStringRange", &Run_getStringRange__wrapper);
     ni_registerModuleMethod(m, "Run_getStatus", &Run_getStatus__wrapper);

@@ -3,6 +3,9 @@
 void AffineTransform__push(AffineTransform value, bool isReturn);
 AffineTransform AffineTransform__pop();
 
+void __String_Int64_Map__push(std::map<std::string,int64_t> _map, bool isReturn);
+std::map<std::string,int64_t> __String_Int64_Map__pop();
+
 void AttributedStringOptions__push(AttributedStringOptions value, bool isReturn);
 AttributedStringOptions AttributedStringOptions__pop();
 
@@ -80,9 +83,6 @@ MutableAttributedString MutableAttributedString__pop();
 
 void Path__push(Path value);
 Path Path__pop();
-
-void __String_Int64_Map__push(std::map<std::string,int64_t> _map, bool isReturn);
-std::map<std::string,int64_t> __String_Int64_Map__pop();
 
 void RunStatus__push(uint32_t value);
 uint32_t RunStatus__pop();
@@ -219,8 +219,6 @@ void Font_createWithName__wrapper();
 void Font_dispose__wrapper();
 
 void Run_getAttributes__wrapper();
-
-void Run_getCustomAttributes__wrapper();
 
 void Run_getTypographicBounds__wrapper();
 

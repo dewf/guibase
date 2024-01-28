@@ -77,7 +77,6 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _font_createWithName;
         private static ModuleMethodHandle _Font_dispose;
         private static ModuleMethodHandle _run_getAttributes;
-        private static ModuleMethodHandle _run_getCustomAttributes;
         private static ModuleMethodHandle _run_getTypographicBounds;
         private static ModuleMethodHandle _run_getStringRange;
         private static ModuleMethodHandle _run_getStatus;
@@ -137,6 +136,28 @@ namespace Org.Prefixed.GuiBase
             return new AffineTransform(a, b, c, d, tx, ty);
         }
 
+        // built-in array type: string[]
+
+        // built-in array type: long[]
+
+        internal static void __String_Long_Map__Push(Dictionary<string, long> map, bool isReturn)
+        {
+            NativeImplClient.PushInt64Array(map.Values.ToArray());
+            NativeImplClient.PushStringArray(map.Keys.ToArray());
+        }
+
+        internal static Dictionary<string, long> __String_Long_Map__Pop()
+        {
+            var keys = NativeImplClient.PopStringArray();
+            var values = NativeImplClient.PopInt64Array();
+            var ret = new Dictionary<string,long>();
+            for (var i = 0; i < keys.Length; i++)
+            {
+                ret[keys[i]] = values[i];
+            }
+            return ret;
+        }
+
         public struct AttributedStringOptions
         {
             [Flags]
@@ -146,7 +167,8 @@ namespace Org.Prefixed.GuiBase
                 ForegroundColorFromContext = 2,
                 Font = 4,
                 StrokeWidth = 8,
-                StrokeColor = 16
+                StrokeColor = 16,
+                Custom = 32
             }
             internal Fields UsedFields;
 
@@ -245,9 +267,32 @@ namespace Org.Prefixed.GuiBase
                 value = default;
                 return false;
             }
+            private Dictionary<string,long> _custom;
+            public Dictionary<string,long> Custom
+            {
+                set
+                {
+                    _custom = value;
+                    UsedFields |= Fields.Custom;
+                }
+            }
+            public bool HasCustom(out Dictionary<string,long> value)
+            {
+                if (UsedFields.HasFlag(Fields.Custom))
+                {
+                    value = _custom;
+                    return true;
+                }
+                value = default;
+                return false;
+            }
         }
         internal static void AttributedStringOptions__Push(AttributedStringOptions value, bool isReturn)
         {
+            if (value.HasCustom(out var custom))
+            {
+                __String_Long_Map__Push(custom, isReturn);
+            }
             if (value.HasStrokeColor(out var strokeColor))
             {
                 Color__Push(strokeColor);
@@ -295,6 +340,10 @@ namespace Org.Prefixed.GuiBase
             if (opts.UsedFields.HasFlag(AttributedStringOptions.Fields.StrokeColor))
             {
                 opts.StrokeColor = Color__Pop();
+            }
+            if (opts.UsedFields.HasFlag(AttributedStringOptions.Fields.Custom))
+            {
+                opts.Custom = __String_Long_Map__Pop();
             }
             return opts;
         }
@@ -1712,28 +1761,6 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Path(ptr) : null;
         }
 
-        // built-in array type: string[]
-
-        // built-in array type: long[]
-
-        internal static void __String_Long_Map__Push(Dictionary<string, long> map, bool isReturn)
-        {
-            NativeImplClient.PushInt64Array(map.Values.ToArray());
-            NativeImplClient.PushStringArray(map.Keys.ToArray());
-        }
-
-        internal static Dictionary<string, long> __String_Long_Map__Pop()
-        {
-            var keys = NativeImplClient.PopStringArray();
-            var values = NativeImplClient.PopInt64Array();
-            var ret = new Dictionary<string,long>();
-            for (var i = 0; i < keys.Length; i++)
-            {
-                ret[keys[i]] = values[i];
-            }
-            return ret;
-        }
-
         [Flags]
         public enum RunStatus
         {
@@ -1773,18 +1800,12 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
-            public AttributedStringOptions GetAttributes()
+            public AttributedStringOptions GetAttributes(string[] customKeys)
             {
+                NativeImplClient.PushStringArray(customKeys);
                 Run__Push(this);
                 NativeImplClient.InvokeModuleMethod(_run_getAttributes);
                 return AttributedStringOptions__Pop();
-            }
-            public Dictionary<string,long> GetCustomAttributes(string[] keys)
-            {
-                NativeImplClient.PushStringArray(keys);
-                Run__Push(this);
-                NativeImplClient.InvokeModuleMethod(_run_getCustomAttributes);
-                return __String_Long_Map__Pop();
             }
             public TypographicBounds GetTypographicBounds(Range range)
             {
@@ -1892,7 +1913,6 @@ namespace Org.Prefixed.GuiBase
             _font_createWithName = NativeImplClient.GetModuleMethod(_module, "Font_createWithName");
             _Font_dispose = NativeImplClient.GetModuleMethod(_module, "Font_dispose");
             _run_getAttributes = NativeImplClient.GetModuleMethod(_module, "Run_getAttributes");
-            _run_getCustomAttributes = NativeImplClient.GetModuleMethod(_module, "Run_getCustomAttributes");
             _run_getTypographicBounds = NativeImplClient.GetModuleMethod(_module, "Run_getTypographicBounds");
             _run_getStringRange = NativeImplClient.GetModuleMethod(_module, "Run_getStringRange");
             _run_getStatus = NativeImplClient.GetModuleMethod(_module, "Run_getStatus");

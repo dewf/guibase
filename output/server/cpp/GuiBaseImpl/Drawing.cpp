@@ -542,7 +542,7 @@ void Font_dispose(Font _this)
     dl_CFRelease(_this);
 }
 
-AttributedStringOptions Run_getAttributes(Run _this)
+AttributedStringOptions Run_getAttributes(Run _this, std::vector<std::string> customKeys)
 {
     AttributedStringOptions ret;
     auto attrs = dl_CTRunGetAttributes((dl_CTRunRef)_this);
@@ -578,28 +578,26 @@ AttributedStringOptions Run_getAttributes(Run _this)
         ret.setStrokeColor(strokeColor);
     }
 
-    return ret;
-}
-
-std::map<std::string, int64_t> Run_getCustomAttributes(Run _this, std::vector<std::string> keys)
-{
-    std::map<std::string, int64_t> ret;
-    auto attrs = dl_CTRunGetAttributes((dl_CTRunRef)_this);
-
-    for (auto i = keys.begin(); i != keys.end(); i++) {
-        auto cfKey = dl_CFStringCreateWithCString(i->c_str());
-        auto cfNumber = (dl_CFNumberRef)dl_CFDictionaryGetValue(attrs, cfKey); // not owned!
-        if (cfNumber != nullptr) {
-            long value;
-            if (dl_CFNumberGetValue(cfNumber, dl_kCFNumberLongType, &value)) {
-                ret[*i] = value;
+    // custom keys if requested
+    if (customKeys.size() > 0) {
+        std::map<std::string, int64_t> customMap;
+        for (auto i = customKeys.begin(); i != customKeys.end(); i++) {
+            auto cfKey = dl_CFStringCreateWithCString(i->c_str());
+            auto cfNumber = (dl_CFNumberRef)dl_CFDictionaryGetValue(attrs, cfKey);
+            if (cfNumber != nullptr) {
+                long id;
+                if (dl_CFNumberGetValue(cfNumber, dl_kCFNumberLongType, &id)) {
+                    customMap[*i] = id;
+                }
+                else {
+                    printf("Run_getAttributes: failed to get long value! (custom attr keys)\n");
+                }
             }
-            else {
-                printf("Run_getCustomAttributes: failed to get long value!\n");
-            }
+            dl_CFRelease(cfKey);
         }
-        dl_CFRelease(cfKey);
+        ret.setCustom(customMap);
     }
+
     return ret;
 }
 

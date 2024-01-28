@@ -51,7 +51,6 @@ public class TextFormattingPage : BasePage
 	    using var timesFont = Font.CreateWithName("Times New Roman", 40.0, new OptArgs());
 	    using var timesItalic = timesFont.CreateCopyWithSymbolicTraits(0, new FontTraits { Italic = true }, new OptArgs()); // 0 = preserve size
 	    
-	    using var black = Color.CreateGenericRGB(0, 0, 0, 1);
 	    using var magenta = Color.CreateGenericRGB(1, 0, 1, 1);
 	    using var alphaYellow = Color.CreateGenericRGB(1, 1, 0, 0.5);
 	    using var red = Color.CreateGenericRGB(1, 0, 0, 1);
@@ -69,7 +68,7 @@ public class TextFormattingPage : BasePage
 	    attrString.BeginEditing();
 	    
         // this was two different lines originally
-        attrString.SetAttribute(fullRange, new AttributedStringOptions { ForegroundColor = black, Font = timesFont });
+        attrString.SetAttribute(fullRange, new AttributedStringOptions { ForegroundColor = _black, Font = timesFont });
 
         Drawing.Range range;
 
@@ -207,14 +206,12 @@ public class TextFormattingPage : BasePage
 			    // TODO: add a custom map to the AttributedStringOptions?
 			    // wish there was a way to maintain a server-side list of all custom keys, so we don't have to pass the AllCustomAttributes array every time
 			    
-			    var attrs = run.GetAttributes();
+			    var attrs = run.GetAttributes(AllCustomAttributes);
 			    attrs.HasForegroundColor(out var fgColor);
 			    attrs.HasFont(out var font);
-			    attrs.HasStrokeWidth(out var strokeWidth);
-			    attrs.HasStrokeColor(out var strokeColor);
-			    // attrs.HasForegroundColorFromContext(out var fgColorFromContext);
+			    attrs.HasCustom(out var customRaw);
 
-			    var customMap = attrMap.GetMap(run.GetCustomAttributes(AllCustomAttributes));
+			    var customMap = attrMap.GetMap(customRaw!); // guaranteed to exist (even if empty) because we provided a non-zero array to .GetAttributes
 			    customMap.TryGetValue(BackgroundKey, out var bgColor);
 			    customMap.TryGetValue(HighlightKey, out var highColor);
 			    customMap.TryGetValue(StrikeCountKey, out var strikeCount);

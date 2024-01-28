@@ -31,6 +31,12 @@ struct AffineTransform {
     double ty;
 };
 
+// std::vector<std::string>
+
+// std::vector<int64_t>
+
+// std::map<std::string,int64_t>
+
 struct AttributedStringOptions {
 private:
     enum Fields {
@@ -38,7 +44,8 @@ private:
         ForegroundColorFromContextField = 2,
         FontField = 4,
         StrokeWidthField = 8,
-        StrokeColorField = 16
+        StrokeColorField = 16,
+        CustomField = 32
     };
     int32_t _usedFields;
     Color _foregroundColor;
@@ -46,6 +53,7 @@ private:
     Font _font;
     double _strokeWidth;
     Color _strokeColor;
+    std::map<std::string,int64_t> _custom;
 protected:
     int32_t getUsedFields() {
         return _usedFields;
@@ -104,6 +112,17 @@ public:
     bool hasStrokeColor(Color *value) {
         if (_usedFields & Fields::StrokeColorField) {
             *value = _strokeColor;
+            return true;
+        }
+        return false;
+    }
+    void setCustom(std::map<std::string,int64_t> value) {
+        _custom = value;
+        _usedFields |= Fields::CustomField;
+    }
+    bool hasCustom(std::map<std::string,int64_t> *value) {
+        if (_usedFields & Fields::CustomField) {
+            *value = _custom;
             return true;
         }
         return false;
@@ -324,12 +343,6 @@ enum LineBoundsOptions {
 
 
 
-// std::vector<std::string>
-
-// std::vector<int64_t>
-
-// std::map<std::string,int64_t>
-
 enum RunStatus {
     NoStatus = 0,
     RightToLeft = 1,
@@ -404,8 +417,7 @@ double Font_getUnderlinePosition(Font _this);
 Font Font_createFromFile(std::string path, double size, OptArgs optArgs);
 Font Font_createWithName(std::string name, double size, OptArgs optArgs);
 void Font_dispose(Font _this);
-AttributedStringOptions Run_getAttributes(Run _this);
-std::map<std::string,int64_t> Run_getCustomAttributes(Run _this, std::vector<std::string> keys);
+AttributedStringOptions Run_getAttributes(Run _this, std::vector<std::string> customKeys);
 TypographicBounds Run_getTypographicBounds(Run _this, Range range);
 Range Run_getStringRange(Run _this);
 uint32_t Run_getStatus(Run _this);

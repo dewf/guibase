@@ -146,7 +146,10 @@ options AttributedStringOptions {
     // for example if we wanted a single C# dictionary per run, because CoreText doesn't know anything about client-side data structures, and can't build them up
     // during run analysis - but it can certainly deal with ints! and we can use those to construct our own queryable things per run
     // another option would have been approximating CF* types via a sumtype, and storing things that way.
-    // but ints yield greater flexibiliy, because we can store absolutely whatever on the client side instead (not limiting us to known CF* types)
+    // but ints yield greater flexibility, because we can store absolutely whatever on the client side instead (not limiting us to known CF* types)
+
+    // right now this only works for reads, for writes use .setCustomAttribute()
+    Map<string,long> custom;
 }
 
 // had this as a sumtype (notfound, zero, actual())
@@ -221,8 +224,7 @@ flags RunStatus {
 }
 
 opaque Run {
-    AttributedStringOptions getAttributes();
-    Map<string,long> getCustomAttributes(Array<string> keys);
+    AttributedStringOptions getAttributes(Array<string> customKeys);
     TypographicBounds getTypographicBounds(Range range);
     Range getStringRange();
     RunStatus getStatus();
