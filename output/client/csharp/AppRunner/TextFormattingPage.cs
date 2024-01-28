@@ -23,7 +23,7 @@ internal class ClientAttrMap
     }
 }
 
-public class TextFormattingPage(IWindowMethods windowMethods) : BasePage(windowMethods)
+public class TextFormattingPage : BasePage
 {
 	private const string Text =
 		"This paragraph of text rendered with DirectWrite is based on IDWriteTextFormat and IDWriteTextLayout " +
@@ -41,40 +41,33 @@ public class TextFormattingPage(IWindowMethods windowMethods) : BasePage(windowM
     private const string UnderlineColorKey = "kDLUnderlineColorAttributeName"; // color
 
     private static readonly string[] AllCustomAttributes = [BackgroundKey, HighlightKey, StrikeCountKey, StrikeColorKey, UnderlineStyleKey, UnderlineColorKey];
-    
-    public override void Render(DrawContext context, RenderArea area)
+
+    private readonly ClientAttrMap _attrManager = new();
+    private readonly FrameSetter _frameSetter;
+    private readonly Color _black = Color.GetConstantColor(ColorConstants.Black);
+
+    public TextFormattingPage(IWindowMethods windowMethods) : base(windowMethods)
     {
-        context.SetRGBFillColor(100 / 255.0, 149 / 255.0, 237 / 255.0, 1);
-        context.FillRect(MakeRect(0, 0, Width, Height));
-
-        context.SetTextMatrix(AffineTransformIdentity);
-
-        using var timesFont = Font.CreateWithName("Times New Roman", 40.0, new OptArgs());
-        using var timesItalic = timesFont.CreateCopyWithSymbolicTraits(0, new FontTraits { Italic = true }, new OptArgs()); // 0 = preserve size
-
-        var attrManager = new ClientAttrMap();
+	    using var timesFont = Font.CreateWithName("Times New Roman", 40.0, new OptArgs());
+	    using var timesItalic = timesFont.CreateCopyWithSymbolicTraits(0, new FontTraits { Italic = true }, new OptArgs()); // 0 = preserve size
+	    
+	    using var black = Color.CreateGenericRGB(0, 0, 0, 1);
+	    using var magenta = Color.CreateGenericRGB(1, 0, 1, 1);
+	    using var alphaYellow = Color.CreateGenericRGB(1, 1, 0, 0.5);
+	    using var red = Color.CreateGenericRGB(1, 0, 0, 1);
+	    using var green = Color.CreateGenericRGB(0, 1, 0, 1);
+	    using var blue = Color.CreateGenericRGB(0, 0, 1, 1);
+	    using var yellow = Color.CreateGenericRGB(1, 1, 0, 1);
         
-        // RECT ===========================
-        var rect = MakeRect(0, 0, Width, Height);
-        using var rectPath = Drawing.Path.CreateWithRect(rect, new OptArgs());
+	    using var attrString = MutableAttributedString.Create(0); // 0 = amt of storage to reserve, no hint
+	    attrString.ReplaceString(RangeZero, Text); // was: MakeRange(0, 0), not sure if that's the same, should be
 
-        using var black = Color.CreateGenericRGB(0, 0, 0, 1);
-        using var magenta = Color.CreateGenericRGB(1, 0, 1, 1);
-        using var alphaYellow = Color.CreateGenericRGB(1, 1, 0, 0.5);
-        using var red = Color.CreateGenericRGB(1, 0, 0, 1);
-        using var green = Color.CreateGenericRGB(0, 1, 0, 1);
-        using var blue = Color.CreateGenericRGB(0, 0, 1, 1);
-        using var yellow = Color.CreateGenericRGB(1, 1, 0, 1);
+	    var strLen = attrString.GetLength();
+	    var fullRange = MakeRange(0, strLen);
         
-        using var attrString = MutableAttributedString.Create(0); // 0 = amt of storage to reserve, no hint
-        attrString.ReplaceString(RangeZero, Text); // was: MakeRange(0, 0), not sure if that's the same, should be
-
-        var strLen = attrString.GetLength();
-        var fullRange = MakeRange(0, strLen);
-        
-        // begin batch editing
-        attrString.BeginEditing();
-
+	    // begin batch editing
+	    attrString.BeginEditing();
+	    
         // this was two different lines originally
         attrString.SetAttribute(fullRange, new AttributedStringOptions { ForegroundColor = black, Font = timesFont });
 
@@ -87,10 +80,10 @@ public class TextFormattingPage(IWindowMethods windowMethods) : BasePage(windowM
         attrString.SetAttribute(range, new AttributedStringOptions { Font = timesItalic });
 
         range = StringFind(Text, "IDWriteTextFormat and IDWriteTextLayout objects");
-        attrString.SetCustomAttribute(range, BackgroundKey, attrManager.Insert(new ColorAttribute(magenta)));
+        attrString.SetCustomAttribute(range, BackgroundKey, _attrManager.Insert(new ColorAttribute(magenta)));
 
         range = StringFind(Text, "the SetDrawingEffect method");
-        attrString.SetCustomAttribute(range, HighlightKey, attrManager.Insert(new ColorAttribute(alphaYellow)));
+        attrString.SetCustomAttribute(range, HighlightKey, _attrManager.Insert(new ColorAttribute(alphaYellow)));
 
         range = StringFind(Text, "SetDrawingEffect");
         attrString.SetAttribute(range, new AttributedStringOptions { Font = timesItalic });
@@ -101,15 +94,15 @@ public class TextFormattingPage(IWindowMethods windowMethods) : BasePage(windowM
         attrString.SetAttribute(MakeRange(range.Location + 1, 1), new AttributedStringOptions { ForegroundColor = blue });
         attrString.SetAttribute(MakeRange(range.Location + 2, 1), new AttributedStringOptions { ForegroundColor = green });
         // strike count:
-        attrString.SetCustomAttribute(range, StrikeCountKey, attrManager.Insert(new IntAttribute(1)));
+        attrString.SetCustomAttribute(range, StrikeCountKey, _attrManager.Insert(new IntAttribute(1)));
         
         // RGB
         range = StringFind(Text, "RGB");
         attrString.SetAttribute(MakeRange(range.Location, 1), new AttributedStringOptions { ForegroundColor = red });
         attrString.SetAttribute(MakeRange(range.Location + 1, 1), new AttributedStringOptions { ForegroundColor = green });
         attrString.SetAttribute(MakeRange(range.Location + 2, 1), new AttributedStringOptions { ForegroundColor = blue });
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Single)));
-        attrString.SetCustomAttribute(range, UnderlineColorKey, attrManager.Insert(new ColorAttribute(yellow)));
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Single)));
+        attrString.SetCustomAttribute(range, UnderlineColorKey, _attrManager.Insert(new ColorAttribute(yellow)));
         
         range = StringFind(Text, " red");
         attrString.SetAttribute(range, new AttributedStringOptions { ForegroundColor = red });
@@ -119,61 +112,73 @@ public class TextFormattingPage(IWindowMethods windowMethods) : BasePage(windowM
         attrString.SetAttribute(range, new AttributedStringOptions { ForegroundColor = blue });
         
         range = StringFind(Text, "double underline");
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Double)));
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Double)));
         
         range = StringFind(Text, "triple underline");
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Triple)));
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Triple)));
         
         range = StringFind(Text, "single strikethrough");
-        attrString.SetCustomAttribute(range, StrikeCountKey, attrManager.Insert(new IntAttribute(1)));
+        attrString.SetCustomAttribute(range, StrikeCountKey, _attrManager.Insert(new IntAttribute(1)));
         
         range = StringFind(Text, "double strikethrough");
-        attrString.SetCustomAttribute(range, StrikeCountKey, attrManager.Insert(new IntAttribute(2)));
+        attrString.SetCustomAttribute(range, StrikeCountKey, _attrManager.Insert(new IntAttribute(2)));
         
         range = StringFind(Text, "triple strikethrough");
-        attrString.SetCustomAttribute(range, StrikeCountKey, attrManager.Insert(new IntAttribute(3)));
+        attrString.SetCustomAttribute(range, StrikeCountKey, _attrManager.Insert(new IntAttribute(3)));
         
         range = StringFind(Text, "combinations");
-        attrString.SetCustomAttribute(range, StrikeCountKey, attrManager.Insert(new IntAttribute(2)));
-        attrString.SetCustomAttribute(range, StrikeColorKey, attrManager.Insert(new ColorAttribute(red)));
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Triple)));
+        attrString.SetCustomAttribute(range, StrikeCountKey, _attrManager.Insert(new IntAttribute(2)));
+        attrString.SetCustomAttribute(range, StrikeColorKey, _attrManager.Insert(new ColorAttribute(red)));
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Triple)));
         
         range = StringFind(Text, "thereof");
-        attrString.SetCustomAttribute(range, StrikeCountKey, attrManager.Insert(new IntAttribute(3)));
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Double)));
-        attrString.SetCustomAttribute(range, UnderlineColorKey, attrManager.Insert(new ColorAttribute(blue)));
+        attrString.SetCustomAttribute(range, StrikeCountKey, _attrManager.Insert(new IntAttribute(3)));
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Double)));
+        attrString.SetCustomAttribute(range, UnderlineColorKey, _attrManager.Insert(new ColorAttribute(blue)));
         
         range = StringFind(Text, "overline");
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Overline)));
-        attrString.SetCustomAttribute(range, UnderlineColorKey, attrManager.Insert(new ColorAttribute(blue)));
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Overline)));
+        attrString.SetCustomAttribute(range, UnderlineColorKey, _attrManager.Insert(new ColorAttribute(blue)));
         
         range = StringFind(Text, "squiggly (squiggly?) underline");
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Squiggly)));
-        attrString.SetCustomAttribute(range, UnderlineColorKey, attrManager.Insert(new ColorAttribute(blue)));
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Squiggly)));
+        attrString.SetCustomAttribute(range, UnderlineColorKey, _attrManager.Insert(new ColorAttribute(blue)));
         
         range = StringFind(Text, "(squiggly?)");
-        attrString.SetCustomAttribute(range, UnderlineColorKey, attrManager.Insert(new ColorAttribute(red)));
+        attrString.SetCustomAttribute(range, UnderlineColorKey, _attrManager.Insert(new ColorAttribute(red)));
         
         range = StringFind(Text, "IDWriteTextLayout");
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Squiggly)));
-        attrString.SetCustomAttribute(range, UnderlineColorKey, attrManager.Insert(new ColorAttribute(blue)));
-        attrString.SetCustomAttribute(range, HighlightKey, attrManager.Insert(new ColorAttribute(alphaYellow)));
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Squiggly)));
+        attrString.SetCustomAttribute(range, UnderlineColorKey, _attrManager.Insert(new ColorAttribute(blue)));
+        attrString.SetCustomAttribute(range, HighlightKey, _attrManager.Insert(new ColorAttribute(alphaYellow)));
         
         // end batch editing
         attrString.EndEditing();
         
         // framesetter
-        using var frameSetter = FrameSetter.CreateWithAttributedString(attrString.GetNormalAttributedString_REMOVEME()); // we need opaque inheritance!
-        using var frame = frameSetter.CreateFrame(RangeZero, rectPath); // don't know what the final argument NULL could be (not implemented yet)
+        _frameSetter = FrameSetter.CreateWithAttributedString(attrString.GetNormalAttributedString_REMOVEME()); // we need opaque inheritance!
+    }
+    
+    public override void Render(DrawContext context, RenderArea area)
+    {
+        context.SetRGBFillColor(100 / 255.0, 149 / 255.0, 237 / 255.0, 1);
+        context.FillRect(MakeRect(0, 0, Width, Height));
+
+        context.SetTextMatrix(AffineTransformIdentity);
+
+        // RECT ===========================
+        var rect = MakeRect(0, 0, Width, Height);
+        using var rectPath = Drawing.Path.CreateWithRect(rect, new OptArgs());
+        using var frame = _frameSetter.CreateFrame(RangeZero, rectPath); // don't know what the final argument NULL could be (not implemented yet)
         
         // draw background color, underlines
-        DrawFrameEffects(context, frame, rect, EffectLayer.Background, black, attrManager);
+        DrawFrameEffects(context, frame, rect, EffectLayer.Background, _black, _attrManager);
         
         // draw text + built-in CT effects
         frame.Draw(context);
         
         // draw strikethroughs, highlights
-        DrawFrameEffects(context, frame, rect, EffectLayer.Overlay, black, attrManager);
+        DrawFrameEffects(context, frame, rect, EffectLayer.Overlay, _black, _attrManager);
     }
 
     private enum EffectLayer
