@@ -47,7 +47,7 @@ private:
         StrokeColorField = 16,
         CustomField = 32
     };
-    int32_t _usedFields;
+    int32_t _usedFields = 0;
     Color _foregroundColor;
     bool _foregroundColorFromContext;
     Font _font;
@@ -545,7 +545,7 @@ private:
         MonospaceField = 16,
         VerticalField = 32
     };
-    int32_t _usedFields;
+    int32_t _usedFields = 0;
     bool _italic;
     bool _bold;
     bool _expanded;
@@ -632,7 +632,7 @@ private:
     enum Fields {
         TransformField = 1
     };
-    int32_t _usedFields;
+    int32_t _usedFields = 0;
     AffineTransform _transform;
 protected:
     int32_t getUsedFields() {

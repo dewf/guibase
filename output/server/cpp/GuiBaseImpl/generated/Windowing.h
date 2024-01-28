@@ -181,7 +181,7 @@ private:
         StyleField = 16,
         NativeParentField = 32
     };
-    int32_t _usedFields;
+    int32_t _usedFields = 0;
     int32_t _minWidth;
     int32_t _minHeight;
     int32_t _maxWidth;
