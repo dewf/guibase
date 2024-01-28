@@ -294,33 +294,14 @@ std::vector<Point> __Point_Array__pop() {
 }
 
 void Range__push(Range value, bool isReturn) {
-    switch (value.tag) {
-    case Range::Tag::NotFound:
-        break;
-    case Range::Tag::Zero:
-        break;
-    case Range::Tag::Valid:
-        ni_pushInt64(value.valid->length);
-        ni_pushInt64(value.valid->location);
-        break;
-    }
-    ni_pushInt32((int32_t)value.tag);
+    ni_pushInt64(value.length);
+    ni_pushInt64(value.location);
 }
 
 Range Range__pop() {
-    auto which = ni_popInt32();
-    switch ((Range::Tag)which) {
-    case Range::Tag::NotFound: {
-        return Range::NotFound::make(); }
-    case Range::Tag::Zero: {
-        return Range::Zero::make(); }
-    case Range::Tag::Valid: {
-        auto location = ni_popInt64();
-        auto length = ni_popInt64();
-        return Range::Valid::make(location, length); }
-    default:
-        throw "Range__pop(): unknown tag!";
-    }
+    auto location = ni_popInt64();
+    auto length = ni_popInt64();
+    return Range { location, length };
 }
 
 void Frame__push(Frame value) {
@@ -607,6 +588,12 @@ void DrawContext_setRGBStrokeColor__wrapper() {
     auto blue = ni_popDouble();
     auto alpha = ni_popDouble();
     DrawContext_setRGBStrokeColor(_this, red, green, blue, alpha);
+}
+
+void DrawContext_setFillColorWithColor__wrapper() {
+    auto _this = DrawContext__pop();
+    auto color = Color__pop();
+    DrawContext_setFillColorWithColor(_this, color);
 }
 
 void DrawContext_fillRect__wrapper() {
@@ -1031,6 +1018,7 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_restoreGState", &DrawContext_restoreGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setRGBFillColor", &DrawContext_setRGBFillColor__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setRGBStrokeColor", &DrawContext_setRGBStrokeColor__wrapper);
+    ni_registerModuleMethod(m, "DrawContext_setFillColorWithColor", &DrawContext_setFillColorWithColor__wrapper);
     ni_registerModuleMethod(m, "DrawContext_fillRect", &DrawContext_fillRect__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setTextMatrix", &DrawContext_setTextMatrix__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setTextPosition", &DrawContext_setTextPosition__wrapper);

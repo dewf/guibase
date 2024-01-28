@@ -15,28 +15,32 @@ internal class ClientAttrMap
         _customRunAttributes.Add(id, attr);
         return id;
     }
-    public CustomRunAttribute AttrFor(long id)
+    public Dictionary<string, CustomRunAttribute> GetMap(Dictionary<string, long> idMap)
     {
-        return _customRunAttributes[id];
+		return idMap
+			.Select(pair => new KeyValuePair<string, CustomRunAttribute>(pair.Key, _customRunAttributes[pair.Value]))
+			.ToDictionary();
     }
 }
 
 public class TextFormattingPage(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
-    private const string Text = """
-                                This paragraph of text rendered with DirectWrite is based on IDWriteTextFormat and IDWriteTextLayout
-                                 objects and uses a custom format specifier passed to the SetDrawingEffect method, and thus is
-                                 capable of different RBG RGB foreground colors, such as red, green, and blue as well as double
-                                 underline, triple underline, single strikethrough, double strikethrough, triple strikethrough, or combinations thereof.
-                                 Also possible is something often referred to as an overline, as well as a squiggly (squiggly?) underline.
-                                """;
+	private const string Text =
+		"This paragraph of text rendered with DirectWrite is based on IDWriteTextFormat and IDWriteTextLayout " +
+		"objects and uses a custom format specifier passed to the SetDrawingEffect method, and thus is " +
+		"capable of different RBG RGB foreground colors, such as red, green, and blue as well as double " +
+		"underline, triple underline, single strikethrough, double strikethrough, triple strikethrough, or combinations thereof. " +
+		"Also possible is something often referred to as an overline, as well as a squiggly (squiggly?) underline.";
+	
     // custom run attributes:
     private const string BackgroundKey = "kDLBackgroundAttributeName"; // color
     private const string HighlightKey = "kDLHighlightAttributeName"; // color
     private const string StrikeCountKey = "kDLStrikeCountAttributeName"; // int
     private const string StrikeColorKey = "kDLStrikeColorAttributeName"; // color
-    private const string UnderlineKey = "kDLUnderlineStyleAttributeName"; // enum
-    private const string UnderlineColor = "kDLUnderlineColorAttributeName"; // color
+    private const string UnderlineStyleKey = "kDLUnderlineStyleAttributeName"; // enum
+    private const string UnderlineColorKey = "kDLUnderlineColorAttributeName"; // color
+
+    private static readonly string[] AllCustomAttributes = [BackgroundKey, HighlightKey, StrikeCountKey, StrikeColorKey, UnderlineStyleKey, UnderlineColorKey];
     
     public override void Render(DrawContext context, RenderArea area)
     {
@@ -63,7 +67,7 @@ public class TextFormattingPage(IWindowMethods windowMethods) : BasePage(windowM
         using var yellow = Color.CreateGenericRGB(1, 1, 0, 1);
         
         using var attrString = MutableAttributedString.Create(0); // 0 = amt of storage to reserve, no hint
-        attrString.ReplaceString(new Drawing.Range.Zero(), Text); // was: MakeRange(0, 0), not sure if that's the same, should be
+        attrString.ReplaceString(RangeZero, Text); // was: MakeRange(0, 0), not sure if that's the same, should be
 
         var strLen = attrString.GetLength();
         var fullRange = MakeRange(0, strLen);
@@ -78,7 +82,7 @@ public class TextFormattingPage(IWindowMethods windowMethods) : BasePage(windowM
 
         range = StringFind(Text, "IDWriteTextFormat");
         attrString.SetAttribute(range, new AttributedStringOptions { Font = timesItalic });
-        
+
         range = StringFind(Text, "IDWriteTextLayout");
         attrString.SetAttribute(range, new AttributedStringOptions { Font = timesItalic });
 
@@ -93,19 +97,19 @@ public class TextFormattingPage(IWindowMethods windowMethods) : BasePage(windowM
         
         // RBG strikethrough
         range = StringFind(Text, "RBG");
-        attrString.SetAttribute(MakeRange(range.Location(), 1), new AttributedStringOptions { ForegroundColor = red });
-        attrString.SetAttribute(MakeRange(range.Location() + 1, 1), new AttributedStringOptions { ForegroundColor = blue });
-        attrString.SetAttribute(MakeRange(range.Location() + 2, 1), new AttributedStringOptions { ForegroundColor = green });
+        attrString.SetAttribute(MakeRange(range.Location, 1), new AttributedStringOptions { ForegroundColor = red });
+        attrString.SetAttribute(MakeRange(range.Location + 1, 1), new AttributedStringOptions { ForegroundColor = blue });
+        attrString.SetAttribute(MakeRange(range.Location + 2, 1), new AttributedStringOptions { ForegroundColor = green });
         // strike count:
         attrString.SetCustomAttribute(range, StrikeCountKey, attrManager.Insert(new IntAttribute(1)));
         
         // RGB
         range = StringFind(Text, "RGB");
-        attrString.SetAttribute(MakeRange(range.Location(), 1), new AttributedStringOptions { ForegroundColor = red });
-        attrString.SetAttribute(MakeRange(range.Location() + 1, 1), new AttributedStringOptions { ForegroundColor = green });
-        attrString.SetAttribute(MakeRange(range.Location() + 2, 1), new AttributedStringOptions { ForegroundColor = blue });
-        attrString.SetCustomAttribute(range, UnderlineKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Single)));
-        attrString.SetCustomAttribute(range, UnderlineColor, attrManager.Insert(new ColorAttribute(yellow)));
+        attrString.SetAttribute(MakeRange(range.Location, 1), new AttributedStringOptions { ForegroundColor = red });
+        attrString.SetAttribute(MakeRange(range.Location + 1, 1), new AttributedStringOptions { ForegroundColor = green });
+        attrString.SetAttribute(MakeRange(range.Location + 2, 1), new AttributedStringOptions { ForegroundColor = blue });
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Single)));
+        attrString.SetCustomAttribute(range, UnderlineColorKey, attrManager.Insert(new ColorAttribute(yellow)));
         
         range = StringFind(Text, " red");
         attrString.SetAttribute(range, new AttributedStringOptions { ForegroundColor = red });
@@ -115,61 +119,239 @@ public class TextFormattingPage(IWindowMethods windowMethods) : BasePage(windowM
         attrString.SetAttribute(range, new AttributedStringOptions { ForegroundColor = blue });
         
         range = StringFind(Text, "double underline");
-        attrString.SetCustomAttribute(range, UnderlineKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Double)));
-
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Double)));
+        
         range = StringFind(Text, "triple underline");
-        attrString.SetCustomAttribute(range, UnderlineKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Triple)));
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Triple)));
         
         range = StringFind(Text, "single strikethrough");
         attrString.SetCustomAttribute(range, StrikeCountKey, attrManager.Insert(new IntAttribute(1)));
-
+        
         range = StringFind(Text, "double strikethrough");
         attrString.SetCustomAttribute(range, StrikeCountKey, attrManager.Insert(new IntAttribute(2)));
-
+        
         range = StringFind(Text, "triple strikethrough");
         attrString.SetCustomAttribute(range, StrikeCountKey, attrManager.Insert(new IntAttribute(3)));
         
         range = StringFind(Text, "combinations");
         attrString.SetCustomAttribute(range, StrikeCountKey, attrManager.Insert(new IntAttribute(2)));
         attrString.SetCustomAttribute(range, StrikeColorKey, attrManager.Insert(new ColorAttribute(red)));
-        attrString.SetCustomAttribute(range, UnderlineKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Triple)));
-
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Triple)));
+        
         range = StringFind(Text, "thereof");
         attrString.SetCustomAttribute(range, StrikeCountKey, attrManager.Insert(new IntAttribute(3)));
-        attrString.SetCustomAttribute(range, UnderlineKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Double)));
-        attrString.SetCustomAttribute(range, UnderlineColor, attrManager.Insert(new ColorAttribute(blue)));
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Double)));
+        attrString.SetCustomAttribute(range, UnderlineColorKey, attrManager.Insert(new ColorAttribute(blue)));
         
         range = StringFind(Text, "overline");
-        attrString.SetCustomAttribute(range, UnderlineKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Overline)));
-        attrString.SetCustomAttribute(range, UnderlineColor, attrManager.Insert(new ColorAttribute(blue)));
-
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Overline)));
+        attrString.SetCustomAttribute(range, UnderlineColorKey, attrManager.Insert(new ColorAttribute(blue)));
+        
         range = StringFind(Text, "squiggly (squiggly?) underline");
-        attrString.SetCustomAttribute(range, UnderlineKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Squiggly)));
-        attrString.SetCustomAttribute(range, UnderlineColor, attrManager.Insert(new ColorAttribute(blue)));
-
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Squiggly)));
+        attrString.SetCustomAttribute(range, UnderlineColorKey, attrManager.Insert(new ColorAttribute(blue)));
+        
         range = StringFind(Text, "(squiggly?)");
-        attrString.SetCustomAttribute(range, UnderlineColor, attrManager.Insert(new ColorAttribute(red)));
-
+        attrString.SetCustomAttribute(range, UnderlineColorKey, attrManager.Insert(new ColorAttribute(red)));
+        
         range = StringFind(Text, "IDWriteTextLayout");
-        attrString.SetCustomAttribute(range, UnderlineKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Squiggly)));
-        attrString.SetCustomAttribute(range, UnderlineColor, attrManager.Insert(new ColorAttribute(blue)));
+        attrString.SetCustomAttribute(range, UnderlineStyleKey, attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Squiggly)));
+        attrString.SetCustomAttribute(range, UnderlineColorKey, attrManager.Insert(new ColorAttribute(blue)));
         attrString.SetCustomAttribute(range, HighlightKey, attrManager.Insert(new ColorAttribute(alphaYellow)));
         
         // end batch editing
         attrString.EndEditing();
-
+        
         // framesetter
         using var frameSetter = FrameSetter.CreateWithAttributedString(attrString.GetNormalAttributedString_REMOVEME()); // we need opaque inheritance!
-        using var frame = frameSetter.CreateFrame(new Drawing.Range.Zero(), rectPath); // don't know what the final argument NULL could be (not implemented yet)
-
+        using var frame = frameSetter.CreateFrame(RangeZero, rectPath); // don't know what the final argument NULL could be (not implemented yet)
+        
         // draw background color, underlines
-        // drawFrameEffects(c, frame, rect, Background, black);
-
+        DrawFrameEffects(context, frame, rect, EffectLayer.Background, black, attrManager);
+        
         // draw text + built-in CT effects
-        // dl_CTFrameDraw(frame, c);
         frame.Draw(context);
-
+        
         // draw strikethroughs, highlights
-        // drawFrameEffects(c, frame, rect, Overlay, black);
+        DrawFrameEffects(context, frame, rect, EffectLayer.Overlay, black, attrManager);
+    }
+
+    private enum EffectLayer
+    {
+	    Background,
+	    Overlay
+    }
+
+    private static void DrawFrameEffects(DrawContext context, Frame frame, Rect rect, EffectLayer layer, Color defaultColor, ClientAttrMap attrMap)
+    {
+	    // really should just combine these into a single call, since origins requires checking the lines array internally
+	    var lines = frame.GetLines();
+	    var origins = frame.GetLineOrigins(RangeZero);
+
+	    foreach (var (line, origin) in lines.Zip(origins, Tuple.Create))
+	    {
+		    // illustrate origins =================
+		    context.SetRGBFillColor(1, 0, 0, 1);
+		    context.FillRect(MakeRect(origin.X - 2, origin.Y - 2, 4, 4));
+		    // end=================================
+
+		    var lineTypoBounds = line.GetTypographicBounds();
+		    
+		    foreach (var run in line.GetGlyphRuns())
+		    {
+			    // TODO: add a custom map to the AttributedStringOptions?
+			    // wish there was a way to maintain a server-side list of all custom keys, so we don't have to pass the AllCustomAttributes array every time
+			    
+			    var attrs = run.GetAttributes();
+			    attrs.HasForegroundColor(out var fgColor);
+			    attrs.HasFont(out var font);
+			    attrs.HasStrokeWidth(out var strokeWidth);
+			    attrs.HasStrokeColor(out var strokeColor);
+			    // attrs.HasForegroundColorFromContext(out var fgColorFromContext);
+
+			    var customMap = attrMap.GetMap(run.GetCustomAttributes(AllCustomAttributes));
+			    customMap.TryGetValue(BackgroundKey, out var bgColor);
+			    customMap.TryGetValue(HighlightKey, out var highColor);
+			    customMap.TryGetValue(StrikeCountKey, out var strikeCount);
+			    customMap.TryGetValue(StrikeColorKey, out var strikeColor);
+			    customMap.TryGetValue(UnderlineStyleKey, out var underStyle);
+			    customMap.TryGetValue(UnderlineColorKey, out var underColor);
+
+			    var runTypoBounds = run.GetTypographicBounds(RangeZero);
+			    var runBounds = RectZero;
+			    
+			    // might want to pad these with user-definable pads?
+			    runBounds.Size.Width = runTypoBounds.Width;
+			    runBounds.Size.Height = runTypoBounds.Ascent + runTypoBounds.Descent;
+
+			    var xOffset = 0.0;
+			    var glyphRange = run.GetStringRange();
+			    var status = run.GetStatus();
+			    if (status.HasFlag(RunStatus.RightToLeft))
+			    {
+				    var (offs1, _) = line.GetLineOffsetForStringIndex(glyphRange.Location + glyphRange.Length);
+				    xOffset = offs1;
+			    }
+			    else
+			    {
+				    var (offs1, _) = line.GetLineOffsetForStringIndex(glyphRange.Location);
+				    xOffset = offs1;
+			    }
+
+			    runBounds.Origin.X = origin.X + xOffset;
+			    runBounds.Origin.Y = origin.Y;
+			    runBounds.Origin.Y -= runTypoBounds.Ascent;
+
+			    if (runBounds.Size.Width > lineTypoBounds.Width)
+			    {
+				    runBounds.Size.Width = lineTypoBounds.Width;
+			    }
+
+			    if (layer == EffectLayer.Background)
+			    {
+				    if (bgColor != null)
+				    {
+					    context.SetFillColorWithColor(bgColor.GetColor());
+					    context.FillRect(runBounds);
+				    }
+				    if (underStyle != null)
+				    {
+					    var ulStyle = underStyle.GetUnderlineStyle();
+					    var ulColor = 
+						    underColor != null
+						    ? underColor.GetColor() 
+						    : fgColor ?? defaultColor;
+					    context.SetStrokeColorWithColor(ulColor);
+
+					    var thickness = font.GetUnderlineThickness();
+					    context.SetLineWidth(thickness);
+
+					    var y = origin.Y + font.GetUnderlinePosition();
+
+					    if (ulStyle is >= UnderlineStyle.Single and <= UnderlineStyle.Triple)
+					    {
+						    context.MoveToPoint(runBounds.Origin.X, y);
+						    context.AddLineToPoint(runBounds.Origin.X + runBounds.Size.Width, y);
+						    context.StrokePath();
+						    if (ulStyle >= UnderlineStyle.Double)
+						    {
+							    y += thickness * 2;
+							    context.MoveToPoint(runBounds.Origin.X, y);
+							    context.AddLineToPoint(runBounds.Origin.X + runBounds.Size.Width, y);
+							    context.StrokePath();
+							    if (ulStyle >= UnderlineStyle.Triple)
+							    {
+								    y += thickness * 2;
+								    context.MoveToPoint(runBounds.Origin.X, y);
+								    context.AddLineToPoint(runBounds.Origin.X + runBounds.Size.Width, y);
+								    context.StrokePath();
+							    }
+						    }
+					    } else if (ulStyle == UnderlineStyle.Overline)
+					    {
+						    y -= runTypoBounds.Ascent - thickness; // thickness hopefully being proportional to font size ...
+						    context.MoveToPoint(runBounds.Origin.X, y);
+						    context.AddLineToPoint(runBounds.Origin.X + runBounds.Size.Width, y);
+						    context.StrokePath();
+					    } else if (ulStyle == UnderlineStyle.Squiggly)
+					    {
+						    var amplitude = thickness;
+						    var period = 5 * thickness;
+
+						    for (var t = 0; t < runBounds.Size.Width; t++)
+						    {
+							    var px = runBounds.Origin.X + t;
+							    var angle = Math.PI * 2 * (px % period) / period; // fmod
+							    var py = y + Math.Sin(angle) * amplitude;
+							    if (t == 0)
+							    {
+								    context.MoveToPoint(px, py);
+							    }
+							    else
+							    {
+								    context.AddLineToPoint(px, py);
+							    }
+						    }
+						    context.StrokePath();
+					    }
+				    }
+			    } else if (layer == EffectLayer.Overlay)
+			    {
+				    if (strikeCount != null)
+				    {
+					    var theCount = strikeCount.GetInt();
+					    var useColor = strikeColor != null ? strikeColor.GetColor() : (fgColor ?? defaultColor);
+					    context.SetStrokeColorWithColor(useColor);
+
+					    var thickness = font.GetUnderlineThickness();
+					    context.SetLineWidth(thickness);
+
+					    var y = origin.Y - (runTypoBounds.Ascent / 4.0);
+					    if (theCount is 1 or 3)
+					    {
+						    context.MoveToPoint(runBounds.Origin.X, y);
+						    context.AddLineToPoint(runBounds.Origin.X + runBounds.Size.Width, y);
+						    context.StrokePath();
+					    }
+					    if (theCount is 2 or 3)
+					    {
+						    var y2 = y - (thickness * (theCount - 1));
+						    context.MoveToPoint(runBounds.Origin.X, y2);
+						    context.AddLineToPoint(runBounds.Origin.X + runBounds.Size.Width, y2);
+						    context.StrokePath();
+						    y2 = y + (thickness * (theCount - 1));
+						    context.MoveToPoint(runBounds.Origin.X, y2);
+						    context.AddLineToPoint(runBounds.Origin.X + runBounds.Size.Width, y2);
+						    context.StrokePath();
+					    }
+				    }
+				    if (highColor != null)
+				    {
+					    context.SetFillColorWithColor(highColor.GetColor());
+					    context.FillRect(runBounds);
+				    }
+			    }
+		    }
+	    }
     }
 }

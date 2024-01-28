@@ -40,7 +40,7 @@ private:
         StrokeWidthField = 8,
         StrokeColorField = 16
     };
-    int32_t _usedFields = 0; // must be set!
+    int32_t _usedFields;
     Color _foregroundColor;
     bool _foregroundColorFromContext;
     Font _font;
@@ -285,39 +285,8 @@ public:
 // std::vector<Point>
 
 struct Range {
-public:
-    enum class Tag {
-        NotFound,
-        Zero,
-        Valid
-    };
-    const Tag tag;
-    struct NotFound {
-        static Range make() {
-            Range ret{ Tag::NotFound };
-            ret.notFound = std::shared_ptr<NotFound>(new NotFound{  });
-            return ret;
-        }
-    };
-    struct Zero {
-        static Range make() {
-            Range ret{ Tag::Zero };
-            ret.zero = std::shared_ptr<Zero>(new Zero{  });
-            return ret;
-        }
-    };
-    struct Valid {
-        const int64_t location;
-        const int64_t length;
-        static Range make(int64_t location, int64_t length) {
-            Range ret{ Tag::Valid };
-            ret.valid = std::shared_ptr<Valid>(new Valid{ location, length });
-            return ret;
-        }
-    };
-    std::shared_ptr<NotFound> notFound;
-    std::shared_ptr<Zero> zero;
-    std::shared_ptr<Valid> valid;
+    int64_t location;
+    int64_t length;
 };
 
 
@@ -387,6 +356,7 @@ void DrawContext_saveGState(DrawContext _this);
 void DrawContext_restoreGState(DrawContext _this);
 void DrawContext_setRGBFillColor(DrawContext _this, double red, double green, double blue, double alpha);
 void DrawContext_setRGBStrokeColor(DrawContext _this, double red, double green, double blue, double alpha);
+void DrawContext_setFillColorWithColor(DrawContext _this, Color color);
 void DrawContext_fillRect(DrawContext _this, Rect rect);
 void DrawContext_setTextMatrix(DrawContext _this, AffineTransform t);
 void DrawContext_setTextPosition(DrawContext _this, double x, double y);

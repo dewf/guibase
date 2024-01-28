@@ -13,6 +13,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     private readonly TextBoundsCircle _page02;
     private readonly TextStrokeFill _page03;
     private readonly ResizeGradient _page04;
+    private readonly TextFormattingPage _page05;
     private IPage _currentPage;
 
     public bool IsDestroyed { get; private set; }
@@ -30,6 +31,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
         _page02 = new TextBoundsCircle(this);
         _page03 = new TextStrokeFill(this);
         _page04 = new ResizeGradient(this);
+        _page05 = new TextFormattingPage(this);
         _currentPage = _page01;
     }
 
@@ -87,6 +89,9 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
                 break;
             case Key._4:
                 SelectPage(_page04);
+                break;
+            case Key._5:
+                SelectPage(_page05);
                 break;
             default:
                 _currentPage.OnKeyDown(key, modifiers);

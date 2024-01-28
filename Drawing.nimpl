@@ -101,6 +101,7 @@ opaque DrawContext {
     void restoreGState();
     void setRGBFillColor(double red, double green, double blue, double alpha);
     void setRGBStrokeColor(double red, double green, double blue, double alpha);
+    void setFillColorWithColor(Color color);
     void fillRect(Rect rect);
     void setTextMatrix(AffineTransform t);
     void setTextPosition(double x, double y);
@@ -148,10 +149,11 @@ options AttributedStringOptions {
     // but ints yield greater flexibiliy, because we can store absolutely whatever on the client side instead (not limiting us to known CF* types)
 }
 
-sumtype Range {
-    NotFound,
-    Zero,
-    Valid(long location, long length)
+// had this as a sumtype (notfound, zero, actual())
+// but too annoying / overkill
+struct Range {
+    long location;
+    long length;
 }
 
 opaque AttributedString {
@@ -240,6 +242,8 @@ opaque Frame {
     void draw(DrawContext context);
     Array<Line> getLines();
     Array<Point> getLineOrigins(Range range); // zero range = fetch all
+    // getLineOrigins relies on getting the array again (and when would you want to do them separately?)
+    // so might as well combine into a single method for Line + Point
 }
 
 opaque FrameSetter {

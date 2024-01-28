@@ -9,31 +9,24 @@ public static class Common
     {
         return new Rect(new Point(x, y), new Size(width, height));
     }
+    public static readonly Drawing.Rect RectZero = MakeRect(0, 0, 0, 0);
 
     public static Drawing.Range MakeRange(long location, long length)
     {
-        return new Drawing.Range.Valid(location, length);
+        return new Drawing.Range(location, length);
     }
 
-    public static long Location(this Drawing.Range range)
-    {
-        return range switch
-        {
-            Drawing.Range.NotFound _ => -1,
-            Drawing.Range.Valid valid => valid.Location,
-            Drawing.Range.Zero _ => 0,
-            _ => throw new ArgumentOutOfRangeException(nameof(range))
-        };
-    }
+    public static readonly Drawing.Range RangeZero = new Drawing.Range(0, 0);
+    public static readonly Drawing.Range RangeNotFound = new Drawing.Range(-1, -1);
 
     public static Drawing.Range StringFind(string str, string substring)
     {
         var result = str.IndexOf(substring, StringComparison.Ordinal);
         if (result >= 0)
         {
-            return new Drawing.Range.Valid(result, substring.Length);
+            return MakeRange(result, substring.Length);
         }
-        return new Drawing.Range.NotFound();
+        return RangeNotFound;
     }
     
     public static void PointAt(DrawContext context, Point p)

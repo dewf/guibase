@@ -208,6 +208,11 @@ void DrawContext_drawLinearGradient(DrawContext _this, Gradient gradient, Point 
         drawOpts);
 }
 
+void DrawContext_setFillColorWithColor(DrawContext _this, Color color)
+{
+    dl_CGContextSetFillColorWithColor((dl_CGContextRef)_this, (dl_CGColorRef)color);
+}
+
 Color Color_createGenericRGB(double red, double green, double blue, double alpha)
 {
     return (Color)dl_CGColorCreateGenericRGB(red, green, blue, alpha);
@@ -419,7 +424,6 @@ void MutableAttributedString_setCustomAttribute(MutableAttributedString _this, R
 
 AttributedString MutableAttributedString_getNormalAttributedString_REMOVEME(MutableAttributedString _this)
 {
-    printf("getNormalAttributedString_REMOVEME!!!\n");
     return (AttributedString)_this;
 }
 
@@ -538,11 +542,6 @@ void Font_dispose(Font _this)
     dl_CFRelease(_this);
 }
 
-AttributedStringOptions Run_getAttributes(Run _this, std::vector<std::string> customKeys)
-{
-    return AttributedStringOptions();
-}
-
 AttributedStringOptions Run_getAttributes(Run _this)
 {
     AttributedStringOptions ret;
@@ -659,12 +658,71 @@ std::vector<Run> Line_getGlyphRuns(Line _this)
     return ret;
 }
 
+std::tuple<double, double> Line_getLineOffsetForStringIndex(Line _this, int64_t charIndex)
+{
+    double secondary;
+    auto primary = dl_CTLineGetOffsetForStringIndex((dl_CTLineRef)_this, charIndex, &secondary);
+    return std::tuple<double, double>(primary, secondary);
+}
+
 Line Line_createWithAttributedString(AttributedString str)
 {
     return (Line)dl_CTLineCreateWithAttributedString((dl_CFAttributedStringRef)str);
 }
 
 void Line_dispose(Line _this)
+{
+    dl_CFRelease(_this);
+}
+
+void Frame_draw(Frame _this, DrawContext context)
+{
+    dl_CTFrameDraw((dl_CTFrameRef)_this, (dl_CGContextRef)context);
+}
+
+std::vector<Line> Frame_getLines(Frame _this)
+{
+    auto arr = dl_CTFrameGetLines((dl_CTFrameRef)_this);
+    auto count = dl_CFArrayGetCount(arr);
+
+    std::vector<Line> ret;
+    for (auto i = 0; i < count; i++) {
+        auto line = (dl_CTLineRef)dl_CFArrayGetValueAtIndex(arr, i);
+        ret.push_back((Line)line);
+    }
+    return ret;
+}
+
+std::vector<Point> Frame_getLineOrigins(Frame _this, Range range)
+{
+    auto arr = dl_CTFrameGetLines((dl_CTFrameRef)_this);
+    auto count = dl_CFArrayGetCount(arr);
+    auto points = new Point[count];
+    dl_CTFrameGetLineOrigins((dl_CTFrameRef)_this, STRUCT_CAST(dl_CFRange, range), (dl_CGPoint*)points);
+    auto ret = std::vector<Point>(points, points + count);
+    delete[] points;
+    return ret;
+}
+
+void Frame_dispose(Frame _this)
+{
+    dl_CFRelease((dl_CTFrameRef)_this);
+}
+
+FrameSetter FrameSetter_createWithAttributedString(AttributedString str)
+{
+    return (FrameSetter)dl_CTFramesetterCreateWithAttributedString((dl_CFAttributedStringRef)str);
+}
+
+Frame FrameSetter_createFrame(FrameSetter _this, Range range, Path path)
+{
+    auto dict = dl_CFDictionaryCreate(nullptr, nullptr, 0);
+    auto ret = (Frame)dl_CTFramesetterCreateFrame((dl_CTFramesetterRef)_this, STRUCT_CAST(dl_CFRange, range), (dl_CGPathRef)path, dict);
+    dl_CFRelease(dict);
+    return ret;
+}
+
+void FrameSetter_dispose(FrameSetter _this)
 {
     dl_CFRelease(_this);
 }

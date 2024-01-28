@@ -28,6 +28,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _drawContext_restoreGState;
         private static ModuleMethodHandle _drawContext_setRGBFillColor;
         private static ModuleMethodHandle _drawContext_setRGBStrokeColor;
+        private static ModuleMethodHandle _drawContext_setFillColorWithColor;
         private static ModuleMethodHandle _drawContext_fillRect;
         private static ModuleMethodHandle _drawContext_setTextMatrix;
         private static ModuleMethodHandle _drawContext_setTextPosition;
@@ -629,6 +630,12 @@ namespace Org.Prefixed.GuiBase
                 DrawContext__Push(this);
                 NativeImplClient.InvokeModuleMethod(_drawContext_setRGBStrokeColor);
             }
+            public void SetFillColorWithColor(Color color)
+            {
+                Color__Push(color);
+                DrawContext__Push(this);
+                NativeImplClient.InvokeModuleMethod(_drawContext_setFillColorWithColor);
+            }
             public void FillRect(Rect rect)
             {
                 Rect__Push(rect, false);
@@ -1181,68 +1188,27 @@ namespace Org.Prefixed.GuiBase
             return ret;
         }
 
-        public abstract record Range
-        {
-            public sealed record NotFound : Range;
-            public sealed record Zero : Range;
-            public sealed record Valid(long Location, long Length) : Range
+        public struct Range {
+            public long Location;
+            public long Length;
+            public Range(long location, long length)
             {
-                public long Location { get; } = Location;
-                public long Length { get; } = Length;
+                this.Location = location;
+                this.Length = length;
             }
         }
 
-        private enum Range__Tag
+        internal static void Range__Push(Range value, bool isReturn)
         {
-            NotFound,
-            Zero,
-            Valid
-        }
-
-        internal static void Range__Push(Range thing, bool isReturn)
-        {
-            Range__Tag which;
-            switch (thing)
-            {
-                case Range.NotFound notFound:
-                    which = Range__Tag.NotFound;
-                    break;
-                case Range.Zero zero:
-                    which = Range__Tag.Zero;
-                    break;
-                case Range.Valid valid:
-                    which = Range__Tag.Valid;
-                    NativeImplClient.PushInt64(valid.Length);
-                    NativeImplClient.PushInt64(valid.Location);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(thing));
-            }
-            NativeImplClient.PushInt32((int)which);
+            NativeImplClient.PushInt64(value.Length);
+            NativeImplClient.PushInt64(value.Location);
         }
 
         internal static Range Range__Pop()
         {
-            var which = NativeImplClient.PopInt32();
-            switch ((Range__Tag)which)
-            {
-                case Range__Tag.NotFound:
-                {
-                    return new Range.NotFound();
-                }
-                case Range__Tag.Zero:
-                {
-                    return new Range.Zero();
-                }
-                case Range__Tag.Valid:
-                {
-                    var location = NativeImplClient.PopInt64();
-                    var length = NativeImplClient.PopInt64();
-                    return new Range.Valid(location, length);
-                }
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            var location = NativeImplClient.PopInt64();
+            var length = NativeImplClient.PopInt64();
+            return new Range(location, length);
         }
 
         public class Frame : IDisposable
@@ -1877,6 +1843,7 @@ namespace Org.Prefixed.GuiBase
             _drawContext_restoreGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_restoreGState");
             _drawContext_setRGBFillColor = NativeImplClient.GetModuleMethod(_module, "DrawContext_setRGBFillColor");
             _drawContext_setRGBStrokeColor = NativeImplClient.GetModuleMethod(_module, "DrawContext_setRGBStrokeColor");
+            _drawContext_setFillColorWithColor = NativeImplClient.GetModuleMethod(_module, "DrawContext_setFillColorWithColor");
             _drawContext_fillRect = NativeImplClient.GetModuleMethod(_module, "DrawContext_fillRect");
             _drawContext_setTextMatrix = NativeImplClient.GetModuleMethod(_module, "DrawContext_setTextMatrix");
             _drawContext_setTextPosition = NativeImplClient.GetModuleMethod(_module, "DrawContext_setTextPosition");

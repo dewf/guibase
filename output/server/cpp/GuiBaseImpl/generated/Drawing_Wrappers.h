@@ -47,6 +47,7 @@ OptArgs OptArgs__pop();
 
 void Font__push(Font value);
 Font Font__pop();
+
 void Range__push(Range value, bool isReturn);
 Range Range__pop();
 
@@ -120,6 +121,8 @@ void DrawContext_restoreGState__wrapper();
 void DrawContext_setRGBFillColor__wrapper();
 
 void DrawContext_setRGBStrokeColor__wrapper();
+
+void DrawContext_setFillColorWithColor__wrapper();
 
 void DrawContext_fillRect__wrapper();
 
