@@ -200,22 +200,17 @@ struct Range {
 }
 
 opaque AttributedString {
+    long getLength();
     static AttributedString create(string s, AttributedStringOptions opts);
 }
 
-opaque MutableAttributedString { // todo: inherit from AttributedString, meaning the backend can operate on it that way as well
-    // AttributedString methods, actually:
-    long getLength();
-
-    // Mutable methods:
+opaque MutableAttributedString extends AttributedString {
     void replaceString(Range range, string str);
-    void beginEditing();
-    void endEditing();
     void setAttribute(Range range, AttributedStringOptions attr);
     void setCustomAttribute(Range range, string key, long value); // ID key has client-specific meaning (use a dictionary or something)
 
-    // temporary, until we get inheritance working
-    AttributedString getNormalAttributedString_REMOVEME();
+    void beginEditing(); // for batch edits
+    void endEditing();
 
     static MutableAttributedString create(long maxLength);
 }

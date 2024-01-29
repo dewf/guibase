@@ -1298,6 +1298,11 @@ void DrawContext_dispose__wrapper() {
     DrawContext_dispose(_this);
 }
 
+void AttributedString_getLength__wrapper() {
+    auto _this = AttributedString__pop();
+    ni_pushInt64(AttributedString_getLength(_this));
+}
+
 void AttributedString_create__wrapper() {
     auto s = popStringInternal();
     auto opts = AttributedStringOptions__pop();
@@ -1309,26 +1314,11 @@ void AttributedString_dispose__wrapper() {
     AttributedString_dispose(_this);
 }
 
-void MutableAttributedString_getLength__wrapper() {
-    auto _this = MutableAttributedString__pop();
-    ni_pushInt64(MutableAttributedString_getLength(_this));
-}
-
 void MutableAttributedString_replaceString__wrapper() {
     auto _this = MutableAttributedString__pop();
     auto range = Range__pop();
     auto str = popStringInternal();
     MutableAttributedString_replaceString(_this, range, str);
-}
-
-void MutableAttributedString_beginEditing__wrapper() {
-    auto _this = MutableAttributedString__pop();
-    MutableAttributedString_beginEditing(_this);
-}
-
-void MutableAttributedString_endEditing__wrapper() {
-    auto _this = MutableAttributedString__pop();
-    MutableAttributedString_endEditing(_this);
 }
 
 void MutableAttributedString_setAttribute__wrapper() {
@@ -1346,9 +1336,14 @@ void MutableAttributedString_setCustomAttribute__wrapper() {
     MutableAttributedString_setCustomAttribute(_this, range, key, value);
 }
 
-void MutableAttributedString_getNormalAttributedString_REMOVEME__wrapper() {
+void MutableAttributedString_beginEditing__wrapper() {
     auto _this = MutableAttributedString__pop();
-    AttributedString__push(MutableAttributedString_getNormalAttributedString_REMOVEME(_this));
+    MutableAttributedString_beginEditing(_this);
+}
+
+void MutableAttributedString_endEditing__wrapper() {
+    auto _this = MutableAttributedString__pop();
+    MutableAttributedString_endEditing(_this);
 }
 
 void MutableAttributedString_create__wrapper() {
@@ -1571,15 +1566,14 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_drawLinearGradient", &DrawContext_drawLinearGradient__wrapper);
     ni_registerModuleMethod(m, "DrawContext_batchDraw", &DrawContext_batchDraw__wrapper);
     ni_registerModuleMethod(m, "DrawContext_dispose", &DrawContext_dispose__wrapper);
+    ni_registerModuleMethod(m, "AttributedString_getLength", &AttributedString_getLength__wrapper);
     ni_registerModuleMethod(m, "AttributedString_create", &AttributedString_create__wrapper);
     ni_registerModuleMethod(m, "AttributedString_dispose", &AttributedString_dispose__wrapper);
-    ni_registerModuleMethod(m, "MutableAttributedString_getLength", &MutableAttributedString_getLength__wrapper);
     ni_registerModuleMethod(m, "MutableAttributedString_replaceString", &MutableAttributedString_replaceString__wrapper);
-    ni_registerModuleMethod(m, "MutableAttributedString_beginEditing", &MutableAttributedString_beginEditing__wrapper);
-    ni_registerModuleMethod(m, "MutableAttributedString_endEditing", &MutableAttributedString_endEditing__wrapper);
     ni_registerModuleMethod(m, "MutableAttributedString_setAttribute", &MutableAttributedString_setAttribute__wrapper);
     ni_registerModuleMethod(m, "MutableAttributedString_setCustomAttribute", &MutableAttributedString_setCustomAttribute__wrapper);
-    ni_registerModuleMethod(m, "MutableAttributedString_getNormalAttributedString_REMOVEME", &MutableAttributedString_getNormalAttributedString_REMOVEME__wrapper);
+    ni_registerModuleMethod(m, "MutableAttributedString_beginEditing", &MutableAttributedString_beginEditing__wrapper);
+    ni_registerModuleMethod(m, "MutableAttributedString_endEditing", &MutableAttributedString_endEditing__wrapper);
     ni_registerModuleMethod(m, "MutableAttributedString_create", &MutableAttributedString_create__wrapper);
     ni_registerModuleMethod(m, "MutableAttributedString_dispose", &MutableAttributedString_dispose__wrapper);
     ni_registerModuleMethod(m, "Font_createCopyWithSymbolicTraits", &Font_createCopyWithSymbolicTraits__wrapper);

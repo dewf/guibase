@@ -190,23 +190,21 @@ void DrawContext_batchDraw__wrapper();
 
 void DrawContext_dispose__wrapper();
 
+void AttributedString_getLength__wrapper();
+
 void AttributedString_create__wrapper();
 
 void AttributedString_dispose__wrapper();
 
-void MutableAttributedString_getLength__wrapper();
-
 void MutableAttributedString_replaceString__wrapper();
-
-void MutableAttributedString_beginEditing__wrapper();
-
-void MutableAttributedString_endEditing__wrapper();
 
 void MutableAttributedString_setAttribute__wrapper();
 
 void MutableAttributedString_setCustomAttribute__wrapper();
 
-void MutableAttributedString_getNormalAttributedString_REMOVEME__wrapper();
+void MutableAttributedString_beginEditing__wrapper();
+
+void MutableAttributedString_endEditing__wrapper();
 
 void MutableAttributedString_create__wrapper();
 

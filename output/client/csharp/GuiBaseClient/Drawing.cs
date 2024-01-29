@@ -58,15 +58,14 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _drawContext_drawLinearGradient;
         private static ModuleMethodHandle _drawContext_batchDraw;
         private static ModuleMethodHandle _DrawContext_dispose;
+        private static ModuleMethodHandle _attributedString_getLength;
         private static ModuleMethodHandle _attributedString_create;
         private static ModuleMethodHandle _AttributedString_dispose;
-        private static ModuleMethodHandle _mutableAttributedString_getLength;
         private static ModuleMethodHandle _mutableAttributedString_replaceString;
-        private static ModuleMethodHandle _mutableAttributedString_beginEditing;
-        private static ModuleMethodHandle _mutableAttributedString_endEditing;
         private static ModuleMethodHandle _mutableAttributedString_setAttribute;
         private static ModuleMethodHandle _mutableAttributedString_setCustomAttribute;
-        private static ModuleMethodHandle _mutableAttributedString_getNormalAttributedString_REMOVEME;
+        private static ModuleMethodHandle _mutableAttributedString_beginEditing;
+        private static ModuleMethodHandle _mutableAttributedString_endEditing;
         private static ModuleMethodHandle _mutableAttributedString_create;
         private static ModuleMethodHandle _MutableAttributedString_dispose;
         private static ModuleMethodHandle _font_createCopyWithSymbolicTraits;
@@ -353,12 +352,12 @@ namespace Org.Prefixed.GuiBase
         public class AttributedString : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal AttributedString(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -366,6 +365,12 @@ namespace Org.Prefixed.GuiBase
                     NativeImplClient.InvokeModuleMethod(_AttributedString_dispose);
                     _disposed = true;
                 }
+            }
+            public long GetLength()
+            {
+                AttributedString__Push(this);
+                NativeImplClient.InvokeModuleMethod(_attributedString_getLength);
+                return NativeImplClient.PopInt64();
             }
             public static AttributedString Create(string s, AttributedStringOptions opts)
             {
@@ -412,12 +417,12 @@ namespace Org.Prefixed.GuiBase
         public class Color : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Color(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -483,12 +488,12 @@ namespace Org.Prefixed.GuiBase
         public class ColorSpace : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal ColorSpace(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -1185,12 +1190,12 @@ namespace Org.Prefixed.GuiBase
         public class DrawContext : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal DrawContext(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -1672,12 +1677,12 @@ namespace Org.Prefixed.GuiBase
         public class Font : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Font(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -2188,12 +2193,12 @@ namespace Org.Prefixed.GuiBase
         public class Frame : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Frame(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -2246,12 +2251,12 @@ namespace Org.Prefixed.GuiBase
         public class FrameSetter : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal FrameSetter(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -2371,12 +2376,12 @@ namespace Org.Prefixed.GuiBase
         public class Gradient : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Gradient(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -2458,12 +2463,12 @@ namespace Org.Prefixed.GuiBase
         public class Line : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Line(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -2525,15 +2530,12 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Line(ptr) : null;
         }
 
-        public class MutableAttributedString : IDisposable
+        public class MutableAttributedString : AttributedString
         {
-            internal readonly IntPtr NativeHandle;
-            private bool _disposed;
-            internal MutableAttributedString(IntPtr nativeHandle)
+            internal MutableAttributedString(IntPtr nativeHandle) : base(nativeHandle)
             {
-                NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public override void Dispose()
             {
                 if (!_disposed)
                 {
@@ -2542,28 +2544,12 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
-            public long GetLength()
-            {
-                MutableAttributedString__Push(this);
-                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_getLength);
-                return NativeImplClient.PopInt64();
-            }
             public void ReplaceString(Range range, string str)
             {
                 NativeImplClient.PushString(str);
                 Range__Push(range, false);
                 MutableAttributedString__Push(this);
                 NativeImplClient.InvokeModuleMethod(_mutableAttributedString_replaceString);
-            }
-            public void BeginEditing()
-            {
-                MutableAttributedString__Push(this);
-                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_beginEditing);
-            }
-            public void EndEditing()
-            {
-                MutableAttributedString__Push(this);
-                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_endEditing);
             }
             public void SetAttribute(Range range, AttributedStringOptions attr)
             {
@@ -2580,11 +2566,15 @@ namespace Org.Prefixed.GuiBase
                 MutableAttributedString__Push(this);
                 NativeImplClient.InvokeModuleMethod(_mutableAttributedString_setCustomAttribute);
             }
-            public AttributedString GetNormalAttributedString_REMOVEME()
+            public void BeginEditing()
             {
                 MutableAttributedString__Push(this);
-                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_getNormalAttributedString_REMOVEME);
-                return AttributedString__Pop();
+                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_beginEditing);
+            }
+            public void EndEditing()
+            {
+                MutableAttributedString__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutableAttributedString_endEditing);
             }
             public static MutableAttributedString Create(long maxLength)
             {
@@ -2610,12 +2600,12 @@ namespace Org.Prefixed.GuiBase
         public class Path : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Path(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -2665,12 +2655,12 @@ namespace Org.Prefixed.GuiBase
         public class Run : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Run(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -2773,15 +2763,14 @@ namespace Org.Prefixed.GuiBase
             _drawContext_drawLinearGradient = NativeImplClient.GetModuleMethod(_module, "DrawContext_drawLinearGradient");
             _drawContext_batchDraw = NativeImplClient.GetModuleMethod(_module, "DrawContext_batchDraw");
             _DrawContext_dispose = NativeImplClient.GetModuleMethod(_module, "DrawContext_dispose");
+            _attributedString_getLength = NativeImplClient.GetModuleMethod(_module, "AttributedString_getLength");
             _attributedString_create = NativeImplClient.GetModuleMethod(_module, "AttributedString_create");
             _AttributedString_dispose = NativeImplClient.GetModuleMethod(_module, "AttributedString_dispose");
-            _mutableAttributedString_getLength = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_getLength");
             _mutableAttributedString_replaceString = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_replaceString");
-            _mutableAttributedString_beginEditing = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_beginEditing");
-            _mutableAttributedString_endEditing = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_endEditing");
             _mutableAttributedString_setAttribute = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_setAttribute");
             _mutableAttributedString_setCustomAttribute = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_setCustomAttribute");
-            _mutableAttributedString_getNormalAttributedString_REMOVEME = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_getNormalAttributedString_REMOVEME");
+            _mutableAttributedString_beginEditing = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_beginEditing");
+            _mutableAttributedString_endEditing = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_endEditing");
             _mutableAttributedString_create = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_create");
             _MutableAttributedString_dispose = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_dispose");
             _font_createCopyWithSymbolicTraits = NativeImplClient.GetModuleMethod(_module, "Font_createCopyWithSymbolicTraits");

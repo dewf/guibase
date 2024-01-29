@@ -201,12 +201,12 @@ namespace Org.Prefixed.GuiBase
         public class Accelerator : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Accelerator(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -262,12 +262,12 @@ namespace Org.Prefixed.GuiBase
         public class Action : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Action(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -303,12 +303,12 @@ namespace Org.Prefixed.GuiBase
         public class Icon : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Icon(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -363,12 +363,12 @@ namespace Org.Prefixed.GuiBase
         public class Menu : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Menu(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -420,12 +420,12 @@ namespace Org.Prefixed.GuiBase
         public class MenuBar : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal MenuBar(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -465,12 +465,12 @@ namespace Org.Prefixed.GuiBase
         public class MenuItem : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal MenuItem(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -543,12 +543,12 @@ namespace Org.Prefixed.GuiBase
         public class Timer : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Timer(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {
@@ -793,12 +793,12 @@ namespace Org.Prefixed.GuiBase
         public class Window : IDisposable
         {
             internal readonly IntPtr NativeHandle;
-            private bool _disposed;
+            protected bool _disposed;
             internal Window(IntPtr nativeHandle)
             {
                 NativeHandle = nativeHandle;
             }
-            public void Dispose()
+            public virtual void Dispose()
             {
                 if (!_disposed)
                 {

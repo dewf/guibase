@@ -312,6 +312,11 @@ void Gradient_dispose(Gradient _this)
     dl_CGGradientRelease((dl_CGGradientRef)_this);
 }
 
+int64_t AttributedString_getLength(AttributedString _this)
+{
+    return dl_CFAttributedStringGetLength((dl_CFAttributedStringRef)_this); // could be mutable for all we know!
+}
+
 AttributedString AttributedString_create(std::string s, AttributedStringOptions opts)
 {
     auto text = dl_CFStringCreateWithCString(s.c_str());

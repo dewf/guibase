@@ -164,7 +164,7 @@ public class TextFormattingPage : BasePage
         attrString.EndEditing();
         
         // framesetter
-        _frameSetter = FrameSetter.CreateWithAttributedString(attrString.GetNormalAttributedString_REMOVEME()); // we need opaque inheritance!
+        _frameSetter = FrameSetter.CreateWithAttributedString(attrString);
     }
     
     public override void Render(DrawContext context, RenderArea area)
