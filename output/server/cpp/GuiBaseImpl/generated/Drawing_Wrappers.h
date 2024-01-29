@@ -56,6 +56,18 @@ Font Font__pop();
 void Range__push(Range value, bool isReturn);
 Range Range__pop();
 
+void TypographicBounds__push(TypographicBounds value, bool isReturn);
+TypographicBounds TypographicBounds__pop();
+
+void RunStatus__push(uint32_t value);
+uint32_t RunStatus__pop();
+
+void RunInfo__push(RunInfo value, bool isReturn);
+RunInfo RunInfo__pop();
+
+void LineInfo__push(LineInfo value, bool isReturn);
+LineInfo LineInfo__pop();
+
 void Frame__push(Frame value);
 Frame Frame__pop();
 
@@ -67,9 +79,6 @@ GradientStop GradientStop__pop();
 
 void Gradient__push(Gradient value);
 Gradient Gradient__pop();
-
-void TypographicBounds__push(TypographicBounds value, bool isReturn);
-TypographicBounds TypographicBounds__pop();
 
 void LineBoundsOptions__push(uint32_t value);
 uint32_t LineBoundsOptions__pop();
@@ -85,9 +94,6 @@ MutableAttributedString MutableAttributedString__pop();
 
 void Path__push(Path value);
 Path Path__pop();
-
-void RunStatus__push(uint32_t value);
-uint32_t RunStatus__pop();
 
 void Run__push(Run value);
 Run Run__pop();
@@ -240,7 +246,7 @@ void Line_draw__wrapper();
 
 void Line_getGlyphRuns__wrapper();
 
-void Line_getLineOffsetForStringIndex__wrapper();
+void Line_getOffsetForStringIndex__wrapper();
 
 void Line_createWithAttributedString__wrapper();
 
@@ -251,6 +257,8 @@ void Frame_draw__wrapper();
 void Frame_getLines__wrapper();
 
 void Frame_getLineOrigins__wrapper();
+
+void Frame_getLinesExtended__wrapper();
 
 void Frame_dispose__wrapper();
 

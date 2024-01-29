@@ -275,17 +275,31 @@ opaque Line {
     Rect getBoundsWithOptions(LineBoundsOptions opts);
     void draw(DrawContext context);
     Array<Run> getGlyphRuns();
-    Tuple<double,double> getLineOffsetForStringIndex(long charIndex); // offset + secondaryOffset
+    Tuple<double,double> getOffsetForStringIndex(long charIndex); // offset + secondaryOffset
 
     static Line createWithAttributedString(AttributedString str);
+}
+
+struct RunInfo {
+    AttributedStringOptions attrs;
+    Range sourceRange;
+    RunStatus status;
+    Rect bounds;
+    TypographicBounds typoBounds;
+}
+
+struct LineInfo {
+    Point origin;
+    TypographicBounds lineTypoBounds;
+    Array<RunInfo> runs;
 }
 
 opaque Frame {
     void draw(DrawContext context);
     Array<Line> getLines();
     Array<Point> getLineOrigins(Range range); // zero range = fetch all
-    // getLineOrigins relies on getting the array again (and when would you want to do them separately?)
-    // so might as well combine into a single method for Line + Point
+
+    Array<LineInfo> getLinesExtended(Array<string> customKeys); // a "deep fetch" to spare a ton of frontend calls for iterating the frame runs
 }
 
 opaque FrameSetter {

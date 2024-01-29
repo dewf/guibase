@@ -1,4 +1,5 @@
-﻿using Org.Prefixed.GuiBase;
+﻿using System.Diagnostics;
+using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
 using static Org.Prefixed.GuiBase.Windowing;
 
@@ -15,6 +16,8 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     private readonly ResizeGradient _page04;
     private readonly TextFormattingPage _page05;
     private IPage _currentPage;
+
+    private Stopwatch _watch = new();
 
     public bool IsDestroyed { get; private set; }
 
@@ -107,11 +110,14 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     }
     public override void Repaint(DrawContext context, int x, int y, int width, int height)
     {
+        _watch.Restart();
         // don't think we need to save/restore state, created afresh every time?
         // will have to see how macOS behaves ...
         context.SaveGState();
         _currentPage.Render(context, new RenderArea(x, y, width, height));
         context.RestoreGState();
+        _watch.Stop();
+        Console.WriteLine($"rendering time: {_watch.ElapsedMilliseconds}ms");
     }
     public override void Resized(int width, int height)
     {

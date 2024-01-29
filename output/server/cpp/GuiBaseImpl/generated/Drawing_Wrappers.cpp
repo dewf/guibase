@@ -600,6 +600,274 @@ Range Range__pop() {
     return Range { location, length };
 }
 
+void TypographicBounds__push(TypographicBounds value, bool isReturn) {
+    ni_pushDouble(value.leading);
+    ni_pushDouble(value.descent);
+    ni_pushDouble(value.ascent);
+    ni_pushDouble(value.width);
+}
+
+TypographicBounds TypographicBounds__pop() {
+    auto width = ni_popDouble();
+    auto ascent = ni_popDouble();
+    auto descent = ni_popDouble();
+    auto leading = ni_popDouble();
+    return TypographicBounds { width, ascent, descent, leading };
+}
+
+void __TypographicBounds_Array__push(std::vector<TypographicBounds> values, bool isReturn) {
+    std::vector<double> leading_values;
+    std::vector<double> descent_values;
+    std::vector<double> ascent_values;
+    std::vector<double> width_values;
+    for (auto v = values.begin(); v != values.end(); v++) {
+        leading_values.push_back(v->leading);
+        descent_values.push_back(v->descent);
+        ascent_values.push_back(v->ascent);
+        width_values.push_back(v->width);
+    }
+    pushDoubleArrayInternal(leading_values);
+    pushDoubleArrayInternal(descent_values);
+    pushDoubleArrayInternal(ascent_values);
+    pushDoubleArrayInternal(width_values);
+}
+
+std::vector<TypographicBounds> __TypographicBounds_Array__pop() {
+    auto width_values = popDoubleArrayInternal();
+    auto ascent_values = popDoubleArrayInternal();
+    auto descent_values = popDoubleArrayInternal();
+    auto leading_values = popDoubleArrayInternal();
+    std::vector<TypographicBounds> __ret;
+    for (auto i = 0; i < width_values.size(); i++) {
+        TypographicBounds __value;
+        __value.width = width_values[i];
+        __value.ascent = ascent_values[i];
+        __value.descent = descent_values[i];
+        __value.leading = leading_values[i];
+        __ret.push_back(__value);
+    }
+    return __ret;
+}
+
+void __AttributedStringOptions_Array__push(std::vector<AttributedStringOptions> values, bool isReturn) {
+    for (auto v = values.rbegin(); v != values.rend(); v++) {
+        AttributedStringOptions__push(*v, isReturn);
+    }
+    ni_pushSizeT(values.size());
+}
+
+std::vector<AttributedStringOptions> __AttributedStringOptions_Array__pop() {
+    std::vector<AttributedStringOptions> __ret;
+    auto count = ni_popSizeT();
+    for (auto i = 0; i < count; i++) {
+        auto value = AttributedStringOptions__pop();
+        __ret.push_back(value);
+    }
+    return __ret;
+}
+
+void __Range_Array__push(std::vector<Range> values, bool isReturn) {
+    std::vector<int64_t> length_values;
+    std::vector<int64_t> location_values;
+    for (auto v = values.begin(); v != values.end(); v++) {
+        length_values.push_back(v->length);
+        location_values.push_back(v->location);
+    }
+    pushInt64ArrayInternal(length_values);
+    pushInt64ArrayInternal(location_values);
+}
+
+std::vector<Range> __Range_Array__pop() {
+    auto location_values = popInt64ArrayInternal();
+    auto length_values = popInt64ArrayInternal();
+    std::vector<Range> __ret;
+    for (auto i = 0; i < location_values.size(); i++) {
+        Range __value;
+        __value.location = location_values[i];
+        __value.length = length_values[i];
+        __ret.push_back(__value);
+    }
+    return __ret;
+}
+
+inline void RunStatus__push(uint32_t value) {
+    ni_pushUInt32(value);
+}
+
+inline uint32_t RunStatus__pop() {
+    return ni_popUInt32();
+}
+
+inline void __RunStatus_Array__push(std::vector<uint32_t> values, bool isReturn) {
+    pushUInt32ArrayInternal(values);
+}
+inline std::vector<uint32_t> __RunStatus_Array__pop() {
+    return popUInt32ArrayInternal();
+}
+
+void __Size_Array__push(std::vector<Size> values, bool isReturn) {
+    std::vector<double> height_values;
+    std::vector<double> width_values;
+    for (auto v = values.begin(); v != values.end(); v++) {
+        height_values.push_back(v->height);
+        width_values.push_back(v->width);
+    }
+    pushDoubleArrayInternal(height_values);
+    pushDoubleArrayInternal(width_values);
+}
+
+std::vector<Size> __Size_Array__pop() {
+    auto width_values = popDoubleArrayInternal();
+    auto height_values = popDoubleArrayInternal();
+    std::vector<Size> __ret;
+    for (auto i = 0; i < width_values.size(); i++) {
+        Size __value;
+        __value.width = width_values[i];
+        __value.height = height_values[i];
+        __ret.push_back(__value);
+    }
+    return __ret;
+}
+
+void __Rect_Array__push(std::vector<Rect> values, bool isReturn) {
+    std::vector<Size> size_values;
+    std::vector<Point> origin_values;
+    for (auto v = values.begin(); v != values.end(); v++) {
+        size_values.push_back(v->size);
+        origin_values.push_back(v->origin);
+    }
+    __Size_Array__push(size_values, isReturn);
+    __Point_Array__push(origin_values, isReturn);
+}
+
+std::vector<Rect> __Rect_Array__pop() {
+    auto origin_values = __Point_Array__pop();
+    auto size_values = __Size_Array__pop();
+    std::vector<Rect> __ret;
+    for (auto i = 0; i < origin_values.size(); i++) {
+        Rect __value;
+        __value.origin = origin_values[i];
+        __value.size = size_values[i];
+        __ret.push_back(__value);
+    }
+    return __ret;
+}
+
+void RunInfo__push(RunInfo value, bool isReturn) {
+    TypographicBounds__push(value.typoBounds, isReturn);
+    Rect__push(value.bounds, isReturn);
+    RunStatus__push(value.status);
+    Range__push(value.sourceRange, isReturn);
+    AttributedStringOptions__push(value.attrs, isReturn);
+}
+
+RunInfo RunInfo__pop() {
+    auto attrs = AttributedStringOptions__pop();
+    auto sourceRange = Range__pop();
+    auto status = RunStatus__pop();
+    auto bounds = Rect__pop();
+    auto typoBounds = TypographicBounds__pop();
+    return RunInfo { attrs, sourceRange, status, bounds, typoBounds };
+}
+
+void __RunInfo_Array__push(std::vector<RunInfo> values, bool isReturn) {
+    std::vector<TypographicBounds> typoBounds_values;
+    std::vector<Rect> bounds_values;
+    std::vector<uint32_t> status_values;
+    std::vector<Range> sourceRange_values;
+    std::vector<AttributedStringOptions> attrs_values;
+    for (auto v = values.begin(); v != values.end(); v++) {
+        typoBounds_values.push_back(v->typoBounds);
+        bounds_values.push_back(v->bounds);
+        status_values.push_back(v->status);
+        sourceRange_values.push_back(v->sourceRange);
+        attrs_values.push_back(v->attrs);
+    }
+    __TypographicBounds_Array__push(typoBounds_values, isReturn);
+    __Rect_Array__push(bounds_values, isReturn);
+    __RunStatus_Array__push(status_values, isReturn);
+    __Range_Array__push(sourceRange_values, isReturn);
+    __AttributedStringOptions_Array__push(attrs_values, isReturn);
+}
+
+std::vector<RunInfo> __RunInfo_Array__pop() {
+    auto attrs_values = __AttributedStringOptions_Array__pop();
+    auto sourceRange_values = __Range_Array__pop();
+    auto status_values = __RunStatus_Array__pop();
+    auto bounds_values = __Rect_Array__pop();
+    auto typoBounds_values = __TypographicBounds_Array__pop();
+    std::vector<RunInfo> __ret;
+    for (auto i = 0; i < attrs_values.size(); i++) {
+        RunInfo __value;
+        __value.attrs = attrs_values[i];
+        __value.sourceRange = sourceRange_values[i];
+        __value.status = status_values[i];
+        __value.bounds = bounds_values[i];
+        __value.typoBounds = typoBounds_values[i];
+        __ret.push_back(__value);
+    }
+    return __ret;
+}
+
+void __RunInfo_Array_Array__push(std::vector<std::vector<RunInfo>> values, bool isReturn) {
+    for (auto v = values.rbegin(); v != values.rend(); v++) {
+        __RunInfo_Array__push(*v, isReturn);
+    }
+    ni_pushSizeT(values.size());
+}
+
+std::vector<std::vector<RunInfo>> __RunInfo_Array_Array__pop() {
+    std::vector<std::vector<RunInfo>> __ret;
+    auto count = ni_popSizeT();
+    for (auto i = 0; i < count; i++) {
+        auto value = __RunInfo_Array__pop();
+        __ret.push_back(value);
+    }
+    return __ret;
+}
+
+void LineInfo__push(LineInfo value, bool isReturn) {
+    __RunInfo_Array__push(value.runs, isReturn);
+    TypographicBounds__push(value.lineTypoBounds, isReturn);
+    Point__push(value.origin, isReturn);
+}
+
+LineInfo LineInfo__pop() {
+    auto origin = Point__pop();
+    auto lineTypoBounds = TypographicBounds__pop();
+    auto runs = __RunInfo_Array__pop();
+    return LineInfo { origin, lineTypoBounds, runs };
+}
+
+void __LineInfo_Array__push(std::vector<LineInfo> values, bool isReturn) {
+    std::vector<std::vector<RunInfo>> runs_values;
+    std::vector<TypographicBounds> lineTypoBounds_values;
+    std::vector<Point> origin_values;
+    for (auto v = values.begin(); v != values.end(); v++) {
+        runs_values.push_back(v->runs);
+        lineTypoBounds_values.push_back(v->lineTypoBounds);
+        origin_values.push_back(v->origin);
+    }
+    __RunInfo_Array_Array__push(runs_values, isReturn);
+    __TypographicBounds_Array__push(lineTypoBounds_values, isReturn);
+    __Point_Array__push(origin_values, isReturn);
+}
+
+std::vector<LineInfo> __LineInfo_Array__pop() {
+    auto origin_values = __Point_Array__pop();
+    auto lineTypoBounds_values = __TypographicBounds_Array__pop();
+    auto runs_values = __RunInfo_Array_Array__pop();
+    std::vector<LineInfo> __ret;
+    for (auto i = 0; i < origin_values.size(); i++) {
+        LineInfo __value;
+        __value.origin = origin_values[i];
+        __value.lineTypoBounds = lineTypoBounds_values[i];
+        __value.runs = runs_values[i];
+        __ret.push_back(__value);
+    }
+    return __ret;
+}
+
 void Frame__push(Frame value) {
     ni_pushPtr(value);
 }
@@ -680,21 +948,6 @@ Gradient Gradient__pop() {
     return (Gradient)ni_popPtr();
 }
 
-void TypographicBounds__push(TypographicBounds value, bool isReturn) {
-    ni_pushDouble(value.leading);
-    ni_pushDouble(value.descent);
-    ni_pushDouble(value.ascent);
-    ni_pushDouble(value.width);
-}
-
-TypographicBounds TypographicBounds__pop() {
-    auto width = ni_popDouble();
-    auto ascent = ni_popDouble();
-    auto descent = ni_popDouble();
-    auto leading = ni_popDouble();
-    return TypographicBounds { width, ascent, descent, leading };
-}
-
 inline void LineBoundsOptions__push(uint32_t value) {
     ni_pushUInt32(value);
 }
@@ -747,14 +1000,6 @@ void Path__push(Path value) {
 
 Path Path__pop() {
     return (Path)ni_popPtr();
-}
-
-inline void RunStatus__push(uint32_t value) {
-    ni_pushUInt32(value);
-}
-
-inline uint32_t RunStatus__pop() {
-    return ni_popUInt32();
 }
 
 void Run__push(Run value) {
@@ -1212,10 +1457,10 @@ void Line_getGlyphRuns__wrapper() {
     __Run_Array__push(Line_getGlyphRuns(_this), true);
 }
 
-void Line_getLineOffsetForStringIndex__wrapper() {
+void Line_getOffsetForStringIndex__wrapper() {
     auto _this = Line__pop();
     auto charIndex = ni_popInt64();
-    __DoubleDouble_Tuple__push(Line_getLineOffsetForStringIndex(_this, charIndex), true);
+    __DoubleDouble_Tuple__push(Line_getOffsetForStringIndex(_this, charIndex), true);
 }
 
 void Line_createWithAttributedString__wrapper() {
@@ -1243,6 +1488,12 @@ void Frame_getLineOrigins__wrapper() {
     auto _this = Frame__pop();
     auto range = Range__pop();
     __Point_Array__push(Frame_getLineOrigins(_this, range), true);
+}
+
+void Frame_getLinesExtended__wrapper() {
+    auto _this = Frame__pop();
+    auto customKeys = popStringArrayInternal();
+    __LineInfo_Array__push(Frame_getLinesExtended(_this, customKeys), true);
 }
 
 void Frame_dispose__wrapper() {
@@ -1348,12 +1599,13 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "Line_getBoundsWithOptions", &Line_getBoundsWithOptions__wrapper);
     ni_registerModuleMethod(m, "Line_draw", &Line_draw__wrapper);
     ni_registerModuleMethod(m, "Line_getGlyphRuns", &Line_getGlyphRuns__wrapper);
-    ni_registerModuleMethod(m, "Line_getLineOffsetForStringIndex", &Line_getLineOffsetForStringIndex__wrapper);
+    ni_registerModuleMethod(m, "Line_getOffsetForStringIndex", &Line_getOffsetForStringIndex__wrapper);
     ni_registerModuleMethod(m, "Line_createWithAttributedString", &Line_createWithAttributedString__wrapper);
     ni_registerModuleMethod(m, "Line_dispose", &Line_dispose__wrapper);
     ni_registerModuleMethod(m, "Frame_draw", &Frame_draw__wrapper);
     ni_registerModuleMethod(m, "Frame_getLines", &Frame_getLines__wrapper);
     ni_registerModuleMethod(m, "Frame_getLineOrigins", &Frame_getLineOrigins__wrapper);
+    ni_registerModuleMethod(m, "Frame_getLinesExtended", &Frame_getLinesExtended__wrapper);
     ni_registerModuleMethod(m, "Frame_dispose", &Frame_dispose__wrapper);
     ni_registerModuleMethod(m, "FrameSetter_createWithAttributedString", &FrameSetter_createWithAttributedString__wrapper);
     ni_registerModuleMethod(m, "FrameSetter_createFrame", &FrameSetter_createFrame__wrapper);

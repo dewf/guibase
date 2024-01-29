@@ -656,7 +656,7 @@ std::vector<Run> Line_getGlyphRuns(Line _this)
     return ret;
 }
 
-std::tuple<double, double> Line_getLineOffsetForStringIndex(Line _this, int64_t charIndex)
+std::tuple<double, double> Line_getOffsetForStringIndex(Line _this, int64_t charIndex)
 {
     double secondary;
     auto primary = dl_CTLineGetOffsetForStringIndex((dl_CTLineRef)_this, charIndex, &secondary);
@@ -688,17 +688,6 @@ std::vector<Line> Frame_getLines(Frame _this)
         auto line = (dl_CTLineRef)dl_CFArrayGetValueAtIndex(arr, i);
         ret.push_back((Line)line);
     }
-    return ret;
-}
-
-std::vector<Point> Frame_getLineOrigins(Frame _this, Range range)
-{
-    auto arr = dl_CTFrameGetLines((dl_CTFrameRef)_this);
-    auto count = dl_CFArrayGetCount(arr);
-    auto points = new Point[count];
-    dl_CTFrameGetLineOrigins((dl_CTFrameRef)_this, STRUCT_CAST(dl_CFRange, range), (dl_CGPoint*)points);
-    auto ret = std::vector<Point>(points, points + count);
-    delete[] points;
     return ret;
 }
 
@@ -900,4 +889,81 @@ void DrawContext_batchDraw(DrawContext _this, std::vector<DrawCommand> commands)
     for (auto i = commands.begin(); i != commands.end(); i++) {
         drawCommand((dl_CGContextRef)_this, *i);
     }
+}
+
+std::vector<Point> Frame_getLineOrigins(Frame _this, Range range)
+{
+    auto ctLinesArr = dl_CTFrameGetLines((dl_CTFrameRef)_this);
+    auto lineCount = dl_CFArrayGetCount(ctLinesArr);
+
+    auto points = new Point[lineCount];
+    dl_CTFrameGetLineOrigins((dl_CTFrameRef)_this, STRUCT_CAST(dl_CFRange,range), (dl_CGPoint*)points);
+    auto ret = std::vector<Point>(points, points + lineCount);
+    delete[] points;
+
+    return ret;
+}
+
+std::vector<LineInfo> Frame_getLinesExtended(Frame _this, std::vector<std::string> customKeys)
+{
+    std::vector<LineInfo> ret;
+    auto ctLinesArr = dl_CTFrameGetLines((dl_CTFrameRef)_this);
+    auto lineCount = dl_CFArrayGetCount(ctLinesArr);
+
+    auto points = new Point[lineCount];
+    dl_CTFrameGetLineOrigins((dl_CTFrameRef)_this, dl_CFRangeZero, (dl_CGPoint*)points);
+    auto origins = std::vector<Point>(points, points + lineCount);
+    delete[] points;
+    
+    for (auto lineIndex = 0; lineIndex < lineCount; lineIndex++) {
+        LineInfo line;
+        auto origin = origins[lineIndex];
+
+        auto ctLine = (dl_CTLineRef)dl_CFArrayGetValueAtIndex(ctLinesArr, lineIndex);
+        line.lineTypoBounds = Line_getTypographicBounds((Line)ctLine);
+
+        auto ctRunsArr = dl_CTLineGetGlyphRuns(ctLine);
+        auto runCount = dl_CFArrayGetCount(ctRunsArr);
+        for (auto runIndex = 0; runIndex < runCount; runIndex++) {
+            RunInfo run;
+
+            auto ctRun = (dl_CTRunRef)dl_CFArrayGetValueAtIndex(ctRunsArr, runIndex);
+            run.attrs = Run_getAttributes((Run)ctRun, customKeys);
+
+            run.typoBounds = Run_getTypographicBounds((Run)ctRun, STRUCT_CAST(Range,dl_CFRangeZero));
+            run.bounds = STRUCT_CAST(Rect, dl_CGRectZero);
+
+            // might want to pad these with user-definable pads?
+            run.bounds.size.width = run.typoBounds.width;
+            run.bounds.size.height = run.typoBounds.ascent + run.typoBounds.descent;
+
+            auto xOffset = 0.0;
+            auto runRange = dl_CTRunGetStringRange(ctRun);
+            run.sourceRange = STRUCT_CAST(Range, runRange);
+            run.status = (RunStatus)dl_CTRunGetStatus(ctRun);
+            if (run.status & RunStatus::RightToLeft) {
+                //    var(offs1, _) = line.GetLineOffsetForStringIndex(glyphRange.Location + glyphRange.Length);
+                //    xOffset = offs1;
+                xOffset = dl_CTLineGetOffsetForStringIndex(ctLine, run.sourceRange.location + run.sourceRange.length, nullptr);
+            }
+            else {
+                //    var(offs1, _) = line.GetLineOffsetForStringIndex(glyphRange.Location);
+                //    xOffset = offs1;
+                xOffset = dl_CTLineGetOffsetForStringIndex(ctLine, run.sourceRange.location, nullptr);
+            }
+
+            run.bounds.origin.x = origin.x + xOffset;
+            run.bounds.origin.y = origin.y;
+            run.bounds.origin.y -= run.typoBounds.ascent;
+
+            if (run.bounds.size.width > line.lineTypoBounds.width) {
+                run.bounds.size.width = line.lineTypoBounds.width;
+            }
+
+            line.runs.push_back(run);
+        }
+        ret.push_back(line);
+    }
+
+    return ret;
 }

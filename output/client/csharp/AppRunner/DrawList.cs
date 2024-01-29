@@ -140,7 +140,7 @@ public class DrawList(DrawContext context)
     public void Send()
     {
         var arr = _commands.ToArray();
-        Console.WriteLine($"draw list array length: {arr.Length}");
+        // Console.WriteLine($"draw list array length: {arr.Length}");
         context.BatchDraw(arr);
         _commands.Clear();
     }

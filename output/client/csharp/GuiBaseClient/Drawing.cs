@@ -86,12 +86,13 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _line_getBoundsWithOptions;
         private static ModuleMethodHandle _line_draw;
         private static ModuleMethodHandle _line_getGlyphRuns;
-        private static ModuleMethodHandle _line_getLineOffsetForStringIndex;
+        private static ModuleMethodHandle _line_getOffsetForStringIndex;
         private static ModuleMethodHandle _line_createWithAttributedString;
         private static ModuleMethodHandle _Line_dispose;
         private static ModuleMethodHandle _frame_draw;
         private static ModuleMethodHandle _frame_getLines;
         private static ModuleMethodHandle _frame_getLineOrigins;
+        private static ModuleMethodHandle _frame_getLinesExtended;
         private static ModuleMethodHandle _Frame_dispose;
         private static ModuleMethodHandle _frameSetter_createWithAttributedString;
         private static ModuleMethodHandle _frameSetter_createFrame;
@@ -1813,6 +1814,377 @@ namespace Org.Prefixed.GuiBase
             return new Range(location, length);
         }
 
+        public struct TypographicBounds {
+            public double Width;
+            public double Ascent;
+            public double Descent;
+            public double Leading;
+            public TypographicBounds(double width, double ascent, double descent, double leading)
+            {
+                this.Width = width;
+                this.Ascent = ascent;
+                this.Descent = descent;
+                this.Leading = leading;
+            }
+        }
+
+        internal static void TypographicBounds__Push(TypographicBounds value, bool isReturn)
+        {
+            NativeImplClient.PushDouble(value.Leading);
+            NativeImplClient.PushDouble(value.Descent);
+            NativeImplClient.PushDouble(value.Ascent);
+            NativeImplClient.PushDouble(value.Width);
+        }
+
+        internal static TypographicBounds TypographicBounds__Pop()
+        {
+            var width = NativeImplClient.PopDouble();
+            var ascent = NativeImplClient.PopDouble();
+            var descent = NativeImplClient.PopDouble();
+            var leading = NativeImplClient.PopDouble();
+            return new TypographicBounds(width, ascent, descent, leading);
+        }
+
+        internal static void __TypographicBounds_Array__Push(TypographicBounds[] items, bool isReturn)
+        {
+            var count = items.Length;
+            var f0Values = new double[count];
+            var f1Values = new double[count];
+            var f2Values = new double[count];
+            var f3Values = new double[count];
+            for (var i = 0; i < count; i++)
+            {
+                f0Values[i] = items[i].Width;
+                f1Values[i] = items[i].Ascent;
+                f2Values[i] = items[i].Descent;
+                f3Values[i] = items[i].Leading;
+            }
+            NativeImplClient.PushDoubleArray(f3Values);
+            NativeImplClient.PushDoubleArray(f2Values);
+            NativeImplClient.PushDoubleArray(f1Values);
+            NativeImplClient.PushDoubleArray(f0Values);
+        }
+
+        internal static TypographicBounds[] __TypographicBounds_Array__Pop()
+        {
+            var f0Values = NativeImplClient.PopDoubleArray();
+            var f1Values = NativeImplClient.PopDoubleArray();
+            var f2Values = NativeImplClient.PopDoubleArray();
+            var f3Values = NativeImplClient.PopDoubleArray();
+            var count = f0Values.Length;
+            var ret = new TypographicBounds[count];
+            for (var i = 0; i < count; i++)
+            {
+                var f0 = f0Values[i];
+                var f1 = f1Values[i];
+                var f2 = f2Values[i];
+                var f3 = f3Values[i];
+                ret[i] = new TypographicBounds(f0, f1, f2, f3);
+            }
+            return ret;
+        }
+
+        internal static void __AttributedStringOptions_Array__Push(AttributedStringOptions[] values, bool isReturn)
+        {
+            foreach (var value in values.Reverse())
+            {
+                AttributedStringOptions__Push(value, isReturn);
+            }
+            NativeImplClient.PushSizeT((IntPtr)values.Length);
+        }
+
+        internal static AttributedStringOptions[] __AttributedStringOptions_Array__Pop()
+        {
+            var count = (int)NativeImplClient.PopSizeT();
+            var ret = new AttributedStringOptions[count];
+            for (var i = 0; i < count; i++)
+            {
+                ret[i] = AttributedStringOptions__Pop();
+            }
+            return ret;
+        }
+
+        internal static void __Range_Array__Push(Range[] items, bool isReturn)
+        {
+            var count = items.Length;
+            var f0Values = new long[count];
+            var f1Values = new long[count];
+            for (var i = 0; i < count; i++)
+            {
+                f0Values[i] = items[i].Location;
+                f1Values[i] = items[i].Length;
+            }
+            NativeImplClient.PushInt64Array(f1Values);
+            NativeImplClient.PushInt64Array(f0Values);
+        }
+
+        internal static Range[] __Range_Array__Pop()
+        {
+            var f0Values = NativeImplClient.PopInt64Array();
+            var f1Values = NativeImplClient.PopInt64Array();
+            var count = f0Values.Length;
+            var ret = new Range[count];
+            for (var i = 0; i < count; i++)
+            {
+                var f0 = f0Values[i];
+                var f1 = f1Values[i];
+                ret[i] = new Range(f0, f1);
+            }
+            return ret;
+        }
+
+        [Flags]
+        public enum RunStatus
+        {
+            NoStatus = 0,
+            RightToLeft = 1,
+            NonMonotonic = 2,
+            HasNonIdentityMatrix = 4
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void RunStatus__Push(RunStatus value)
+        {
+            NativeImplClient.PushUInt32((uint)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static RunStatus RunStatus__Pop()
+        {
+            var ret = NativeImplClient.PopUInt32();
+            return (RunStatus)ret;
+        }
+
+        internal static void __RunStatus_Array__Push(RunStatus[] items)
+        {
+            var intValues = items.Select(i => (uint)i).ToArray();
+            NativeImplClient.PushUInt32Array(intValues);
+        }
+
+        internal static RunStatus[] __RunStatus_Array__Pop()
+        {
+            var intValues = NativeImplClient.PopUInt32Array();
+            return intValues.Select(i => (RunStatus)i).ToArray();
+        }
+
+        internal static void __Size_Array__Push(Size[] items, bool isReturn)
+        {
+            var count = items.Length;
+            var f0Values = new double[count];
+            var f1Values = new double[count];
+            for (var i = 0; i < count; i++)
+            {
+                f0Values[i] = items[i].Width;
+                f1Values[i] = items[i].Height;
+            }
+            NativeImplClient.PushDoubleArray(f1Values);
+            NativeImplClient.PushDoubleArray(f0Values);
+        }
+
+        internal static Size[] __Size_Array__Pop()
+        {
+            var f0Values = NativeImplClient.PopDoubleArray();
+            var f1Values = NativeImplClient.PopDoubleArray();
+            var count = f0Values.Length;
+            var ret = new Size[count];
+            for (var i = 0; i < count; i++)
+            {
+                var f0 = f0Values[i];
+                var f1 = f1Values[i];
+                ret[i] = new Size(f0, f1);
+            }
+            return ret;
+        }
+
+        internal static void __Rect_Array__Push(Rect[] items, bool isReturn)
+        {
+            var count = items.Length;
+            var f0Values = new Point[count];
+            var f1Values = new Size[count];
+            for (var i = 0; i < count; i++)
+            {
+                f0Values[i] = items[i].Origin;
+                f1Values[i] = items[i].Size;
+            }
+            __Size_Array__Push(f1Values, isReturn);
+            __Point_Array__Push(f0Values, isReturn);
+        }
+
+        internal static Rect[] __Rect_Array__Pop()
+        {
+            var f0Values = __Point_Array__Pop();
+            var f1Values = __Size_Array__Pop();
+            var count = f0Values.Length;
+            var ret = new Rect[count];
+            for (var i = 0; i < count; i++)
+            {
+                var f0 = f0Values[i];
+                var f1 = f1Values[i];
+                ret[i] = new Rect(f0, f1);
+            }
+            return ret;
+        }
+
+        public struct RunInfo {
+            public AttributedStringOptions Attrs;
+            public Range SourceRange;
+            public RunStatus Status;
+            public Rect Bounds;
+            public TypographicBounds TypoBounds;
+            public RunInfo(AttributedStringOptions attrs, Range sourceRange, RunStatus status, Rect bounds, TypographicBounds typoBounds)
+            {
+                this.Attrs = attrs;
+                this.SourceRange = sourceRange;
+                this.Status = status;
+                this.Bounds = bounds;
+                this.TypoBounds = typoBounds;
+            }
+        }
+
+        internal static void RunInfo__Push(RunInfo value, bool isReturn)
+        {
+            TypographicBounds__Push(value.TypoBounds, isReturn);
+            Rect__Push(value.Bounds, isReturn);
+            RunStatus__Push(value.Status);
+            Range__Push(value.SourceRange, isReturn);
+            AttributedStringOptions__Push(value.Attrs, isReturn);
+        }
+
+        internal static RunInfo RunInfo__Pop()
+        {
+            var attrs = AttributedStringOptions__Pop();
+            var sourceRange = Range__Pop();
+            var status = RunStatus__Pop();
+            var bounds = Rect__Pop();
+            var typoBounds = TypographicBounds__Pop();
+            return new RunInfo(attrs, sourceRange, status, bounds, typoBounds);
+        }
+
+        internal static void __RunInfo_Array__Push(RunInfo[] items, bool isReturn)
+        {
+            var count = items.Length;
+            var f0Values = new AttributedStringOptions[count];
+            var f1Values = new Range[count];
+            var f2Values = new RunStatus[count];
+            var f3Values = new Rect[count];
+            var f4Values = new TypographicBounds[count];
+            for (var i = 0; i < count; i++)
+            {
+                f0Values[i] = items[i].Attrs;
+                f1Values[i] = items[i].SourceRange;
+                f2Values[i] = items[i].Status;
+                f3Values[i] = items[i].Bounds;
+                f4Values[i] = items[i].TypoBounds;
+            }
+            __TypographicBounds_Array__Push(f4Values, isReturn);
+            __Rect_Array__Push(f3Values, isReturn);
+            __RunStatus_Array__Push(f2Values);
+            __Range_Array__Push(f1Values, isReturn);
+            __AttributedStringOptions_Array__Push(f0Values, isReturn);
+        }
+
+        internal static RunInfo[] __RunInfo_Array__Pop()
+        {
+            var f0Values = __AttributedStringOptions_Array__Pop();
+            var f1Values = __Range_Array__Pop();
+            var f2Values = __RunStatus_Array__Pop();
+            var f3Values = __Rect_Array__Pop();
+            var f4Values = __TypographicBounds_Array__Pop();
+            var count = f0Values.Length;
+            var ret = new RunInfo[count];
+            for (var i = 0; i < count; i++)
+            {
+                var f0 = f0Values[i];
+                var f1 = f1Values[i];
+                var f2 = f2Values[i];
+                var f3 = f3Values[i];
+                var f4 = f4Values[i];
+                ret[i] = new RunInfo(f0, f1, f2, f3, f4);
+            }
+            return ret;
+        }
+
+        internal static void __RunInfo_Array_Array__Push(RunInfo[][] values, bool isReturn)
+        {
+            foreach (var value in values.Reverse())
+            {
+                __RunInfo_Array__Push(value, isReturn);
+            }
+            NativeImplClient.PushSizeT((IntPtr)values.Length);
+        }
+
+        internal static RunInfo[][] __RunInfo_Array_Array__Pop()
+        {
+            var count = (int)NativeImplClient.PopSizeT();
+            var ret = new RunInfo[count][];
+            for (var i = 0; i < count; i++)
+            {
+                ret[i] = __RunInfo_Array__Pop();
+            }
+            return ret;
+        }
+
+        public struct LineInfo {
+            public Point Origin;
+            public TypographicBounds LineTypoBounds;
+            public RunInfo[] Runs;
+            public LineInfo(Point origin, TypographicBounds lineTypoBounds, RunInfo[] runs)
+            {
+                this.Origin = origin;
+                this.LineTypoBounds = lineTypoBounds;
+                this.Runs = runs;
+            }
+        }
+
+        internal static void LineInfo__Push(LineInfo value, bool isReturn)
+        {
+            __RunInfo_Array__Push(value.Runs, isReturn);
+            TypographicBounds__Push(value.LineTypoBounds, isReturn);
+            Point__Push(value.Origin, isReturn);
+        }
+
+        internal static LineInfo LineInfo__Pop()
+        {
+            var origin = Point__Pop();
+            var lineTypoBounds = TypographicBounds__Pop();
+            var runs = __RunInfo_Array__Pop();
+            return new LineInfo(origin, lineTypoBounds, runs);
+        }
+
+        internal static void __LineInfo_Array__Push(LineInfo[] items, bool isReturn)
+        {
+            var count = items.Length;
+            var f0Values = new Point[count];
+            var f1Values = new TypographicBounds[count];
+            var f2Values = new RunInfo[count][];
+            for (var i = 0; i < count; i++)
+            {
+                f0Values[i] = items[i].Origin;
+                f1Values[i] = items[i].LineTypoBounds;
+                f2Values[i] = items[i].Runs;
+            }
+            __RunInfo_Array_Array__Push(f2Values, isReturn);
+            __TypographicBounds_Array__Push(f1Values, isReturn);
+            __Point_Array__Push(f0Values, isReturn);
+        }
+
+        internal static LineInfo[] __LineInfo_Array__Pop()
+        {
+            var f0Values = __Point_Array__Pop();
+            var f1Values = __TypographicBounds_Array__Pop();
+            var f2Values = __RunInfo_Array_Array__Pop();
+            var count = f0Values.Length;
+            var ret = new LineInfo[count];
+            for (var i = 0; i < count; i++)
+            {
+                var f0 = f0Values[i];
+                var f1 = f1Values[i];
+                var f2 = f2Values[i];
+                ret[i] = new LineInfo(f0, f1, f2);
+            }
+            return ret;
+        }
+
         public class Frame : IDisposable
         {
             internal readonly IntPtr NativeHandle;
@@ -1848,6 +2220,13 @@ namespace Org.Prefixed.GuiBase
                 Frame__Push(this);
                 NativeImplClient.InvokeModuleMethod(_frame_getLineOrigins);
                 return __Point_Array__Pop();
+            }
+            public LineInfo[] GetLinesExtended(string[] customKeys)
+            {
+                NativeImplClient.PushStringArray(customKeys);
+                Frame__Push(this);
+                NativeImplClient.InvokeModuleMethod(_frame_getLinesExtended);
+                return __LineInfo_Array__Pop();
             }
         }
 
@@ -2028,37 +2407,6 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Gradient(ptr) : null;
         }
 
-        public struct TypographicBounds {
-            public double Width;
-            public double Ascent;
-            public double Descent;
-            public double Leading;
-            public TypographicBounds(double width, double ascent, double descent, double leading)
-            {
-                this.Width = width;
-                this.Ascent = ascent;
-                this.Descent = descent;
-                this.Leading = leading;
-            }
-        }
-
-        internal static void TypographicBounds__Push(TypographicBounds value, bool isReturn)
-        {
-            NativeImplClient.PushDouble(value.Leading);
-            NativeImplClient.PushDouble(value.Descent);
-            NativeImplClient.PushDouble(value.Ascent);
-            NativeImplClient.PushDouble(value.Width);
-        }
-
-        internal static TypographicBounds TypographicBounds__Pop()
-        {
-            var width = NativeImplClient.PopDouble();
-            var ascent = NativeImplClient.PopDouble();
-            var descent = NativeImplClient.PopDouble();
-            var leading = NativeImplClient.PopDouble();
-            return new TypographicBounds(width, ascent, descent, leading);
-        }
-
         [Flags]
         public enum LineBoundsOptions
         {
@@ -2149,11 +2497,11 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.InvokeModuleMethod(_line_getGlyphRuns);
                 return __Run_Array__Pop();
             }
-            public (double, double) GetLineOffsetForStringIndex(long charIndex)
+            public (double, double) GetOffsetForStringIndex(long charIndex)
             {
                 NativeImplClient.PushInt64(charIndex);
                 Line__Push(this);
-                NativeImplClient.InvokeModuleMethod(_line_getLineOffsetForStringIndex);
+                NativeImplClient.InvokeModuleMethod(_line_getOffsetForStringIndex);
                 return __DoubleDouble_Tuple__Pop();
             }
             public static Line CreateWithAttributedString(AttributedString str)
@@ -2314,28 +2662,6 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Path(ptr) : null;
         }
 
-        [Flags]
-        public enum RunStatus
-        {
-            NoStatus = 0,
-            RightToLeft = 1,
-            NonMonotonic = 2,
-            HasNonIdentityMatrix = 4
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void RunStatus__Push(RunStatus value)
-        {
-            NativeImplClient.PushUInt32((uint)value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static RunStatus RunStatus__Pop()
-        {
-            var ret = NativeImplClient.PopUInt32();
-            return (RunStatus)ret;
-        }
-
         public class Run : IDisposable
         {
             internal readonly IntPtr NativeHandle;
@@ -2475,12 +2801,13 @@ namespace Org.Prefixed.GuiBase
             _line_getBoundsWithOptions = NativeImplClient.GetModuleMethod(_module, "Line_getBoundsWithOptions");
             _line_draw = NativeImplClient.GetModuleMethod(_module, "Line_draw");
             _line_getGlyphRuns = NativeImplClient.GetModuleMethod(_module, "Line_getGlyphRuns");
-            _line_getLineOffsetForStringIndex = NativeImplClient.GetModuleMethod(_module, "Line_getLineOffsetForStringIndex");
+            _line_getOffsetForStringIndex = NativeImplClient.GetModuleMethod(_module, "Line_getOffsetForStringIndex");
             _line_createWithAttributedString = NativeImplClient.GetModuleMethod(_module, "Line_createWithAttributedString");
             _Line_dispose = NativeImplClient.GetModuleMethod(_module, "Line_dispose");
             _frame_draw = NativeImplClient.GetModuleMethod(_module, "Frame_draw");
             _frame_getLines = NativeImplClient.GetModuleMethod(_module, "Frame_getLines");
             _frame_getLineOrigins = NativeImplClient.GetModuleMethod(_module, "Frame_getLineOrigins");
+            _frame_getLinesExtended = NativeImplClient.GetModuleMethod(_module, "Frame_getLinesExtended");
             _Frame_dispose = NativeImplClient.GetModuleMethod(_module, "Frame_dispose");
             _frameSetter_createWithAttributedString = NativeImplClient.GetModuleMethod(_module, "FrameSetter_createWithAttributedString");
             _frameSetter_createFrame = NativeImplClient.GetModuleMethod(_module, "FrameSetter_createFrame");

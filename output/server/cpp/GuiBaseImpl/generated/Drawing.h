@@ -664,6 +664,52 @@ struct Range {
     int64_t length;
 };
 
+struct TypographicBounds {
+    double width;
+    double ascent;
+    double descent;
+    double leading;
+};
+
+// std::vector<TypographicBounds>
+
+// std::vector<AttributedStringOptions>
+
+// std::vector<Range>
+
+enum RunStatus {
+    NoStatus = 0,
+    RightToLeft = 1,
+    NonMonotonic = 2,
+    HasNonIdentityMatrix = 4
+};
+
+// std::vector<uint32_t>
+
+// std::vector<Size>
+
+// std::vector<Rect>
+
+struct RunInfo {
+    AttributedStringOptions attrs;
+    Range sourceRange;
+    uint32_t status;
+    Rect bounds;
+    TypographicBounds typoBounds;
+};
+
+// std::vector<RunInfo>
+
+// std::vector<std::vector<RunInfo>>
+
+struct LineInfo {
+    Point origin;
+    TypographicBounds lineTypoBounds;
+    std::vector<RunInfo> runs;
+};
+
+// std::vector<LineInfo>
+
 
 
 struct GradientStop {
@@ -676,13 +722,6 @@ struct GradientStop {
 
 // std::vector<GradientStop>
 
-
-struct TypographicBounds {
-    double width;
-    double ascent;
-    double descent;
-    double leading;
-};
 
 enum LineBoundsOptions {
     ExcludeTypographicLeading = 1,
@@ -698,13 +737,6 @@ enum LineBoundsOptions {
 
 
 
-
-enum RunStatus {
-    NoStatus = 0,
-    RightToLeft = 1,
-    NonMonotonic = 2,
-    HasNonIdentityMatrix = 4
-};
 
 
 extern const AffineTransform AffineTransformIdentity;
@@ -783,12 +815,13 @@ TypographicBounds Line_getTypographicBounds(Line _this);
 Rect Line_getBoundsWithOptions(Line _this, uint32_t opts);
 void Line_draw(Line _this, DrawContext context);
 std::vector<Run> Line_getGlyphRuns(Line _this);
-std::tuple<double,double> Line_getLineOffsetForStringIndex(Line _this, int64_t charIndex);
+std::tuple<double,double> Line_getOffsetForStringIndex(Line _this, int64_t charIndex);
 Line Line_createWithAttributedString(AttributedString str);
 void Line_dispose(Line _this);
 void Frame_draw(Frame _this, DrawContext context);
 std::vector<Line> Frame_getLines(Frame _this);
 std::vector<Point> Frame_getLineOrigins(Frame _this, Range range);
+std::vector<LineInfo> Frame_getLinesExtended(Frame _this, std::vector<std::string> customKeys);
 void Frame_dispose(Frame _this);
 FrameSetter FrameSetter_createWithAttributedString(AttributedString str);
 Frame FrameSetter_createFrame(FrameSetter _this, Range range, Path path);
