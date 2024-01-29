@@ -413,13 +413,13 @@ void MutableAttributedString_setAttribute(MutableAttributedString _this, Range r
 
 void MutableAttributedString_setCustomAttribute(MutableAttributedString _this, Range range, std::string key, int64_t value)
 {
-    auto cfKey = dl_CFStringCreateWithCString(key.c_str());
+    auto cfKey = __dl_CFStringMakeConstantString(key.c_str()); // needs to be a constant (deduplicated) for anything key-related
     auto cfValue = dl_CFNumberCreate(dl_CFNumberType::dl_kCFNumberLongType, &value);
 
     dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), cfKey, cfValue);
 
     dl_CFRelease(cfValue);
-    dl_CFRelease(cfKey);
+    // dl_CFRelease(cfKey); // constant strings don't need to be released
 }
 
 AttributedString MutableAttributedString_getNormalAttributedString_REMOVEME(MutableAttributedString _this)
@@ -582,7 +582,7 @@ AttributedStringOptions Run_getAttributes(Run _this, std::vector<std::string> cu
     if (customKeys.size() > 0) {
         std::map<std::string, int64_t> customMap;
         for (auto i = customKeys.begin(); i != customKeys.end(); i++) {
-            auto cfKey = dl_CFStringCreateWithCString(i->c_str());
+            auto cfKey = __dl_CFStringMakeConstantString(i->c_str()); // needs to be constant (ie, deduplicated) for anything key-related
             auto cfNumber = (dl_CFNumberRef)dl_CFDictionaryGetValue(attrs, cfKey);
             if (cfNumber != nullptr) {
                 long id;
@@ -593,7 +593,7 @@ AttributedStringOptions Run_getAttributes(Run _this, std::vector<std::string> cu
                     printf("Run_getAttributes: failed to get long value! (custom attr keys)\n");
                 }
             }
-            dl_CFRelease(cfKey);
+            // dl_CFRelease(cfKey); // constant strings shouldn't be released
         }
         ret.setCustom(customMap);
     }
