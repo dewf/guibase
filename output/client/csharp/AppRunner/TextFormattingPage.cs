@@ -21,6 +21,10 @@ internal class ClientAttrMap
 			.Select(pair => new KeyValuePair<string, CustomRunAttribute>(pair.Key, _customRunAttributes[pair.Value]))
 			.ToDictionary();
     }
+    public void SetCustom(MutableAttributedString attrString, Drawing.Range range, string key, CustomRunAttribute attr)
+    {
+	    attrString.SetCustomAttribute(range, key, Insert(attr));
+    }
 }
 
 public class TextFormattingPage : BasePage
@@ -42,7 +46,7 @@ public class TextFormattingPage : BasePage
 
     private static readonly string[] AllCustomAttributes = [BackgroundKey, HighlightKey, StrikeCountKey, StrikeColorKey, UnderlineStyleKey, UnderlineColorKey];
 
-    private readonly ClientAttrMap _attrManager = new();
+    private readonly ClientAttrMap _attrMap = new();
     private readonly FrameSetter _frameSetter;
     private readonly Color _black = Color.GetConstantColor(ColorConstants.Black);
 
@@ -84,10 +88,10 @@ public class TextFormattingPage : BasePage
         attrString.SetAttribute(range, new AttributedStringOptions { Font = timesItalic });
 
         range = StringFind(Text, "IDWriteTextFormat and IDWriteTextLayout objects");
-        attrString.SetCustomAttribute(range, BackgroundKey, _attrManager.Insert(new ColorAttribute(magenta)));
+        _attrMap.SetCustom(attrString, range, BackgroundKey, new ColorAttribute(magenta));
 
         range = StringFind(Text, "the SetDrawingEffect method");
-        attrString.SetCustomAttribute(range, HighlightKey, _attrManager.Insert(new ColorAttribute(alphaYellow)));
+        _attrMap.SetCustom(attrString, range, HighlightKey, new ColorAttribute(alphaYellow));
 
         range = StringFind(Text, "SetDrawingEffect");
         attrString.SetAttribute(range, new AttributedStringOptions { Font = timesItalic });
@@ -98,15 +102,15 @@ public class TextFormattingPage : BasePage
         attrString.SetAttribute(MakeRange(range.Location + 1, 1), new AttributedStringOptions { ForegroundColor = blue });
         attrString.SetAttribute(MakeRange(range.Location + 2, 1), new AttributedStringOptions { ForegroundColor = green });
         // strike count:
-        attrString.SetCustomAttribute(range, StrikeCountKey, _attrManager.Insert(new IntAttribute(1)));
+        _attrMap.SetCustom(attrString, range, StrikeCountKey, new IntAttribute(1));
         
         // RGB
         range = StringFind(Text, "RGB");
         attrString.SetAttribute(MakeRange(range.Location, 1), new AttributedStringOptions { ForegroundColor = red });
         attrString.SetAttribute(MakeRange(range.Location + 1, 1), new AttributedStringOptions { ForegroundColor = green });
         attrString.SetAttribute(MakeRange(range.Location + 2, 1), new AttributedStringOptions { ForegroundColor = blue });
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Single)));
-        attrString.SetCustomAttribute(range, UnderlineColorKey, _attrManager.Insert(new ColorAttribute(yellow)));
+        _attrMap.SetCustom(attrString, range, UnderlineStyleKey, new UnderlineStyleAttribute(UnderlineStyle.Single));
+        _attrMap.SetCustom(attrString, range, UnderlineColorKey, new ColorAttribute(yellow));
         
         range = StringFind(Text, " red");
         attrString.SetAttribute(range, new AttributedStringOptions { ForegroundColor = red });
@@ -116,45 +120,45 @@ public class TextFormattingPage : BasePage
         attrString.SetAttribute(range, new AttributedStringOptions { ForegroundColor = blue });
         
         range = StringFind(Text, "double underline");
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Double)));
+        _attrMap.SetCustom(attrString, range, UnderlineStyleKey, new UnderlineStyleAttribute(UnderlineStyle.Double));
         
         range = StringFind(Text, "triple underline");
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Triple)));
+        _attrMap.SetCustom(attrString, range, UnderlineStyleKey, new UnderlineStyleAttribute(UnderlineStyle.Triple));
         
         range = StringFind(Text, "single strikethrough");
-        attrString.SetCustomAttribute(range, StrikeCountKey, _attrManager.Insert(new IntAttribute(1)));
+        _attrMap.SetCustom(attrString, range, StrikeCountKey, new IntAttribute(1));
         
         range = StringFind(Text, "double strikethrough");
-        attrString.SetCustomAttribute(range, StrikeCountKey, _attrManager.Insert(new IntAttribute(2)));
+        _attrMap.SetCustom(attrString, range, StrikeCountKey, new IntAttribute(2));
         
         range = StringFind(Text, "triple strikethrough");
-        attrString.SetCustomAttribute(range, StrikeCountKey, _attrManager.Insert(new IntAttribute(3)));
+        _attrMap.SetCustom(attrString, range, StrikeCountKey, new IntAttribute(3));
         
         range = StringFind(Text, "combinations");
-        attrString.SetCustomAttribute(range, StrikeCountKey, _attrManager.Insert(new IntAttribute(2)));
-        attrString.SetCustomAttribute(range, StrikeColorKey, _attrManager.Insert(new ColorAttribute(red)));
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Triple)));
+        _attrMap.SetCustom(attrString, range, StrikeCountKey, new IntAttribute(2));
+        _attrMap.SetCustom(attrString, range, StrikeColorKey, new ColorAttribute(red));
+        _attrMap.SetCustom(attrString, range, UnderlineStyleKey, new UnderlineStyleAttribute(UnderlineStyle.Triple));
         
         range = StringFind(Text, "thereof");
-        attrString.SetCustomAttribute(range, StrikeCountKey, _attrManager.Insert(new IntAttribute(3)));
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Double)));
-        attrString.SetCustomAttribute(range, UnderlineColorKey, _attrManager.Insert(new ColorAttribute(blue)));
+        _attrMap.SetCustom(attrString, range, StrikeCountKey, new IntAttribute(3));
+        _attrMap.SetCustom(attrString, range, UnderlineStyleKey, new UnderlineStyleAttribute(UnderlineStyle.Double));
+        _attrMap.SetCustom(attrString, range, UnderlineColorKey, new ColorAttribute(blue));
         
         range = StringFind(Text, "overline");
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Overline)));
-        attrString.SetCustomAttribute(range, UnderlineColorKey, _attrManager.Insert(new ColorAttribute(blue)));
+        _attrMap.SetCustom(attrString, range, UnderlineStyleKey, new UnderlineStyleAttribute(UnderlineStyle.Overline));
+        _attrMap.SetCustom(attrString, range, UnderlineColorKey, new ColorAttribute(blue));
         
         range = StringFind(Text, "squiggly (squiggly?) underline");
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Squiggly)));
-        attrString.SetCustomAttribute(range, UnderlineColorKey, _attrManager.Insert(new ColorAttribute(blue)));
+        _attrMap.SetCustom(attrString, range, UnderlineStyleKey, new UnderlineStyleAttribute(UnderlineStyle.Squiggly));
+        _attrMap.SetCustom(attrString, range, UnderlineColorKey, new ColorAttribute(blue));
         
         range = StringFind(Text, "(squiggly?)");
-        attrString.SetCustomAttribute(range, UnderlineColorKey, _attrManager.Insert(new ColorAttribute(red)));
+        _attrMap.SetCustom(attrString, range, UnderlineColorKey, new ColorAttribute(red));
         
         range = StringFind(Text, "IDWriteTextLayout");
-        attrString.SetCustomAttribute(range, UnderlineStyleKey, _attrManager.Insert(new UnderlineStyleAttribute(UnderlineStyle.Squiggly)));
-        attrString.SetCustomAttribute(range, UnderlineColorKey, _attrManager.Insert(new ColorAttribute(blue)));
-        attrString.SetCustomAttribute(range, HighlightKey, _attrManager.Insert(new ColorAttribute(alphaYellow)));
+        _attrMap.SetCustom(attrString, range, UnderlineStyleKey, new UnderlineStyleAttribute(UnderlineStyle.Squiggly));
+        _attrMap.SetCustom(attrString, range, UnderlineColorKey, new ColorAttribute(blue));
+        _attrMap.SetCustom(attrString, range, HighlightKey, new ColorAttribute(alphaYellow));
         
         // end batch editing
         attrString.EndEditing();
@@ -178,14 +182,14 @@ public class TextFormattingPage : BasePage
         using var frame = _frameSetter.CreateFrame(RangeZero, rectPath); // don't know what the final argument NULL could be (not implemented yet)
         
         // draw background color, underlines
-        DrawFrameEffects(drawList, frame, rect, EffectLayer.Background, _black, _attrManager);
+        DrawFrameEffects(drawList, frame, rect, EffectLayer.Background, _black, _attrMap);
         
         // draw text + built-in CT effects
         drawList.DrawFrame(frame);
         // frame.Draw(context);
         
         // draw strikethroughs, highlights
-        DrawFrameEffects(drawList, frame, rect, EffectLayer.Overlay, _black, _attrManager);
+        DrawFrameEffects(drawList, frame, rect, EffectLayer.Overlay, _black, _attrMap);
         
         drawList.Send();
     }
