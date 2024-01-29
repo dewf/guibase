@@ -896,12 +896,9 @@ std::vector<Point> Frame_getLineOrigins(Frame _this, Range range)
     auto ctLinesArr = dl_CTFrameGetLines((dl_CTFrameRef)_this);
     auto lineCount = dl_CFArrayGetCount(ctLinesArr);
 
-    auto points = new Point[lineCount];
-    dl_CTFrameGetLineOrigins((dl_CTFrameRef)_this, STRUCT_CAST(dl_CFRange,range), (dl_CGPoint*)points);
-    auto ret = std::vector<Point>(points, points + lineCount);
-    delete[] points;
-
-    return ret;
+    std::vector<Point> origins(lineCount);
+    dl_CTFrameGetLineOrigins((dl_CTFrameRef)_this, STRUCT_CAST(dl_CFRange,range), (dl_CGPoint*)origins.data());
+    return origins;
 }
 
 std::vector<LineInfo> Frame_getLinesExtended(Frame _this, std::vector<std::string> customKeys)
@@ -910,14 +907,12 @@ std::vector<LineInfo> Frame_getLinesExtended(Frame _this, std::vector<std::strin
     auto ctLinesArr = dl_CTFrameGetLines((dl_CTFrameRef)_this);
     auto lineCount = dl_CFArrayGetCount(ctLinesArr);
 
-    auto points = new Point[lineCount];
-    dl_CTFrameGetLineOrigins((dl_CTFrameRef)_this, dl_CFRangeZero, (dl_CGPoint*)points);
-    auto origins = std::vector<Point>(points, points + lineCount);
-    delete[] points;
+    std::vector<Point> origins(lineCount);
+    dl_CTFrameGetLineOrigins((dl_CTFrameRef)_this, dl_CFRangeZero, (dl_CGPoint*)origins.data());
     
     for (auto lineIndex = 0; lineIndex < lineCount; lineIndex++) {
         LineInfo line;
-        auto origin = origins[lineIndex];
+        line.origin = origins[lineIndex];
 
         auto ctLine = (dl_CTLineRef)dl_CFArrayGetValueAtIndex(ctLinesArr, lineIndex);
         line.lineTypoBounds = Line_getTypographicBounds((Line)ctLine);
@@ -952,8 +947,8 @@ std::vector<LineInfo> Frame_getLinesExtended(Frame _this, std::vector<std::strin
                 xOffset = dl_CTLineGetOffsetForStringIndex(ctLine, run.sourceRange.location, nullptr);
             }
 
-            run.bounds.origin.x = origin.x + xOffset;
-            run.bounds.origin.y = origin.y;
+            run.bounds.origin.x = line.origin.x + xOffset;
+            run.bounds.origin.y = line.origin.y;
             run.bounds.origin.y -= run.typoBounds.ascent;
 
             if (run.bounds.size.width > line.lineTypoBounds.width) {
