@@ -183,7 +183,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.ForegroundColor;
                 }
             }
-            public bool HasForegroundColor(out Color value)
+            public readonly bool HasForegroundColor(out Color value)
             {
                 if (UsedFields.HasFlag(Fields.ForegroundColor))
                 {
@@ -202,7 +202,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.ForegroundColorFromContext;
                 }
             }
-            public bool HasForegroundColorFromContext(out bool value)
+            public readonly bool HasForegroundColorFromContext(out bool value)
             {
                 if (UsedFields.HasFlag(Fields.ForegroundColorFromContext))
                 {
@@ -221,7 +221,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.Font;
                 }
             }
-            public bool HasFont(out Font value)
+            public readonly bool HasFont(out Font value)
             {
                 if (UsedFields.HasFlag(Fields.Font))
                 {
@@ -240,7 +240,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.StrokeWidth;
                 }
             }
-            public bool HasStrokeWidth(out double value)
+            public readonly bool HasStrokeWidth(out double value)
             {
                 if (UsedFields.HasFlag(Fields.StrokeWidth))
                 {
@@ -259,7 +259,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.StrokeColor;
                 }
             }
-            public bool HasStrokeColor(out Color value)
+            public readonly bool HasStrokeColor(out Color value)
             {
                 if (UsedFields.HasFlag(Fields.StrokeColor))
                 {
@@ -278,7 +278,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.Custom;
                 }
             }
-            public bool HasCustom(out Dictionary<string,long> value)
+            public readonly bool HasCustom(out Dictionary<string,long> value)
             {
                 if (UsedFields.HasFlag(Fields.Custom))
                 {
@@ -1452,7 +1452,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.Italic;
                 }
             }
-            public bool HasItalic(out bool value)
+            public readonly bool HasItalic(out bool value)
             {
                 if (UsedFields.HasFlag(Fields.Italic))
                 {
@@ -1471,7 +1471,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.Bold;
                 }
             }
-            public bool HasBold(out bool value)
+            public readonly bool HasBold(out bool value)
             {
                 if (UsedFields.HasFlag(Fields.Bold))
                 {
@@ -1490,7 +1490,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.Expanded;
                 }
             }
-            public bool HasExpanded(out bool value)
+            public readonly bool HasExpanded(out bool value)
             {
                 if (UsedFields.HasFlag(Fields.Expanded))
                 {
@@ -1509,7 +1509,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.Condensed;
                 }
             }
-            public bool HasCondensed(out bool value)
+            public readonly bool HasCondensed(out bool value)
             {
                 if (UsedFields.HasFlag(Fields.Condensed))
                 {
@@ -1528,7 +1528,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.Monospace;
                 }
             }
-            public bool HasMonospace(out bool value)
+            public readonly bool HasMonospace(out bool value)
             {
                 if (UsedFields.HasFlag(Fields.Monospace))
                 {
@@ -1547,7 +1547,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.Vertical;
                 }
             }
-            public bool HasVertical(out bool value)
+            public readonly bool HasVertical(out bool value)
             {
                 if (UsedFields.HasFlag(Fields.Vertical))
                 {
@@ -1637,7 +1637,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.Transform;
                 }
             }
-            public bool HasTransform(out AffineTransform value)
+            public readonly bool HasTransform(out AffineTransform value)
             {
                 if (UsedFields.HasFlag(Fields.Transform))
                 {

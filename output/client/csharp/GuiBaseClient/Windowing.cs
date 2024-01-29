@@ -623,7 +623,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.MinWidth;
                 }
             }
-            public bool HasMinWidth(out int value)
+            public readonly bool HasMinWidth(out int value)
             {
                 if (UsedFields.HasFlag(Fields.MinWidth))
                 {
@@ -642,7 +642,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.MinHeight;
                 }
             }
-            public bool HasMinHeight(out int value)
+            public readonly bool HasMinHeight(out int value)
             {
                 if (UsedFields.HasFlag(Fields.MinHeight))
                 {
@@ -661,7 +661,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.MaxWidth;
                 }
             }
-            public bool HasMaxWidth(out int value)
+            public readonly bool HasMaxWidth(out int value)
             {
                 if (UsedFields.HasFlag(Fields.MaxWidth))
                 {
@@ -680,7 +680,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.MaxHeight;
                 }
             }
-            public bool HasMaxHeight(out int value)
+            public readonly bool HasMaxHeight(out int value)
             {
                 if (UsedFields.HasFlag(Fields.MaxHeight))
                 {
@@ -699,7 +699,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.Style;
                 }
             }
-            public bool HasStyle(out WindowStyle value)
+            public readonly bool HasStyle(out WindowStyle value)
             {
                 if (UsedFields.HasFlag(Fields.Style))
                 {
@@ -718,7 +718,7 @@ namespace Org.Prefixed.GuiBase
                     UsedFields |= Fields.NativeParent;
                 }
             }
-            public bool HasNativeParent(out IntPtr value)
+            public readonly bool HasNativeParent(out IntPtr value)
             {
                 if (UsedFields.HasFlag(Fields.NativeParent))
                 {
