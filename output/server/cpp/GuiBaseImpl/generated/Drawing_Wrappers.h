@@ -12,6 +12,15 @@ AttributedStringOptions AttributedStringOptions__pop();
 void AttributedString__push(AttributedString value);
 AttributedString AttributedString__pop();
 
+void BitmapInfo__push(uint32_t value);
+uint32_t BitmapInfo__pop();
+
+void BitmapDrawContext__push(BitmapDrawContext value);
+BitmapDrawContext BitmapDrawContext__pop();
+
+void BitmapLock__push(BitmapLock value);
+BitmapLock BitmapLock__pop();
+
 void ColorConstants__push(ColorConstants value);
 ColorConstants ColorConstants__pop();
 
@@ -38,8 +47,9 @@ PathDrawingMode PathDrawingMode__pop();
 
 void GradientDrawingOptions__push(uint32_t value);
 uint32_t GradientDrawingOptions__pop();
-void DrawCommand__push(DrawCommand value, bool isReturn);
-DrawCommand DrawCommand__pop();
+
+void TextDrawingMode__push(TextDrawingMode value);
+TextDrawingMode TextDrawingMode__pop();
 
 void DrawContext__push(DrawContext value);
 DrawContext DrawContext__pop();
@@ -80,6 +90,12 @@ GradientStop GradientStop__pop();
 void Gradient__push(Gradient value);
 Gradient Gradient__pop();
 
+void Image__push(Image value);
+Image Image__pop();
+
+void ImageAlphaInfo__push(ImageAlphaInfo value);
+ImageAlphaInfo ImageAlphaInfo__pop();
+
 void LineBoundsOptions__push(uint32_t value);
 uint32_t LineBoundsOptions__pop();
 
@@ -91,6 +107,14 @@ Line Line__pop();
 
 void MutableAttributedString__push(MutableAttributedString value);
 MutableAttributedString MutableAttributedString__pop();
+
+void TextAlignment__push(TextAlignment value);
+TextAlignment TextAlignment__pop();
+void ParagraphStyleSetting__push(ParagraphStyleSetting value, bool isReturn);
+ParagraphStyleSetting ParagraphStyleSetting__pop();
+
+void ParagraphStyle__push(ParagraphStyle value);
+ParagraphStyle ParagraphStyle__pop();
 
 void Path__push(Path value);
 Path Path__pop();
@@ -186,7 +210,11 @@ void DrawContext_closePath__wrapper();
 
 void DrawContext_drawLinearGradient__wrapper();
 
-void DrawContext_batchDraw__wrapper();
+void DrawContext_setTextDrawingMode__wrapper();
+
+void DrawContext_clipToMask__wrapper();
+
+void DrawContext_drawImage__wrapper();
 
 void DrawContext_dispose__wrapper();
 
@@ -265,6 +293,22 @@ void FrameSetter_createWithAttributedString__wrapper();
 void FrameSetter_createFrame__wrapper();
 
 void FrameSetter_dispose__wrapper();
+
+void ParagraphStyle_create__wrapper();
+
+void ParagraphStyle_dispose__wrapper();
+
+void BitmapLock_dispose__wrapper();
+
+void Image_dispose__wrapper();
+
+void BitmapDrawContext_createImage__wrapper();
+
+void BitmapDrawContext_getData__wrapper();
+
+void BitmapDrawContext_create__wrapper();
+
+void BitmapDrawContext_dispose__wrapper();
 
 void __constantsFunc();
 

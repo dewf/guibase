@@ -96,42 +96,15 @@ opaque Path {
     static Path createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
 }
 
-sumtype DrawCommand {
-    saveGState(),
-    restoreGState(),
-    setRGBFillColor(double red, double green, double blue, double alpha),
-    setRGBStrokeColor(double red, double green, double blue, double alpha),
-    setFillColorWithColor(Color color),
-    fillRect(Rect rect),
-    setTextMatrix(AffineTransform t),
-    setTextPosition(double x, double y),
-    beginPath(),
-    addArc(double x, double y, double radius, double startAngle, double endAngle, bool clockwise),
-    addArcToPoint(double x1, double y1, double x2, double y2, double radius),
-    drawPath(PathDrawingMode mode),
-    setStrokeColorWithColor(Color color),
-    strokeRectWithWidth(Rect rect, double width),
-    moveToPoint(double x, double y),
-    addLineToPoint(double x, double y),
-    strokePath(),
-    setLineDash(double phase, Array<double> lengths),
-    clearLineDash(),
-    setLineWidth(double width),
-    clip(),
-    clipToRect(Rect clipRect),
-    translateCTM(double tx, double ty),
-    scaleCTM(double scaleX, double scaleY),
-    rotateCTM(double angle),
-    concatCTM(AffineTransform transform),
-    addPath(Path path),
-    fillPath(),
-    strokeRect(Rect rect),
-    addRect(Rect rect),
-    closePath(),
-    drawLinearGradient(Gradient gradient, Point startPoint, Point endPoint, GradientDrawingOptions drawOpts),
-
-    // inverted:
-    drawFrame(Frame frame)
+enum TextDrawingMode {
+    Fill,
+    Stroke,
+    FillStroke,
+    Invisible,
+    FillClip,
+    StrokeClip,
+    FillStrokeClip,
+    Clip
 }
 
 opaque DrawContext {
@@ -167,8 +140,10 @@ opaque DrawContext {
     void addRect(Rect rect);
     void closePath();
     void drawLinearGradient(Gradient gradient, Point startPoint, Point endPoint, GradientDrawingOptions drawOpts);
+    void setTextDrawingMode(TextDrawingMode mode);
 
-    void batchDraw(Array<DrawCommand> commands);
+    void clipToMask(Rect rect, Image mask);
+    void drawImage(Rect rect, Image image);
 }
 
 // text stuff
@@ -179,6 +154,7 @@ options AttributedStringOptions {
     Font font;
     double strokeWidth;
     Color strokeColor;
+    ParagraphStyle paragraphStyle;
 
     // for custom types, this seems the simplest for now:
     // client will maintain its own ID->value mapping, instead of having to have knowledge of CFDictionary types etc
@@ -300,4 +276,66 @@ opaque Frame {
 opaque FrameSetter {
     static FrameSetter createWithAttributedString(AttributedString str);
     Frame createFrame(Range range, Path path); // no frameAttributes yet, not sure what they are!
+}
+
+enum TextAlignment {
+    Left,
+    Right,
+    Center,
+    Justified,
+    Natural
+}
+
+sumtype ParagraphStyleSetting {
+    alignment(TextAlignment value)
+}
+
+opaque ParagraphStyle {
+    static ParagraphStyle create(Array<ParagraphStyleSetting> settings);
+}
+
+// bitmaps ===============
+
+enum ImageAlphaInfo {
+    None,               /* For example, RGB. */
+    PremultipliedLast,  /* For example, premultiplied RGBA */
+    PremultipliedFirst, /* For example, premultiplied ARGB */
+    Last,               /* For example, non-premultiplied RGBA */
+    First,              /* For example, non-premultiplied ARGB */
+    NoneSkipLast,       /* For example, RBGX. */
+    NoneSkipFirst,      /* For example, XRGB. */
+    Only                /* No color data, alpha data only */
+}
+    
+flags BitmapInfo {
+    AlphaInfoMask = 0x1F,
+    
+    FloatInfoMask = 0xF00,
+    FloatComponents = 1 << 8,
+    
+    ByteOrderMask     = 0x7000,  // ImageByteOrderInfo.Mask,
+    ByteOrderDefault  = 0 << 12,
+    ByteOrder16Little = 1 << 12, // ImageByteOrderInfo._16Little,
+    ByteOrder32Little = 2 << 12, // ImageByteOrderInfo._32Little,
+    ByteOrder16Big    = 3 << 12, // ImageByteOrderInfo._16Big,
+    ByteOrder32Big    = 4 << 12  // ImageByteOrderInfo._32Big
+}
+
+opaque BitmapLock {
+    // this will eventually allow buffer access
+    // Buffer<byte> getData(); 
+}
+
+opaque Image;
+
+opaque BitmapDrawContext extends DrawContext {
+    Image createImage();
+
+    // return the memory so it can be edited
+    // this API differs from stock Quartz (which can return a void* directly), because Windows needs to lock/unlock the data for writing
+    BitmapLock getData();
+
+    // we don't support a void* data argument on this yet
+    // (will eventually support a Buffer<whatever> argument)
+    static BitmapDrawContext create(int width, int height, int bitsPerComponent, int bytesPerRow, ColorSpace space, BitmapInfo bitmapInfo);
 }

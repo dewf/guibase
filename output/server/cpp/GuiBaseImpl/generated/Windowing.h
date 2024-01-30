@@ -132,9 +132,9 @@ enum class Key {
 
 enum Modifiers {
     Shift = 1,
-    Control = 2,
-    Alt = 4,
-    MacControl = 8
+    Control = 1 << 1,
+    Alt = 1 << 2,
+    MacControl = 1 << 3
 };
 
 

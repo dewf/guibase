@@ -5,9 +5,15 @@ namespace AppRunner;
 
 public static class Common
 {
+    public static readonly Drawing.Point PointZero = new(0, 0);
     public static Rect MakeRect(double x, double y, double width, double height)
     {
         return new Rect(new Point(x, y), new Size(width, height));
+    }
+    public static Rect Inset(this Rect rect, int amount)
+    {
+        return MakeRect(rect.Origin.X + amount, rect.Origin.Y + amount, rect.Size.Width - amount * 2,
+            rect.Size.Height - amount * 2);
     }
     public static string RectToString(Rect r)
     {
@@ -20,8 +26,8 @@ public static class Common
         return new Drawing.Range(location, length);
     }
 
-    public static readonly Drawing.Range RangeZero = new Drawing.Range(0, 0);
-    public static readonly Drawing.Range RangeNotFound = new Drawing.Range(-1, -1);
+    public static readonly Drawing.Range RangeZero = new(0, 0);
+    public static readonly Drawing.Range RangeNotFound = new(-1, -1);
 
     public static Drawing.Range StringFind(string str, string substring)
     {

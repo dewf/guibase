@@ -387,32 +387,39 @@ void MutableAttributedString_endEditing(MutableAttributedString _this)
 
 void MutableAttributedString_setAttribute(MutableAttributedString _this, Range range, AttributedStringOptions attr)
 {
+    auto cfRange = STRUCT_CAST(dl_CFRange, range);
+
     Color foreground;
     if (attr.hasForegroundColor(&foreground)) {
-        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), dl_kCTForegroundColorAttributeName, foreground);
+        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, cfRange, dl_kCTForegroundColorAttributeName, foreground);
     }
 
     bool foregroundFromContext;
     if (attr.hasForegroundColorFromContext(&foregroundFromContext)) {
         auto cfBool = foregroundFromContext ? dl_kCFBooleanTrue : dl_kCFBooleanFalse;
-        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), dl_kCTForegroundColorFromContextAttributeName, cfBool);
+        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, cfRange, dl_kCTForegroundColorFromContextAttributeName, cfBool);
     }
 
     Font font;
     if (attr.hasFont(&font)) {
-        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), dl_kCTFontAttributeName, font);
+        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, cfRange, dl_kCTFontAttributeName, font);
     }
 
     double strokeWidth;
     if (attr.hasStrokeWidth(&strokeWidth)) {
         auto cfWidth = dl_CFNumberWithFloat((float)strokeWidth); // because double isn't working (nothing supports casting yet)
-        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), dl_kCTStrokeWidthAttributeName, cfWidth);
+        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, cfRange, dl_kCTStrokeWidthAttributeName, cfWidth);
         dl_CFRelease(cfWidth);
     }
 
     Color strokeColor;
     if (attr.hasStrokeColor(&strokeColor)) {
-        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, STRUCT_CAST(dl_CFRange, range), dl_kCTStrokeColorAttributeName, strokeColor);
+        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, cfRange, dl_kCTStrokeColorAttributeName, strokeColor);
+    }
+
+    ParagraphStyle paraStyle;
+    if (attr.hasParagraphStyle(&paraStyle)) {
+        dl_CFAttributedStringSetAttribute((dl_CFMutableAttributedStringRef)_this, cfRange, dl_kCTParagraphStyleAttributeName, paraStyle);
     }
 }
 
@@ -719,182 +726,182 @@ void FrameSetter_dispose(FrameSetter _this)
     dl_CFRelease(_this);
 }
 
-static inline void drawCommand(dl_CGContextRef context, DrawCommand command)
-{
-    switch (command.tag) {
-    case DrawCommand::Tag::restoreGState: {
-        dl_CGContextRestoreGState(context);
-        break;
-    }
-    case DrawCommand::Tag::saveGState: {
-        dl_CGContextSaveGState(context);
-        break;
-    }
-    case DrawCommand::Tag::setRGBFillColor: {
-        auto& cmd = command.setRGBFillColor;
-        dl_CGContextSetRGBFillColor(context, cmd->red, cmd->green, cmd->blue, cmd->alpha);
-        break;
-    }
-    case DrawCommand::Tag::setRGBStrokeColor: {
-        auto& cmd = command.setRGBStrokeColor;
-        dl_CGContextSetRGBStrokeColor(context, cmd->red, cmd->green, cmd->blue, cmd->alpha);
-        break;
-    }
-    case DrawCommand::Tag::setFillColorWithColor: {
-        auto& cmd = command.setFillColorWithColor;
-        dl_CGContextSetFillColorWithColor(context, (dl_CGColorRef)cmd->color);
-        break;
-    }
-    case DrawCommand::Tag::fillRect: {
-        auto& cmd = command.fillRect;
-        dl_CGContextFillRect(context, STRUCT_CAST(dl_CGRect, cmd->rect));
-        break;
-    }
-    case DrawCommand::Tag::setTextMatrix: {
-        auto& cmd = command.setTextMatrix;
-        dl_CGContextSetTextMatrix(context, STRUCT_CAST(dl_CGAffineTransform, cmd->t));
-        break;
-    }
-    case DrawCommand::Tag::setTextPosition: {
-        auto& cmd = command.setTextPosition;
-        dl_CGContextSetTextPosition(context, cmd->x, cmd->y);
-        break;
-    }
-    case DrawCommand::Tag::beginPath: {
-        dl_CGContextBeginPath(context);
-        break;
-    }
-    case DrawCommand::Tag::addArc: {
-        auto& cmd = command.addArc;
-        dl_CGContextAddArc(context, cmd->x, cmd->y, cmd->radius, cmd->startAngle, cmd->endAngle, cmd->clockwise);
-        break;
-    }
-    case DrawCommand::Tag::addArcToPoint: {
-        auto& cmd = command.addArcToPoint;
-        dl_CGContextAddArcToPoint(context, cmd->x1, cmd->y1, cmd->x2, cmd->y2, cmd->radius);
-        break;
-    }
-    case DrawCommand::Tag::drawPath: {
-        auto& cmd = command.drawPath;
-        dl_CGContextDrawPath(context, (dl_CGPathDrawingMode)cmd->mode);
-        break;
-    }
-    case DrawCommand::Tag::setStrokeColorWithColor: {
-        auto& cmd = command.setStrokeColorWithColor;
-        dl_CGContextSetStrokeColorWithColor(context, (dl_CGColorRef)cmd->color);
-        break;
-    }
-    case DrawCommand::Tag::strokeRectWithWidth: {
-        auto& cmd = command.strokeRectWithWidth;
-        dl_CGContextStrokeRectWithWidth(context, STRUCT_CAST(dl_CGRect, cmd->rect), cmd->width);
-        break;
-    }
-    case DrawCommand::Tag::moveToPoint: {
-        auto& cmd = command.moveToPoint;
-        dl_CGContextMoveToPoint(context, cmd->x, cmd->y);
-        break;
-    }
-    case DrawCommand::Tag::addLineToPoint: {
-        auto& cmd = command.addLineToPoint;
-        dl_CGContextAddLineToPoint(context, cmd->x, cmd->y);
-        break;
-    }
-    case DrawCommand::Tag::strokePath: {
-        dl_CGContextStrokePath(context);
-        break;
-    }
-    case DrawCommand::Tag::setLineDash: {
-        auto& cmd = command.setLineDash;
-        dl_CGContextSetLineDash(context, cmd->phase, cmd->lengths.data(), cmd->lengths.size());
-        break;
-    }
-    case DrawCommand::Tag::clearLineDash: {
-        dl_CGContextSetLineDash(context, 0, nullptr, 0);
-        break;
-    }
-    case DrawCommand::Tag::setLineWidth: {
-        auto& cmd = command.setLineWidth;
-        dl_CGContextSetLineWidth(context, cmd->width);
-        break;
-    }
-    case DrawCommand::Tag::clip: {
-        dl_CGContextClip(context);
-        break;
-    }
-    case DrawCommand::Tag::clipToRect: {
-        auto& cmd = command.clipToRect;
-        dl_CGContextClipToRect(context, STRUCT_CAST(dl_CGRect, cmd->clipRect));
-        break;
-    }
-    case DrawCommand::Tag::translateCTM: {
-        auto& cmd = command.translateCTM;
-        dl_CGContextTranslateCTM(context, cmd->tx, cmd->ty);
-        break;
-    }
-    case DrawCommand::Tag::scaleCTM: {
-        auto& cmd = command.scaleCTM;
-        dl_CGContextScaleCTM(context, cmd->scaleX, cmd->scaleY);
-        break;
-    }
-    case DrawCommand::Tag::rotateCTM: {
-        auto& cmd = command.rotateCTM;
-        dl_CGContextRotateCTM(context, cmd->angle);
-        break;
-    }
-    case DrawCommand::Tag::concatCTM: {
-        auto& cmd = command.concatCTM;
-        dl_CGContextConcatCTM(context, STRUCT_CAST(dl_CGAffineTransform, cmd->transform));
-        break;
-    }
-    case DrawCommand::Tag::addPath: {
-        auto& cmd = command.addPath;
-        dl_CGContextAddPath(context, (dl_CGPathRef)cmd->path);
-        break;
-    }
-    case DrawCommand::Tag::fillPath: {
-        dl_CGContextFillPath(context);
-        break;
-    }
-    case DrawCommand::Tag::strokeRect: {
-        auto& cmd = command.strokeRect;
-        dl_CGContextStrokeRect(context, STRUCT_CAST(dl_CGRect, cmd->rect));
-        break;
-    }
-    case DrawCommand::Tag::addRect: {
-        auto& cmd = command.addRect;
-        dl_CGContextAddRect(context, STRUCT_CAST(dl_CGRect, cmd->rect));
-        break;
-    }
-    case DrawCommand::Tag::closePath: {
-        dl_CGContextClosePath(context);
-        break;
-    }
-    case DrawCommand::Tag::drawLinearGradient: {
-        auto& cmd = command.drawLinearGradient;
-        dl_CGContextDrawLinearGradient(
-            context,
-            (dl_CGGradientRef)cmd->gradient,
-            STRUCT_CAST(dl_CGPoint, cmd->startPoint),
-            STRUCT_CAST(dl_CGPoint, cmd->endPoint),
-            (dl_CGGradientDrawingOptions)cmd->drawOpts);
-        break;
-    }
-    case DrawCommand::Tag::drawFrame: {
-        auto& cmd = command.drawFrame;
-        dl_CTFrameDraw((dl_CTFrameRef)cmd->frame, context);
-        break;
-    }
-    default:
-        printf("Drawing.cpp: unhandled drawCommand! %d\n", command.tag);
-    }
-}
-
-void DrawContext_batchDraw(DrawContext _this, std::vector<DrawCommand> commands)
-{
-    for (auto i = commands.begin(); i != commands.end(); i++) {
-        drawCommand((dl_CGContextRef)_this, *i);
-    }
-}
+//static inline void drawCommand(dl_CGContextRef context, DrawCommand command)
+//{
+//    switch (command.tag) {
+//    case DrawCommand::Tag::restoreGState: {
+//        dl_CGContextRestoreGState(context);
+//        break;
+//    }
+//    case DrawCommand::Tag::saveGState: {
+//        dl_CGContextSaveGState(context);
+//        break;
+//    }
+//    case DrawCommand::Tag::setRGBFillColor: {
+//        auto& cmd = command.setRGBFillColor;
+//        dl_CGContextSetRGBFillColor(context, cmd->red, cmd->green, cmd->blue, cmd->alpha);
+//        break;
+//    }
+//    case DrawCommand::Tag::setRGBStrokeColor: {
+//        auto& cmd = command.setRGBStrokeColor;
+//        dl_CGContextSetRGBStrokeColor(context, cmd->red, cmd->green, cmd->blue, cmd->alpha);
+//        break;
+//    }
+//    case DrawCommand::Tag::setFillColorWithColor: {
+//        auto& cmd = command.setFillColorWithColor;
+//        dl_CGContextSetFillColorWithColor(context, (dl_CGColorRef)cmd->color);
+//        break;
+//    }
+//    case DrawCommand::Tag::fillRect: {
+//        auto& cmd = command.fillRect;
+//        dl_CGContextFillRect(context, STRUCT_CAST(dl_CGRect, cmd->rect));
+//        break;
+//    }
+//    case DrawCommand::Tag::setTextMatrix: {
+//        auto& cmd = command.setTextMatrix;
+//        dl_CGContextSetTextMatrix(context, STRUCT_CAST(dl_CGAffineTransform, cmd->t));
+//        break;
+//    }
+//    case DrawCommand::Tag::setTextPosition: {
+//        auto& cmd = command.setTextPosition;
+//        dl_CGContextSetTextPosition(context, cmd->x, cmd->y);
+//        break;
+//    }
+//    case DrawCommand::Tag::beginPath: {
+//        dl_CGContextBeginPath(context);
+//        break;
+//    }
+//    case DrawCommand::Tag::addArc: {
+//        auto& cmd = command.addArc;
+//        dl_CGContextAddArc(context, cmd->x, cmd->y, cmd->radius, cmd->startAngle, cmd->endAngle, cmd->clockwise);
+//        break;
+//    }
+//    case DrawCommand::Tag::addArcToPoint: {
+//        auto& cmd = command.addArcToPoint;
+//        dl_CGContextAddArcToPoint(context, cmd->x1, cmd->y1, cmd->x2, cmd->y2, cmd->radius);
+//        break;
+//    }
+//    case DrawCommand::Tag::drawPath: {
+//        auto& cmd = command.drawPath;
+//        dl_CGContextDrawPath(context, (dl_CGPathDrawingMode)cmd->mode);
+//        break;
+//    }
+//    case DrawCommand::Tag::setStrokeColorWithColor: {
+//        auto& cmd = command.setStrokeColorWithColor;
+//        dl_CGContextSetStrokeColorWithColor(context, (dl_CGColorRef)cmd->color);
+//        break;
+//    }
+//    case DrawCommand::Tag::strokeRectWithWidth: {
+//        auto& cmd = command.strokeRectWithWidth;
+//        dl_CGContextStrokeRectWithWidth(context, STRUCT_CAST(dl_CGRect, cmd->rect), cmd->width);
+//        break;
+//    }
+//    case DrawCommand::Tag::moveToPoint: {
+//        auto& cmd = command.moveToPoint;
+//        dl_CGContextMoveToPoint(context, cmd->x, cmd->y);
+//        break;
+//    }
+//    case DrawCommand::Tag::addLineToPoint: {
+//        auto& cmd = command.addLineToPoint;
+//        dl_CGContextAddLineToPoint(context, cmd->x, cmd->y);
+//        break;
+//    }
+//    case DrawCommand::Tag::strokePath: {
+//        dl_CGContextStrokePath(context);
+//        break;
+//    }
+//    case DrawCommand::Tag::setLineDash: {
+//        auto& cmd = command.setLineDash;
+//        dl_CGContextSetLineDash(context, cmd->phase, cmd->lengths.data(), cmd->lengths.size());
+//        break;
+//    }
+//    case DrawCommand::Tag::clearLineDash: {
+//        dl_CGContextSetLineDash(context, 0, nullptr, 0);
+//        break;
+//    }
+//    case DrawCommand::Tag::setLineWidth: {
+//        auto& cmd = command.setLineWidth;
+//        dl_CGContextSetLineWidth(context, cmd->width);
+//        break;
+//    }
+//    case DrawCommand::Tag::clip: {
+//        dl_CGContextClip(context);
+//        break;
+//    }
+//    case DrawCommand::Tag::clipToRect: {
+//        auto& cmd = command.clipToRect;
+//        dl_CGContextClipToRect(context, STRUCT_CAST(dl_CGRect, cmd->clipRect));
+//        break;
+//    }
+//    case DrawCommand::Tag::translateCTM: {
+//        auto& cmd = command.translateCTM;
+//        dl_CGContextTranslateCTM(context, cmd->tx, cmd->ty);
+//        break;
+//    }
+//    case DrawCommand::Tag::scaleCTM: {
+//        auto& cmd = command.scaleCTM;
+//        dl_CGContextScaleCTM(context, cmd->scaleX, cmd->scaleY);
+//        break;
+//    }
+//    case DrawCommand::Tag::rotateCTM: {
+//        auto& cmd = command.rotateCTM;
+//        dl_CGContextRotateCTM(context, cmd->angle);
+//        break;
+//    }
+//    case DrawCommand::Tag::concatCTM: {
+//        auto& cmd = command.concatCTM;
+//        dl_CGContextConcatCTM(context, STRUCT_CAST(dl_CGAffineTransform, cmd->transform));
+//        break;
+//    }
+//    case DrawCommand::Tag::addPath: {
+//        auto& cmd = command.addPath;
+//        dl_CGContextAddPath(context, (dl_CGPathRef)cmd->path);
+//        break;
+//    }
+//    case DrawCommand::Tag::fillPath: {
+//        dl_CGContextFillPath(context);
+//        break;
+//    }
+//    case DrawCommand::Tag::strokeRect: {
+//        auto& cmd = command.strokeRect;
+//        dl_CGContextStrokeRect(context, STRUCT_CAST(dl_CGRect, cmd->rect));
+//        break;
+//    }
+//    case DrawCommand::Tag::addRect: {
+//        auto& cmd = command.addRect;
+//        dl_CGContextAddRect(context, STRUCT_CAST(dl_CGRect, cmd->rect));
+//        break;
+//    }
+//    case DrawCommand::Tag::closePath: {
+//        dl_CGContextClosePath(context);
+//        break;
+//    }
+//    case DrawCommand::Tag::drawLinearGradient: {
+//        auto& cmd = command.drawLinearGradient;
+//        dl_CGContextDrawLinearGradient(
+//            context,
+//            (dl_CGGradientRef)cmd->gradient,
+//            STRUCT_CAST(dl_CGPoint, cmd->startPoint),
+//            STRUCT_CAST(dl_CGPoint, cmd->endPoint),
+//            (dl_CGGradientDrawingOptions)cmd->drawOpts);
+//        break;
+//    }
+//    case DrawCommand::Tag::drawFrame: {
+//        auto& cmd = command.drawFrame;
+//        dl_CTFrameDraw((dl_CTFrameRef)cmd->frame, context);
+//        break;
+//    }
+//    default:
+//        printf("Drawing.cpp: unhandled drawCommand! %d\n", command.tag);
+//    }
+//}
+//
+//void DrawContext_batchDraw(DrawContext _this, std::vector<DrawCommand> commands)
+//{
+//    for (auto i = commands.begin(); i != commands.end(); i++) {
+//        drawCommand((dl_CGContextRef)_this, *i);
+//    }
+//}
 
 std::vector<Point> Frame_getLineOrigins(Frame _this, Range range)
 {
@@ -966,4 +973,89 @@ std::vector<LineInfo> Frame_getLinesExtended(Frame _this, std::vector<std::strin
     }
 
     return ret;
+}
+
+ParagraphStyle ParagraphStyle_create(std::vector<ParagraphStyleSetting> settings)
+{
+    std::vector<dl_CTParagraphStyleSetting> ctSettings;
+
+    for (auto i = settings.begin(); i != settings.end(); i++) {
+        dl_CTParagraphStyleSetting pss;
+
+        switch (i->tag) {
+        case ParagraphStyleSetting::Tag::alignment: {
+            pss.spec = dl_kCTParagraphStyleSpecifierAlignment;
+            auto value = i->alignment->value;
+            pss.value = &value;
+            pss.valueSize = sizeof(value);
+            break;
+        }
+        default:
+            printf("ParagraphStyle_create(): unrecognized setting tag: %d\n", i->tag);
+            continue;
+        }
+
+        ctSettings.push_back(pss);
+    }
+
+    return (ParagraphStyle)dl_CTParagraphStyleCreate(ctSettings.data(), ctSettings.size());
+}
+
+void ParagraphStyle_dispose(ParagraphStyle _this)
+{
+    dl_CFRelease(_this);
+}
+
+void DrawContext_setTextDrawingMode(DrawContext _this, TextDrawingMode mode)
+{
+    dl_CGContextSetTextDrawingMode((dl_CGContextRef)_this, (dl_CGTextDrawingMode)mode);
+}
+
+void DrawContext_clipToMask(DrawContext _this, Rect rect, Image mask)
+{
+    dl_CGContextClipToMask((dl_CGContextRef)_this, STRUCT_CAST(dl_CGRect, rect), (dl_CGImageRef)mask);
+}
+
+void DrawContext_drawImage(DrawContext _this, Rect rect, Image image)
+{
+    dl_CGContextDrawImage((dl_CGContextRef)_this, STRUCT_CAST(dl_CGRect, rect), (dl_CGImageRef)image);
+}
+
+struct __BitmapLock {
+    BitmapDrawContext source;
+    void* data;
+};
+
+BitmapLock BitmapDrawContext_getData(BitmapDrawContext _this)
+{
+    auto ret = new __BitmapLock;
+    ret->source = _this;
+    ret->data = dl_CGBitmapContextGetData((dl_CGContextRef)_this);
+    return ret;
+}
+
+void BitmapLock_dispose(BitmapLock _this)
+{
+    dl_CGBitmapContextReleaseData((dl_CGContextRef)_this->source);
+    delete _this;
+}
+
+BitmapDrawContext BitmapDrawContext_create(int32_t width, int32_t height, int32_t bitsPerComponent, int32_t bytesPerRow, ColorSpace space, uint32_t bitmapInfo)
+{
+    return (BitmapDrawContext)dl_CGBitmapContextCreate(nullptr, width, height, bitsPerComponent, bytesPerRow, (dl_CGColorSpaceRef)space, bitmapInfo);
+}
+
+Image BitmapDrawContext_createImage(BitmapDrawContext _this)
+{
+    return (Image)dl_CGBitmapContextCreateImage((dl_CGContextRef)_this);
+}
+
+void BitmapDrawContext_dispose(BitmapDrawContext _this)
+{
+    dl_CGContextRelease((dl_CGContextRef)_this);
+}
+
+void Image_dispose(Image _this)
+{
+    dl_CGImageRelease((dl_CGImageRef)_this);
 }

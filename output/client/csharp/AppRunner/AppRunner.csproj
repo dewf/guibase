@@ -11,5 +11,9 @@
     <ItemGroup>
       <ProjectReference Include="..\GuiBaseClient\GuiBaseClient.csproj" />
     </ItemGroup>
-
+    
+    <ItemGroup>
+      <Compile Remove="DrawList.cs" />
+    </ItemGroup>
+    
 </Project>
