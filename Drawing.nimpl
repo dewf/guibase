@@ -177,6 +177,8 @@ struct Range {
 
 opaque AttributedString {
     long getLength();
+    MutableAttributedString createMutableCopy(long maxLength);
+
     static AttributedString create(string s, AttributedStringOptions opts);
 }
 

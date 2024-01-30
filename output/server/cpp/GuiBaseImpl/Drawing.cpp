@@ -1021,6 +1021,11 @@ void DrawContext_drawImage(DrawContext _this, Rect rect, Image image)
     dl_CGContextDrawImage((dl_CGContextRef)_this, STRUCT_CAST(dl_CGRect, rect), (dl_CGImageRef)image);
 }
 
+MutableAttributedString AttributedString_createMutableCopy(AttributedString _this, int64_t maxLength)
+{
+    return (MutableAttributedString)dl_CFAttributedStringCreateMutableCopy(maxLength, (dl_CFAttributedStringRef)_this);
+}
+
 struct __BitmapLock {
     BitmapDrawContext source;
     void* data;

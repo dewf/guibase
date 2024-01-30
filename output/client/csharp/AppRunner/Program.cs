@@ -16,6 +16,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     private readonly ResizeGradient _page04;
     private readonly TextFormattingPage _page05;
     private readonly GradLabelPage _page06;
+    private readonly TextStrokeTestingPage _page07;
     private IPage _currentPage;
 
     private readonly Stopwatch _watch = new();
@@ -37,6 +38,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
         _page04 = new ResizeGradient(this);
         _page05 = new TextFormattingPage(this);
         _page06 = new GradLabelPage(this);
+        _page07 = new TextStrokeTestingPage(this);
         _currentPage = _page01;
     }
 
@@ -100,6 +102,9 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
                 break;
             case Key._6:
                 SelectPage(_page06);
+                break;
+            case Key._7:
+                SelectPage(_page07);
                 break;
             default:
                 _currentPage.OnKeyDown(key, modifiers);

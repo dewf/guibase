@@ -516,6 +516,7 @@ void DrawContext_clipToMask(DrawContext _this, Rect rect, Image mask);
 void DrawContext_drawImage(DrawContext _this, Rect rect, Image image);
 void DrawContext_dispose(DrawContext _this);
 int64_t AttributedString_getLength(AttributedString _this);
+MutableAttributedString AttributedString_createMutableCopy(AttributedString _this, int64_t maxLength);
 AttributedString AttributedString_create(std::string s, AttributedStringOptions opts);
 void AttributedString_dispose(AttributedString _this);
 void MutableAttributedString_replaceString(MutableAttributedString _this, Range range, std::string str);

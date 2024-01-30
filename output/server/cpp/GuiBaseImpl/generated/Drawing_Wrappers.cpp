@@ -1166,6 +1166,12 @@ void AttributedString_getLength__wrapper() {
     ni_pushInt64(AttributedString_getLength(_this));
 }
 
+void AttributedString_createMutableCopy__wrapper() {
+    auto _this = AttributedString__pop();
+    auto maxLength = ni_popInt64();
+    MutableAttributedString__push(AttributedString_createMutableCopy(_this, maxLength));
+}
+
 void AttributedString_create__wrapper() {
     auto s = popStringInternal();
     auto opts = AttributedStringOptions__pop();
@@ -1477,6 +1483,7 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_drawImage", &DrawContext_drawImage__wrapper);
     ni_registerModuleMethod(m, "DrawContext_dispose", &DrawContext_dispose__wrapper);
     ni_registerModuleMethod(m, "AttributedString_getLength", &AttributedString_getLength__wrapper);
+    ni_registerModuleMethod(m, "AttributedString_createMutableCopy", &AttributedString_createMutableCopy__wrapper);
     ni_registerModuleMethod(m, "AttributedString_create", &AttributedString_create__wrapper);
     ni_registerModuleMethod(m, "AttributedString_dispose", &AttributedString_dispose__wrapper);
     ni_registerModuleMethod(m, "MutableAttributedString_replaceString", &MutableAttributedString_replaceString__wrapper);

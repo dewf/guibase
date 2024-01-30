@@ -61,6 +61,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _drawContext_drawImage;
         private static ModuleMethodHandle _DrawContext_dispose;
         private static ModuleMethodHandle _attributedString_getLength;
+        private static ModuleMethodHandle _attributedString_createMutableCopy;
         private static ModuleMethodHandle _attributedString_create;
         private static ModuleMethodHandle _AttributedString_dispose;
         private static ModuleMethodHandle _mutableAttributedString_replaceString;
@@ -409,6 +410,13 @@ namespace Org.Prefixed.GuiBase
                 AttributedString__Push(this);
                 NativeImplClient.InvokeModuleMethod(_attributedString_getLength);
                 return NativeImplClient.PopInt64();
+            }
+            public MutableAttributedString CreateMutableCopy(long maxLength)
+            {
+                NativeImplClient.PushInt64(maxLength);
+                AttributedString__Push(this);
+                NativeImplClient.InvokeModuleMethod(_attributedString_createMutableCopy);
+                return MutableAttributedString__Pop();
             }
             public static AttributedString Create(string s, AttributedStringOptions opts)
             {
@@ -2588,6 +2596,7 @@ namespace Org.Prefixed.GuiBase
             _drawContext_drawImage = NativeImplClient.GetModuleMethod(_module, "DrawContext_drawImage");
             _DrawContext_dispose = NativeImplClient.GetModuleMethod(_module, "DrawContext_dispose");
             _attributedString_getLength = NativeImplClient.GetModuleMethod(_module, "AttributedString_getLength");
+            _attributedString_createMutableCopy = NativeImplClient.GetModuleMethod(_module, "AttributedString_createMutableCopy");
             _attributedString_create = NativeImplClient.GetModuleMethod(_module, "AttributedString_create");
             _AttributedString_dispose = NativeImplClient.GetModuleMethod(_module, "AttributedString_dispose");
             _mutableAttributedString_replaceString = NativeImplClient.GetModuleMethod(_module, "MutableAttributedString_replaceString");

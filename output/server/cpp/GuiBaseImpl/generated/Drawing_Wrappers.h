@@ -220,6 +220,8 @@ void DrawContext_dispose__wrapper();
 
 void AttributedString_getLength__wrapper();
 
+void AttributedString_createMutableCopy__wrapper();
+
 void AttributedString_create__wrapper();
 
 void AttributedString_dispose__wrapper();
