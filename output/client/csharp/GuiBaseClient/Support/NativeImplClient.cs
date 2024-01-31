@@ -458,9 +458,9 @@ namespace Org.Prefixed.GuiBase.Support
         public static void PushString(string str)
         {
             var bytes = Encoding.UTF8.GetBytes(str);
-            var ptr = Marshal.AllocHGlobal(str.Length);
+            var ptr = Marshal.AllocHGlobal(bytes.Length);
             Marshal.Copy(bytes, 0, ptr, bytes.Length);
-            NativeMethods.pushString(ptr, (IntPtr)bytes.Length);
+            NativeMethods.pushString(ptr, bytes.Length);
             Marshal.FreeHGlobal(ptr);
         }
 
