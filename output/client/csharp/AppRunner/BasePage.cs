@@ -23,7 +23,10 @@ public interface IPage
     void OnSize(int newWidth, int newHeight);
     void OnTimer(double secondsSinceLast);
     void OnMouseMove(int x, int y, Windowing.Modifiers modifiers);
+    void OnMouseLeave(Windowing.Modifiers modifiers);
+    void OnMouseEnter(int x, int y, Windowing.Modifiers modifiers);
     void OnMouseDown(int x, int y, Windowing.MouseButton button, Windowing.Modifiers modifiers);
+    void OnMouseUp(int x, int y, Windowing.MouseButton button, Windowing.Modifiers modifiers);
     void OnKeyDown(Windowing.Key key, Windowing.Modifiers modifiers);
 }
 
@@ -45,6 +48,14 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     {
     }
 
+    public virtual void OnMouseLeave(Windowing.Modifiers modifiers)
+    {
+    }
+
+    public virtual void OnMouseEnter(int x, int y, Windowing.Modifiers modifiers)
+    {
+    }
+
     public virtual void OnMouseDown(int x, int y, Windowing.MouseButton button, Windowing.Modifiers modifiers)
     {
     }
@@ -53,6 +64,10 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     {
     }
 
+    public virtual void OnMouseUp(int x, int y, Windowing.MouseButton button, Windowing.Modifiers modifiers)
+    {
+    }
+    
     public abstract void Render(Drawing.DrawContext context, RenderArea area);
 
     public virtual void Render2(Drawing.DrawContext context, RenderArea area)

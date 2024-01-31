@@ -1299,6 +1299,11 @@ void Run_dispose__wrapper() {
     Run_dispose(_this);
 }
 
+void Line_getStringRange__wrapper() {
+    auto _this = Line__pop();
+    Range__push(Line_getStringRange(_this), true);
+}
+
 void Line_getTypographicBounds__wrapper() {
     auto _this = Line__pop();
     TypographicBounds__push(Line_getTypographicBounds(_this), true);
@@ -1325,6 +1330,12 @@ void Line_getOffsetForStringIndex__wrapper() {
     auto _this = Line__pop();
     auto charIndex = ni_popInt64();
     __DoubleDouble_Tuple__push(Line_getOffsetForStringIndex(_this, charIndex), true);
+}
+
+void Line_getStringIndexForPosition__wrapper() {
+    auto _this = Line__pop();
+    auto p = Point__pop();
+    ni_pushInt64(Line_getStringIndexForPosition(_this, p));
 }
 
 void Line_createWithAttributedString__wrapper() {
@@ -1506,11 +1517,13 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "Run_getStringRange", &Run_getStringRange__wrapper);
     ni_registerModuleMethod(m, "Run_getStatus", &Run_getStatus__wrapper);
     ni_registerModuleMethod(m, "Run_dispose", &Run_dispose__wrapper);
+    ni_registerModuleMethod(m, "Line_getStringRange", &Line_getStringRange__wrapper);
     ni_registerModuleMethod(m, "Line_getTypographicBounds", &Line_getTypographicBounds__wrapper);
     ni_registerModuleMethod(m, "Line_getBoundsWithOptions", &Line_getBoundsWithOptions__wrapper);
     ni_registerModuleMethod(m, "Line_draw", &Line_draw__wrapper);
     ni_registerModuleMethod(m, "Line_getGlyphRuns", &Line_getGlyphRuns__wrapper);
     ni_registerModuleMethod(m, "Line_getOffsetForStringIndex", &Line_getOffsetForStringIndex__wrapper);
+    ni_registerModuleMethod(m, "Line_getStringIndexForPosition", &Line_getStringIndexForPosition__wrapper);
     ni_registerModuleMethod(m, "Line_createWithAttributedString", &Line_createWithAttributedString__wrapper);
     ni_registerModuleMethod(m, "Line_dispose", &Line_dispose__wrapper);
     ni_registerModuleMethod(m, "Frame_draw", &Frame_draw__wrapper);

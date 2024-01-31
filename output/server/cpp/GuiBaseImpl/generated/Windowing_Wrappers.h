@@ -113,7 +113,13 @@ void WindowDelegate_destroyed__wrapper(int serverID);
 
 void WindowDelegate_mouseDown__wrapper(int serverID);
 
+void WindowDelegate_mouseUp__wrapper(int serverID);
+
 void WindowDelegate_mouseMove__wrapper(int serverID);
+
+void WindowDelegate_mouseEnter__wrapper(int serverID);
+
+void WindowDelegate_mouseLeave__wrapper(int serverID);
 
 void WindowDelegate_repaint__wrapper(int serverID);
 

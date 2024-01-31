@@ -17,6 +17,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     private readonly TextFormattingPage _page05;
     private readonly GradLabelPage _page06;
     private readonly TextStrokeTestingPage _page07;
+    private readonly TextSelectionPage _page08;
     private IPage _currentPage;
 
     private readonly Stopwatch _watch = new();
@@ -39,6 +40,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
         _page05 = new TextFormattingPage(this);
         _page06 = new GradLabelPage(this);
         _page07 = new TextStrokeTestingPage(this);
+        _page08 = new TextSelectionPage(this);
         _currentPage = _page01;
     }
 
@@ -68,12 +70,27 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
             _currentPage.OnMouseDown(x, y, button, modifiers);
         }
     }
-    
+
+    public override void MouseUp(int x, int y, MouseButton button, Modifiers modifiers)
+    {
+        _currentPage.OnMouseUp(x, y, button, modifiers);
+    }
+
     public override void MouseMove(int x, int y, Modifiers modifiers)
     {
         _currentPage.OnMouseMove(x, y, modifiers);
     }
 
+    public override void MouseLeave(Modifiers modifiers)
+    {
+        _currentPage.OnMouseLeave(modifiers);
+    }
+
+    public override void MouseEnter(int x, int y, Modifiers modifiers)
+    {
+        _currentPage.OnMouseEnter(x, y, modifiers);
+    }
+    
     private void SelectPage(IPage page)
     {
         _currentPage = page;
@@ -106,6 +123,9 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
             case Key._7:
                 SelectPage(_page07);
                 break;
+            case Key._8:
+                SelectPage(_page08);
+                break;
             default:
                 _currentPage.OnKeyDown(key, modifiers);
                 break;
@@ -120,14 +140,16 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     }
     public override void Repaint(DrawContext context, int x, int y, int width, int height)
     {
-        _watch.Restart();
+        // _watch.Restart();
+        
         // don't think we need to save/restore state, created afresh every time?
         // will have to see how macOS behaves ...
         context.SaveGState();
         _currentPage.Render(context, new RenderArea(x, y, width, height));
         context.RestoreGState();
-        _watch.Stop();
-        Console.WriteLine($"rendering time: {_watch.ElapsedMilliseconds}ms");
+        
+        // _watch.Stop();
+        // Console.WriteLine($"rendering time: {_watch.ElapsedMilliseconds}ms");
     }
     public override void Resized(int width, int height)
     {

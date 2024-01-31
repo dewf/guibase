@@ -266,6 +266,8 @@ void Run_getStatus__wrapper();
 
 void Run_dispose__wrapper();
 
+void Line_getStringRange__wrapper();
+
 void Line_getTypographicBounds__wrapper();
 
 void Line_getBoundsWithOptions__wrapper();
@@ -275,6 +277,8 @@ void Line_draw__wrapper();
 void Line_getGlyphRuns__wrapper();
 
 void Line_getOffsetForStringIndex__wrapper();
+
+void Line_getStringIndexForPosition__wrapper();
 
 void Line_createWithAttributedString__wrapper();
 

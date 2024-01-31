@@ -244,11 +244,13 @@ opaque Run {
 }
 
 opaque Line {
+    Range getStringRange();
     TypographicBounds getTypographicBounds();
     Rect getBoundsWithOptions(LineBoundsOptions opts);
     void draw(DrawContext context);
     Array<Run> getGlyphRuns();
     Tuple<double,double> getOffsetForStringIndex(long charIndex); // offset + secondaryOffset
+    long getStringIndexForPosition(Point p);
 
     static Line createWithAttributedString(AttributedString str);
 }

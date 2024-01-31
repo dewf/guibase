@@ -7,7 +7,10 @@ ni_InterfaceMethodRef windowDelegate_canClose;
 ni_InterfaceMethodRef windowDelegate_closed;
 ni_InterfaceMethodRef windowDelegate_destroyed;
 ni_InterfaceMethodRef windowDelegate_mouseDown;
+ni_InterfaceMethodRef windowDelegate_mouseUp;
 ni_InterfaceMethodRef windowDelegate_mouseMove;
+ni_InterfaceMethodRef windowDelegate_mouseEnter;
+ni_InterfaceMethodRef windowDelegate_mouseLeave;
 ni_InterfaceMethodRef windowDelegate_repaint;
 ni_InterfaceMethodRef windowDelegate_resized;
 ni_InterfaceMethodRef windowDelegate_keyDown;
@@ -247,11 +250,28 @@ public:
         ni_pushInt32(x);
         invokeMethod(windowDelegate_mouseDown);
     }
+    void mouseUp(int32_t x, int32_t y, MouseButton button, uint32_t modifiers) override {
+        Modifiers__push(modifiers);
+        MouseButton__push(button);
+        ni_pushInt32(y);
+        ni_pushInt32(x);
+        invokeMethod(windowDelegate_mouseUp);
+    }
     void mouseMove(int32_t x, int32_t y, uint32_t modifiers) override {
         Modifiers__push(modifiers);
         ni_pushInt32(y);
         ni_pushInt32(x);
         invokeMethod(windowDelegate_mouseMove);
+    }
+    void mouseEnter(int32_t x, int32_t y, uint32_t modifiers) override {
+        Modifiers__push(modifiers);
+        ni_pushInt32(y);
+        ni_pushInt32(x);
+        invokeMethod(windowDelegate_mouseEnter);
+    }
+    void mouseLeave(uint32_t modifiers) override {
+        Modifiers__push(modifiers);
+        invokeMethod(windowDelegate_mouseLeave);
     }
     void repaint(DrawContext context, int32_t x, int32_t y, int32_t width, int32_t height) override {
         ni_pushInt32(height);
@@ -481,12 +501,35 @@ void WindowDelegate_mouseDown__wrapper(int serverID) {
     inst->mouseDown(x, y, button, modifiers);
 }
 
+void WindowDelegate_mouseUp__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
+    auto x = ni_popInt32();
+    auto y = ni_popInt32();
+    auto button = MouseButton__pop();
+    auto modifiers = Modifiers__pop();
+    inst->mouseUp(x, y, button, modifiers);
+}
+
 void WindowDelegate_mouseMove__wrapper(int serverID) {
     auto inst = ServerWindowDelegate::getByID(serverID);
     auto x = ni_popInt32();
     auto y = ni_popInt32();
     auto modifiers = Modifiers__pop();
     inst->mouseMove(x, y, modifiers);
+}
+
+void WindowDelegate_mouseEnter__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
+    auto x = ni_popInt32();
+    auto y = ni_popInt32();
+    auto modifiers = Modifiers__pop();
+    inst->mouseEnter(x, y, modifiers);
+}
+
+void WindowDelegate_mouseLeave__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
+    auto modifiers = Modifiers__pop();
+    inst->mouseLeave(modifiers);
 }
 
 void WindowDelegate_repaint__wrapper(int serverID) {
@@ -549,7 +592,10 @@ int Windowing__register() {
     windowDelegate_closed = ni_registerInterfaceMethod(windowDelegate, "closed", &WindowDelegate_closed__wrapper);
     windowDelegate_destroyed = ni_registerInterfaceMethod(windowDelegate, "destroyed", &WindowDelegate_destroyed__wrapper);
     windowDelegate_mouseDown = ni_registerInterfaceMethod(windowDelegate, "mouseDown", &WindowDelegate_mouseDown__wrapper);
+    windowDelegate_mouseUp = ni_registerInterfaceMethod(windowDelegate, "mouseUp", &WindowDelegate_mouseUp__wrapper);
     windowDelegate_mouseMove = ni_registerInterfaceMethod(windowDelegate, "mouseMove", &WindowDelegate_mouseMove__wrapper);
+    windowDelegate_mouseEnter = ni_registerInterfaceMethod(windowDelegate, "mouseEnter", &WindowDelegate_mouseEnter__wrapper);
+    windowDelegate_mouseLeave = ni_registerInterfaceMethod(windowDelegate, "mouseLeave", &WindowDelegate_mouseLeave__wrapper);
     windowDelegate_repaint = ni_registerInterfaceMethod(windowDelegate, "repaint", &WindowDelegate_repaint__wrapper);
     windowDelegate_resized = ni_registerInterfaceMethod(windowDelegate, "resized", &WindowDelegate_resized__wrapper);
     windowDelegate_keyDown = ni_registerInterfaceMethod(windowDelegate, "keyDown", &WindowDelegate_keyDown__wrapper);

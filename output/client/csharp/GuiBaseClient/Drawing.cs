@@ -84,11 +84,13 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _run_getStringRange;
         private static ModuleMethodHandle _run_getStatus;
         private static ModuleMethodHandle _Run_dispose;
+        private static ModuleMethodHandle _line_getStringRange;
         private static ModuleMethodHandle _line_getTypographicBounds;
         private static ModuleMethodHandle _line_getBoundsWithOptions;
         private static ModuleMethodHandle _line_draw;
         private static ModuleMethodHandle _line_getGlyphRuns;
         private static ModuleMethodHandle _line_getOffsetForStringIndex;
+        private static ModuleMethodHandle _line_getStringIndexForPosition;
         private static ModuleMethodHandle _line_createWithAttributedString;
         private static ModuleMethodHandle _Line_dispose;
         private static ModuleMethodHandle _frame_draw;
@@ -2184,6 +2186,12 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
+            public Range GetStringRange()
+            {
+                Line__Push(this);
+                NativeImplClient.InvokeModuleMethod(_line_getStringRange);
+                return Range__Pop();
+            }
             public TypographicBounds GetTypographicBounds()
             {
                 Line__Push(this);
@@ -2215,6 +2223,13 @@ namespace Org.Prefixed.GuiBase
                 Line__Push(this);
                 NativeImplClient.InvokeModuleMethod(_line_getOffsetForStringIndex);
                 return __DoubleDouble_Tuple__Pop();
+            }
+            public long GetStringIndexForPosition(Point p)
+            {
+                Point__Push(p, false);
+                Line__Push(this);
+                NativeImplClient.InvokeModuleMethod(_line_getStringIndexForPosition);
+                return NativeImplClient.PopInt64();
             }
             public static Line CreateWithAttributedString(AttributedString str)
             {
@@ -2619,11 +2634,13 @@ namespace Org.Prefixed.GuiBase
             _run_getStringRange = NativeImplClient.GetModuleMethod(_module, "Run_getStringRange");
             _run_getStatus = NativeImplClient.GetModuleMethod(_module, "Run_getStatus");
             _Run_dispose = NativeImplClient.GetModuleMethod(_module, "Run_dispose");
+            _line_getStringRange = NativeImplClient.GetModuleMethod(_module, "Line_getStringRange");
             _line_getTypographicBounds = NativeImplClient.GetModuleMethod(_module, "Line_getTypographicBounds");
             _line_getBoundsWithOptions = NativeImplClient.GetModuleMethod(_module, "Line_getBoundsWithOptions");
             _line_draw = NativeImplClient.GetModuleMethod(_module, "Line_draw");
             _line_getGlyphRuns = NativeImplClient.GetModuleMethod(_module, "Line_getGlyphRuns");
             _line_getOffsetForStringIndex = NativeImplClient.GetModuleMethod(_module, "Line_getOffsetForStringIndex");
+            _line_getStringIndexForPosition = NativeImplClient.GetModuleMethod(_module, "Line_getStringIndexForPosition");
             _line_createWithAttributedString = NativeImplClient.GetModuleMethod(_module, "Line_createWithAttributedString");
             _Line_dispose = NativeImplClient.GetModuleMethod(_module, "Line_dispose");
             _frame_draw = NativeImplClient.GetModuleMethod(_module, "Frame_draw");

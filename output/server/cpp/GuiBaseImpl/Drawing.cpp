@@ -1039,6 +1039,17 @@ BitmapLock BitmapDrawContext_getData(BitmapDrawContext _this)
     return ret;
 }
 
+Range Line_getStringRange(Line _this)
+{
+    auto ret = dl_CTLineGetStringRange((dl_CTLineRef)_this);
+    return STRUCT_CAST(Range, ret);
+}
+
+int64_t Line_getStringIndexForPosition(Line _this, Point p)
+{
+    return dl_CTLineGetStringIndexForPosition((dl_CTLineRef)_this, STRUCT_CAST(dl_CGPoint, p));
+}
+
 void BitmapLock_dispose(BitmapLock _this)
 {
     dl_CGBitmapContextReleaseData((dl_CGContextRef)_this->source);

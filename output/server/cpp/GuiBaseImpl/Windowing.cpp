@@ -102,8 +102,17 @@ public:
         case wl_kMouseEventTypeMouseDown:
             del->mouseDown(mouseEvent.x, mouseEvent.y, (MouseButton)mouseEvent.button, mouseEvent.modifiers);
             break;
+        case wl_kMouseEventTypeMouseUp:
+            del->mouseUp(mouseEvent.x, mouseEvent.y, (MouseButton)mouseEvent.button, mouseEvent.modifiers);
+            break;
         case wl_kMouseEventTypeMouseMove:
             del->mouseMove(mouseEvent.x, mouseEvent.y, mouseEvent.modifiers);
+            break;
+        case wl_kMouseEventTypeMouseEnter:
+            del->mouseEnter(mouseEvent.x, mouseEvent.y, mouseEvent.modifiers);
+            break;
+        case wl_kMouseEventTypeMouseLeave:
+            del->mouseLeave(mouseEvent.modifiers);
             break;
         }
     }

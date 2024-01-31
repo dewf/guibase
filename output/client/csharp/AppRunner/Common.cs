@@ -6,11 +6,13 @@ namespace AppRunner;
 public static class Common
 {
     public static readonly Drawing.Point PointZero = new(0, 0);
+    
+    // rect methods
     public static Rect MakeRect(double x, double y, double width, double height)
     {
         return new Rect(new Point(x, y), new Size(width, height));
     }
-    public static Rect Inset(this Rect rect, int amount)
+    public static Rect Inset(this Rect rect, double amount)
     {
         return MakeRect(rect.Origin.X + amount, rect.Origin.Y + amount, rect.Size.Width - amount * 2,
             rect.Size.Height - amount * 2);
@@ -20,6 +22,19 @@ public static class Common
         return $"{r.Origin.X}/{r.Origin.Y}/{r.Size.Width}/{r.Size.Height}";
     }
     public static readonly Drawing.Rect RectZero = MakeRect(0, 0, 0, 0);
+
+    public static bool ContainsPoint(this Rect r, Point p)
+    {
+        return p.X >= r.Origin.X && p.Y >= r.Origin.Y &&
+               p.X < (r.Origin.X + r.Size.Width) &&
+               p.Y < (r.Origin.Y + r.Size.Height);
+    }
+
+    // range methods
+    public static long RangeEnd(this Drawing.Range r)
+    {
+        return r.Location + r.Length;
+    }
 
     public static Drawing.Range MakeRange(long location, long length)
     {
