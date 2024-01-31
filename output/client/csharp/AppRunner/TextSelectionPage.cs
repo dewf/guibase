@@ -7,7 +7,7 @@ namespace AppRunner;
 public class TextSelectionPage : BasePage
 {
     private readonly AttributedString _latinString;
-    // private readonly AttributedString _arabicString;
+    private readonly AttributedString _arabicString;
     private AttributedString _currentAttrString;
     
     private Frame? _frame;
@@ -33,7 +33,7 @@ public class TextSelectionPage : BasePage
         using var font = Font.CreateWithName(Constants.TimesFontName, 36, new OptArgs());
         var black = Color.GetConstantColor(ColorConstants.Black);
         _latinString = AttributedString.Create(Constants.LoremIpsum, new AttributedStringOptions { Font = font, ForegroundColor = black });
-        // _arabicString = AttributedString.Create(Constants.ArabicSample, new AttributedStringOptions { Font = font, ForegroundColor = black });
+        _arabicString = AttributedString.Create(Constants.ArabicSample, new AttributedStringOptions { Font = font, ForegroundColor = black });
         _currentAttrString = _latinString;
         _textDirection = TextDirection.LeftToRight;
     }
@@ -55,6 +55,25 @@ public class TextSelectionPage : BasePage
         
         _textRect = MakeRect(0, 0, Width, Height).Inset(20.5);
         DoLayout();
+    }
+
+    public override void OnKeyDown(Windowing.Key key, Windowing.Modifiers modifiers)
+    {
+        if (key == Windowing.Key.Space)
+        {
+            if (_currentAttrString == _latinString)
+            {
+                _currentAttrString = _arabicString;
+                _textDirection = TextDirection.RightToLeft;
+            }
+            else
+            {
+                _currentAttrString = _latinString;
+                _textDirection = TextDirection.LeftToRight;
+            }
+            DoLayout();
+            Invalidate();
+        }
     }
 
     public override void OnMouseMove(int x, int y, Windowing.Modifiers modifiers)
