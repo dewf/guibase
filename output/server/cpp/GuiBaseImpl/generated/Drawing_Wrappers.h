@@ -108,6 +108,12 @@ Line Line__pop();
 void MutableAttributedString__push(MutableAttributedString value);
 MutableAttributedString MutableAttributedString__pop();
 
+void MutablePathTransformException__push(MutablePathTransformException e);
+void MutablePathTransformException__buildAndThrow();
+
+void MutablePath__push(MutablePath value);
+MutablePath MutablePath__pop();
+
 void TextAlignment__push(TextAlignment value);
 TextAlignment TextAlignment__pop();
 void ParagraphStyleSetting__push(ParagraphStyleSetting value, bool isReturn);
@@ -121,6 +127,14 @@ Path Path__pop();
 
 void Run__push(Run value);
 Run Run__pop();
+
+void AffineTransformTranslate__wrapper();
+
+void AffineTransformRotate__wrapper();
+
+void AffineTransformScale__wrapper();
+
+void AffineTransformConcat__wrapper();
 
 void Color_createGenericRGB__wrapper();
 
@@ -138,6 +152,12 @@ void Gradient_createWithColorComponents__wrapper();
 
 void Gradient_dispose__wrapper();
 
+void Path_getCurrentPoint__wrapper();
+
+void Path_createCopy__wrapper();
+
+void Path_createMutableCopy__wrapper();
+
 void Path_createWithRect__wrapper();
 
 void Path_createWithEllipseInRect__wrapper();
@@ -145,6 +165,38 @@ void Path_createWithEllipseInRect__wrapper();
 void Path_createWithRoundedRect__wrapper();
 
 void Path_dispose__wrapper();
+
+void MutablePath_addPath__wrapper();
+
+void MutablePath_addRect__wrapper();
+
+void MutablePath_addRects__wrapper();
+
+void MutablePath_addRoundedRect__wrapper();
+
+void MutablePath_addEllipseInRect__wrapper();
+
+void MutablePath_moveToPoint__wrapper();
+
+void MutablePath_addArc__wrapper();
+
+void MutablePath_addRelativeArc__wrapper();
+
+void MutablePath_addArcToPoint__wrapper();
+
+void MutablePath_addCurveToPoint__wrapper();
+
+void MutablePath_addLines__wrapper();
+
+void MutablePath_addLineToPoint__wrapper();
+
+void MutablePath_addQuadCurveToPoint__wrapper();
+
+void MutablePath_closeSubpath__wrapper();
+
+void MutablePath_create__wrapper();
+
+void MutablePath_dispose__wrapper();
 
 void DrawContext_saveGState__wrapper();
 

@@ -2,6 +2,7 @@
 #include "Drawing_wrappers.h"
 #include "Drawing.h"
 
+ni_ExceptionRef mutablePathTransformException;
 
 void AffineTransform__push(AffineTransform value, bool isReturn) {
     ni_pushDouble(value.ty);
@@ -789,6 +790,24 @@ MutableAttributedString MutableAttributedString__pop() {
     return (MutableAttributedString)ni_popPtr();
 }
 
+
+void MutablePathTransformException__push(MutablePathTransformException e) {
+    pushStringInternal(e.error);
+}
+
+void MutablePathTransformException__buildAndThrow() {
+    auto error = popStringInternal();
+    throw MutablePathTransformException(error);
+}
+
+void MutablePath__push(MutablePath value) {
+    ni_pushPtr(value);
+}
+
+MutablePath MutablePath__pop() {
+    return (MutablePath)ni_popPtr();
+}
+
 inline void TextAlignment__push(TextAlignment value) {
     ni_pushInt32((int32_t)value);
 }
@@ -859,6 +878,32 @@ Run Run__pop() {
     return (Run)ni_popPtr();
 }
 
+void AffineTransformTranslate__wrapper() {
+    auto input = AffineTransform__pop();
+    auto tx = ni_popDouble();
+    auto ty = ni_popDouble();
+    AffineTransform__push(AffineTransformTranslate(input, tx, ty), true);
+}
+
+void AffineTransformRotate__wrapper() {
+    auto input = AffineTransform__pop();
+    auto angle = ni_popDouble();
+    AffineTransform__push(AffineTransformRotate(input, angle), true);
+}
+
+void AffineTransformScale__wrapper() {
+    auto input = AffineTransform__pop();
+    auto sx = ni_popDouble();
+    auto sy = ni_popDouble();
+    AffineTransform__push(AffineTransformScale(input, sx, sy), true);
+}
+
+void AffineTransformConcat__wrapper() {
+    auto t1 = AffineTransform__pop();
+    auto t2 = AffineTransform__pop();
+    AffineTransform__push(AffineTransformConcat(t1, t2), true);
+}
+
 void Color_createGenericRGB__wrapper() {
     auto red = ni_popDouble();
     auto green = ni_popDouble();
@@ -902,6 +947,21 @@ void Gradient_dispose__wrapper() {
     Gradient_dispose(_this);
 }
 
+void Path_getCurrentPoint__wrapper() {
+    auto _this = Path__pop();
+    Point__push(Path_getCurrentPoint(_this), true);
+}
+
+void Path_createCopy__wrapper() {
+    auto _this = Path__pop();
+    Path__push(Path_createCopy(_this));
+}
+
+void Path_createMutableCopy__wrapper() {
+    auto _this = Path__pop();
+    MutablePath__push(Path_createMutableCopy(_this));
+}
+
 void Path_createWithRect__wrapper() {
     auto rect = Rect__pop();
     auto optArgs = OptArgs__pop();
@@ -925,6 +985,184 @@ void Path_createWithRoundedRect__wrapper() {
 void Path_dispose__wrapper() {
     auto _this = Path__pop();
     Path_dispose(_this);
+}
+
+void MutablePath_addPath__wrapper() {
+    auto _this = MutablePath__pop();
+    auto path2 = Path__pop();
+    auto optArgs = OptArgs__pop();
+    MutablePath_addPath(_this, path2, optArgs);
+}
+
+void MutablePath_addRect__wrapper() {
+    auto _this = MutablePath__pop();
+    auto rect = Rect__pop();
+    auto optArgs = OptArgs__pop();
+    MutablePath_addRect(_this, rect, optArgs);
+}
+
+void MutablePath_addRects__wrapper() {
+    auto _this = MutablePath__pop();
+    auto rects = __Rect_Array__pop();
+    auto optArgs = OptArgs__pop();
+    MutablePath_addRects(_this, rects, optArgs);
+}
+
+void MutablePath_addRoundedRect__wrapper() {
+    auto _this = MutablePath__pop();
+    auto rect = Rect__pop();
+    auto cornerWidth = ni_popDouble();
+    auto cornerHeight = ni_popDouble();
+    auto optArgs = OptArgs__pop();
+    MutablePath_addRoundedRect(_this, rect, cornerWidth, cornerHeight, optArgs);
+}
+
+void MutablePath_addEllipseInRect__wrapper() {
+    auto _this = MutablePath__pop();
+    auto rect = Rect__pop();
+    auto optArgs = OptArgs__pop();
+    MutablePath_addEllipseInRect(_this, rect, optArgs);
+}
+
+void MutablePath_moveToPoint__wrapper() {
+    auto _this = MutablePath__pop();
+    auto x = ni_popDouble();
+    auto y = ni_popDouble();
+    auto optArgs = OptArgs__pop();
+    try {
+        MutablePath_moveToPoint(_this, x, y, optArgs);
+    }
+    catch (const MutablePathTransformException& e) {
+        ni_setException(mutablePathTransformException);
+        MutablePathTransformException__push(e);
+    }
+}
+
+void MutablePath_addArc__wrapper() {
+    auto _this = MutablePath__pop();
+    auto x = ni_popDouble();
+    auto y = ni_popDouble();
+    auto radius = ni_popDouble();
+    auto startAngle = ni_popDouble();
+    auto endAngle = ni_popDouble();
+    auto clockwise = ni_popBool();
+    auto optArgs = OptArgs__pop();
+    try {
+        MutablePath_addArc(_this, x, y, radius, startAngle, endAngle, clockwise, optArgs);
+    }
+    catch (const MutablePathTransformException& e) {
+        ni_setException(mutablePathTransformException);
+        MutablePathTransformException__push(e);
+    }
+}
+
+void MutablePath_addRelativeArc__wrapper() {
+    auto _this = MutablePath__pop();
+    auto x = ni_popDouble();
+    auto y = ni_popDouble();
+    auto radius = ni_popDouble();
+    auto startAngle = ni_popDouble();
+    auto delta = ni_popDouble();
+    auto optArgs = OptArgs__pop();
+    try {
+        MutablePath_addRelativeArc(_this, x, y, radius, startAngle, delta, optArgs);
+    }
+    catch (const MutablePathTransformException& e) {
+        ni_setException(mutablePathTransformException);
+        MutablePathTransformException__push(e);
+    }
+}
+
+void MutablePath_addArcToPoint__wrapper() {
+    auto _this = MutablePath__pop();
+    auto x1 = ni_popDouble();
+    auto y1 = ni_popDouble();
+    auto x2 = ni_popDouble();
+    auto y2 = ni_popDouble();
+    auto radius = ni_popDouble();
+    auto optArgs = OptArgs__pop();
+    try {
+        MutablePath_addArcToPoint(_this, x1, y1, x2, y2, radius, optArgs);
+    }
+    catch (const MutablePathTransformException& e) {
+        ni_setException(mutablePathTransformException);
+        MutablePathTransformException__push(e);
+    }
+}
+
+void MutablePath_addCurveToPoint__wrapper() {
+    auto _this = MutablePath__pop();
+    auto cp1x = ni_popDouble();
+    auto cp1y = ni_popDouble();
+    auto cp2x = ni_popDouble();
+    auto cp2y = ni_popDouble();
+    auto x = ni_popDouble();
+    auto y = ni_popDouble();
+    auto optArgs = OptArgs__pop();
+    try {
+        MutablePath_addCurveToPoint(_this, cp1x, cp1y, cp2x, cp2y, x, y, optArgs);
+    }
+    catch (const MutablePathTransformException& e) {
+        ni_setException(mutablePathTransformException);
+        MutablePathTransformException__push(e);
+    }
+}
+
+void MutablePath_addLines__wrapper() {
+    auto _this = MutablePath__pop();
+    auto points = __Point_Array__pop();
+    auto optArgs = OptArgs__pop();
+    try {
+        MutablePath_addLines(_this, points, optArgs);
+    }
+    catch (const MutablePathTransformException& e) {
+        ni_setException(mutablePathTransformException);
+        MutablePathTransformException__push(e);
+    }
+}
+
+void MutablePath_addLineToPoint__wrapper() {
+    auto _this = MutablePath__pop();
+    auto x = ni_popDouble();
+    auto y = ni_popDouble();
+    auto optArgs = OptArgs__pop();
+    try {
+        MutablePath_addLineToPoint(_this, x, y, optArgs);
+    }
+    catch (const MutablePathTransformException& e) {
+        ni_setException(mutablePathTransformException);
+        MutablePathTransformException__push(e);
+    }
+}
+
+void MutablePath_addQuadCurveToPoint__wrapper() {
+    auto _this = MutablePath__pop();
+    auto cpx = ni_popDouble();
+    auto cpy = ni_popDouble();
+    auto x = ni_popDouble();
+    auto y = ni_popDouble();
+    auto optArgs = OptArgs__pop();
+    try {
+        MutablePath_addQuadCurveToPoint(_this, cpx, cpy, x, y, optArgs);
+    }
+    catch (const MutablePathTransformException& e) {
+        ni_setException(mutablePathTransformException);
+        MutablePathTransformException__push(e);
+    }
+}
+
+void MutablePath_closeSubpath__wrapper() {
+    auto _this = MutablePath__pop();
+    MutablePath_closeSubpath(_this);
+}
+
+void MutablePath_create__wrapper() {
+    MutablePath__push(MutablePath_create());
+}
+
+void MutablePath_dispose__wrapper() {
+    auto _this = MutablePath__pop();
+    MutablePath_dispose(_this);
 }
 
 void DrawContext_saveGState__wrapper() {
@@ -1445,6 +1683,10 @@ void __constantsFunc() {
 int Drawing__register() {
     auto m = ni_registerModule("Drawing");
     ni_registerModuleConstants(m, &__constantsFunc);
+    ni_registerModuleMethod(m, "AffineTransformTranslate", &AffineTransformTranslate__wrapper);
+    ni_registerModuleMethod(m, "AffineTransformRotate", &AffineTransformRotate__wrapper);
+    ni_registerModuleMethod(m, "AffineTransformScale", &AffineTransformScale__wrapper);
+    ni_registerModuleMethod(m, "AffineTransformConcat", &AffineTransformConcat__wrapper);
     ni_registerModuleMethod(m, "Color_createGenericRGB", &Color_createGenericRGB__wrapper);
     ni_registerModuleMethod(m, "Color_getConstantColor", &Color_getConstantColor__wrapper);
     ni_registerModuleMethod(m, "Color_dispose", &Color_dispose__wrapper);
@@ -1453,10 +1695,29 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "ColorSpace_dispose", &ColorSpace_dispose__wrapper);
     ni_registerModuleMethod(m, "Gradient_createWithColorComponents", &Gradient_createWithColorComponents__wrapper);
     ni_registerModuleMethod(m, "Gradient_dispose", &Gradient_dispose__wrapper);
+    ni_registerModuleMethod(m, "Path_getCurrentPoint", &Path_getCurrentPoint__wrapper);
+    ni_registerModuleMethod(m, "Path_createCopy", &Path_createCopy__wrapper);
+    ni_registerModuleMethod(m, "Path_createMutableCopy", &Path_createMutableCopy__wrapper);
     ni_registerModuleMethod(m, "Path_createWithRect", &Path_createWithRect__wrapper);
     ni_registerModuleMethod(m, "Path_createWithEllipseInRect", &Path_createWithEllipseInRect__wrapper);
     ni_registerModuleMethod(m, "Path_createWithRoundedRect", &Path_createWithRoundedRect__wrapper);
     ni_registerModuleMethod(m, "Path_dispose", &Path_dispose__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_addPath", &MutablePath_addPath__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_addRect", &MutablePath_addRect__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_addRects", &MutablePath_addRects__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_addRoundedRect", &MutablePath_addRoundedRect__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_addEllipseInRect", &MutablePath_addEllipseInRect__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_moveToPoint", &MutablePath_moveToPoint__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_addArc", &MutablePath_addArc__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_addRelativeArc", &MutablePath_addRelativeArc__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_addArcToPoint", &MutablePath_addArcToPoint__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_addCurveToPoint", &MutablePath_addCurveToPoint__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_addLines", &MutablePath_addLines__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_addLineToPoint", &MutablePath_addLineToPoint__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_addQuadCurveToPoint", &MutablePath_addQuadCurveToPoint__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_closeSubpath", &MutablePath_closeSubpath__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_create", &MutablePath_create__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_dispose", &MutablePath_dispose__wrapper);
     ni_registerModuleMethod(m, "DrawContext_saveGState", &DrawContext_saveGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_restoreGState", &DrawContext_restoreGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setRGBFillColor", &DrawContext_setRGBFillColor__wrapper);
@@ -1542,5 +1803,6 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "BitmapDrawContext_getData", &BitmapDrawContext_getData__wrapper);
     ni_registerModuleMethod(m, "BitmapDrawContext_create", &BitmapDrawContext_create__wrapper);
     ni_registerModuleMethod(m, "BitmapDrawContext_dispose", &BitmapDrawContext_dispose__wrapper);
+    mutablePathTransformException = ni_registerException(m, "MutablePathTransformException", &MutablePathTransformException__buildAndThrow);
     return 0; // = OK
 }

@@ -13,6 +13,7 @@ struct __Color; typedef struct __Color* Color;
 struct __ColorSpace; typedef struct __ColorSpace* ColorSpace;
 struct __Gradient; typedef struct __Gradient* Gradient;
 struct __Path; typedef struct __Path* Path;
+struct __MutablePath; typedef struct __MutablePath* MutablePath;
 struct __DrawContext; typedef struct __DrawContext* DrawContext;
 struct __AttributedString; typedef struct __AttributedString* AttributedString;
 struct __MutableAttributedString; typedef struct __MutableAttributedString* MutableAttributedString;
@@ -435,6 +436,14 @@ enum LineBoundsOptions {
 
 
 
+class MutablePathTransformException {
+public:
+    std::string error;
+    MutablePathTransformException(std::string error)
+        : error(error) {}
+};
+
+
 enum class TextAlignment {
     Left,
     Right,
@@ -467,6 +476,10 @@ public:
 
 extern const AffineTransform AffineTransformIdentity;
 
+AffineTransform AffineTransformTranslate(AffineTransform input, double tx, double ty);
+AffineTransform AffineTransformRotate(AffineTransform input, double angle);
+AffineTransform AffineTransformScale(AffineTransform input, double sx, double sy);
+AffineTransform AffineTransformConcat(AffineTransform t1, AffineTransform t2);
 Color Color_createGenericRGB(double red, double green, double blue, double alpha);
 Color Color_getConstantColor(ColorConstants which);
 void Color_dispose(Color _this);
@@ -475,10 +488,29 @@ ColorSpace ColorSpace_createDeviceGray();
 void ColorSpace_dispose(ColorSpace _this);
 Gradient Gradient_createWithColorComponents(ColorSpace space, std::vector<GradientStop> stops);
 void Gradient_dispose(Gradient _this);
+Point Path_getCurrentPoint(Path _this);
+Path Path_createCopy(Path _this);
+MutablePath Path_createMutableCopy(Path _this);
 Path Path_createWithRect(Rect rect, OptArgs optArgs);
 Path Path_createWithEllipseInRect(Rect rect, OptArgs optArgs);
 Path Path_createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
 void Path_dispose(Path _this);
+void MutablePath_addPath(MutablePath _this, Path path2, OptArgs optArgs);
+void MutablePath_addRect(MutablePath _this, Rect rect, OptArgs optArgs);
+void MutablePath_addRects(MutablePath _this, std::vector<Rect> rects, OptArgs optArgs);
+void MutablePath_addRoundedRect(MutablePath _this, Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
+void MutablePath_addEllipseInRect(MutablePath _this, Rect rect, OptArgs optArgs);
+void MutablePath_moveToPoint(MutablePath _this, double x, double y, OptArgs optArgs); // throws MutablePathTransformException
+void MutablePath_addArc(MutablePath _this, double x, double y, double radius, double startAngle, double endAngle, bool clockwise, OptArgs optArgs); // throws MutablePathTransformException
+void MutablePath_addRelativeArc(MutablePath _this, double x, double y, double radius, double startAngle, double delta, OptArgs optArgs); // throws MutablePathTransformException
+void MutablePath_addArcToPoint(MutablePath _this, double x1, double y1, double x2, double y2, double radius, OptArgs optArgs); // throws MutablePathTransformException
+void MutablePath_addCurveToPoint(MutablePath _this, double cp1x, double cp1y, double cp2x, double cp2y, double x, double y, OptArgs optArgs); // throws MutablePathTransformException
+void MutablePath_addLines(MutablePath _this, std::vector<Point> points, OptArgs optArgs); // throws MutablePathTransformException
+void MutablePath_addLineToPoint(MutablePath _this, double x, double y, OptArgs optArgs); // throws MutablePathTransformException
+void MutablePath_addQuadCurveToPoint(MutablePath _this, double cpx, double cpy, double x, double y, OptArgs optArgs); // throws MutablePathTransformException
+void MutablePath_closeSubpath(MutablePath _this);
+MutablePath MutablePath_create();
+void MutablePath_dispose(MutablePath _this);
 void DrawContext_saveGState(DrawContext _this);
 void DrawContext_restoreGState(DrawContext _this);
 void DrawContext_setRGBFillColor(DrawContext _this, double red, double green, double blue, double alpha);

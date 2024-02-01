@@ -12,6 +12,10 @@ namespace Org.Prefixed.GuiBase
     public static class Drawing
     {
         private static ModuleHandle _module;
+        private static ModuleMethodHandle _AffineTransformTranslate;
+        private static ModuleMethodHandle _AffineTransformRotate;
+        private static ModuleMethodHandle _AffineTransformScale;
+        private static ModuleMethodHandle _AffineTransformConcat;
         private static ModuleMethodHandle _color_createGenericRGB;
         private static ModuleMethodHandle _color_getConstantColor;
         private static ModuleMethodHandle _Color_dispose;
@@ -20,10 +24,29 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _ColorSpace_dispose;
         private static ModuleMethodHandle _gradient_createWithColorComponents;
         private static ModuleMethodHandle _Gradient_dispose;
+        private static ModuleMethodHandle _path_getCurrentPoint;
+        private static ModuleMethodHandle _path_createCopy;
+        private static ModuleMethodHandle _path_createMutableCopy;
         private static ModuleMethodHandle _path_createWithRect;
         private static ModuleMethodHandle _path_createWithEllipseInRect;
         private static ModuleMethodHandle _path_createWithRoundedRect;
         private static ModuleMethodHandle _Path_dispose;
+        private static ModuleMethodHandle _mutablePath_addPath;
+        private static ModuleMethodHandle _mutablePath_addRect;
+        private static ModuleMethodHandle _mutablePath_addRects;
+        private static ModuleMethodHandle _mutablePath_addRoundedRect;
+        private static ModuleMethodHandle _mutablePath_addEllipseInRect;
+        private static ModuleMethodHandle _mutablePath_moveToPoint;
+        private static ModuleMethodHandle _mutablePath_addArc;
+        private static ModuleMethodHandle _mutablePath_addRelativeArc;
+        private static ModuleMethodHandle _mutablePath_addArcToPoint;
+        private static ModuleMethodHandle _mutablePath_addCurveToPoint;
+        private static ModuleMethodHandle _mutablePath_addLines;
+        private static ModuleMethodHandle _mutablePath_addLineToPoint;
+        private static ModuleMethodHandle _mutablePath_addQuadCurveToPoint;
+        private static ModuleMethodHandle _mutablePath_closeSubpath;
+        private static ModuleMethodHandle _mutablePath_create;
+        private static ModuleMethodHandle _MutablePath_dispose;
         private static ModuleMethodHandle _drawContext_saveGState;
         private static ModuleMethodHandle _drawContext_restoreGState;
         private static ModuleMethodHandle _drawContext_setRGBFillColor;
@@ -109,6 +132,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _bitmapDrawContext_getData;
         private static ModuleMethodHandle _bitmapDrawContext_create;
         private static ModuleMethodHandle _BitmapDrawContext_dispose;
+        private static ExceptionHandle _mutablePathTransformException;
         public static AffineTransform AffineTransformIdentity { get; private set; }
 
         public struct AffineTransform {
@@ -2319,6 +2343,180 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new MutableAttributedString(ptr) : null;
         }
 
+        public class MutablePathTransformException : Exception
+        {
+            public readonly string Error;
+            public MutablePathTransformException(string error) : base("MutablePathTransformException")
+            {
+                Error = error;
+            }
+            internal void PushAndSet()
+            {
+                NativeImplClient.PushString(Error);
+                NativeImplClient.SetException(_mutablePathTransformException);
+            }
+            internal static void BuildAndThrow()
+            {
+                var error = NativeImplClient.PopString();
+                throw new MutablePathTransformException(error);
+            }
+        }
+
+        public class MutablePath : Path
+        {
+            internal MutablePath(IntPtr nativeHandle) : base(nativeHandle)
+            {
+            }
+            public override void Dispose()
+            {
+                if (!_disposed)
+                {
+                    MutablePath__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_MutablePath_dispose);
+                    _disposed = true;
+                }
+            }
+            public void AddPath(Path path2, OptArgs optArgs)
+            {
+                OptArgs__Push(optArgs, false);
+                Path__Push(path2);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutablePath_addPath);
+            }
+            public void AddRect(Rect rect, OptArgs optArgs)
+            {
+                OptArgs__Push(optArgs, false);
+                Rect__Push(rect, false);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutablePath_addRect);
+            }
+            public void AddRects(Rect[] rects, OptArgs optArgs)
+            {
+                OptArgs__Push(optArgs, false);
+                __Rect_Array__Push(rects, false);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutablePath_addRects);
+            }
+            public void AddRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs)
+            {
+                OptArgs__Push(optArgs, false);
+                NativeImplClient.PushDouble(cornerHeight);
+                NativeImplClient.PushDouble(cornerWidth);
+                Rect__Push(rect, false);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutablePath_addRoundedRect);
+            }
+            public void AddEllipseInRect(Rect rect, OptArgs optArgs)
+            {
+                OptArgs__Push(optArgs, false);
+                Rect__Push(rect, false);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutablePath_addEllipseInRect);
+            }
+            public void MoveToPoint(double x, double y, OptArgs optArgs) // throws MutablePathTransformException
+            {
+                OptArgs__Push(optArgs, false);
+                NativeImplClient.PushDouble(y);
+                NativeImplClient.PushDouble(x);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethodWithExceptions(_mutablePath_moveToPoint);
+            }
+            public void AddArc(double x, double y, double radius, double startAngle, double endAngle, bool clockwise, OptArgs optArgs) // throws MutablePathTransformException
+            {
+                OptArgs__Push(optArgs, false);
+                NativeImplClient.PushBool(clockwise);
+                NativeImplClient.PushDouble(endAngle);
+                NativeImplClient.PushDouble(startAngle);
+                NativeImplClient.PushDouble(radius);
+                NativeImplClient.PushDouble(y);
+                NativeImplClient.PushDouble(x);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethodWithExceptions(_mutablePath_addArc);
+            }
+            public void AddRelativeArc(double x, double y, double radius, double startAngle, double delta, OptArgs optArgs) // throws MutablePathTransformException
+            {
+                OptArgs__Push(optArgs, false);
+                NativeImplClient.PushDouble(delta);
+                NativeImplClient.PushDouble(startAngle);
+                NativeImplClient.PushDouble(radius);
+                NativeImplClient.PushDouble(y);
+                NativeImplClient.PushDouble(x);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethodWithExceptions(_mutablePath_addRelativeArc);
+            }
+            public void AddArcToPoint(double x1, double y1, double x2, double y2, double radius, OptArgs optArgs) // throws MutablePathTransformException
+            {
+                OptArgs__Push(optArgs, false);
+                NativeImplClient.PushDouble(radius);
+                NativeImplClient.PushDouble(y2);
+                NativeImplClient.PushDouble(x2);
+                NativeImplClient.PushDouble(y1);
+                NativeImplClient.PushDouble(x1);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethodWithExceptions(_mutablePath_addArcToPoint);
+            }
+            public void AddCurveToPoint(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y, OptArgs optArgs) // throws MutablePathTransformException
+            {
+                OptArgs__Push(optArgs, false);
+                NativeImplClient.PushDouble(y);
+                NativeImplClient.PushDouble(x);
+                NativeImplClient.PushDouble(cp2y);
+                NativeImplClient.PushDouble(cp2x);
+                NativeImplClient.PushDouble(cp1y);
+                NativeImplClient.PushDouble(cp1x);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethodWithExceptions(_mutablePath_addCurveToPoint);
+            }
+            public void AddLines(Point[] points, OptArgs optArgs) // throws MutablePathTransformException
+            {
+                OptArgs__Push(optArgs, false);
+                __Point_Array__Push(points, false);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethodWithExceptions(_mutablePath_addLines);
+            }
+            public void AddLineToPoint(double x, double y, OptArgs optArgs) // throws MutablePathTransformException
+            {
+                OptArgs__Push(optArgs, false);
+                NativeImplClient.PushDouble(y);
+                NativeImplClient.PushDouble(x);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethodWithExceptions(_mutablePath_addLineToPoint);
+            }
+            public void AddQuadCurveToPoint(double cpx, double cpy, double x, double y, OptArgs optArgs) // throws MutablePathTransformException
+            {
+                OptArgs__Push(optArgs, false);
+                NativeImplClient.PushDouble(y);
+                NativeImplClient.PushDouble(x);
+                NativeImplClient.PushDouble(cpy);
+                NativeImplClient.PushDouble(cpx);
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethodWithExceptions(_mutablePath_addQuadCurveToPoint);
+            }
+            public void CloseSubpath()
+            {
+                MutablePath__Push(this);
+                NativeImplClient.InvokeModuleMethod(_mutablePath_closeSubpath);
+            }
+            public static MutablePath Create()
+            {
+                NativeImplClient.InvokeModuleMethod(_mutablePath_create);
+                return MutablePath__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void MutablePath__Push(MutablePath thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static MutablePath MutablePath__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new MutablePath(ptr) : null;
+        }
+
         public enum TextAlignment
         {
             Left,
@@ -2459,6 +2657,24 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
+            public Point GetCurrentPoint()
+            {
+                Path__Push(this);
+                NativeImplClient.InvokeModuleMethod(_path_getCurrentPoint);
+                return Point__Pop();
+            }
+            public Path CreateCopy()
+            {
+                Path__Push(this);
+                NativeImplClient.InvokeModuleMethod(_path_createCopy);
+                return Path__Pop();
+            }
+            public MutablePath CreateMutableCopy()
+            {
+                Path__Push(this);
+                NativeImplClient.InvokeModuleMethod(_path_createMutableCopy);
+                return MutablePath__Pop();
+            }
             public static Path CreateWithRect(Rect rect, OptArgs optArgs)
             {
                 OptArgs__Push(optArgs, false);
@@ -2555,12 +2771,51 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Run(ptr) : null;
         }
 
+        public static AffineTransform AffineTransformTranslate(AffineTransform input, double tx, double ty)
+        {
+            NativeImplClient.PushDouble(ty);
+            NativeImplClient.PushDouble(tx);
+            AffineTransform__Push(input, false);
+            NativeImplClient.InvokeModuleMethod(_AffineTransformTranslate);
+            return AffineTransform__Pop();
+        }
+
+        public static AffineTransform AffineTransformRotate(AffineTransform input, double angle)
+        {
+            NativeImplClient.PushDouble(angle);
+            AffineTransform__Push(input, false);
+            NativeImplClient.InvokeModuleMethod(_AffineTransformRotate);
+            return AffineTransform__Pop();
+        }
+
+        public static AffineTransform AffineTransformScale(AffineTransform input, double sx, double sy)
+        {
+            NativeImplClient.PushDouble(sy);
+            NativeImplClient.PushDouble(sx);
+            AffineTransform__Push(input, false);
+            NativeImplClient.InvokeModuleMethod(_AffineTransformScale);
+            return AffineTransform__Pop();
+        }
+
+        public static AffineTransform AffineTransformConcat(AffineTransform t1, AffineTransform t2)
+        {
+            AffineTransform__Push(t2, false);
+            AffineTransform__Push(t1, false);
+            NativeImplClient.InvokeModuleMethod(_AffineTransformConcat);
+            return AffineTransform__Pop();
+        }
+
         internal static void Init()
         {
             _module = NativeImplClient.GetModule("Drawing");
 
             NativeImplClient.PushModuleConstants(_module);
             AffineTransformIdentity = AffineTransform__Pop();
+
+            _AffineTransformTranslate = NativeImplClient.GetModuleMethod(_module, "AffineTransformTranslate");
+            _AffineTransformRotate = NativeImplClient.GetModuleMethod(_module, "AffineTransformRotate");
+            _AffineTransformScale = NativeImplClient.GetModuleMethod(_module, "AffineTransformScale");
+            _AffineTransformConcat = NativeImplClient.GetModuleMethod(_module, "AffineTransformConcat");
 
             _color_createGenericRGB = NativeImplClient.GetModuleMethod(_module, "Color_createGenericRGB");
             _color_getConstantColor = NativeImplClient.GetModuleMethod(_module, "Color_getConstantColor");
@@ -2570,10 +2825,29 @@ namespace Org.Prefixed.GuiBase
             _ColorSpace_dispose = NativeImplClient.GetModuleMethod(_module, "ColorSpace_dispose");
             _gradient_createWithColorComponents = NativeImplClient.GetModuleMethod(_module, "Gradient_createWithColorComponents");
             _Gradient_dispose = NativeImplClient.GetModuleMethod(_module, "Gradient_dispose");
+            _path_getCurrentPoint = NativeImplClient.GetModuleMethod(_module, "Path_getCurrentPoint");
+            _path_createCopy = NativeImplClient.GetModuleMethod(_module, "Path_createCopy");
+            _path_createMutableCopy = NativeImplClient.GetModuleMethod(_module, "Path_createMutableCopy");
             _path_createWithRect = NativeImplClient.GetModuleMethod(_module, "Path_createWithRect");
             _path_createWithEllipseInRect = NativeImplClient.GetModuleMethod(_module, "Path_createWithEllipseInRect");
             _path_createWithRoundedRect = NativeImplClient.GetModuleMethod(_module, "Path_createWithRoundedRect");
             _Path_dispose = NativeImplClient.GetModuleMethod(_module, "Path_dispose");
+            _mutablePath_addPath = NativeImplClient.GetModuleMethod(_module, "MutablePath_addPath");
+            _mutablePath_addRect = NativeImplClient.GetModuleMethod(_module, "MutablePath_addRect");
+            _mutablePath_addRects = NativeImplClient.GetModuleMethod(_module, "MutablePath_addRects");
+            _mutablePath_addRoundedRect = NativeImplClient.GetModuleMethod(_module, "MutablePath_addRoundedRect");
+            _mutablePath_addEllipseInRect = NativeImplClient.GetModuleMethod(_module, "MutablePath_addEllipseInRect");
+            _mutablePath_moveToPoint = NativeImplClient.GetModuleMethod(_module, "MutablePath_moveToPoint");
+            _mutablePath_addArc = NativeImplClient.GetModuleMethod(_module, "MutablePath_addArc");
+            _mutablePath_addRelativeArc = NativeImplClient.GetModuleMethod(_module, "MutablePath_addRelativeArc");
+            _mutablePath_addArcToPoint = NativeImplClient.GetModuleMethod(_module, "MutablePath_addArcToPoint");
+            _mutablePath_addCurveToPoint = NativeImplClient.GetModuleMethod(_module, "MutablePath_addCurveToPoint");
+            _mutablePath_addLines = NativeImplClient.GetModuleMethod(_module, "MutablePath_addLines");
+            _mutablePath_addLineToPoint = NativeImplClient.GetModuleMethod(_module, "MutablePath_addLineToPoint");
+            _mutablePath_addQuadCurveToPoint = NativeImplClient.GetModuleMethod(_module, "MutablePath_addQuadCurveToPoint");
+            _mutablePath_closeSubpath = NativeImplClient.GetModuleMethod(_module, "MutablePath_closeSubpath");
+            _mutablePath_create = NativeImplClient.GetModuleMethod(_module, "MutablePath_create");
+            _MutablePath_dispose = NativeImplClient.GetModuleMethod(_module, "MutablePath_dispose");
             _drawContext_saveGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_saveGState");
             _drawContext_restoreGState = NativeImplClient.GetModuleMethod(_module, "DrawContext_restoreGState");
             _drawContext_setRGBFillColor = NativeImplClient.GetModuleMethod(_module, "DrawContext_setRGBFillColor");
@@ -2659,6 +2933,9 @@ namespace Org.Prefixed.GuiBase
             _bitmapDrawContext_getData = NativeImplClient.GetModuleMethod(_module, "BitmapDrawContext_getData");
             _bitmapDrawContext_create = NativeImplClient.GetModuleMethod(_module, "BitmapDrawContext_create");
             _BitmapDrawContext_dispose = NativeImplClient.GetModuleMethod(_module, "BitmapDrawContext_dispose");
+
+            _mutablePathTransformException = NativeImplClient.GetException(_module, "MutablePathTransformException");
+            NativeImplClient.SetExceptionBuilder(_mutablePathTransformException, MutablePathTransformException.BuildAndThrow);
 
             // no static init
         }

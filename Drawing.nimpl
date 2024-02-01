@@ -23,7 +23,14 @@ struct AffineTransform {
     double tx;
     double ty;
 }
+
+// ugh
+// decide either what to do with structs (allow methods + static values?) or make opaque!
 AffineTransform AffineTransformIdentity;
+AffineTransform AffineTransformTranslate(AffineTransform input, double tx, double ty);
+AffineTransform AffineTransformRotate(AffineTransform input, double angle);
+AffineTransform AffineTransformScale(AffineTransform input, double sx, double sy);
+AffineTransform AffineTransformConcat(AffineTransform t1, AffineTransform t2);
 
 enum PathDrawingMode {
     Fill,
@@ -45,6 +52,7 @@ options OptArgs {
 // and if we're maintaining them then we're going to see them as leaks on the C++ size, since they would last the entire program
 // unless they were explicitly disposed in the module shutdown ...
 // lazy initialization perhaps? looks like a property but is actually a function?
+// and what about properties for that matter?
 
 enum ColorConstants {
     White,
@@ -91,9 +99,36 @@ opaque Gradient {
 }
 
 opaque Path {
+    Point getCurrentPoint();
+    Path createCopy();
+    MutablePath createMutableCopy();
+
     static Path createWithRect(Rect rect, OptArgs optArgs);
     static Path createWithEllipseInRect(Rect rect, OptArgs optArgs);
     static Path createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
+}
+
+exception MutablePathTransformException(string error);
+
+opaque MutablePath extends Path {
+    void addPath(Path path2, OptArgs optArgs);
+    void addRect(Rect rect, OptArgs optArgs);
+    void addRects(Array<Rect> rects, OptArgs optArgs);
+    void addRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
+    void addEllipseInRect(Rect rect, OptArgs optArgs);
+
+    // subpath (current win/linux limitation: all segments must use same [or no] transform - hence the possible exception)
+    void moveToPoint(double x, double y, OptArgs optArgs) throws MutablePathTransformException;
+    void addArc(double x, double y, double radius, double startAngle, double endAngle, bool clockwise, OptArgs optArgs) throws MutablePathTransformException;
+    void addRelativeArc(double x, double y, double radius, double startAngle, double delta, OptArgs optArgs) throws MutablePathTransformException;
+    void addArcToPoint(double x1, double y1, double x2, double y2, double radius, OptArgs optArgs) throws MutablePathTransformException;
+    void addCurveToPoint(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y, OptArgs optArgs) throws MutablePathTransformException;
+    void addLines(Array<Point> points, OptArgs optArgs) throws MutablePathTransformException;
+    void addLineToPoint(double x, double y, OptArgs optArgs) throws MutablePathTransformException;
+    void addQuadCurveToPoint(double cpx, double cpy, double x, double y, OptArgs optArgs) throws MutablePathTransformException;
+    void closeSubpath();
+
+    static MutablePath create();
 }
 
 enum TextDrawingMode {

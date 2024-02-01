@@ -1,5 +1,6 @@
 #include "generated/Drawing.h"
 #include "deps/opendl/source/opendl.h"
+#include "deps/opendl/deps/CFMinimal/source/CF/CFMisc.h" // for exceptions
 
 #define STRUCT_CAST(t, v) *((t*)&v)
 
@@ -726,6 +727,404 @@ void FrameSetter_dispose(FrameSetter _this)
     dl_CFRelease(_this);
 }
 
+std::vector<Point> Frame_getLineOrigins(Frame _this, Range range)
+{
+    auto ctLinesArr = dl_CTFrameGetLines((dl_CTFrameRef)_this);
+    auto lineCount = dl_CFArrayGetCount(ctLinesArr);
+
+    std::vector<Point> origins(lineCount);
+    dl_CTFrameGetLineOrigins((dl_CTFrameRef)_this, STRUCT_CAST(dl_CFRange,range), (dl_CGPoint*)origins.data());
+    return origins;
+}
+
+std::vector<LineInfo> Frame_getLinesExtended(Frame _this, std::vector<std::string> customKeys)
+{
+    std::vector<LineInfo> ret;
+    auto ctLinesArr = dl_CTFrameGetLines((dl_CTFrameRef)_this);
+    auto lineCount = dl_CFArrayGetCount(ctLinesArr);
+
+    std::vector<Point> origins(lineCount);
+    dl_CTFrameGetLineOrigins((dl_CTFrameRef)_this, dl_CFRangeZero, (dl_CGPoint*)origins.data());
+    
+    for (auto lineIndex = 0; lineIndex < lineCount; lineIndex++) {
+        LineInfo line;
+        line.origin = origins[lineIndex];
+
+        auto ctLine = (dl_CTLineRef)dl_CFArrayGetValueAtIndex(ctLinesArr, lineIndex);
+        line.lineTypoBounds = Line_getTypographicBounds((Line)ctLine);
+
+        auto ctRunsArr = dl_CTLineGetGlyphRuns(ctLine);
+        auto runCount = dl_CFArrayGetCount(ctRunsArr);
+        for (auto runIndex = 0; runIndex < runCount; runIndex++) {
+            RunInfo run;
+
+            auto ctRun = (dl_CTRunRef)dl_CFArrayGetValueAtIndex(ctRunsArr, runIndex);
+            run.attrs = Run_getAttributes((Run)ctRun, customKeys);
+
+            run.typoBounds = Run_getTypographicBounds((Run)ctRun, STRUCT_CAST(Range,dl_CFRangeZero));
+            run.bounds = STRUCT_CAST(Rect, dl_CGRectZero);
+
+            // might want to pad these with user-definable pads?
+            run.bounds.size.width = run.typoBounds.width;
+            run.bounds.size.height = run.typoBounds.ascent + run.typoBounds.descent;
+
+            auto xOffset = 0.0;
+            auto runRange = dl_CTRunGetStringRange(ctRun);
+            run.sourceRange = STRUCT_CAST(Range, runRange);
+            run.status = (RunStatus)dl_CTRunGetStatus(ctRun);
+            if (run.status & RunStatus::RightToLeft) {
+                //    var(offs1, _) = line.GetLineOffsetForStringIndex(glyphRange.Location + glyphRange.Length);
+                //    xOffset = offs1;
+                xOffset = dl_CTLineGetOffsetForStringIndex(ctLine, run.sourceRange.location + run.sourceRange.length, nullptr);
+            }
+            else {
+                //    var(offs1, _) = line.GetLineOffsetForStringIndex(glyphRange.Location);
+                //    xOffset = offs1;
+                xOffset = dl_CTLineGetOffsetForStringIndex(ctLine, run.sourceRange.location, nullptr);
+            }
+
+            run.bounds.origin.x = line.origin.x + xOffset;
+            run.bounds.origin.y = line.origin.y;
+            run.bounds.origin.y -= run.typoBounds.ascent;
+
+            if (run.bounds.size.width > line.lineTypoBounds.width) {
+                run.bounds.size.width = line.lineTypoBounds.width;
+            }
+
+            line.runs.push_back(run);
+        }
+        ret.push_back(line);
+    }
+
+    return ret;
+}
+
+ParagraphStyle ParagraphStyle_create(std::vector<ParagraphStyleSetting> settings)
+{
+    std::vector<dl_CTParagraphStyleSetting> ctSettings;
+
+    for (auto i = settings.begin(); i != settings.end(); i++) {
+        dl_CTParagraphStyleSetting pss;
+
+        switch (i->tag) {
+        case ParagraphStyleSetting::Tag::alignment: {
+            pss.spec = dl_kCTParagraphStyleSpecifierAlignment;
+            auto value = i->alignment->value;
+            pss.value = &value;
+            pss.valueSize = sizeof(value);
+            break;
+        }
+        default:
+            printf("ParagraphStyle_create(): unrecognized setting tag: %d\n", i->tag);
+            continue;
+        }
+
+        ctSettings.push_back(pss);
+    }
+
+    return (ParagraphStyle)dl_CTParagraphStyleCreate(ctSettings.data(), ctSettings.size());
+}
+
+void ParagraphStyle_dispose(ParagraphStyle _this)
+{
+    dl_CFRelease(_this);
+}
+
+void DrawContext_setTextDrawingMode(DrawContext _this, TextDrawingMode mode)
+{
+    dl_CGContextSetTextDrawingMode((dl_CGContextRef)_this, (dl_CGTextDrawingMode)mode);
+}
+
+void DrawContext_clipToMask(DrawContext _this, Rect rect, Image mask)
+{
+    dl_CGContextClipToMask((dl_CGContextRef)_this, STRUCT_CAST(dl_CGRect, rect), (dl_CGImageRef)mask);
+}
+
+void DrawContext_drawImage(DrawContext _this, Rect rect, Image image)
+{
+    dl_CGContextDrawImage((dl_CGContextRef)_this, STRUCT_CAST(dl_CGRect, rect), (dl_CGImageRef)image);
+}
+
+MutableAttributedString AttributedString_createMutableCopy(AttributedString _this, int64_t maxLength)
+{
+    return (MutableAttributedString)dl_CFAttributedStringCreateMutableCopy(maxLength, (dl_CFAttributedStringRef)_this);
+}
+
+struct __BitmapLock {
+    BitmapDrawContext source;
+    void* data;
+};
+
+BitmapLock BitmapDrawContext_getData(BitmapDrawContext _this)
+{
+    auto ret = new __BitmapLock;
+    ret->source = _this;
+    ret->data = dl_CGBitmapContextGetData((dl_CGContextRef)_this);
+    return ret;
+}
+
+Range Line_getStringRange(Line _this)
+{
+    auto ret = dl_CTLineGetStringRange((dl_CTLineRef)_this);
+    return STRUCT_CAST(Range, ret);
+}
+
+int64_t Line_getStringIndexForPosition(Line _this, Point p)
+{
+    return dl_CTLineGetStringIndexForPosition((dl_CTLineRef)_this, STRUCT_CAST(dl_CGPoint, p));
+}
+
+void BitmapLock_dispose(BitmapLock _this)
+{
+    dl_CGBitmapContextReleaseData((dl_CGContextRef)_this->source);
+    delete _this;
+}
+
+BitmapDrawContext BitmapDrawContext_create(int32_t width, int32_t height, int32_t bitsPerComponent, int32_t bytesPerRow, ColorSpace space, uint32_t bitmapInfo)
+{
+    return (BitmapDrawContext)dl_CGBitmapContextCreate(nullptr, width, height, bitsPerComponent, bytesPerRow, (dl_CGColorSpaceRef)space, bitmapInfo);
+}
+
+Image BitmapDrawContext_createImage(BitmapDrawContext _this)
+{
+    return (Image)dl_CGBitmapContextCreateImage((dl_CGContextRef)_this);
+}
+
+void BitmapDrawContext_dispose(BitmapDrawContext _this)
+{
+    dl_CGContextRelease((dl_CGContextRef)_this);
+}
+
+void Image_dispose(Image _this)
+{
+    dl_CGImageRelease((dl_CGImageRef)_this);
+}
+
+AffineTransform AffineTransformTranslate(AffineTransform input, double tx, double ty)
+{
+    auto ret = dl_CGAffineTransformTranslate(STRUCT_CAST(dl_CGAffineTransform, input), tx, ty);
+    return STRUCT_CAST(AffineTransform, ret);
+}
+
+AffineTransform AffineTransformRotate(AffineTransform input, double angle)
+{
+    auto ret = dl_CGAffineTransformRotate(STRUCT_CAST(dl_CGAffineTransform, input), angle);
+    return STRUCT_CAST(AffineTransform, ret);
+}
+
+AffineTransform AffineTransformScale(AffineTransform input, double sx, double sy)
+{
+    auto ret = dl_CGAffineTransformScale(STRUCT_CAST(dl_CGAffineTransform, input), sx, sy);
+    return STRUCT_CAST(AffineTransform, ret);
+}
+
+AffineTransform AffineTransformConcat(AffineTransform t1, AffineTransform t2)
+{
+    auto ret = dl_CGAffineTransformConcat(STRUCT_CAST(dl_CGAffineTransform, t1), STRUCT_CAST(dl_CGAffineTransform, t2));
+    return STRUCT_CAST(AffineTransform, ret);
+}
+
+Point Path_getCurrentPoint(Path _this)
+{
+    auto ret = dl_CGPathGetCurrentPoint((dl_CGPathRef)_this);
+    return STRUCT_CAST(Point, ret);
+}
+
+Path Path_createCopy(Path _this)
+{
+    return (Path)dl_CGPathCreateCopy((dl_CGPathRef)_this);
+}
+
+MutablePath Path_createMutableCopy(Path _this)
+{
+    return (MutablePath)dl_CGPathCreateMutableCopy((dl_CGPathRef)_this);
+}
+
+void MutablePath_moveToPoint(MutablePath _this, double x, double y, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform *m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    try {
+        dl_CGPathMoveToPoint((dl_CGMutablePathRef)_this, m, x, y);
+    }
+    catch (cf::Exception e) {
+        throw MutablePathTransformException(e.reason());
+    }
+}
+
+void MutablePath_addArc(MutablePath _this, double x, double y, double radius, double startAngle, double endAngle, bool clockwise, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform* m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    try {
+        dl_CGPathAddArc((dl_CGMutablePathRef)_this, m, x, y, radius, startAngle, endAngle, clockwise);
+    }
+    catch (cf::Exception e) {
+        throw MutablePathTransformException(e.reason());
+    }
+}
+
+void MutablePath_addRelativeArc(MutablePath _this, double x, double y, double radius, double startAngle, double delta, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform* m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    try {
+        dl_CGPathAddRelativeArc((dl_CGMutablePathRef)_this, m, x, y, radius, startAngle, delta);
+    }
+    catch (cf::Exception e) {
+        throw MutablePathTransformException(e.reason());
+    }
+}
+
+void MutablePath_addArcToPoint(MutablePath _this, double x1, double y1, double x2, double y2, double radius, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform* m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    try {
+        dl_CGPathAddArcToPoint((dl_CGMutablePathRef)_this, m, x1, y1, x2, y2, radius);
+    }
+    catch (cf::Exception e) {
+        throw MutablePathTransformException(e.reason());
+    }
+}
+
+void MutablePath_addCurveToPoint(MutablePath _this, double cp1x, double cp1y, double cp2x, double cp2y, double x, double y, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform* m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    try {
+        dl_CGPathAddCurveToPoint((dl_CGMutablePathRef)_this, m, cp1x, cp1y, cp2x, cp2y, x, y);
+    }
+    catch (cf::Exception e) {
+        throw MutablePathTransformException(e.reason());
+    }
+}
+
+void MutablePath_addLines(MutablePath _this, std::vector<Point> points, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform* m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    try {
+        dl_CGPathAddLines((dl_CGMutablePathRef)_this, m, (dl_CGPoint*)points.data(), points.size());
+    }
+    catch (cf::Exception e) {
+        throw MutablePathTransformException(e.reason());
+    }
+}
+
+void MutablePath_addLineToPoint(MutablePath _this, double x, double y, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform* m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    try {
+        dl_CGPathAddLineToPoint((dl_CGMutablePathRef)_this, m, x, y);
+    }
+    catch (cf::Exception e) {
+        throw MutablePathTransformException(e.reason());
+    }
+}
+
+void MutablePath_addPath(MutablePath _this, Path path2, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform* m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    dl_CGPathAddPath((dl_CGMutablePathRef)_this, m, (dl_CGPathRef)path2);
+}
+
+void MutablePath_addQuadCurveToPoint(MutablePath _this, double cpx, double cpy, double x, double y, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform* m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    try {
+        dl_CGPathAddQuadCurveToPoint((dl_CGMutablePathRef)_this, m, cpx, cpy, x, y);
+    }
+    catch (cf::Exception e) {
+        throw MutablePathTransformException(e.reason());
+    }
+}
+
+void MutablePath_addRect(MutablePath _this, Rect rect, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform* m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    dl_CGPathAddRect((dl_CGMutablePathRef)_this, m, STRUCT_CAST(dl_CGRect, rect));
+}
+
+void MutablePath_addRects(MutablePath _this, std::vector<Rect> rects, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform* m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    dl_CGPathAddRects((dl_CGMutablePathRef)_this, m, (dl_CGRect*)rects.data(), rects.size());
+}
+
+void MutablePath_addRoundedRect(MutablePath _this, Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform* m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    dl_CGPathAddRoundedRect((dl_CGMutablePathRef)_this, m, STRUCT_CAST(dl_CGRect, rect), cornerWidth, cornerHeight);
+}
+
+void MutablePath_addEllipseInRect(MutablePath _this, Rect rect, OptArgs optArgs)
+{
+    AffineTransform transform;
+    dl_CGAffineTransform* m = nullptr;
+    if (optArgs.hasTransform(&transform)) {
+        m = (dl_CGAffineTransform*)&transform;
+    }
+    dl_CGPathAddEllipseInRect((dl_CGMutablePathRef)_this, m, STRUCT_CAST(dl_CGRect, rect));
+}
+
+void MutablePath_closeSubpath(MutablePath _this)
+{
+    dl_CGPathCloseSubpath((dl_CGMutablePathRef)_this);
+}
+
+MutablePath MutablePath_create()
+{
+    return (MutablePath)dl_CGPathCreateMutable();
+}
+
+void MutablePath_dispose(MutablePath _this)
+{
+    dl_CGPathRelease((dl_CGPathRef)_this);
+}
+
 //static inline void drawCommand(dl_CGContextRef context, DrawCommand command)
 //{
 //    switch (command.tag) {
@@ -903,175 +1302,3 @@ void FrameSetter_dispose(FrameSetter _this)
 //    }
 //}
 
-std::vector<Point> Frame_getLineOrigins(Frame _this, Range range)
-{
-    auto ctLinesArr = dl_CTFrameGetLines((dl_CTFrameRef)_this);
-    auto lineCount = dl_CFArrayGetCount(ctLinesArr);
-
-    std::vector<Point> origins(lineCount);
-    dl_CTFrameGetLineOrigins((dl_CTFrameRef)_this, STRUCT_CAST(dl_CFRange,range), (dl_CGPoint*)origins.data());
-    return origins;
-}
-
-std::vector<LineInfo> Frame_getLinesExtended(Frame _this, std::vector<std::string> customKeys)
-{
-    std::vector<LineInfo> ret;
-    auto ctLinesArr = dl_CTFrameGetLines((dl_CTFrameRef)_this);
-    auto lineCount = dl_CFArrayGetCount(ctLinesArr);
-
-    std::vector<Point> origins(lineCount);
-    dl_CTFrameGetLineOrigins((dl_CTFrameRef)_this, dl_CFRangeZero, (dl_CGPoint*)origins.data());
-    
-    for (auto lineIndex = 0; lineIndex < lineCount; lineIndex++) {
-        LineInfo line;
-        line.origin = origins[lineIndex];
-
-        auto ctLine = (dl_CTLineRef)dl_CFArrayGetValueAtIndex(ctLinesArr, lineIndex);
-        line.lineTypoBounds = Line_getTypographicBounds((Line)ctLine);
-
-        auto ctRunsArr = dl_CTLineGetGlyphRuns(ctLine);
-        auto runCount = dl_CFArrayGetCount(ctRunsArr);
-        for (auto runIndex = 0; runIndex < runCount; runIndex++) {
-            RunInfo run;
-
-            auto ctRun = (dl_CTRunRef)dl_CFArrayGetValueAtIndex(ctRunsArr, runIndex);
-            run.attrs = Run_getAttributes((Run)ctRun, customKeys);
-
-            run.typoBounds = Run_getTypographicBounds((Run)ctRun, STRUCT_CAST(Range,dl_CFRangeZero));
-            run.bounds = STRUCT_CAST(Rect, dl_CGRectZero);
-
-            // might want to pad these with user-definable pads?
-            run.bounds.size.width = run.typoBounds.width;
-            run.bounds.size.height = run.typoBounds.ascent + run.typoBounds.descent;
-
-            auto xOffset = 0.0;
-            auto runRange = dl_CTRunGetStringRange(ctRun);
-            run.sourceRange = STRUCT_CAST(Range, runRange);
-            run.status = (RunStatus)dl_CTRunGetStatus(ctRun);
-            if (run.status & RunStatus::RightToLeft) {
-                //    var(offs1, _) = line.GetLineOffsetForStringIndex(glyphRange.Location + glyphRange.Length);
-                //    xOffset = offs1;
-                xOffset = dl_CTLineGetOffsetForStringIndex(ctLine, run.sourceRange.location + run.sourceRange.length, nullptr);
-            }
-            else {
-                //    var(offs1, _) = line.GetLineOffsetForStringIndex(glyphRange.Location);
-                //    xOffset = offs1;
-                xOffset = dl_CTLineGetOffsetForStringIndex(ctLine, run.sourceRange.location, nullptr);
-            }
-
-            run.bounds.origin.x = line.origin.x + xOffset;
-            run.bounds.origin.y = line.origin.y;
-            run.bounds.origin.y -= run.typoBounds.ascent;
-
-            if (run.bounds.size.width > line.lineTypoBounds.width) {
-                run.bounds.size.width = line.lineTypoBounds.width;
-            }
-
-            line.runs.push_back(run);
-        }
-        ret.push_back(line);
-    }
-
-    return ret;
-}
-
-ParagraphStyle ParagraphStyle_create(std::vector<ParagraphStyleSetting> settings)
-{
-    std::vector<dl_CTParagraphStyleSetting> ctSettings;
-
-    for (auto i = settings.begin(); i != settings.end(); i++) {
-        dl_CTParagraphStyleSetting pss;
-
-        switch (i->tag) {
-        case ParagraphStyleSetting::Tag::alignment: {
-            pss.spec = dl_kCTParagraphStyleSpecifierAlignment;
-            auto value = i->alignment->value;
-            pss.value = &value;
-            pss.valueSize = sizeof(value);
-            break;
-        }
-        default:
-            printf("ParagraphStyle_create(): unrecognized setting tag: %d\n", i->tag);
-            continue;
-        }
-
-        ctSettings.push_back(pss);
-    }
-
-    return (ParagraphStyle)dl_CTParagraphStyleCreate(ctSettings.data(), ctSettings.size());
-}
-
-void ParagraphStyle_dispose(ParagraphStyle _this)
-{
-    dl_CFRelease(_this);
-}
-
-void DrawContext_setTextDrawingMode(DrawContext _this, TextDrawingMode mode)
-{
-    dl_CGContextSetTextDrawingMode((dl_CGContextRef)_this, (dl_CGTextDrawingMode)mode);
-}
-
-void DrawContext_clipToMask(DrawContext _this, Rect rect, Image mask)
-{
-    dl_CGContextClipToMask((dl_CGContextRef)_this, STRUCT_CAST(dl_CGRect, rect), (dl_CGImageRef)mask);
-}
-
-void DrawContext_drawImage(DrawContext _this, Rect rect, Image image)
-{
-    dl_CGContextDrawImage((dl_CGContextRef)_this, STRUCT_CAST(dl_CGRect, rect), (dl_CGImageRef)image);
-}
-
-MutableAttributedString AttributedString_createMutableCopy(AttributedString _this, int64_t maxLength)
-{
-    return (MutableAttributedString)dl_CFAttributedStringCreateMutableCopy(maxLength, (dl_CFAttributedStringRef)_this);
-}
-
-struct __BitmapLock {
-    BitmapDrawContext source;
-    void* data;
-};
-
-BitmapLock BitmapDrawContext_getData(BitmapDrawContext _this)
-{
-    auto ret = new __BitmapLock;
-    ret->source = _this;
-    ret->data = dl_CGBitmapContextGetData((dl_CGContextRef)_this);
-    return ret;
-}
-
-Range Line_getStringRange(Line _this)
-{
-    auto ret = dl_CTLineGetStringRange((dl_CTLineRef)_this);
-    return STRUCT_CAST(Range, ret);
-}
-
-int64_t Line_getStringIndexForPosition(Line _this, Point p)
-{
-    return dl_CTLineGetStringIndexForPosition((dl_CTLineRef)_this, STRUCT_CAST(dl_CGPoint, p));
-}
-
-void BitmapLock_dispose(BitmapLock _this)
-{
-    dl_CGBitmapContextReleaseData((dl_CGContextRef)_this->source);
-    delete _this;
-}
-
-BitmapDrawContext BitmapDrawContext_create(int32_t width, int32_t height, int32_t bitsPerComponent, int32_t bytesPerRow, ColorSpace space, uint32_t bitmapInfo)
-{
-    return (BitmapDrawContext)dl_CGBitmapContextCreate(nullptr, width, height, bitsPerComponent, bytesPerRow, (dl_CGColorSpaceRef)space, bitmapInfo);
-}
-
-Image BitmapDrawContext_createImage(BitmapDrawContext _this)
-{
-    return (Image)dl_CGBitmapContextCreateImage((dl_CGContextRef)_this);
-}
-
-void BitmapDrawContext_dispose(BitmapDrawContext _this)
-{
-    dl_CGContextRelease((dl_CGContextRef)_this);
-}
-
-void Image_dispose(Image _this)
-{
-    dl_CGImageRelease((dl_CGImageRef)_this);
-}

@@ -64,6 +64,14 @@ public static class Common
         context.RestoreGState();
     }
 
+    public static AffineTransform MakeTransform(Point p, double angle, double scale)
+    {
+        var m1 = AffineTransformTranslate(AffineTransformIdentity, p.X, p.Y);
+        var m2 = AffineTransformRotate(m1, angle);
+        var m3 = AffineTransformScale(m2, scale, scale);
+        return AffineTransformTranslate(m3, -p.X, -p.Y);
+    }
+
     public static void DrawRect(DrawContext context, Rect r, Color color, double width)
     {
         context.SetStrokeColorWithColor(color);
