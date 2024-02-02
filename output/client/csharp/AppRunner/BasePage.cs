@@ -17,10 +17,11 @@ public readonly struct RenderArea(int x, int y, int width, int height)
 
 public interface IPage
 {
-    string PageTitle();
+    bool IsAnimating { get; }
+    string PageTitle { get; }
+    bool CanDrop { get; }
     void Render(Drawing.DrawContext context, RenderArea area);
     void Render2(Drawing.DrawContext context, RenderArea area);
-    bool IsAnimating();
     void OnSize(int newWidth, int newHeight);
     void OnTimer(double secondsSinceLast);
     void OnMouseMove(int x, int y, Windowing.Modifiers modifiers);
@@ -29,19 +30,25 @@ public interface IPage
     void OnMouseDown(int x, int y, Windowing.MouseButton button, Windowing.Modifiers modifiers);
     void OnMouseUp(int x, int y, Windowing.MouseButton button, Windowing.Modifiers modifiers);
     void OnKeyDown(Windowing.Key key, Windowing.Modifiers modifiers);
+    
+    Windowing.DropEffect DropFeedback(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect suggested);
+    void DropLeave();
+    void DropSubmit(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect effect);
 }
 
 public abstract class BasePage(IWindowMethods windowMethods) : IPage
 {
     protected int Width, Height;
     
-    public virtual string PageTitle() => "(untitled)";
+    public virtual string PageTitle => "(untitled)";
+    public virtual bool IsAnimating => false;
+    public virtual bool CanDrop => false;
 
     protected void Invalidate()
     {
         windowMethods.Invalidate(0, 0, 0, 0);
     }
-
+    
     protected void Invalidate(int x, int y, int width, int height)
     {
         windowMethods.Invalidate(x, y, width, height);
@@ -78,8 +85,6 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
         Render(context, area);
     }
 
-    public virtual bool IsAnimating() => false;
-
     public virtual void OnSize(int newWidth, int newHeight)
     {
         Width = newWidth;
@@ -87,6 +92,19 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     }
 
     public virtual void OnTimer(double secondsSinceLast)
+    {
+    }
+
+    public virtual Windowing.DropEffect DropFeedback(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect suggested)
+    {
+        return Windowing.DropEffect.None;
+    }
+
+    public virtual void DropLeave()
+    {
+    }
+
+    public virtual void DropSubmit(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect effect)
     {
     }
 }

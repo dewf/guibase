@@ -6,7 +6,7 @@ namespace AppRunner.Pages;
 
 public class TextStrokeTestingPage(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
-    public override string PageTitle() => "Text Stroke/Testing";
+    public override string PageTitle => "Text Stroke/Testing";
     
     private void ClipPre(DrawContext context, TextDrawingMode mode, Rect bounds, double xpos, double ypos)
     {

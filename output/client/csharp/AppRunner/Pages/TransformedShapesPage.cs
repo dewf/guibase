@@ -9,7 +9,7 @@ public class TransformedShapesPage : BasePage
     private readonly Gradient _grad;    
     private readonly Gradient _grad2;
     
-    public override string PageTitle() => "Transformed Shapes";
+    public override string PageTitle => "Transformed Shapes";
     
     public TransformedShapesPage(IWindowMethods windowMethods) : base(windowMethods)
     {

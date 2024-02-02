@@ -41,6 +41,27 @@ options WindowOptions {
    size_t nativeParent; // HWND actually
 }
 
+exception DropDataBadFormat(string format); // until we have an Option<> type for the result of getFormat()
+
+// constants for easy checking
+// might want to create a way to enumerate what's in the DropData for easy inspection ...
+string kDragFormatUTF8;
+string kDragFormatFiles;
+
+opaque DropData {
+   bool hasFormat(string mimeFormat);
+   Buffer<byte> getFormat(string mimeFormat) throws DropDataBadFormat;
+   Array<string> getFiles() throws DropDataBadFormat;
+}
+
+flags DropEffect {
+   None = 0,
+   Copy = 1 << 0,
+   Move = 1 << 1,
+   Link = 1 << 2,
+   Other = 1 << 3 // ask / private / etc
+}
+
 interface WindowDelegate {
    bool canClose();
    void closed();
@@ -53,6 +74,11 @@ interface WindowDelegate {
    void repaint(DrawContext context, int x, int y, int width, int height);
    void resized(int width, int height);
    void keyDown(Key key, Modifiers modifiers, KeyLocation location);
+
+   // dnd
+   DropEffect dropFeedback(DropData data, int x, int y, Modifiers modifiers, DropEffect suggested);
+   void dropLeave();
+   void dropSubmit(DropData data, int x, int y, Modifiers modifiers, DropEffect effect);
 }
 
 opaque Window {
@@ -62,6 +88,7 @@ opaque Window {
    void showContextMenu(int x, int y, Menu menu); // hmm, had a "fromEvent" parameter I think for GTK
    void invalidate(int x, int y, int width, int height);
    void setTitle(string title);
+   void enableDrops(bool enable);
 
    static Window create(int width, int height, string title, WindowDelegate del, WindowOptions opts);
 }

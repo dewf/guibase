@@ -368,6 +368,6 @@ void BitmapDrawContext_create__wrapper();
 
 void BitmapDrawContext_dispose__wrapper();
 
-void __constantsFunc();
+void Drawing__constantsFunc();
 
 int Drawing__register();

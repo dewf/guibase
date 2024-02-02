@@ -18,12 +18,17 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _moduleShutdown;
         private static ModuleMethodHandle _runloop;
         private static ModuleMethodHandle _exitRunloop;
+        private static ModuleMethodHandle _dropData_hasFormat;
+        private static ModuleMethodHandle _dropData_getFormat;
+        private static ModuleMethodHandle _dropData_getFiles;
+        private static ModuleMethodHandle _DropData_dispose;
         private static ModuleMethodHandle _window_show;
         private static ModuleMethodHandle _window_destroy;
         private static ModuleMethodHandle _window_setMenuBar;
         private static ModuleMethodHandle _window_showContextMenu;
         private static ModuleMethodHandle _window_invalidate;
         private static ModuleMethodHandle _window_setTitle;
+        private static ModuleMethodHandle _window_enableDrops;
         private static ModuleMethodHandle _window_create;
         private static ModuleMethodHandle _Window_dispose;
         private static ModuleMethodHandle _timer_create;
@@ -55,6 +60,12 @@ namespace Org.Prefixed.GuiBase
         private static InterfaceMethodHandle _windowDelegate_repaint;
         private static InterfaceMethodHandle _windowDelegate_resized;
         private static InterfaceMethodHandle _windowDelegate_keyDown;
+        private static InterfaceMethodHandle _windowDelegate_dropFeedback;
+        private static InterfaceMethodHandle _windowDelegate_dropLeave;
+        private static InterfaceMethodHandle _windowDelegate_dropSubmit;
+        private static ExceptionHandle _dropDataBadFormat;
+        public static string KDragFormatUTF8 { get; private set; }
+        public static string KDragFormatFiles { get; private set; }
 
         public enum Key
         {
@@ -302,6 +313,136 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new Action(ptr) : null;
+        }
+
+        internal static void __Native_Byte_Buffer__Push(INativeBuffer<byte> buf, bool isReturn)
+        {
+            if (buf != null)
+            {
+                ((IPushable)buf).Push(isReturn);
+            }
+            else
+            {
+                NativeImplClient.PushNull();
+            }
+        }
+
+        internal static INativeBuffer<byte> __Native_Byte_Buffer__Pop()
+        {
+            NativeMethods.popBuffer(out var id, out var isClientId, out var bufferDescriptor);
+            if (id != 0)
+            {
+                if (isClientId)
+                {
+                    return ClientBuffer<byte>.GetById(id);
+                }
+                else
+                {
+                    return new ServerBuffer<byte>(id, bufferDescriptor);
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public class DropDataBadFormat : Exception
+        {
+            public readonly string Format;
+            public DropDataBadFormat(string format) : base("DropDataBadFormat")
+            {
+                Format = format;
+            }
+            internal void PushAndSet()
+            {
+                NativeImplClient.PushString(Format);
+                NativeImplClient.SetException(_dropDataBadFormat);
+            }
+            internal static void BuildAndThrow()
+            {
+                var format = NativeImplClient.PopString();
+                throw new DropDataBadFormat(format);
+            }
+        }
+
+        // built-in array type: string[]
+
+        public class DropData : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            protected bool _disposed;
+            internal DropData(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public virtual void Dispose()
+            {
+                if (!_disposed)
+                {
+                    DropData__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_DropData_dispose);
+                    _disposed = true;
+                }
+            }
+            public bool HasFormat(string mimeFormat)
+            {
+                NativeImplClient.PushString(mimeFormat);
+                DropData__Push(this);
+                NativeImplClient.InvokeModuleMethod(_dropData_hasFormat);
+                return NativeImplClient.PopBool();
+            }
+            public INativeBuffer<byte> GetFormat(string mimeFormat) // throws DropDataBadFormat
+            {
+                NativeImplClient.PushString(mimeFormat);
+                DropData__Push(this);
+                NativeImplClient.InvokeModuleMethodWithExceptions(_dropData_getFormat);
+                var __ret = __Native_Byte_Buffer__Pop();
+                NativeImplClient.ServerClearSafetyArea();
+                return __ret;
+            }
+            public string[] GetFiles() // throws DropDataBadFormat
+            {
+                DropData__Push(this);
+                NativeImplClient.InvokeModuleMethodWithExceptions(_dropData_getFiles);
+                return NativeImplClient.PopStringArray();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void DropData__Push(DropData thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static DropData DropData__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new DropData(ptr) : null;
+        }
+
+        [Flags]
+        public enum DropEffect
+        {
+            None = 0,
+            Copy = 1,
+            Move = 1 << 1,
+            Link = 1 << 2,
+            Other = 1 << 3
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void DropEffect__Push(DropEffect value)
+        {
+            NativeImplClient.PushUInt32((uint)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static DropEffect DropEffect__Pop()
+        {
+            var ret = NativeImplClient.PopUInt32();
+            return (DropEffect)ret;
         }
 
         public class Icon : IDisposable
@@ -850,6 +991,12 @@ namespace Org.Prefixed.GuiBase
                 Window__Push(this);
                 NativeImplClient.InvokeModuleMethod(_window_setTitle);
             }
+            public void EnableDrops(bool enable)
+            {
+                NativeImplClient.PushBool(enable);
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_enableDrops);
+            }
             public static Window Create(int width, int height, string title, WindowDelegate del, WindowOptions opts)
             {
                 WindowOptions__Push(opts, false);
@@ -889,6 +1036,9 @@ namespace Org.Prefixed.GuiBase
             void Repaint(DrawContext context, int x, int y, int width, int height);
             void Resized(int width, int height);
             void KeyDown(Key key, Modifiers modifiers, KeyLocation location);
+            DropEffect DropFeedback(DropData data, int x, int y, Modifiers modifiers, DropEffect suggested);
+            void DropLeave();
+            void DropSubmit(DropData data, int x, int y, Modifiers modifiers, DropEffect effect);
         }
 
         internal static void WindowDelegate__Push(WindowDelegate thing, bool isReturn)
@@ -940,6 +1090,9 @@ namespace Org.Prefixed.GuiBase
             public abstract void Repaint(DrawContext context, int x, int y, int width, int height);
             public abstract void Resized(int width, int height);
             public abstract void KeyDown(Key key, Modifiers modifiers, KeyLocation location);
+            public abstract DropEffect DropFeedback(DropData data, int x, int y, Modifiers modifiers, DropEffect suggested);
+            public abstract void DropLeave();
+            public abstract void DropSubmit(DropData data, int x, int y, Modifiers modifiers, DropEffect effect);
         }
 
         internal class ServerWindowDelegate : ServerObject, WindowDelegate
@@ -1029,6 +1182,32 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.InvokeInterfaceMethod(_windowDelegate_keyDown, Id);
             }
 
+            public DropEffect DropFeedback(DropData data, int x, int y, Modifiers modifiers, DropEffect suggested)
+            {
+                DropEffect__Push(suggested);
+                Modifiers__Push(modifiers);
+                NativeImplClient.PushInt32(y);
+                NativeImplClient.PushInt32(x);
+                DropData__Push(data);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_dropFeedback, Id);
+                return DropEffect__Pop();
+            }
+
+            public void DropLeave()
+            {
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_dropLeave, Id);
+            }
+
+            public void DropSubmit(DropData data, int x, int y, Modifiers modifiers, DropEffect effect)
+            {
+                DropEffect__Push(effect);
+                Modifiers__Push(modifiers);
+                NativeImplClient.PushInt32(y);
+                NativeImplClient.PushInt32(x);
+                DropData__Push(data);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_dropSubmit, Id);
+            }
+
             public void Dispose()
             {
                 ServerDispose();
@@ -1059,17 +1238,26 @@ namespace Org.Prefixed.GuiBase
         {
             _module = NativeImplClient.GetModule("Windowing");
 
+            NativeImplClient.PushModuleConstants(_module);
+            KDragFormatUTF8 = NativeImplClient.PopString();
+            KDragFormatFiles = NativeImplClient.PopString();
+
             _moduleInit = NativeImplClient.GetModuleMethod(_module, "moduleInit");
             _moduleShutdown = NativeImplClient.GetModuleMethod(_module, "moduleShutdown");
             _runloop = NativeImplClient.GetModuleMethod(_module, "runloop");
             _exitRunloop = NativeImplClient.GetModuleMethod(_module, "exitRunloop");
 
+            _dropData_hasFormat = NativeImplClient.GetModuleMethod(_module, "DropData_hasFormat");
+            _dropData_getFormat = NativeImplClient.GetModuleMethod(_module, "DropData_getFormat");
+            _dropData_getFiles = NativeImplClient.GetModuleMethod(_module, "DropData_getFiles");
+            _DropData_dispose = NativeImplClient.GetModuleMethod(_module, "DropData_dispose");
             _window_show = NativeImplClient.GetModuleMethod(_module, "Window_show");
             _window_destroy = NativeImplClient.GetModuleMethod(_module, "Window_destroy");
             _window_setMenuBar = NativeImplClient.GetModuleMethod(_module, "Window_setMenuBar");
             _window_showContextMenu = NativeImplClient.GetModuleMethod(_module, "Window_showContextMenu");
             _window_invalidate = NativeImplClient.GetModuleMethod(_module, "Window_invalidate");
             _window_setTitle = NativeImplClient.GetModuleMethod(_module, "Window_setTitle");
+            _window_enableDrops = NativeImplClient.GetModuleMethod(_module, "Window_enableDrops");
             _window_create = NativeImplClient.GetModuleMethod(_module, "Window_create");
             _Window_dispose = NativeImplClient.GetModuleMethod(_module, "Window_dispose");
             _timer_create = NativeImplClient.GetModuleMethod(_module, "Timer_create");
@@ -1090,6 +1278,9 @@ namespace Org.Prefixed.GuiBase
             _menuBar_create = NativeImplClient.GetModuleMethod(_module, "MenuBar_create");
             _MenuBar_dispose = NativeImplClient.GetModuleMethod(_module, "MenuBar_dispose");
 
+            _dropDataBadFormat = NativeImplClient.GetException(_module, "DropDataBadFormat");
+            NativeImplClient.SetExceptionBuilder(_dropDataBadFormat, DropDataBadFormat.BuildAndThrow);
+
             _windowDelegate = NativeImplClient.GetInterface(_module, "WindowDelegate");
             _windowDelegate_canClose = NativeImplClient.GetInterfaceMethod(_windowDelegate, "canClose");
             _windowDelegate_closed = NativeImplClient.GetInterfaceMethod(_windowDelegate, "closed");
@@ -1102,6 +1293,9 @@ namespace Org.Prefixed.GuiBase
             _windowDelegate_repaint = NativeImplClient.GetInterfaceMethod(_windowDelegate, "repaint");
             _windowDelegate_resized = NativeImplClient.GetInterfaceMethod(_windowDelegate, "resized");
             _windowDelegate_keyDown = NativeImplClient.GetInterfaceMethod(_windowDelegate, "keyDown");
+            _windowDelegate_dropFeedback = NativeImplClient.GetInterfaceMethod(_windowDelegate, "dropFeedback");
+            _windowDelegate_dropLeave = NativeImplClient.GetInterfaceMethod(_windowDelegate, "dropLeave");
+            _windowDelegate_dropSubmit = NativeImplClient.GetInterfaceMethod(_windowDelegate, "dropSubmit");
 
             NativeImplClient.SetClientMethodWrapper(_windowDelegate_canClose, delegate(ClientObject obj)
             {
@@ -1192,6 +1386,34 @@ namespace Org.Prefixed.GuiBase
                 var modifiers = Modifiers__Pop();
                 var location = KeyLocation__Pop();
                 inst.KeyDown(key, modifiers, location);
+            });
+
+            NativeImplClient.SetClientMethodWrapper(_windowDelegate_dropFeedback, delegate(ClientObject obj)
+            {
+                var inst = (ClientWindowDelegate) obj;
+                var data = DropData__Pop();
+                var x = NativeImplClient.PopInt32();
+                var y = NativeImplClient.PopInt32();
+                var modifiers = Modifiers__Pop();
+                var suggested = DropEffect__Pop();
+                DropEffect__Push(inst.DropFeedback(data, x, y, modifiers, suggested));
+            });
+
+            NativeImplClient.SetClientMethodWrapper(_windowDelegate_dropLeave, delegate(ClientObject obj)
+            {
+                var inst = (ClientWindowDelegate) obj;
+                inst.DropLeave();
+            });
+
+            NativeImplClient.SetClientMethodWrapper(_windowDelegate_dropSubmit, delegate(ClientObject obj)
+            {
+                var inst = (ClientWindowDelegate) obj;
+                var data = DropData__Pop();
+                var x = NativeImplClient.PopInt32();
+                var y = NativeImplClient.PopInt32();
+                var modifiers = Modifiers__Pop();
+                var effect = DropEffect__Pop();
+                inst.DropSubmit(data, x, y, modifiers, effect);
             });
 
             ModuleInit();

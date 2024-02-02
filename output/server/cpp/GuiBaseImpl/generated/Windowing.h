@@ -11,6 +11,7 @@
 
 #include "Drawing.h"
 
+struct __DropData; typedef struct __DropData* DropData;
 struct __Window; typedef struct __Window* Window;
 struct __Timer; typedef struct __Timer* Timer;
 struct __Icon; typedef struct __Icon* Icon;
@@ -140,6 +141,26 @@ enum Modifiers {
 
 typedef void MenuActionFunc();
 
+
+// std::shared_ptr<NativeBuffer<uint8_t>>
+
+class DropDataBadFormat {
+public:
+    std::string format;
+    DropDataBadFormat(std::string format)
+        : format(format) {}
+};
+
+// std::vector<std::string>
+
+
+enum DropEffect {
+    None = 0,
+    Copy = 1,
+    Move = 1 << 1,
+    Link = 1 << 2,
+    Other = 1 << 3
+};
 
 
 enum class KeyLocation {
@@ -277,6 +298,9 @@ public:
     virtual void repaint(DrawContext context, int32_t x, int32_t y, int32_t width, int32_t height) = 0;
     virtual void resized(int32_t width, int32_t height) = 0;
     virtual void keyDown(Key key, uint32_t modifiers, KeyLocation location) = 0;
+    virtual uint32_t dropFeedback(DropData data, int32_t x, int32_t y, uint32_t modifiers, uint32_t suggested) = 0;
+    virtual void dropLeave() = 0;
+    virtual void dropSubmit(DropData data, int32_t x, int32_t y, uint32_t modifiers, uint32_t effect) = 0;
 };
 
 // inherit from this to create server instances of WindowDelegate
@@ -289,16 +313,24 @@ public:
     }
 };
 
+extern const std::string kDragFormatUTF8;
+extern const std::string kDragFormatFiles;
+
 void moduleInit();
 void moduleShutdown();
 void runloop();
 void exitRunloop();
+bool DropData_hasFormat(DropData _this, std::string mimeFormat);
+std::shared_ptr<NativeBuffer<uint8_t>> DropData_getFormat(DropData _this, std::string mimeFormat); // throws DropDataBadFormat
+std::vector<std::string> DropData_getFiles(DropData _this); // throws DropDataBadFormat
+void DropData_dispose(DropData _this);
 void Window_show(Window _this);
 void Window_destroy(Window _this);
 void Window_setMenuBar(Window _this, MenuBar menuBar);
 void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu);
 void Window_invalidate(Window _this, int32_t x, int32_t y, int32_t width, int32_t height);
 void Window_setTitle(Window _this, std::string title);
+void Window_enableDrops(Window _this, bool enable);
 Window Window_create(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts);
 void Window_dispose(Window _this);
 Timer Timer_create(int32_t msTimeout, std::function<TimerFunc> func);

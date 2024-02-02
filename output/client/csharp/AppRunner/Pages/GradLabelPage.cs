@@ -10,7 +10,7 @@ public class GradLabelPage(IWindowMethods windowMethods) : BasePage(windowMethod
 	private const string BigLabelText = "BIG-LABEL";
 	private const string GradLabelText = "GRAD-LABEL";
 
-	public override string PageTitle() => "Gradient Label";
+	public override string PageTitle => "Gradient Label";
 
 	private static void DrawTextInShape(DrawContext context, Drawing.Path path, string text, Color color, Font font, TextAlignment? alignment = null)
 	{

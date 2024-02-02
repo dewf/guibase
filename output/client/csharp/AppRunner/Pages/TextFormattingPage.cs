@@ -51,7 +51,7 @@ public class TextFormattingPage : BasePage
     private readonly FrameSetter _frameSetter;
     private readonly Color _black = Color.GetConstantColor(ColorConstants.Black);
 
-    public override string PageTitle() => "Fancy Text Formatting";
+    public override string PageTitle => "Fancy Text Formatting";
 
     public TextFormattingPage(IWindowMethods windowMethods) : base(windowMethods)
     {

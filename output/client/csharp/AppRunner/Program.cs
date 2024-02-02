@@ -18,7 +18,8 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
         set
         {
             _window = value;
-            _window!.SetTitle(_currentPage.PageTitle());
+            _window!.SetTitle(_currentPage.PageTitle);
+            _window!.EnableDrops(_currentPage.CanDrop);
         }
     }
 
@@ -31,6 +32,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     private readonly TextStrokeTestingPage _page07;
     private readonly TextSelectionPage _page08;
     private readonly TransformedShapesPage _page09;
+    private readonly DragDropTesting _page10;
     private IPage _currentPage;
 
     private readonly Stopwatch _watch = new();
@@ -55,6 +57,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
         _page07 = new TextStrokeTestingPage(this);
         _page08 = new TextSelectionPage(this);
         _page09 = new TransformedShapesPage(this);
+        _page10 = new DragDropTesting(this);
         _currentPage = _page01;
     }
 
@@ -109,7 +112,8 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     {
         _currentPage = page;
         _currentPage.OnSize(_width, _height);
-        Window!.SetTitle(_currentPage.PageTitle());
+        Window!.SetTitle(_currentPage.PageTitle);
+        Window!.EnableDrops(_currentPage.CanDrop);
         Invalidate(0, 0, _width, _height);
     }
 
@@ -144,6 +148,9 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
             case Key._9:
                 SelectPage(_page09);
                 break;
+            case Key._0:
+                SelectPage(_page10);
+                break;
             default:
                 _currentPage.OnKeyDown(key, modifiers);
                 break;
@@ -176,6 +183,21 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
         _currentPage.OnSize(_width, _height);
     }
 
+    public override DropEffect DropFeedback(DropData data, int x, int y, Modifiers modifiers, DropEffect suggested)
+    {
+        return _currentPage.CanDrop ? _currentPage.DropFeedback(data, x, y, modifiers, suggested) : DropEffect.None;
+    }
+
+    public override void DropLeave()
+    {
+        if (_currentPage.CanDrop) _currentPage.DropLeave();
+    }
+
+    public override void DropSubmit(DropData data, int x, int y, Modifiers modifiers, DropEffect effect)
+    {
+        if (_currentPage.CanDrop) _currentPage.DropSubmit(data, x, y, modifiers, effect);
+    }
+
     public void Invalidate(int x, int y, int width, int height)
     {
         Window!.Invalidate(x, y, width, height);
@@ -183,7 +205,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
 
     public void TimerTick(double secondsSinceLast)
     {
-        if (_currentPage.IsAnimating())
+        if (_currentPage.IsAnimating)
         {
             _currentPage.OnTimer(secondsSinceLast);
         }

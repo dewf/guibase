@@ -1676,13 +1676,13 @@ void BitmapDrawContext_dispose__wrapper() {
     BitmapDrawContext_dispose(_this);
 }
 
-void __constantsFunc() {
+void Drawing__constantsFunc() {
     AffineTransform__push(AffineTransformIdentity, false);
 }
 
 int Drawing__register() {
     auto m = ni_registerModule("Drawing");
-    ni_registerModuleConstants(m, &__constantsFunc);
+    ni_registerModuleConstants(m, &Drawing__constantsFunc);
     ni_registerModuleMethod(m, "AffineTransformTranslate", &AffineTransformTranslate__wrapper);
     ni_registerModuleMethod(m, "AffineTransformRotate", &AffineTransformRotate__wrapper);
     ni_registerModuleMethod(m, "AffineTransformScale", &AffineTransformScale__wrapper);

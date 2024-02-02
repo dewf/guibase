@@ -7,7 +7,7 @@ public class TextBoundsCircle : BasePage
 {
     private readonly AttributedString _labelString;
     
-    public override string PageTitle() => "Text Bounds + Concentric Circles";
+    public override string PageTitle => "Text Bounds + Concentric Circles";
     
     public TextBoundsCircle(IWindowMethods windowMethods) : base(windowMethods)
     {

@@ -6,7 +6,7 @@ namespace AppRunner.Pages;
 
 public class ResizeGradient(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
-    public override string PageTitle() => "Resize Gradient";
+    public override string PageTitle => "Resize Gradient";
     
     public override void Render(DrawContext context, RenderArea area)
     {

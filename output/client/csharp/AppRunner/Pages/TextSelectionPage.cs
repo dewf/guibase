@@ -28,7 +28,7 @@ public class TextSelectionPage : BasePage
     }
     private TextDirection _textDirection;
     
-    public override string PageTitle() => "Text Selection";
+    public override string PageTitle => "Text Selection";
     
     public TextSelectionPage(IWindowMethods windowMethods) : base(windowMethods)
     {

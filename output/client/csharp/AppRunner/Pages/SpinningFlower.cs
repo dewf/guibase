@@ -15,8 +15,8 @@ public class SpinningFlower(IWindowMethods windowMethods) : BasePage(windowMetho
     private const double AnimTurnsPerSec = 1.0 / 5.0;
     private double _animAngle = 0;
 
-    public override bool IsAnimating() => _animating;
-    public override string PageTitle() => "Spinning Flower";
+    public override bool IsAnimating => _animating;
+    public override string PageTitle => "Spinning Flower";
 
     public override void OnTimer(double secondsSinceLast)
     {

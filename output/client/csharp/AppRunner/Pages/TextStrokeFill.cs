@@ -5,7 +5,7 @@ namespace AppRunner.Pages;
 
 public class TextStrokeFill(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
-    public override string PageTitle() => "Text Stroke/Fill";
+    public override string PageTitle => "Text Stroke/Fill";
 
     public override void Render(Drawing.DrawContext context, RenderArea area)
     {

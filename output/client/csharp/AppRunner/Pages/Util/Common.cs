@@ -181,6 +181,18 @@ public static class Common
         DashedRect(context, r);
         context.RestoreGState();
     }
+
+    public static void CenterText(DrawContext context, Rect centerInRect, string text, AttributedStringOptions attrOpts)
+    {
+        using var labelString = AttributedString.Create(text, attrOpts);
+        using var line = Line.CreateWithAttributedString(labelString);
+        var typoBounds = line.GetTypographicBounds();
+        var bounds = line.GetBoundsWithOptions(0);
+        var x = (centerInRect.Size.Width - bounds.Size.Width) / 2 + centerInRect.Origin.X;
+        var y = (centerInRect.Size.Height - bounds.Size.Height) / 2 + typoBounds.Ascent;
+        context.SetTextPosition(x, y);
+        line.Draw(context);
+    }
     
     public static void TextLine(DrawContext context, double x, double y, string text, AttributedStringOptions attrOpts, bool withGradient = true, bool fromBaseline = false)
     {

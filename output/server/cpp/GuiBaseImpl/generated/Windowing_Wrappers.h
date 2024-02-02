@@ -14,6 +14,18 @@ std::function<MenuActionFunc> MenuActionFunc__pop();
 void Action__push(Action value);
 Action Action__pop();
 
+inline void __Native_UInt8_Buffer__push(std::shared_ptr<NativeBuffer<uint8_t>> buf, bool isReturn);
+std::shared_ptr<NativeBuffer<uint8_t>> __Native_UInt8_Buffer__pop();
+
+void DropDataBadFormat__push(DropDataBadFormat e);
+void DropDataBadFormat__buildAndThrow();
+
+void DropData__push(DropData value);
+DropData DropData__pop();
+
+void DropEffect__push(uint32_t value);
+uint32_t DropEffect__pop();
+
 void Icon__push(Icon value);
 Icon Icon__pop();
 
@@ -57,6 +69,14 @@ void runloop__wrapper();
 
 void exitRunloop__wrapper();
 
+void DropData_hasFormat__wrapper();
+
+void DropData_getFormat__wrapper();
+
+void DropData_getFiles__wrapper();
+
+void DropData_dispose__wrapper();
+
 void Window_show__wrapper();
 
 void Window_destroy__wrapper();
@@ -68,6 +88,8 @@ void Window_showContextMenu__wrapper();
 void Window_invalidate__wrapper();
 
 void Window_setTitle__wrapper();
+
+void Window_enableDrops__wrapper();
 
 void Window_create__wrapper();
 
@@ -128,5 +150,13 @@ void WindowDelegate_repaint__wrapper(int serverID);
 void WindowDelegate_resized__wrapper(int serverID);
 
 void WindowDelegate_keyDown__wrapper(int serverID);
+
+void WindowDelegate_dropFeedback__wrapper(int serverID);
+
+void WindowDelegate_dropLeave__wrapper(int serverID);
+
+void WindowDelegate_dropSubmit__wrapper(int serverID);
+
+void Windowing__constantsFunc();
 
 int Windowing__register();

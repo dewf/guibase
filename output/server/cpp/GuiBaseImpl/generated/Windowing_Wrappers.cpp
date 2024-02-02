@@ -3,6 +3,7 @@
 #include "Windowing.h"
 #include "Drawing_wrappers.h"
 
+ni_ExceptionRef dropDataBadFormat;
 ni_InterfaceMethodRef windowDelegate_canClose;
 ni_InterfaceMethodRef windowDelegate_closed;
 ni_InterfaceMethodRef windowDelegate_destroyed;
@@ -14,6 +15,9 @@ ni_InterfaceMethodRef windowDelegate_mouseLeave;
 ni_InterfaceMethodRef windowDelegate_repaint;
 ni_InterfaceMethodRef windowDelegate_resized;
 ni_InterfaceMethodRef windowDelegate_keyDown;
+ni_InterfaceMethodRef windowDelegate_dropFeedback;
+ni_InterfaceMethodRef windowDelegate_dropLeave;
+ni_InterfaceMethodRef windowDelegate_dropSubmit;
 
 inline void Key__push(Key value) {
     ni_pushInt32((int32_t)value);
@@ -69,6 +73,63 @@ void Action__push(Action value) {
 
 Action Action__pop() {
     return (Action)ni_popPtr();
+}
+
+inline void __Native_UInt8_Buffer__push(std::shared_ptr<NativeBuffer<uint8_t>> buf, bool isReturn) {
+    if (buf != nullptr) {
+        auto pushable = std::dynamic_pointer_cast<Pushable>(buf);
+        pushable->push(pushable, isReturn);
+    }
+    else {
+        ni_pushNull();
+    }
+}
+
+std::shared_ptr<NativeBuffer<uint8_t>> __Native_UInt8_Buffer__pop() {
+    int id;
+    bool isClientId;
+    ni_BufferDescriptor descriptor;
+    ni_popBuffer(&id, &isClientId, &descriptor);
+    if (id != 0) {
+        if (isClientId) {
+            auto buf = new ClientBuffer<uint8_t>(id, descriptor);
+            return std::shared_ptr<NativeBuffer<uint8_t>>(buf);
+        }
+        else {
+            return ServerBuffer<uint8_t>::getByID(id);
+        }
+    }
+    else {
+        return std::shared_ptr<NativeBuffer<uint8_t>>();
+    }
+}
+
+
+void DropDataBadFormat__push(DropDataBadFormat e) {
+    pushStringInternal(e.format);
+}
+
+void DropDataBadFormat__buildAndThrow() {
+    auto format = popStringInternal();
+    throw DropDataBadFormat(format);
+}
+
+// built-in array type: std::vector<std::string>
+
+void DropData__push(DropData value) {
+    ni_pushPtr(value);
+}
+
+DropData DropData__pop() {
+    return (DropData)ni_popPtr();
+}
+
+inline void DropEffect__push(uint32_t value) {
+    ni_pushUInt32(value);
+}
+
+inline uint32_t DropEffect__pop() {
+    return ni_popUInt32();
 }
 
 void Icon__push(Icon value) {
@@ -292,6 +353,26 @@ public:
         Key__push(key);
         invokeMethod(windowDelegate_keyDown);
     }
+    uint32_t dropFeedback(DropData data, int32_t x, int32_t y, uint32_t modifiers, uint32_t suggested) override {
+        DropEffect__push(suggested);
+        Modifiers__push(modifiers);
+        ni_pushInt32(y);
+        ni_pushInt32(x);
+        DropData__push(data);
+        invokeMethod(windowDelegate_dropFeedback);
+        return DropEffect__pop();
+    }
+    void dropLeave() override {
+        invokeMethod(windowDelegate_dropLeave);
+    }
+    void dropSubmit(DropData data, int32_t x, int32_t y, uint32_t modifiers, uint32_t effect) override {
+        DropEffect__push(effect);
+        Modifiers__push(modifiers);
+        ni_pushInt32(y);
+        ni_pushInt32(x);
+        DropData__push(data);
+        invokeMethod(windowDelegate_dropSubmit);
+    }
 };
 
 void WindowDelegate__push(std::shared_ptr<WindowDelegate> inst, bool isReturn) {
@@ -336,6 +417,40 @@ void exitRunloop__wrapper() {
     exitRunloop();
 }
 
+void DropData_hasFormat__wrapper() {
+    auto _this = DropData__pop();
+    auto mimeFormat = popStringInternal();
+    ni_pushBool(DropData_hasFormat(_this, mimeFormat));
+}
+
+void DropData_getFormat__wrapper() {
+    auto _this = DropData__pop();
+    auto mimeFormat = popStringInternal();
+    try {
+        __Native_UInt8_Buffer__push(DropData_getFormat(_this, mimeFormat), true);
+    }
+    catch (const DropDataBadFormat& e) {
+        ni_setException(dropDataBadFormat);
+        DropDataBadFormat__push(e);
+    }
+}
+
+void DropData_getFiles__wrapper() {
+    auto _this = DropData__pop();
+    try {
+        pushStringArrayInternal(DropData_getFiles(_this));
+    }
+    catch (const DropDataBadFormat& e) {
+        ni_setException(dropDataBadFormat);
+        DropDataBadFormat__push(e);
+    }
+}
+
+void DropData_dispose__wrapper() {
+    auto _this = DropData__pop();
+    DropData_dispose(_this);
+}
+
 void Window_show__wrapper() {
     auto _this = Window__pop();
     Window_show(_this);
@@ -373,6 +488,12 @@ void Window_setTitle__wrapper() {
     auto _this = Window__pop();
     auto title = popStringInternal();
     Window_setTitle(_this, title);
+}
+
+void Window_enableDrops__wrapper() {
+    auto _this = Window__pop();
+    auto enable = ni_popBool();
+    Window_enableDrops(_this, enable);
 }
 
 void Window_create__wrapper() {
@@ -563,18 +684,54 @@ void WindowDelegate_keyDown__wrapper(int serverID) {
     inst->keyDown(key, modifiers, location);
 }
 
+void WindowDelegate_dropFeedback__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
+    auto data = DropData__pop();
+    auto x = ni_popInt32();
+    auto y = ni_popInt32();
+    auto modifiers = Modifiers__pop();
+    auto suggested = DropEffect__pop();
+    DropEffect__push(inst->dropFeedback(data, x, y, modifiers, suggested));
+}
+
+void WindowDelegate_dropLeave__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
+    inst->dropLeave();
+}
+
+void WindowDelegate_dropSubmit__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
+    auto data = DropData__pop();
+    auto x = ni_popInt32();
+    auto y = ni_popInt32();
+    auto modifiers = Modifiers__pop();
+    auto effect = DropEffect__pop();
+    inst->dropSubmit(data, x, y, modifiers, effect);
+}
+
+void Windowing__constantsFunc() {
+    pushStringInternal(kDragFormatFiles);
+    pushStringInternal(kDragFormatUTF8);
+}
+
 int Windowing__register() {
     auto m = ni_registerModule("Windowing");
+    ni_registerModuleConstants(m, &Windowing__constantsFunc);
     ni_registerModuleMethod(m, "moduleInit", &moduleInit__wrapper);
     ni_registerModuleMethod(m, "moduleShutdown", &moduleShutdown__wrapper);
     ni_registerModuleMethod(m, "runloop", &runloop__wrapper);
     ni_registerModuleMethod(m, "exitRunloop", &exitRunloop__wrapper);
+    ni_registerModuleMethod(m, "DropData_hasFormat", &DropData_hasFormat__wrapper);
+    ni_registerModuleMethod(m, "DropData_getFormat", &DropData_getFormat__wrapper);
+    ni_registerModuleMethod(m, "DropData_getFiles", &DropData_getFiles__wrapper);
+    ni_registerModuleMethod(m, "DropData_dispose", &DropData_dispose__wrapper);
     ni_registerModuleMethod(m, "Window_show", &Window_show__wrapper);
     ni_registerModuleMethod(m, "Window_destroy", &Window_destroy__wrapper);
     ni_registerModuleMethod(m, "Window_setMenuBar", &Window_setMenuBar__wrapper);
     ni_registerModuleMethod(m, "Window_showContextMenu", &Window_showContextMenu__wrapper);
     ni_registerModuleMethod(m, "Window_invalidate", &Window_invalidate__wrapper);
     ni_registerModuleMethod(m, "Window_setTitle", &Window_setTitle__wrapper);
+    ni_registerModuleMethod(m, "Window_enableDrops", &Window_enableDrops__wrapper);
     ni_registerModuleMethod(m, "Window_create", &Window_create__wrapper);
     ni_registerModuleMethod(m, "Window_dispose", &Window_dispose__wrapper);
     ni_registerModuleMethod(m, "Timer_create", &Timer_create__wrapper);
@@ -606,5 +763,9 @@ int Windowing__register() {
     windowDelegate_repaint = ni_registerInterfaceMethod(windowDelegate, "repaint", &WindowDelegate_repaint__wrapper);
     windowDelegate_resized = ni_registerInterfaceMethod(windowDelegate, "resized", &WindowDelegate_resized__wrapper);
     windowDelegate_keyDown = ni_registerInterfaceMethod(windowDelegate, "keyDown", &WindowDelegate_keyDown__wrapper);
+    windowDelegate_dropFeedback = ni_registerInterfaceMethod(windowDelegate, "dropFeedback", &WindowDelegate_dropFeedback__wrapper);
+    windowDelegate_dropLeave = ni_registerInterfaceMethod(windowDelegate, "dropLeave", &WindowDelegate_dropLeave__wrapper);
+    windowDelegate_dropSubmit = ni_registerInterfaceMethod(windowDelegate, "dropSubmit", &WindowDelegate_dropSubmit__wrapper);
+    dropDataBadFormat = ni_registerException(m, "DropDataBadFormat", &DropDataBadFormat__buildAndThrow);
     return 0; // = OK
 }

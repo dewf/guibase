@@ -13,6 +13,10 @@ static std::function<MenuActionFunc> actionFuncForId(int id) {
     return menuActionFuncs[id];
 }
 
+
+const std::string kDragFormatUTF8 = wl_kDragFormatUTF8;
+const std::string kDragFormatFiles = wl_kDragFormatFiles;
+
 static void convertProps(WindowOptions& opts, wl_WindowProperties& output) {
     int minWidth, minHeight, maxWidth, maxHeight;
     WindowStyle style;
@@ -81,6 +85,9 @@ public:
     void setTitle(std::string title) {
         wl_WindowSetTitle(wlWindow, title.c_str());
     }
+    void enableDrops(bool enable) {
+        wl_WindowEnableDrops(wlWindow, enable);
+    }
     // OpenWL event handling ==========================
     void onDestroyed() {
         del->destroyed();
@@ -123,6 +130,21 @@ public:
         switch (keyEvent.eventType) {
         case wl_kKeyEventTypeDown:
             del->keyDown((Key)keyEvent.key, keyEvent.modifiers, (KeyLocation)keyEvent.location);
+            break;
+        }
+    }
+    void onDrop(wl_DropEvent& dropEvent) {
+        switch (dropEvent.eventType) {
+        case wl_kDropEventTypeFeedback: {
+            auto allowed = del->dropFeedback((DropData)dropEvent.data, dropEvent.x, dropEvent.y, dropEvent.modifiers, dropEvent.defaultModifierAction);
+            dropEvent.allowedEffectMask = allowed;
+            break;
+        }
+        case wl_kDropEventTypeLeave:
+            del->dropLeave();
+            break;
+        case wl_kDropEventTypeDrop:
+            del->dropSubmit((DropData)dropEvent.data, dropEvent.x, dropEvent.y, dropEvent.modifiers, dropEvent.defaultModifierAction);
             break;
         }
     }
@@ -180,6 +202,9 @@ CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* user
         case wl_kEventTypeWindowResized:
             win->onResized(event->resizeEvent);
             break;
+        case wl_kEventTypeDrop:
+            win->onDrop(event->dropEvent);
+            break;
         default:
             //printf("unhandled event type: %d\n", event->eventType);
             event->handled = false;
@@ -223,6 +248,54 @@ void exitRunloop() {
     wl_ExitRunloop();
 }
 
+bool DropData_hasFormat(DropData _this, std::string mimeFormat)
+{
+    return wl_DropHasFormat((wl_DropDataRef)_this, mimeFormat.c_str());
+}
+
+std::shared_ptr<NativeBuffer<uint8_t>> DropData_getFormat(DropData _this, std::string mimeFormat)
+{
+    const void* wlData;
+    size_t wlDataSize;
+    if (wl_DropGetFormat((wl_DropDataRef)_this, mimeFormat.c_str(), &wlData, &wlDataSize)) {
+        std::vector<int> dims;
+        dims.push_back((int)wlDataSize);
+        auto buffer = new ServerBuffer<uint8_t>(dims);
+
+        size_t spanSize;
+        void* span = buffer->getSpan(&spanSize);
+        memcpy(span, wlData, spanSize);
+
+        return std::shared_ptr<NativeBuffer<uint8_t>>(buffer);
+    }
+    else
+    {
+        throw DropDataBadFormat("wl_DropDataGetFormat() failed");
+    }
+}
+
+std::vector<std::string> DropData_getFiles(DropData _this)
+{
+    const wl_Files* files; // not owned by us
+    if (wl_DropGetFiles((wl_DropDataRef)_this, &files)) {
+        std::vector<std::string> ret;
+        for (auto i = 0; i < files->numFiles; i++) {
+            ret.push_back(files->filenames[i]);
+        }
+        return ret;
+    }
+    else {
+        throw DropDataBadFormat("wl_DropGetFiles() failed");
+    }
+}
+
+void DropData_dispose(DropData _this)
+{
+    // not necessary, it's taken care of by OpenWL
+    // however we'll have a separate ClipData that will inherit, and WILL have a release because that is client responsibility
+    printf("!!! DropData_dispose called, why?\n");
+}
+
 void Window_show(Window _this) {
     ((InternalWindow*)_this)->show();
 }
@@ -247,6 +320,11 @@ void Window_invalidate(Window _this, int32_t x, int32_t y, int32_t width, int32_
 void Window_setTitle(Window _this, std::string title)
 {
     ((InternalWindow*)_this)->setTitle(title);
+}
+
+void Window_enableDrops(Window _this, bool enable)
+{
+    ((InternalWindow*)_this)->enableDrops(enable);
 }
 
 Window Window_create(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts)
