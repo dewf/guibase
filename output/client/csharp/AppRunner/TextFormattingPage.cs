@@ -55,11 +55,8 @@ public class TextFormattingPage : BasePage
 	    using var timesFont = Font.CreateWithName("Times New Roman", 40.0, new OptArgs());
 	    using var timesItalic = timesFont.CreateCopyWithSymbolicTraits(0, new FontTraits { Italic = true }, new OptArgs()); // 0 = preserve size
 	    
-	    // can't use "use" with these now, they will be released if the other side doesn't retain them
-	    // I understand why the local-only ones aren't being retained, but what about those passed directly
-	    // into the remote attribute dictionary? my own dictionary-splitting run analysis implementation is failing to retain them?
-	    // could be ...
-	    // don't tell me we need .retain on opaques, as well - sigh
+	    // since we are storing these resources on the client side (and only keyed by ID on the backend attrstring dictionary)
+	    // we can't "use" them for auto-disposal, since the backend knows nothing about them and therefore can't retain them
 	    var magenta = Color.CreateGenericRGB(1, 0, 1, 1);
 	    var alphaYellow = Color.CreateGenericRGB(1, 1, 0, 0.5);
 	    var red = Color.CreateGenericRGB(1, 0, 0, 1);
