@@ -61,6 +61,7 @@ opaque Window {
    void setMenuBar(MenuBar menuBar);
    void showContextMenu(int x, int y, Menu menu); // hmm, had a "fromEvent" parameter I think for GTK
    void invalidate(int x, int y, int width, int height);
+   void setTitle(string title);
 
    static Window create(int width, int height, string title, WindowDelegate del, WindowOptions opts);
 }

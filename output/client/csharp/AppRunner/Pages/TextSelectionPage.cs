@@ -1,8 +1,8 @@
 ﻿using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
-using static AppRunner.Common;
+using static AppRunner.Pages.Util.Common;
 
-namespace AppRunner;
+namespace AppRunner.Pages;
 
 public class TextSelectionPage : BasePage
 {
@@ -27,6 +27,8 @@ public class TextSelectionPage : BasePage
         RightToLeft
     }
     private TextDirection _textDirection;
+    
+    public override string PageTitle() => "Text Selection";
     
     public TextSelectionPage(IWindowMethods windowMethods) : base(windowMethods)
     {

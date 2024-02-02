@@ -1,11 +1,13 @@
 ﻿using static Org.Prefixed.GuiBase.Drawing;
 
-using static AppRunner.Common;
+using static AppRunner.Pages.Util.Common;
 
-namespace AppRunner;
+namespace AppRunner.Pages;
 
 public class ResizeGradient(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
+    public override string PageTitle() => "Resize Gradient";
+    
     public override void Render(DrawContext context, RenderArea area)
     {
         using var grad1 = GetGradient(0.3, 0.2, 1, 1, 1, 0.3, 0, 1);

@@ -1,8 +1,8 @@
 ﻿using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
-using static AppRunner.Common;
+using static AppRunner.Pages.Util.Common;
 
-namespace AppRunner;
+namespace AppRunner.Pages;
 
 public class SpinningFlower(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
@@ -16,6 +16,7 @@ public class SpinningFlower(IWindowMethods windowMethods) : BasePage(windowMetho
     private double _animAngle = 0;
 
     public override bool IsAnimating() => _animating;
+    public override string PageTitle() => "Spinning Flower";
 
     public override void OnTimer(double secondsSinceLast)
     {

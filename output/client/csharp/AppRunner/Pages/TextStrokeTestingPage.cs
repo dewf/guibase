@@ -1,11 +1,13 @@
 ﻿using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
-using static AppRunner.Common;
+using static AppRunner.Pages.Util.Common;
 
-namespace AppRunner;
+namespace AppRunner.Pages;
 
 public class TextStrokeTestingPage(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
+    public override string PageTitle() => "Text Stroke/Testing";
+    
     private void ClipPre(DrawContext context, TextDrawingMode mode, Rect bounds, double xpos, double ypos)
     {
         if (mode is TextDrawingMode.Clip or TextDrawingMode.FillClip or TextDrawingMode.StrokeClip or TextDrawingMode.FillStrokeClip)

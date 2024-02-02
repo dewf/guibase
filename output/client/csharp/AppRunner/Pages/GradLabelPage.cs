@@ -1,14 +1,17 @@
 ﻿using Org.Prefixed.GuiBase;
-using static AppRunner.Common;
+using static AppRunner.Pages.Util.Common;
 using static Org.Prefixed.GuiBase.Drawing;
 
-namespace AppRunner;
+namespace AppRunner.Pages;
 
 public class GradLabelPage(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
 	private const string Text = "Vestibulum mattis ipsum augue, ac maximus erat scelerisque vitae. Nam vel commodo urna, a consectetur arcu. Quisque a suscipit metus. Nam bibendum accumsan vulputate. Proin suscipit, sapien a fermentum laoreet, est turpis sollicitudin ipsum, quis consectetur purus augue non ante. Donec sollicitudin erat sed urna posuere vehicula. Sed lacus felis, dapibus sed leo vel, pretium gravida lectus. Fusce id eros euismod, cursus ante sit amet, tempus tortor. Aenean venenatis quam ut tortor aliquet ornare. Curabitur sollicitudin molestie nisi, sit amet sollicitudin tortor maximus at. Phasellus eget vehicula ligula. Ut eu tempus urna. Donec tempor velit in odio vulputate, id condimentum justo finibus. Donec cursus nulla et pellentesque finibus. Phasellus tincidunt ligula pellentesque pulvinar ultrices. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed malesuada mauris ac tortor consequat gravida et non urna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Proin vitae justo erat. Suspendisse potenti. Sed sit amet leo in sapien placerat maximus vitae eget tellus. Etiam ullamcorper augue eros, at mollis libero placerat id. Nulla id suscipit quam, non rhoncus tellus. Nulla mauris elit, congue id accumsan in, pellentesque ullamcorper nisi. In a elit mi. Quisque feugiat justo at ipsum lacinia finibus.";
 	private const string BigLabelText = "BIG-LABEL";
 	private const string GradLabelText = "GRAD-LABEL";
+
+	public override string PageTitle() => "Gradient Label";
+
 	private static void DrawTextInShape(DrawContext context, Drawing.Path path, string text, Color color, Font font, TextAlignment? alignment = null)
 	{
 		using var attrString = MutableAttributedString.Create(0); // 0 = amt of storage to reserve, no hint

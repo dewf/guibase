@@ -369,6 +369,12 @@ void Window_invalidate__wrapper() {
     Window_invalidate(_this, x, y, width, height);
 }
 
+void Window_setTitle__wrapper() {
+    auto _this = Window__pop();
+    auto title = popStringInternal();
+    Window_setTitle(_this, title);
+}
+
 void Window_create__wrapper() {
     auto width = ni_popInt32();
     auto height = ni_popInt32();
@@ -568,6 +574,7 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "Window_setMenuBar", &Window_setMenuBar__wrapper);
     ni_registerModuleMethod(m, "Window_showContextMenu", &Window_showContextMenu__wrapper);
     ni_registerModuleMethod(m, "Window_invalidate", &Window_invalidate__wrapper);
+    ni_registerModuleMethod(m, "Window_setTitle", &Window_setTitle__wrapper);
     ni_registerModuleMethod(m, "Window_create", &Window_create__wrapper);
     ni_registerModuleMethod(m, "Window_dispose", &Window_dispose__wrapper);
     ni_registerModuleMethod(m, "Timer_create", &Timer_create__wrapper);

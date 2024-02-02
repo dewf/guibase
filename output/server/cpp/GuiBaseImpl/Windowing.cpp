@@ -78,6 +78,9 @@ public:
     void invalidate(int x, int y, int width, int height) {
         wl_WindowInvalidate(wlWindow, x, y, width, height);
     }
+    void setTitle(std::string title) {
+        wl_WindowSetTitle(wlWindow, title.c_str());
+    }
     // OpenWL event handling ==========================
     void onDestroyed() {
         del->destroyed();
@@ -239,6 +242,11 @@ void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu) {
 void Window_invalidate(Window _this, int32_t x, int32_t y, int32_t width, int32_t height)
 {
     ((InternalWindow*)_this)->invalidate(x, y, width, height);
+}
+
+void Window_setTitle(Window _this, std::string title)
+{
+    ((InternalWindow*)_this)->setTitle(title);
 }
 
 Window Window_create(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts)

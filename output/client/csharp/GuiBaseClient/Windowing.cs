@@ -23,6 +23,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _window_setMenuBar;
         private static ModuleMethodHandle _window_showContextMenu;
         private static ModuleMethodHandle _window_invalidate;
+        private static ModuleMethodHandle _window_setTitle;
         private static ModuleMethodHandle _window_create;
         private static ModuleMethodHandle _Window_dispose;
         private static ModuleMethodHandle _timer_create;
@@ -843,6 +844,12 @@ namespace Org.Prefixed.GuiBase
                 Window__Push(this);
                 NativeImplClient.InvokeModuleMethod(_window_invalidate);
             }
+            public void SetTitle(string title)
+            {
+                NativeImplClient.PushString(title);
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_setTitle);
+            }
             public static Window Create(int width, int height, string title, WindowDelegate del, WindowOptions opts)
             {
                 WindowOptions__Push(opts, false);
@@ -1062,6 +1069,7 @@ namespace Org.Prefixed.GuiBase
             _window_setMenuBar = NativeImplClient.GetModuleMethod(_module, "Window_setMenuBar");
             _window_showContextMenu = NativeImplClient.GetModuleMethod(_module, "Window_showContextMenu");
             _window_invalidate = NativeImplClient.GetModuleMethod(_module, "Window_invalidate");
+            _window_setTitle = NativeImplClient.GetModuleMethod(_module, "Window_setTitle");
             _window_create = NativeImplClient.GetModuleMethod(_module, "Window_create");
             _Window_dispose = NativeImplClient.GetModuleMethod(_module, "Window_dispose");
             _timer_create = NativeImplClient.GetModuleMethod(_module, "Timer_create");

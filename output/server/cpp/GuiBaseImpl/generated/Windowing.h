@@ -298,6 +298,7 @@ void Window_destroy(Window _this);
 void Window_setMenuBar(Window _this, MenuBar menuBar);
 void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu);
 void Window_invalidate(Window _this, int32_t x, int32_t y, int32_t width, int32_t height);
+void Window_setTitle(Window _this, std::string title);
 Window Window_create(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts);
 void Window_dispose(Window _this);
 Timer Timer_create(int32_t msTimeout, std::function<TimerFunc> func);

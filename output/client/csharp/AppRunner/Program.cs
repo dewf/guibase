@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using AppRunner.Pages;
 using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
 using static Org.Prefixed.GuiBase.Windowing;
@@ -9,7 +10,18 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
 {
     private int _width, _height;
     private readonly Menu _contextMenu;
-    public Window? Window { get; set; }
+
+    private Window? _window;
+    public Window? Window
+    {
+        get => _window;
+        set
+        {
+            _window = value;
+            _window!.SetTitle(_currentPage.PageTitle());
+        }
+    }
+
     private readonly SpinningFlower _page01;
     private readonly TextBoundsCircle _page02;
     private readonly TextStrokeFill _page03;
@@ -97,6 +109,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     {
         _currentPage = page;
         _currentPage.OnSize(_width, _height);
+        Window!.SetTitle(_currentPage.PageTitle());
         Invalidate(0, 0, _width, _height);
     }
 

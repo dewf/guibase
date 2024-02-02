@@ -67,6 +67,8 @@ void Window_showContextMenu__wrapper();
 
 void Window_invalidate__wrapper();
 
+void Window_setTitle__wrapper();
+
 void Window_create__wrapper();
 
 void Window_dispose__wrapper();

@@ -1,8 +1,9 @@
-﻿using Org.Prefixed.GuiBase;
-using static AppRunner.Common;
+﻿using AppRunner.Pages.Util;
+using Org.Prefixed.GuiBase;
+using static AppRunner.Pages.Util.Common;
 using static Org.Prefixed.GuiBase.Drawing;
 
-namespace AppRunner;
+namespace AppRunner.Pages;
 
 internal class ClientAttrMap
 {
@@ -49,6 +50,8 @@ public class TextFormattingPage : BasePage
     private readonly ClientAttrMap _attrMap = new();
     private readonly FrameSetter _frameSetter;
     private readonly Color _black = Color.GetConstantColor(ColorConstants.Black);
+
+    public override string PageTitle() => "Fancy Text Formatting";
 
     public TextFormattingPage(IWindowMethods windowMethods) : base(windowMethods)
     {

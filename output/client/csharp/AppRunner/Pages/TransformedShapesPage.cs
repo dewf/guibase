@@ -1,13 +1,15 @@
 ﻿using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
-using static AppRunner.Common;
+using static AppRunner.Pages.Util.Common;
 
-namespace AppRunner;
+namespace AppRunner.Pages;
 
 public class TransformedShapesPage : BasePage
 {
     private readonly Gradient _grad;    
     private readonly Gradient _grad2;
+    
+    public override string PageTitle() => "Transformed Shapes";
     
     public TransformedShapesPage(IWindowMethods windowMethods) : base(windowMethods)
     {

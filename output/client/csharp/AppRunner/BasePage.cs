@@ -17,6 +17,7 @@ public readonly struct RenderArea(int x, int y, int width, int height)
 
 public interface IPage
 {
+    string PageTitle();
     void Render(Drawing.DrawContext context, RenderArea area);
     void Render2(Drawing.DrawContext context, RenderArea area);
     bool IsAnimating();
@@ -34,6 +35,8 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
 {
     protected int Width, Height;
     
+    public virtual string PageTitle() => "(untitled)";
+
     protected void Invalidate()
     {
         windowMethods.Invalidate(0, 0, 0, 0);

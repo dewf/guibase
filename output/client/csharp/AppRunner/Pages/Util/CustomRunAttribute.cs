@@ -1,6 +1,6 @@
 ﻿using Org.Prefixed.GuiBase;
 
-namespace AppRunner;
+namespace AppRunner.Pages.Util;
 
 internal abstract class CustomRunAttribute
 {

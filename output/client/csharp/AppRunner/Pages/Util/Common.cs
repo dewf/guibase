@@ -1,7 +1,7 @@
 ﻿using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
 
-namespace AppRunner;
+namespace AppRunner.Pages.Util;
 
 public static class Common
 {

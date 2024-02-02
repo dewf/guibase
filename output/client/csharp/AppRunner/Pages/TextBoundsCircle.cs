@@ -1,11 +1,13 @@
 ﻿using static Org.Prefixed.GuiBase.Drawing;
-using static AppRunner.Common;
+using static AppRunner.Pages.Util.Common;
 
-namespace AppRunner;
+namespace AppRunner.Pages;
 
 public class TextBoundsCircle : BasePage
 {
     private readonly AttributedString _labelString;
+    
+    public override string PageTitle() => "Text Bounds + Concentric Circles";
     
     public TextBoundsCircle(IWindowMethods windowMethods) : base(windowMethods)
     {

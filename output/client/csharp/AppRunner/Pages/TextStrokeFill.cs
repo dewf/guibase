@@ -1,10 +1,12 @@
 ﻿using Org.Prefixed.GuiBase;
-using static AppRunner.Common;
+using static AppRunner.Pages.Util.Common;
 
-namespace AppRunner;
+namespace AppRunner.Pages;
 
 public class TextStrokeFill(IWindowMethods windowMethods) : BasePage(windowMethods)
 {
+    public override string PageTitle() => "Text Stroke/Fill";
+
     public override void Render(Drawing.DrawContext context, RenderArea area)
     {
         context.SetRGBFillColor(0.5, 0.5, 0.5, 1);
