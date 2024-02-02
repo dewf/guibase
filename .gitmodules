@@ -1,6 +1,6 @@
 [submodule "output/server/cpp/GuiBaseImpl/deps/openwl"]
 	path = output/server/cpp/GuiBaseImpl/deps/openwl
-	url = https://github.com/dewf/openwl.git
+	url = ../openwl.git
 [submodule "output/server/cpp/GuiBaseImpl/deps/opendl"]
 	path = output/server/cpp/GuiBaseImpl/deps/opendl
-	url = https://github.com/dewf/opendl.git
+	url = ../opendl.git
