@@ -1,4 +1,5 @@
-﻿using AppRunner.Pages.Util;
+﻿using AppRunner.Pages.Menus;
+using AppRunner.Pages.Util;
 using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
 using static Org.Prefixed.GuiBase.Windowing;
@@ -13,17 +14,27 @@ public class WindowEventStuff : BasePage
     private DropEffect _suggestedEffect;
     private double _animPhase;
     private string[]? _lastDroppedFiles;
-    // private MenuBar? _menuBar;
-    // private Menu? _contextMenu;
+
+    private readonly Menubar _menuBar = new();
     
     public override string PageTitle => "Windowing/Event testing";
     public override bool CanDrop => true;
     public override bool IsAnimating => _dropInProgress;
-    // public override MenuBar? MenuBar => _menuBar;
+
+    private void OnMenuInvalidation(object? sender, EventArgs args)
+    {
+        Invalidate(0, 0, Width, Menubar.MenuHeight);
+    }
 
     public WindowEventStuff(IWindowMethods windowMethods) : base(windowMethods)
     {
         // CreateMenu();
+        _menuBar.NeedsInvalidation += OnMenuInvalidation;
+    }
+
+    public override void OnMouseMove(int x, int y, Modifiers modifiers)
+    {
+        _menuBar.OnMouseMove(x, y);
     }
 
     public override void Render(DrawContext context, RenderArea area)
@@ -37,10 +48,19 @@ public class WindowEventStuff : BasePage
 
         var totalRect = MakeRect(0, 0, Width, Height);
 
+        // background
         context.SetFillColorWithColor(black);
         context.FillRect(totalRect);
-        TextLine(context, 20, 20, "DnD Testing", new AttributedStringOptions { Font = font, ForegroundColor = orange }, withGradient:false);
-
+        
+        // menu
+        context.SaveGState();
+        var menuRect = MakeRect(0, 0, Width, Menubar.MenuHeight);
+        context.ClipToRect(menuRect);
+        _menuBar.Render(context, Width);
+        context.RestoreGState();
+        
+        // etc
+        TextLine(context, 20, 40, "DnD Testing", new AttributedStringOptions { Font = font, ForegroundColor = orange }, withGradient:false);
         if (_dropInProgress && _dropAllowed)
         {
             var rect = totalRect.Inset(20);
