@@ -5,6 +5,7 @@ namespace AppRunner;
 public interface IWindowMethods
 {
     void Invalidate(int x, int y, int width, int height);
+    void DestroyWindow();
 }
 
 public readonly struct RenderArea(int x, int y, int width, int height)
@@ -20,6 +21,7 @@ public interface IPage
     bool IsAnimating { get; }
     string PageTitle { get; }
     bool CanDrop { get; }
+    Windowing.MenuBar? MenuBar { get; }
     void Render(Drawing.DrawContext context, RenderArea area);
     void Render2(Drawing.DrawContext context, RenderArea area);
     void OnSize(int newWidth, int newHeight);
@@ -43,6 +45,12 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     public virtual string PageTitle => "(untitled)";
     public virtual bool IsAnimating => false;
     public virtual bool CanDrop => false;
+    public virtual Windowing.MenuBar? MenuBar => null;
+
+    protected void DestroyWindow()
+    {
+        windowMethods.DestroyWindow();
+    }
 
     protected void Invalidate()
     {

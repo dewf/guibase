@@ -9,7 +9,7 @@ namespace AppRunner;
 internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
 {
     private int _width, _height;
-    private readonly Menu _contextMenu;
+    private readonly MenuBar _emptyMenuBar = MenuBar.Create();
 
     private Window? _window;
     public Window? Window
@@ -32,7 +32,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     private readonly TextStrokeTestingPage _page07;
     private readonly TextSelectionPage _page08;
     private readonly TransformedShapesPage _page09;
-    private readonly DragDropTesting _page10;
+    private readonly WindowEventStuff _page10;
     private IPage _currentPage;
 
     private readonly Stopwatch _watch = new();
@@ -41,12 +41,6 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
 
     public MainWindowDelegate()
     {
-        _contextMenu = Menu.Create();
-        _contextMenu.AddAction(Windowing.Action.Create("Context Item", null, null, () =>
-        {
-            Console.WriteLine("context item clicked!");
-        }));
-
         // page init
         _page01 = new SpinningFlower(this);
         _page02 = new TextBoundsCircle(this);
@@ -57,7 +51,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
         _page07 = new TextStrokeTestingPage(this);
         _page08 = new TextSelectionPage(this);
         _page09 = new TransformedShapesPage(this);
-        _page10 = new DragDropTesting(this);
+        _page10 = new WindowEventStuff(this);
         _currentPage = _page01;
     }
 
@@ -77,15 +71,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
 
     public override void MouseDown(int x, int y, MouseButton button, Modifiers modifiers)
     {
-        // Console.WriteLine($"button press @ {x}/{y}/{button}/{ModifiersToString(modifiers)}");
-        if (button == MouseButton.Right)
-        {
-            Window!.ShowContextMenu(x, y, _contextMenu);
-        }
-        else
-        {
-            _currentPage.OnMouseDown(x, y, button, modifiers);
-        }
+        _currentPage.OnMouseDown(x, y, button, modifiers);
     }
 
     public override void MouseUp(int x, int y, MouseButton button, Modifiers modifiers)
@@ -210,6 +196,11 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
             _currentPage.OnTimer(secondsSinceLast);
         }
     }
+    
+    public void DestroyWindow()
+    {
+        Window!.Destroy();
+    }
 }
 
 internal static class Program
@@ -231,20 +222,6 @@ internal static class Program
             var mainWinDel = new MainWindowDelegate();
             using var window = Window.Create(Constants.InitWidth, Constants.InitHeight, "this is the first window! 🚀", mainWinDel, options);
             mainWinDel.Window = window;
-
-            using var fileMenu = Menu.Create();
-            using var exitAction =
-                Windowing.Action.Create("E&xit", null, Accelerator.Create(Key.Q, Modifiers.Control), () =>
-                {
-                    Console.WriteLine("you chose 'exit'!");
-                    ExitRunloop();
-                });
-            fileMenu.AddAction(exitAction);
-
-            using var menuBar = MenuBar.Create();
-            menuBar.AddMenu("&File", fileMenu);
-        
-            window.SetMenuBar(menuBar);
 
             using var timer = Windowing.Timer.Create(1000 / 60, secondsSinceLast =>
             {

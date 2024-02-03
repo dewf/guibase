@@ -41,10 +41,11 @@ options WindowOptions {
    size_t nativeParent; // HWND actually
 }
 
-exception DropDataBadFormat(string format); // until we have an Option<> type for the result of getFormat()
+exception DropDataBadFormat(string format); // until we have an Option<> or Result<> type for the result of getFormat()
 
 // constants for easy checking
 // might want to create a way to enumerate what's in the DropData for easy inspection ...
+// but these are used by both DropData and DragData ...
 string kDragFormatUTF8;
 string kDragFormatFiles;
 
