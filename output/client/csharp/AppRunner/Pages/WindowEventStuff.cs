@@ -60,7 +60,7 @@ public class WindowEventStuff : BasePage
         context.RestoreGState();
         
         // etc
-        TextLine(context, 20, 40, "DnD Testing", new AttributedStringOptions { Font = font, ForegroundColor = orange }, withGradient:false);
+        // TextLine(context, 20, 40, "DnD Testing", new AttributedStringOptions { Font = font, ForegroundColor = orange }, withGradient:false);
         if (_dropInProgress && _dropAllowed)
         {
             var rect = totalRect.Inset(20);

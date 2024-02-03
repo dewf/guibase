@@ -6,11 +6,10 @@ namespace AppRunner.Pages.Menus;
 
 public class Menubar
 {
-    public const int MenuHeight = 32;
+    public const int MenuHeight = 24;
 
     private readonly string[] _menuNames = ["File", "Edit", "View", "Misc", "Help"];
     private readonly Gradient _bgGradient = GetGradient(0.8, 0.8, 0.8, 1, 0.5, 0.5, 0.5, 1);
-
     public event EventHandler? NeedsInvalidation;
 
     private struct MenuItem
