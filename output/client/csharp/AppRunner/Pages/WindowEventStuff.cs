@@ -15,7 +15,7 @@ public class WindowEventStuff : BasePage
     private double _animPhase;
     private string[]? _lastDroppedFiles;
 
-    private readonly Menubar _menuBar;
+    private readonly ClientMenuBar _menuBar;
     
     public override string PageTitle => "Windowing/Event testing";
     public override bool CanDrop => true;
@@ -23,12 +23,12 @@ public class WindowEventStuff : BasePage
 
     private void OnMenuInvalidation(object? sender, EventArgs args)
     {
-        Invalidate(0, 0, Width, Menubar.MenuHeight);
+        Invalidate(0, 0, Width, ClientMenuBar.MenuHeight);
     }
 
     public WindowEventStuff(IWindowMethods windowMethods) : base(windowMethods)
     {
-        _menuBar = new Menubar(windowMethods);
+        _menuBar = new ClientMenuBar(windowMethods);
         _menuBar.NeedsInvalidation += OnMenuInvalidation;
     }
 
@@ -44,7 +44,7 @@ public class WindowEventStuff : BasePage
 
     public override void OnMouseDown(int x, int y, MouseButton button, Modifiers modifiers)
     {
-        if (y < Menubar.MenuHeight)
+        if (y < ClientMenuBar.MenuHeight)
         {
             _menuBar.OnMouseDown(x, y);
         }
@@ -71,7 +71,7 @@ public class WindowEventStuff : BasePage
         
         // menu
         context.SaveGState();
-        var menuRect = MakeRect(0, 0, Width, Menubar.MenuHeight);
+        var menuRect = MakeRect(0, 0, Width, ClientMenuBar.MenuHeight);
         context.ClipToRect(menuRect);
         _menuBar.Render(context, Width);
         context.RestoreGState();

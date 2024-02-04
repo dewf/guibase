@@ -4,7 +4,7 @@ using static AppRunner.Pages.Util.Common;
 
 namespace AppRunner.Pages.Menus;
 
-public class Menubar
+public class ClientMenuBar
 {
     public const int MenuHeight = 24;
 
@@ -13,19 +13,19 @@ public class Menubar
     private readonly Gradient _bgGradient = GetGradient(0.8, 0.8, 0.8, 1, 0.5, 0.5, 0.5, 1);
     public event EventHandler? NeedsInvalidation;
 
-    private struct MenuItem
+    private struct MenuItemButton
     {
         public Line Line { get; init; }
         public Rect Bounds { get; init; }
-        public Point Position { get; init; }
+        public Point TextPosition { get; init; }
     }
 
-    private readonly MenuItem[] _items;
+    private readonly MenuItemButton[] _items;
     private int _hoverIndex = -1;
     private readonly MenuWindow _menuWindow;
     private bool _menuIsVisible;
 
-    public Menubar(IWindowMethods windowMethods)
+    public ClientMenuBar(IWindowMethods windowMethods)
     {
         _windowMethods = windowMethods;
         _menuWindow = MenuWindow.Create();
@@ -49,7 +49,7 @@ public class Menubar
             bounds.Origin.Y = y;
             var textPosition = new Point(x, y + tBounds.Ascent);
 
-            var item = new MenuItem { Line = line, Bounds = bounds, Position = textPosition };
+            var item = new MenuItemButton { Line = line, Bounds = bounds, TextPosition = textPosition };
             x += bounds.Size.Width + 8;
 
             return item;
@@ -143,7 +143,7 @@ public class Menubar
         var i = 0;
         foreach (var item in _items)
         {
-            context.SetTextPosition(item.Position.X, item.Position.Y);
+            context.SetTextPosition(item.TextPosition.X, item.TextPosition.Y);
             if (i == _hoverIndex)
             {
                 context.SetRGBFillColor(0, 0.8, 1, 0.25);
