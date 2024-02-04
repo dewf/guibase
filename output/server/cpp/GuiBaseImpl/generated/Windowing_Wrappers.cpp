@@ -466,6 +466,11 @@ void Window_showRelativeTo__wrapper() {
     Window_showRelativeTo(_this, other, x, y, newWidth, newHeight);
 }
 
+void Window_hide__wrapper() {
+    auto _this = Window__pop();
+    Window_hide(_this);
+}
+
 void Window_destroy__wrapper() {
     auto _this = Window__pop();
     Window_destroy(_this);
@@ -737,6 +742,7 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "DropData_dispose", &DropData_dispose__wrapper);
     ni_registerModuleMethod(m, "Window_show", &Window_show__wrapper);
     ni_registerModuleMethod(m, "Window_showRelativeTo", &Window_showRelativeTo__wrapper);
+    ni_registerModuleMethod(m, "Window_hide", &Window_hide__wrapper);
     ni_registerModuleMethod(m, "Window_destroy", &Window_destroy__wrapper);
     ni_registerModuleMethod(m, "Window_setMenuBar", &Window_setMenuBar__wrapper);
     ni_registerModuleMethod(m, "Window_showContextMenu", &Window_showContextMenu__wrapper);

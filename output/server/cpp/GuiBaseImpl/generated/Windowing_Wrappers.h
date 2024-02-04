@@ -81,6 +81,8 @@ void Window_show__wrapper();
 
 void Window_showRelativeTo__wrapper();
 
+void Window_hide__wrapper();
+
 void Window_destroy__wrapper();
 
 void Window_setMenuBar__wrapper();

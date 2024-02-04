@@ -37,6 +37,18 @@ public class WindowEventStuff : BasePage
         _menuBar.OnMouseMove(x, y);
     }
 
+    public override void OnMouseDown(int x, int y, MouseButton button, Modifiers modifiers)
+    {
+        if (y < Menubar.MenuHeight)
+        {
+            _menuBar.OnMouseDown(x, y);
+        }
+        else
+        {
+            _menuBar.PublicHide();
+        }
+    }
+
     public override void Render(DrawContext context, RenderArea area)
     {
         using var font = Font.CreateWithName(Constants.TimesFontName, 32, new OptArgs());
