@@ -1,6 +1,6 @@
 ﻿using Org.Prefixed.GuiBase;
 
-namespace AppRunner.Pages.Menus;
+namespace AppRunner;
 
 public class BaseWindowDelegate : Windowing.ClientWindowDelegate
 {
@@ -48,6 +48,14 @@ public class BaseWindowDelegate : Windowing.ClientWindowDelegate
 
     public override void KeyDown(Windowing.Key key, Windowing.Modifiers modifiers, Windowing.KeyLocation location)
     {
+    }
+
+    public override void DragRender(Windowing.DragRenderPayload payload, string requestedFormatMIME)
+    {
+        if (requestedFormatMIME == Windowing.KDragFormatUTF8)
+        {
+            payload.RenderUTF8("forgot to override this :)");
+        }
     }
 
     public override Windowing.DropEffect DropFeedback(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect suggested)

@@ -38,6 +38,8 @@ public interface IPage
     Windowing.DropEffect DropFeedback(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect suggested);
     void DropLeave();
     void DropSubmit(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect effect);
+
+    void DragRender(Windowing.DragRenderPayload payload, string requestedFormat);
 }
 
 public abstract class BasePage(IWindowMethods windowMethods) : IPage
@@ -120,6 +122,10 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     }
 
     public virtual void DropSubmit(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect effect)
+    {
+    }
+
+    public virtual void DragRender(Windowing.DragRenderPayload payload, string requestedFormat)
     {
     }
 }

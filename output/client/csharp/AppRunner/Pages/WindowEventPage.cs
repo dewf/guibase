@@ -7,8 +7,10 @@ using static AppRunner.Pages.Util.Common;
 
 namespace AppRunner.Pages;
 
-public class WindowEventStuff : BasePage
+public class WindowEventPage : BasePage
 {
+    private readonly IWindowMethods _windowMethods;
+    
     private bool _dropInProgress;
     private bool _dropAllowed;
     private DropEffect _suggestedEffect;
@@ -16,6 +18,10 @@ public class WindowEventStuff : BasePage
     private string[]? _lastDroppedFiles;
 
     private readonly ClientMenuBar _menuBar;
+
+    private readonly Rect _dragSourceRect = MakeRect(100, 100, 200, 200);
+
+    private bool _mouseDownPotentialDrag;
     
     public override string PageTitle => "Windowing/Event testing";
     public override bool CanDrop => true;
@@ -26,8 +32,9 @@ public class WindowEventStuff : BasePage
         Invalidate(0, 0, Width, ClientMenuBar.MenuHeight);
     }
 
-    public WindowEventStuff(IWindowMethods windowMethods) : base(windowMethods)
+    public WindowEventPage(IWindowMethods windowMethods) : base(windowMethods)
     {
+        _windowMethods = windowMethods;
         _menuBar = new ClientMenuBar(windowMethods);
         _menuBar.NeedsInvalidation += OnMenuInvalidation;
     }
@@ -40,6 +47,16 @@ public class WindowEventStuff : BasePage
     public override void OnMouseMove(int x, int y, Modifiers modifiers)
     {
         _menuBar.OnMouseMove(x, y);
+        if (_mouseDownPotentialDrag)
+        {
+            // begin DnD drag
+            using var dragData = DragData.Create(_windowMethods.GetWindowHandle());
+            dragData.AddFormat(KDragFormatUTF8);
+            var dropEffect = dragData.Execute(DropEffect.Copy);
+            Console.WriteLine($"DnD Drop effect: {dropEffect} (source format: {KDragFormatUTF8})");
+            // cancel the potential, otherwise they will keep happening!
+            _mouseDownPotentialDrag = false;
+        }
     }
 
     public override void OnMouseDown(int x, int y, MouseButton button, Modifiers modifiers)
@@ -51,11 +68,13 @@ public class WindowEventStuff : BasePage
         else
         {
             _menuBar.PublicHide();
+            _mouseDownPotentialDrag = _dragSourceRect.ContainsPoint(new Point(x, y));
         }
     }
 
     public override void Render(DrawContext context, RenderArea area)
     {
+        using var smallFont = Font.CreateWithName(Constants.TimesFontName, 16, new OptArgs());
         using var font = Font.CreateWithName(Constants.TimesFontName, 32, new OptArgs());
         using var largeFont = Font.CreateWithName(Constants.FuturaFontName, 64, new OptArgs());
         using var orange = Color.CreateGenericRGB(1, 0.75, 0, 1);
@@ -75,6 +94,12 @@ public class WindowEventStuff : BasePage
         context.ClipToRect(menuRect);
         _menuBar.Render(context, Width);
         context.RestoreGState();
+        
+        // drag rect
+        context.SetStrokeColorWithColor(orange);
+        context.SetLineWidth(2);
+        context.StrokeRect(_dragSourceRect);
+        CenterText(context, _dragSourceRect, "Drag Source", new AttributedStringOptions { Font = smallFont, ForegroundColor = orange });
         
         // etc
         // TextLine(context, 20, 40, "DnD Testing", new AttributedStringOptions { Font = font, ForegroundColor = orange }, withGradient:false);
@@ -118,7 +143,7 @@ public class WindowEventStuff : BasePage
         // timer is animating / invalidating
         // Invalidate();
         
-        if (data.HasFormat(KDragFormatFiles))
+        if (data.HasFormat(KDragFormatFiles) || data.HasFormat(KDragFormatUTF8))
         {
             _dropAllowed = true;
             return DropEffect.Copy | DropEffect.Link | DropEffect.Move;
@@ -144,13 +169,25 @@ public class WindowEventStuff : BasePage
             {
                 Console.WriteLine($"file {filename} dropped!");
             }
+        } else if (data.HasFormat(KDragFormatUTF8))
+        {
+            var text = data.GetTextUTF8();
+            Console.WriteLine($"got text drop: [{text}]");
         }
         _dropInProgress = false;
         _dropAllowed = false;
         // timer no longer invalidating:
         Invalidate();
     }
-    
+
+    public override void DragRender(DragRenderPayload payload, string requestedFormat)
+    {
+        if (requestedFormat == KDragFormatUTF8)
+        {
+            payload.RenderUTF8("Hello from the Window Event Page!");
+        }
+    }
+
     public override void OnTimer(double secondsSinceLast)
     {
         // 1 complete cycle per second?

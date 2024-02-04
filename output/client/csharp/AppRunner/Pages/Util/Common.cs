@@ -188,8 +188,8 @@ public static class Common
         using var line = Line.CreateWithAttributedString(labelString);
         var typoBounds = line.GetTypographicBounds();
         var bounds = line.GetBoundsWithOptions(0);
-        var x = (centerInRect.Size.Width - bounds.Size.Width) / 2 + centerInRect.Origin.X;
-        var y = (centerInRect.Size.Height - bounds.Size.Height) / 2 + typoBounds.Ascent;
+        var x = centerInRect.Origin.X + (centerInRect.Size.Width - bounds.Size.Width) / 2;
+        var y = centerInRect.Origin.Y + (centerInRect.Size.Height - bounds.Size.Height) / 2 + typoBounds.Ascent;
         context.SetTextPosition(x, y);
         line.Draw(context);
     }

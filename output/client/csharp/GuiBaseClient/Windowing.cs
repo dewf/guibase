@@ -19,9 +19,18 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _runloop;
         private static ModuleMethodHandle _exitRunloop;
         private static ModuleMethodHandle _dropData_hasFormat;
-        private static ModuleMethodHandle _dropData_getFormat;
         private static ModuleMethodHandle _dropData_getFiles;
+        private static ModuleMethodHandle _dropData_getTextUTF8;
+        private static ModuleMethodHandle _dropData_getFormat;
         private static ModuleMethodHandle _DropData_dispose;
+        private static ModuleMethodHandle _dragData_addFormat;
+        private static ModuleMethodHandle _dragData_execute;
+        private static ModuleMethodHandle _dragData_create;
+        private static ModuleMethodHandle _DragData_dispose;
+        private static ModuleMethodHandle _dragRenderPayload_renderUTF8;
+        private static ModuleMethodHandle _dragRenderPayload_renderFiles;
+        private static ModuleMethodHandle _dragRenderPayload_renderFormat;
+        private static ModuleMethodHandle _DragRenderPayload_dispose;
         private static ModuleMethodHandle _window_show;
         private static ModuleMethodHandle _window_showRelativeTo;
         private static ModuleMethodHandle _window_hide;
@@ -63,6 +72,7 @@ namespace Org.Prefixed.GuiBase
         private static InterfaceMethodHandle _windowDelegate_moved;
         private static InterfaceMethodHandle _windowDelegate_resized;
         private static InterfaceMethodHandle _windowDelegate_keyDown;
+        private static InterfaceMethodHandle _windowDelegate_dragRender;
         private static InterfaceMethodHandle _windowDelegate_dropFeedback;
         private static InterfaceMethodHandle _windowDelegate_dropLeave;
         private static InterfaceMethodHandle _windowDelegate_dropSubmit;
@@ -318,6 +328,82 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Action(ptr) : null;
         }
 
+        [Flags]
+        public enum DropEffect
+        {
+            None = 0,
+            Copy = 1,
+            Move = 1 << 1,
+            Link = 1 << 2,
+            Other = 1 << 3
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void DropEffect__Push(DropEffect value)
+        {
+            NativeImplClient.PushUInt32((uint)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static DropEffect DropEffect__Pop()
+        {
+            var ret = NativeImplClient.PopUInt32();
+            return (DropEffect)ret;
+        }
+
+        public class DragData : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            protected bool _disposed;
+            internal DragData(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public virtual void Dispose()
+            {
+                if (!_disposed)
+                {
+                    DragData__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_DragData_dispose);
+                    _disposed = true;
+                }
+            }
+            public void AddFormat(string dragFormatMIME)
+            {
+                NativeImplClient.PushString(dragFormatMIME);
+                DragData__Push(this);
+                NativeImplClient.InvokeModuleMethod(_dragData_addFormat);
+            }
+            public DropEffect Execute(DropEffect canDoMask)
+            {
+                DropEffect__Push(canDoMask);
+                DragData__Push(this);
+                NativeImplClient.InvokeModuleMethod(_dragData_execute);
+                return DropEffect__Pop();
+            }
+            public static DragData Create(Window forWindow)
+            {
+                Window__Push(forWindow);
+                NativeImplClient.InvokeModuleMethod(_dragData_create);
+                return DragData__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void DragData__Push(DragData thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static DragData DragData__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new DragData(ptr) : null;
+        }
+
+        // built-in array type: string[]
+
         internal static void __Native_Byte_Buffer__Push(INativeBuffer<byte> buf, bool isReturn)
         {
             if (buf != null)
@@ -350,6 +436,57 @@ namespace Org.Prefixed.GuiBase
             }
         }
 
+        public class DragRenderPayload : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            protected bool _disposed;
+            internal DragRenderPayload(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public virtual void Dispose()
+            {
+                if (!_disposed)
+                {
+                    DragRenderPayload__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_DragRenderPayload_dispose);
+                    _disposed = true;
+                }
+            }
+            public void RenderUTF8(string text)
+            {
+                NativeImplClient.PushString(text);
+                DragRenderPayload__Push(this);
+                NativeImplClient.InvokeModuleMethod(_dragRenderPayload_renderUTF8);
+            }
+            public void RenderFiles(string[] filenames)
+            {
+                NativeImplClient.PushStringArray(filenames);
+                DragRenderPayload__Push(this);
+                NativeImplClient.InvokeModuleMethod(_dragRenderPayload_renderFiles);
+            }
+            public void RenderFormat(string formatMIME, INativeBuffer<byte> data)
+            {
+                __Native_Byte_Buffer__Push(data, false);
+                NativeImplClient.PushString(formatMIME);
+                DragRenderPayload__Push(this);
+                NativeImplClient.InvokeModuleMethod(_dragRenderPayload_renderFormat);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void DragRenderPayload__Push(DragRenderPayload thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static DragRenderPayload DragRenderPayload__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new DragRenderPayload(ptr) : null;
+        }
+
         public class DropDataBadFormat : Exception
         {
             public readonly string Format;
@@ -368,8 +505,6 @@ namespace Org.Prefixed.GuiBase
                 throw new DropDataBadFormat(format);
             }
         }
-
-        // built-in array type: string[]
 
         public class DropData : IDisposable
         {
@@ -395,6 +530,18 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.InvokeModuleMethod(_dropData_hasFormat);
                 return NativeImplClient.PopBool();
             }
+            public string[] GetFiles() // throws DropDataBadFormat
+            {
+                DropData__Push(this);
+                NativeImplClient.InvokeModuleMethodWithExceptions(_dropData_getFiles);
+                return NativeImplClient.PopStringArray();
+            }
+            public string GetTextUTF8() // throws DropDataBadFormat
+            {
+                DropData__Push(this);
+                NativeImplClient.InvokeModuleMethodWithExceptions(_dropData_getTextUTF8);
+                return NativeImplClient.PopString();
+            }
             public INativeBuffer<byte> GetFormat(string mimeFormat) // throws DropDataBadFormat
             {
                 NativeImplClient.PushString(mimeFormat);
@@ -403,12 +550,6 @@ namespace Org.Prefixed.GuiBase
                 var __ret = __Native_Byte_Buffer__Pop();
                 NativeImplClient.ServerClearSafetyArea();
                 return __ret;
-            }
-            public string[] GetFiles() // throws DropDataBadFormat
-            {
-                DropData__Push(this);
-                NativeImplClient.InvokeModuleMethodWithExceptions(_dropData_getFiles);
-                return NativeImplClient.PopStringArray();
             }
         }
 
@@ -423,29 +564,6 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new DropData(ptr) : null;
-        }
-
-        [Flags]
-        public enum DropEffect
-        {
-            None = 0,
-            Copy = 1,
-            Move = 1 << 1,
-            Link = 1 << 2,
-            Other = 1 << 3
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void DropEffect__Push(DropEffect value)
-        {
-            NativeImplClient.PushUInt32((uint)value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static DropEffect DropEffect__Pop()
-        {
-            var ret = NativeImplClient.PopUInt32();
-            return (DropEffect)ret;
         }
 
         public class Icon : IDisposable
@@ -1055,6 +1173,7 @@ namespace Org.Prefixed.GuiBase
             void Moved(int x, int y);
             void Resized(int width, int height);
             void KeyDown(Key key, Modifiers modifiers, KeyLocation location);
+            void DragRender(DragRenderPayload payload, string requestedFormatMIME);
             DropEffect DropFeedback(DropData data, int x, int y, Modifiers modifiers, DropEffect suggested);
             void DropLeave();
             void DropSubmit(DropData data, int x, int y, Modifiers modifiers, DropEffect effect);
@@ -1110,6 +1229,7 @@ namespace Org.Prefixed.GuiBase
             public abstract void Moved(int x, int y);
             public abstract void Resized(int width, int height);
             public abstract void KeyDown(Key key, Modifiers modifiers, KeyLocation location);
+            public abstract void DragRender(DragRenderPayload payload, string requestedFormatMIME);
             public abstract DropEffect DropFeedback(DropData data, int x, int y, Modifiers modifiers, DropEffect suggested);
             public abstract void DropLeave();
             public abstract void DropSubmit(DropData data, int x, int y, Modifiers modifiers, DropEffect effect);
@@ -1209,6 +1329,13 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.InvokeInterfaceMethod(_windowDelegate_keyDown, Id);
             }
 
+            public void DragRender(DragRenderPayload payload, string requestedFormatMIME)
+            {
+                NativeImplClient.PushString(requestedFormatMIME);
+                DragRenderPayload__Push(payload);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_dragRender, Id);
+            }
+
             public DropEffect DropFeedback(DropData data, int x, int y, Modifiers modifiers, DropEffect suggested)
             {
                 DropEffect__Push(suggested);
@@ -1275,9 +1402,18 @@ namespace Org.Prefixed.GuiBase
             _exitRunloop = NativeImplClient.GetModuleMethod(_module, "exitRunloop");
 
             _dropData_hasFormat = NativeImplClient.GetModuleMethod(_module, "DropData_hasFormat");
-            _dropData_getFormat = NativeImplClient.GetModuleMethod(_module, "DropData_getFormat");
             _dropData_getFiles = NativeImplClient.GetModuleMethod(_module, "DropData_getFiles");
+            _dropData_getTextUTF8 = NativeImplClient.GetModuleMethod(_module, "DropData_getTextUTF8");
+            _dropData_getFormat = NativeImplClient.GetModuleMethod(_module, "DropData_getFormat");
             _DropData_dispose = NativeImplClient.GetModuleMethod(_module, "DropData_dispose");
+            _dragData_addFormat = NativeImplClient.GetModuleMethod(_module, "DragData_addFormat");
+            _dragData_execute = NativeImplClient.GetModuleMethod(_module, "DragData_execute");
+            _dragData_create = NativeImplClient.GetModuleMethod(_module, "DragData_create");
+            _DragData_dispose = NativeImplClient.GetModuleMethod(_module, "DragData_dispose");
+            _dragRenderPayload_renderUTF8 = NativeImplClient.GetModuleMethod(_module, "DragRenderPayload_renderUTF8");
+            _dragRenderPayload_renderFiles = NativeImplClient.GetModuleMethod(_module, "DragRenderPayload_renderFiles");
+            _dragRenderPayload_renderFormat = NativeImplClient.GetModuleMethod(_module, "DragRenderPayload_renderFormat");
+            _DragRenderPayload_dispose = NativeImplClient.GetModuleMethod(_module, "DragRenderPayload_dispose");
             _window_show = NativeImplClient.GetModuleMethod(_module, "Window_show");
             _window_showRelativeTo = NativeImplClient.GetModuleMethod(_module, "Window_showRelativeTo");
             _window_hide = NativeImplClient.GetModuleMethod(_module, "Window_hide");
@@ -1323,6 +1459,7 @@ namespace Org.Prefixed.GuiBase
             _windowDelegate_moved = NativeImplClient.GetInterfaceMethod(_windowDelegate, "moved");
             _windowDelegate_resized = NativeImplClient.GetInterfaceMethod(_windowDelegate, "resized");
             _windowDelegate_keyDown = NativeImplClient.GetInterfaceMethod(_windowDelegate, "keyDown");
+            _windowDelegate_dragRender = NativeImplClient.GetInterfaceMethod(_windowDelegate, "dragRender");
             _windowDelegate_dropFeedback = NativeImplClient.GetInterfaceMethod(_windowDelegate, "dropFeedback");
             _windowDelegate_dropLeave = NativeImplClient.GetInterfaceMethod(_windowDelegate, "dropLeave");
             _windowDelegate_dropSubmit = NativeImplClient.GetInterfaceMethod(_windowDelegate, "dropSubmit");
@@ -1424,6 +1561,14 @@ namespace Org.Prefixed.GuiBase
                 var modifiers = Modifiers__Pop();
                 var location = KeyLocation__Pop();
                 inst.KeyDown(key, modifiers, location);
+            });
+
+            NativeImplClient.SetClientMethodWrapper(_windowDelegate_dragRender, delegate(ClientObject obj)
+            {
+                var inst = (ClientWindowDelegate) obj;
+                var payload = DragRenderPayload__Pop();
+                var requestedFormatMIME = NativeImplClient.PopString();
+                inst.DragRender(payload, requestedFormatMIME);
             });
 
             NativeImplClient.SetClientMethodWrapper(_windowDelegate_dropFeedback, delegate(ClientObject obj)

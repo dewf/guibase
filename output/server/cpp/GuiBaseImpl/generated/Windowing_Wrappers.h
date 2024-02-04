@@ -14,17 +14,23 @@ std::function<MenuActionFunc> MenuActionFunc__pop();
 void Action__push(Action value);
 Action Action__pop();
 
+void DropEffect__push(uint32_t value);
+uint32_t DropEffect__pop();
+
+void DragData__push(DragData value);
+DragData DragData__pop();
+
 inline void __Native_UInt8_Buffer__push(std::shared_ptr<NativeBuffer<uint8_t>> buf, bool isReturn);
 std::shared_ptr<NativeBuffer<uint8_t>> __Native_UInt8_Buffer__pop();
+
+void DragRenderPayload__push(DragRenderPayload value);
+DragRenderPayload DragRenderPayload__pop();
 
 void DropDataBadFormat__push(DropDataBadFormat e);
 void DropDataBadFormat__buildAndThrow();
 
 void DropData__push(DropData value);
 DropData DropData__pop();
-
-void DropEffect__push(uint32_t value);
-uint32_t DropEffect__pop();
 
 void Icon__push(Icon value);
 Icon Icon__pop();
@@ -71,11 +77,29 @@ void exitRunloop__wrapper();
 
 void DropData_hasFormat__wrapper();
 
-void DropData_getFormat__wrapper();
-
 void DropData_getFiles__wrapper();
 
+void DropData_getTextUTF8__wrapper();
+
+void DropData_getFormat__wrapper();
+
 void DropData_dispose__wrapper();
+
+void DragData_addFormat__wrapper();
+
+void DragData_execute__wrapper();
+
+void DragData_create__wrapper();
+
+void DragData_dispose__wrapper();
+
+void DragRenderPayload_renderUTF8__wrapper();
+
+void DragRenderPayload_renderFiles__wrapper();
+
+void DragRenderPayload_renderFormat__wrapper();
+
+void DragRenderPayload_dispose__wrapper();
 
 void Window_show__wrapper();
 
@@ -156,6 +180,8 @@ void WindowDelegate_moved__wrapper(int serverID);
 void WindowDelegate_resized__wrapper(int serverID);
 
 void WindowDelegate_keyDown__wrapper(int serverID);
+
+void WindowDelegate_dragRender__wrapper(int serverID);
 
 void WindowDelegate_dropFeedback__wrapper(int serverID);
 

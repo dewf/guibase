@@ -301,11 +301,74 @@ std::vector<std::string> DropData_getFiles(DropData _this)
     }
 }
 
+std::string DropData_getTextUTF8(DropData _this)
+{
+    const void* data;
+    size_t dataSize;
+    if (wl_DropGetFormat((wl_DropDataRef)_this, wl_kDragFormatUTF8, &data, &dataSize)) {
+        return std::string((const char *)data, dataSize); // pretty sure it's null-terminated but let's be safe anyway
+        // we don't own or have to worry about 'data' ptr
+    }
+    else {
+        throw DropDataBadFormat("DropData_getUTF8 failed");
+    }
+}
+
 void DropData_dispose(DropData _this)
 {
     // not necessary, it's taken care of by OpenWL
     // however we'll have a separate ClipData that will inherit, and WILL have a release because that is client responsibility
     printf("!!! DropData_dispose called, why?\n");
+}
+
+void DragData_addFormat(DragData _this, std::string dragFormatMIME)
+{
+    wl_DragAddFormat((wl_DragDataRef)_this, dragFormatMIME.c_str());
+}
+
+uint32_t DragData_execute(DragData _this, uint32_t canDoMask)
+{
+    return wl_DragExec((wl_DragDataRef)_this, canDoMask, nullptr); // I think 'fromEvent' was only necessary for GTK/linux ...
+}
+
+DragData DragData_create(Window forWindow)
+{
+    return (DragData)wl_DragDataCreate((wl_WindowRef)forWindow);
+}
+
+void DragData_dispose(DragData _this)
+{
+    auto x = (wl_DragDataRef)_this; // a silly layer of indirection, because DragDataRelease nullifies the pointer as well ... not that we care about the incoming parameter per se, but could preclude some weird future bugs
+    wl_DragDataRelease(&x);
+}
+
+void DragRenderPayload_renderUTF8(DragRenderPayload _this, std::string text)
+{
+    wl_DragRenderUTF8((wl_RenderPayloadRef)_this, text.c_str());
+}
+
+void DragRenderPayload_renderFiles(DragRenderPayload _this, std::vector<std::string> filenames)
+{
+    wl_Files files;
+    files.numFiles = (int) filenames.size();
+    files.filenames = new const char*[files.numFiles];
+    for (auto i = 0; i < files.numFiles; i++) {
+        files.filenames[i] = filenames[i].c_str();
+    }
+    wl_DragRenderFiles((wl_RenderPayloadRef)_this, &files);
+    delete[] files.filenames;
+}
+
+void DragRenderPayload_renderFormat(DragRenderPayload _this, std::string formatMIME, std::shared_ptr<NativeBuffer<uint8_t>> data)
+{
+    size_t dataLength;
+    void* dataPtr = data->getSpan(&dataLength);
+    wl_DragRenderFormat((wl_RenderPayloadRef)_this, formatMIME.c_str(), dataPtr, dataLength);
+}
+
+void DragRenderPayload_dispose(DragRenderPayload _this)
+{
+    // we don't own these, do nothing
 }
 
 void Window_show(Window _this) {

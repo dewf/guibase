@@ -16,6 +16,7 @@ ni_InterfaceMethodRef windowDelegate_repaint;
 ni_InterfaceMethodRef windowDelegate_moved;
 ni_InterfaceMethodRef windowDelegate_resized;
 ni_InterfaceMethodRef windowDelegate_keyDown;
+ni_InterfaceMethodRef windowDelegate_dragRender;
 ni_InterfaceMethodRef windowDelegate_dropFeedback;
 ni_InterfaceMethodRef windowDelegate_dropLeave;
 ni_InterfaceMethodRef windowDelegate_dropSubmit;
@@ -76,6 +77,24 @@ Action Action__pop() {
     return (Action)ni_popPtr();
 }
 
+inline void DropEffect__push(uint32_t value) {
+    ni_pushUInt32(value);
+}
+
+inline uint32_t DropEffect__pop() {
+    return ni_popUInt32();
+}
+
+void DragData__push(DragData value) {
+    ni_pushPtr(value);
+}
+
+DragData DragData__pop() {
+    return (DragData)ni_popPtr();
+}
+
+// built-in array type: std::vector<std::string>
+
 inline void __Native_UInt8_Buffer__push(std::shared_ptr<NativeBuffer<uint8_t>> buf, bool isReturn) {
     if (buf != nullptr) {
         auto pushable = std::dynamic_pointer_cast<Pushable>(buf);
@@ -105,6 +124,14 @@ std::shared_ptr<NativeBuffer<uint8_t>> __Native_UInt8_Buffer__pop() {
     }
 }
 
+void DragRenderPayload__push(DragRenderPayload value) {
+    ni_pushPtr(value);
+}
+
+DragRenderPayload DragRenderPayload__pop() {
+    return (DragRenderPayload)ni_popPtr();
+}
+
 
 void DropDataBadFormat__push(DropDataBadFormat e) {
     pushStringInternal(e.format);
@@ -115,22 +142,12 @@ void DropDataBadFormat__buildAndThrow() {
     throw DropDataBadFormat(format);
 }
 
-// built-in array type: std::vector<std::string>
-
 void DropData__push(DropData value) {
     ni_pushPtr(value);
 }
 
 DropData DropData__pop() {
     return (DropData)ni_popPtr();
-}
-
-inline void DropEffect__push(uint32_t value) {
-    ni_pushUInt32(value);
-}
-
-inline uint32_t DropEffect__pop() {
-    return ni_popUInt32();
 }
 
 void Icon__push(Icon value) {
@@ -359,6 +376,11 @@ public:
         Key__push(key);
         invokeMethod(windowDelegate_keyDown);
     }
+    void dragRender(DragRenderPayload payload, std::string requestedFormatMIME) override {
+        pushStringInternal(requestedFormatMIME);
+        DragRenderPayload__push(payload);
+        invokeMethod(windowDelegate_dragRender);
+    }
     uint32_t dropFeedback(DropData data, int32_t x, int32_t y, uint32_t modifiers, uint32_t suggested) override {
         DropEffect__push(suggested);
         Modifiers__push(modifiers);
@@ -429,6 +451,28 @@ void DropData_hasFormat__wrapper() {
     ni_pushBool(DropData_hasFormat(_this, mimeFormat));
 }
 
+void DropData_getFiles__wrapper() {
+    auto _this = DropData__pop();
+    try {
+        pushStringArrayInternal(DropData_getFiles(_this));
+    }
+    catch (const DropDataBadFormat& e) {
+        ni_setException(dropDataBadFormat);
+        DropDataBadFormat__push(e);
+    }
+}
+
+void DropData_getTextUTF8__wrapper() {
+    auto _this = DropData__pop();
+    try {
+        pushStringInternal(DropData_getTextUTF8(_this));
+    }
+    catch (const DropDataBadFormat& e) {
+        ni_setException(dropDataBadFormat);
+        DropDataBadFormat__push(e);
+    }
+}
+
 void DropData_getFormat__wrapper() {
     auto _this = DropData__pop();
     auto mimeFormat = popStringInternal();
@@ -441,20 +485,55 @@ void DropData_getFormat__wrapper() {
     }
 }
 
-void DropData_getFiles__wrapper() {
-    auto _this = DropData__pop();
-    try {
-        pushStringArrayInternal(DropData_getFiles(_this));
-    }
-    catch (const DropDataBadFormat& e) {
-        ni_setException(dropDataBadFormat);
-        DropDataBadFormat__push(e);
-    }
-}
-
 void DropData_dispose__wrapper() {
     auto _this = DropData__pop();
     DropData_dispose(_this);
+}
+
+void DragData_addFormat__wrapper() {
+    auto _this = DragData__pop();
+    auto dragFormatMIME = popStringInternal();
+    DragData_addFormat(_this, dragFormatMIME);
+}
+
+void DragData_execute__wrapper() {
+    auto _this = DragData__pop();
+    auto canDoMask = DropEffect__pop();
+    DropEffect__push(DragData_execute(_this, canDoMask));
+}
+
+void DragData_create__wrapper() {
+    auto forWindow = Window__pop();
+    DragData__push(DragData_create(forWindow));
+}
+
+void DragData_dispose__wrapper() {
+    auto _this = DragData__pop();
+    DragData_dispose(_this);
+}
+
+void DragRenderPayload_renderUTF8__wrapper() {
+    auto _this = DragRenderPayload__pop();
+    auto text = popStringInternal();
+    DragRenderPayload_renderUTF8(_this, text);
+}
+
+void DragRenderPayload_renderFiles__wrapper() {
+    auto _this = DragRenderPayload__pop();
+    auto filenames = popStringArrayInternal();
+    DragRenderPayload_renderFiles(_this, filenames);
+}
+
+void DragRenderPayload_renderFormat__wrapper() {
+    auto _this = DragRenderPayload__pop();
+    auto formatMIME = popStringInternal();
+    auto data = __Native_UInt8_Buffer__pop();
+    DragRenderPayload_renderFormat(_this, formatMIME, data);
+}
+
+void DragRenderPayload_dispose__wrapper() {
+    auto _this = DragRenderPayload__pop();
+    DragRenderPayload_dispose(_this);
 }
 
 void Window_show__wrapper() {
@@ -712,6 +791,13 @@ void WindowDelegate_keyDown__wrapper(int serverID) {
     inst->keyDown(key, modifiers, location);
 }
 
+void WindowDelegate_dragRender__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
+    auto payload = DragRenderPayload__pop();
+    auto requestedFormatMIME = popStringInternal();
+    inst->dragRender(payload, requestedFormatMIME);
+}
+
 void WindowDelegate_dropFeedback__wrapper(int serverID) {
     auto inst = ServerWindowDelegate::getByID(serverID);
     auto data = DropData__pop();
@@ -750,9 +836,18 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "runloop", &runloop__wrapper);
     ni_registerModuleMethod(m, "exitRunloop", &exitRunloop__wrapper);
     ni_registerModuleMethod(m, "DropData_hasFormat", &DropData_hasFormat__wrapper);
-    ni_registerModuleMethod(m, "DropData_getFormat", &DropData_getFormat__wrapper);
     ni_registerModuleMethod(m, "DropData_getFiles", &DropData_getFiles__wrapper);
+    ni_registerModuleMethod(m, "DropData_getTextUTF8", &DropData_getTextUTF8__wrapper);
+    ni_registerModuleMethod(m, "DropData_getFormat", &DropData_getFormat__wrapper);
     ni_registerModuleMethod(m, "DropData_dispose", &DropData_dispose__wrapper);
+    ni_registerModuleMethod(m, "DragData_addFormat", &DragData_addFormat__wrapper);
+    ni_registerModuleMethod(m, "DragData_execute", &DragData_execute__wrapper);
+    ni_registerModuleMethod(m, "DragData_create", &DragData_create__wrapper);
+    ni_registerModuleMethod(m, "DragData_dispose", &DragData_dispose__wrapper);
+    ni_registerModuleMethod(m, "DragRenderPayload_renderUTF8", &DragRenderPayload_renderUTF8__wrapper);
+    ni_registerModuleMethod(m, "DragRenderPayload_renderFiles", &DragRenderPayload_renderFiles__wrapper);
+    ni_registerModuleMethod(m, "DragRenderPayload_renderFormat", &DragRenderPayload_renderFormat__wrapper);
+    ni_registerModuleMethod(m, "DragRenderPayload_dispose", &DragRenderPayload_dispose__wrapper);
     ni_registerModuleMethod(m, "Window_show", &Window_show__wrapper);
     ni_registerModuleMethod(m, "Window_showRelativeTo", &Window_showRelativeTo__wrapper);
     ni_registerModuleMethod(m, "Window_hide", &Window_hide__wrapper);
@@ -794,6 +889,7 @@ int Windowing__register() {
     windowDelegate_moved = ni_registerInterfaceMethod(windowDelegate, "moved", &WindowDelegate_moved__wrapper);
     windowDelegate_resized = ni_registerInterfaceMethod(windowDelegate, "resized", &WindowDelegate_resized__wrapper);
     windowDelegate_keyDown = ni_registerInterfaceMethod(windowDelegate, "keyDown", &WindowDelegate_keyDown__wrapper);
+    windowDelegate_dragRender = ni_registerInterfaceMethod(windowDelegate, "dragRender", &WindowDelegate_dragRender__wrapper);
     windowDelegate_dropFeedback = ni_registerInterfaceMethod(windowDelegate, "dropFeedback", &WindowDelegate_dropFeedback__wrapper);
     windowDelegate_dropLeave = ni_registerInterfaceMethod(windowDelegate, "dropLeave", &WindowDelegate_dropLeave__wrapper);
     windowDelegate_dropSubmit = ni_registerInterfaceMethod(windowDelegate, "dropSubmit", &WindowDelegate_dropSubmit__wrapper);
