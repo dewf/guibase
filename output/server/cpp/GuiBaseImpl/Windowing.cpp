@@ -110,6 +110,9 @@ public:
         del->repaint((DrawContext)context, paintEvent.x, paintEvent.y, paintEvent.width, paintEvent.height);
         dl_CGContextRelease(context);
     }
+    void onMoved(wl_MoveEvent& moveEvent) {
+        del->moved(moveEvent.x, moveEvent.y);
+    }
     void onResized(wl_ResizeEvent& resizeEvent) {
         del->resized(resizeEvent.newWidth, resizeEvent.newHeight);
     }
@@ -204,6 +207,9 @@ CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* user
             break;
         case wl_kEventTypeD2DTargetRecreated:
             dl_D2DTargetRecreated(event->d2dTargetRecreatedEvent.newTarget, event->d2dTargetRecreatedEvent.oldTarget);
+            break;
+        case wl_kEventTypeWindowMoved:
+            win->onMoved(event->moveEvent);
             break;
         case wl_kEventTypeWindowResized:
             win->onResized(event->resizeEvent);

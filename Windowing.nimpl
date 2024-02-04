@@ -73,6 +73,7 @@ interface WindowDelegate {
    void mouseEnter(int x, int y, Modifiers modifiers);
    void mouseLeave(Modifiers modifiers);
    void repaint(DrawContext context, int x, int y, int width, int height);
+   void moved(int x, int y);
    void resized(int width, int height);
    void keyDown(Key key, Modifiers modifiers, KeyLocation location);
 

@@ -25,6 +25,7 @@ public interface IPage
     Windowing.MenuBar? MenuBar { get; }
     void Render(Drawing.DrawContext context, RenderArea area);
     void Render2(Drawing.DrawContext context, RenderArea area);
+    void OnHostWindowMoved();
     void OnSize(int newWidth, int newHeight);
     void OnTimer(double secondsSinceLast);
     void OnMouseMove(int x, int y, Windowing.Modifiers modifiers);
@@ -92,6 +93,11 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     public virtual void Render2(Drawing.DrawContext context, RenderArea area)
     {
         Render(context, area);
+    }
+
+    public virtual void OnHostWindowMoved()
+    {
+        // useful for re-showing menus or hiding them or whatever
     }
 
     public virtual void OnSize(int newWidth, int newHeight)

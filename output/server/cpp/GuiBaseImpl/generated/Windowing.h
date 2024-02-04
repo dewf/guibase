@@ -296,6 +296,7 @@ public:
     virtual void mouseEnter(int32_t x, int32_t y, uint32_t modifiers) = 0;
     virtual void mouseLeave(uint32_t modifiers) = 0;
     virtual void repaint(DrawContext context, int32_t x, int32_t y, int32_t width, int32_t height) = 0;
+    virtual void moved(int32_t x, int32_t y) = 0;
     virtual void resized(int32_t width, int32_t height) = 0;
     virtual void keyDown(Key key, uint32_t modifiers, KeyLocation location) = 0;
     virtual uint32_t dropFeedback(DropData data, int32_t x, int32_t y, uint32_t modifiers, uint32_t suggested) = 0;

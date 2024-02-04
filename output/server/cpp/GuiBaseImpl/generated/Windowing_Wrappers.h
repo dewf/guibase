@@ -151,6 +151,8 @@ void WindowDelegate_mouseLeave__wrapper(int serverID);
 
 void WindowDelegate_repaint__wrapper(int serverID);
 
+void WindowDelegate_moved__wrapper(int serverID);
+
 void WindowDelegate_resized__wrapper(int serverID);
 
 void WindowDelegate_keyDown__wrapper(int serverID);

@@ -32,6 +32,11 @@ public class WindowEventStuff : BasePage
         _menuBar.NeedsInvalidation += OnMenuInvalidation;
     }
 
+    public override void OnHostWindowMoved()
+    {
+        _menuBar.HostWindowMoved();
+    }
+
     public override void OnMouseMove(int x, int y, Modifiers modifiers)
     {
         _menuBar.OnMouseMove(x, y);
@@ -61,7 +66,7 @@ public class WindowEventStuff : BasePage
         var totalRect = MakeRect(0, 0, Width, Height);
 
         // background
-        context.SetFillColorWithColor(black);
+        context.SetRGBFillColor(0, 0.3, 0.4, 1);
         context.FillRect(totalRect);
         
         // menu

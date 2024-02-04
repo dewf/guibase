@@ -38,6 +38,10 @@ public class BaseWindowDelegate : Windowing.ClientWindowDelegate
     {
     }
 
+    public override void Moved(int x, int y)
+    {
+    }
+
     public override void Resized(int width, int height)
     {
     }

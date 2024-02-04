@@ -27,6 +27,15 @@ public class MenuWindow : BaseWindowDelegate
     {
         context.SetRGBFillColor(0.5, 0.5, 0.5, 1);
         context.FillRect(MakeRect(0, 0, 200, 500));
+        
+        context.SetRGBStrokeColor(0, 0, 0, 1);
+        context.SetLineWidth(1);
+        // context.StrokeRect(MakeRect(0, 0, 200, 500).Inset(0.5));
+        context.MoveToPoint(0.5, 0);
+        context.AddLineToPoint(0.5, 500-0.5);
+        context.AddLineToPoint(200-0.5, 500-0.5);
+        context.AddLineToPoint(200-0.5, 0);
+        context.StrokePath();
     }
     
     public void Hide()

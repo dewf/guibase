@@ -56,6 +56,14 @@ public class Menubar
         }).ToArray();
     }
 
+    public void HostWindowMoved()
+    {
+        if (_menuIsVisible)
+        {
+            HideMenu();
+        }
+    }
+
     private int IndexAtPoint(int x, int y)
     {
         var p = new Point(x, y);
@@ -148,12 +156,12 @@ public class Menubar
             i++;
         }
         
-        // context.SetLineWidth(1);
-        // context.MoveToPoint(0, MenuHeight - 0.5);
-        // context.AddLineToPoint(width, MenuHeight - 0.5);
-        // context.SetRGBStrokeColor(1, 0.7, 0, 0.7);
-        // context.StrokePath();
-        //
+        context.SetLineWidth(1);
+        context.MoveToPoint(0, MenuHeight - 0.5);
+        context.AddLineToPoint(width, MenuHeight - 0.5);
+        context.SetRGBStrokeColor(0, 0, 0, 1);
+        context.StrokePath();
+        
         context.RestoreGState();
     }
 }

@@ -60,6 +60,7 @@ namespace Org.Prefixed.GuiBase
         private static InterfaceMethodHandle _windowDelegate_mouseEnter;
         private static InterfaceMethodHandle _windowDelegate_mouseLeave;
         private static InterfaceMethodHandle _windowDelegate_repaint;
+        private static InterfaceMethodHandle _windowDelegate_moved;
         private static InterfaceMethodHandle _windowDelegate_resized;
         private static InterfaceMethodHandle _windowDelegate_keyDown;
         private static InterfaceMethodHandle _windowDelegate_dropFeedback;
@@ -1051,6 +1052,7 @@ namespace Org.Prefixed.GuiBase
             void MouseEnter(int x, int y, Modifiers modifiers);
             void MouseLeave(Modifiers modifiers);
             void Repaint(DrawContext context, int x, int y, int width, int height);
+            void Moved(int x, int y);
             void Resized(int width, int height);
             void KeyDown(Key key, Modifiers modifiers, KeyLocation location);
             DropEffect DropFeedback(DropData data, int x, int y, Modifiers modifiers, DropEffect suggested);
@@ -1105,6 +1107,7 @@ namespace Org.Prefixed.GuiBase
             public abstract void MouseEnter(int x, int y, Modifiers modifiers);
             public abstract void MouseLeave(Modifiers modifiers);
             public abstract void Repaint(DrawContext context, int x, int y, int width, int height);
+            public abstract void Moved(int x, int y);
             public abstract void Resized(int width, int height);
             public abstract void KeyDown(Key key, Modifiers modifiers, KeyLocation location);
             public abstract DropEffect DropFeedback(DropData data, int x, int y, Modifiers modifiers, DropEffect suggested);
@@ -1182,6 +1185,13 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.PushInt32(x);
                 DrawContext__Push(context);
                 NativeImplClient.InvokeInterfaceMethod(_windowDelegate_repaint, Id);
+            }
+
+            public void Moved(int x, int y)
+            {
+                NativeImplClient.PushInt32(y);
+                NativeImplClient.PushInt32(x);
+                NativeImplClient.InvokeInterfaceMethod(_windowDelegate_moved, Id);
             }
 
             public void Resized(int width, int height)
@@ -1310,6 +1320,7 @@ namespace Org.Prefixed.GuiBase
             _windowDelegate_mouseEnter = NativeImplClient.GetInterfaceMethod(_windowDelegate, "mouseEnter");
             _windowDelegate_mouseLeave = NativeImplClient.GetInterfaceMethod(_windowDelegate, "mouseLeave");
             _windowDelegate_repaint = NativeImplClient.GetInterfaceMethod(_windowDelegate, "repaint");
+            _windowDelegate_moved = NativeImplClient.GetInterfaceMethod(_windowDelegate, "moved");
             _windowDelegate_resized = NativeImplClient.GetInterfaceMethod(_windowDelegate, "resized");
             _windowDelegate_keyDown = NativeImplClient.GetInterfaceMethod(_windowDelegate, "keyDown");
             _windowDelegate_dropFeedback = NativeImplClient.GetInterfaceMethod(_windowDelegate, "dropFeedback");
@@ -1388,6 +1399,14 @@ namespace Org.Prefixed.GuiBase
                 var width = NativeImplClient.PopInt32();
                 var height = NativeImplClient.PopInt32();
                 inst.Repaint(context, x, y, width, height);
+            });
+
+            NativeImplClient.SetClientMethodWrapper(_windowDelegate_moved, delegate(ClientObject obj)
+            {
+                var inst = (ClientWindowDelegate) obj;
+                var x = NativeImplClient.PopInt32();
+                var y = NativeImplClient.PopInt32();
+                inst.Moved(x, y);
             });
 
             NativeImplClient.SetClientMethodWrapper(_windowDelegate_resized, delegate(ClientObject obj)

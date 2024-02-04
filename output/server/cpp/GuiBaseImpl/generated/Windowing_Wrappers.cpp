@@ -13,6 +13,7 @@ ni_InterfaceMethodRef windowDelegate_mouseMove;
 ni_InterfaceMethodRef windowDelegate_mouseEnter;
 ni_InterfaceMethodRef windowDelegate_mouseLeave;
 ni_InterfaceMethodRef windowDelegate_repaint;
+ni_InterfaceMethodRef windowDelegate_moved;
 ni_InterfaceMethodRef windowDelegate_resized;
 ni_InterfaceMethodRef windowDelegate_keyDown;
 ni_InterfaceMethodRef windowDelegate_dropFeedback;
@@ -341,6 +342,11 @@ public:
         ni_pushInt32(x);
         DrawContext__push(context);
         invokeMethod(windowDelegate_repaint);
+    }
+    void moved(int32_t x, int32_t y) override {
+        ni_pushInt32(y);
+        ni_pushInt32(x);
+        invokeMethod(windowDelegate_moved);
     }
     void resized(int32_t width, int32_t height) override {
         ni_pushInt32(height);
@@ -684,6 +690,13 @@ void WindowDelegate_repaint__wrapper(int serverID) {
     inst->repaint(context, x, y, width, height);
 }
 
+void WindowDelegate_moved__wrapper(int serverID) {
+    auto inst = ServerWindowDelegate::getByID(serverID);
+    auto x = ni_popInt32();
+    auto y = ni_popInt32();
+    inst->moved(x, y);
+}
+
 void WindowDelegate_resized__wrapper(int serverID) {
     auto inst = ServerWindowDelegate::getByID(serverID);
     auto width = ni_popInt32();
@@ -778,6 +791,7 @@ int Windowing__register() {
     windowDelegate_mouseEnter = ni_registerInterfaceMethod(windowDelegate, "mouseEnter", &WindowDelegate_mouseEnter__wrapper);
     windowDelegate_mouseLeave = ni_registerInterfaceMethod(windowDelegate, "mouseLeave", &WindowDelegate_mouseLeave__wrapper);
     windowDelegate_repaint = ni_registerInterfaceMethod(windowDelegate, "repaint", &WindowDelegate_repaint__wrapper);
+    windowDelegate_moved = ni_registerInterfaceMethod(windowDelegate, "moved", &WindowDelegate_moved__wrapper);
     windowDelegate_resized = ni_registerInterfaceMethod(windowDelegate, "resized", &WindowDelegate_resized__wrapper);
     windowDelegate_keyDown = ni_registerInterfaceMethod(windowDelegate, "keyDown", &WindowDelegate_keyDown__wrapper);
     windowDelegate_dropFeedback = ni_registerInterfaceMethod(windowDelegate, "dropFeedback", &WindowDelegate_dropFeedback__wrapper);

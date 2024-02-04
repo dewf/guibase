@@ -163,6 +163,7 @@ internal class MainWindow : ClientWindowDelegate, IWindowMethods
             from modifier in new[] { Modifiers.Shift, Modifiers.Control, Modifiers.Alt, Modifiers.MacControl } where modifiers.HasFlag(modifier) select modifier.ToString();
         return string.Join("+", strings);
     }
+    
     public override void Repaint(DrawContext context, int x, int y, int width, int height)
     {
         // _watch.Restart();
@@ -176,6 +177,12 @@ internal class MainWindow : ClientWindowDelegate, IWindowMethods
         // _watch.Stop();
         // Console.WriteLine($"rendering time: {_watch.ElapsedMilliseconds}ms");
     }
+
+    public override void Moved(int x, int y)
+    {
+        _currentPage.OnHostWindowMoved();
+    }
+    
     public override void Resized(int width, int height)
     {
         _width = width;
