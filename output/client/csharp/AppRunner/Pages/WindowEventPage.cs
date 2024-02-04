@@ -184,7 +184,11 @@ public class WindowEventPage : BasePage
     {
         if (requestedFormat == KDragFormatUTF8)
         {
-            payload.RenderUTF8("Hello from the Window Event Page!");
+            payload.RenderUTF8("Hello from the Window Event Page!!");
+        }
+        else
+        {
+            Console.WriteLine($"DragRender: we failed to render [{requestedFormat}] !");
         }
     }
 

@@ -127,5 +127,6 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
 
     public virtual void DragRender(Windowing.DragRenderPayload payload, string requestedFormat)
     {
+        throw new NotImplementedException("base page DragRender, you don't want to see this");
     }
 }

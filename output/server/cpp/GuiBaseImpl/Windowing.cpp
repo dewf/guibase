@@ -94,6 +94,9 @@ public:
     void enableDrops(bool enable) {
         wl_WindowEnableDrops(wlWindow, enable);
     }
+    wl_DragDataRef createDragData() {
+        return wl_DragDataCreate(wlWindow);
+    }
     // OpenWL event handling ==========================
     void onDestroyed() {
         del->destroyed();
@@ -157,6 +160,9 @@ public:
             break;
         }
     }
+    void onDragRender(wl_DragRenderEvent& renderEvent) {
+        del->dragRender((DragRenderPayload)renderEvent.payload, renderEvent.dragFormat);
+    }
 };
 
 struct __Timer {
@@ -216,6 +222,9 @@ CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* user
             break;
         case wl_kEventTypeDrop:
             win->onDrop(event->dropEvent);
+            break;
+        case wl_kEventTypeDragRender:
+            win->onDragRender(event->dragRenderEvent);
             break;
         default:
             //printf("unhandled event type: %d\n", event->eventType);
@@ -333,7 +342,7 @@ uint32_t DragData_execute(DragData _this, uint32_t canDoMask)
 
 DragData DragData_create(Window forWindow)
 {
-    return (DragData)wl_DragDataCreate((wl_WindowRef)forWindow);
+    return (DragData)((InternalWindow*)forWindow)->createDragData();
 }
 
 void DragData_dispose(DragData _this)

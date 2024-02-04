@@ -52,10 +52,7 @@ public class BaseWindowDelegate : Windowing.ClientWindowDelegate
 
     public override void DragRender(Windowing.DragRenderPayload payload, string requestedFormatMIME)
     {
-        if (requestedFormatMIME == Windowing.KDragFormatUTF8)
-        {
-            payload.RenderUTF8("forgot to override this :)");
-        }
+        throw new NotImplementedException("BaseWindowDelegate.DragRender() - you probably want to do something here");
     }
 
     public override Windowing.DropEffect DropFeedback(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect suggested)
