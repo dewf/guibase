@@ -6,23 +6,12 @@ using static Org.Prefixed.GuiBase.Windowing;
 
 namespace AppRunner;
 
-internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
+internal class MainWindow : ClientWindowDelegate, IWindowMethods
 {
-    private int _width, _height;
-    private readonly MenuBar _emptyMenuBar = MenuBar.Create();
+    private int _width = Constants.InitWidth; 
+    private int _height = Constants.InitHeight;
 
     private Window? _window;
-    public Window? Window
-    {
-        get => _window;
-        set
-        {
-            _window = value;
-            _window!.SetTitle(_currentPage.PageTitle);
-            _window!.EnableDrops(_currentPage.CanDrop);
-        }
-    }
-
     private readonly SpinningFlower _page01;
     private readonly TextBoundsCircle _page02;
     private readonly TextStrokeFill _page03;
@@ -39,7 +28,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
 
     public bool IsDestroyed { get; private set; }
 
-    public MainWindowDelegate()
+    private MainWindow()
     {
         // page init
         _page01 = new SpinningFlower(this);
@@ -53,6 +42,31 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
         _page09 = new TransformedShapesPage(this);
         _page10 = new WindowEventStuff(this);
         _currentPage = _page01;
+    }
+    
+    public static MainWindow Create()
+    {
+        var options = new WindowOptions
+        {
+            MinWidth = Constants.MinWidth,
+            MinHeight = Constants.MinHeight,
+            MaxWidth = Constants.MaxWidth,
+            MaxHeight = Constants.MaxHeight
+        };
+        var ret = new MainWindow();
+        ret._window = Window.Create(Constants.InitWidth, Constants.InitHeight, "this is the first window! 🚀", ret, options);
+        ret._window.SetTitle(ret._currentPage.PageTitle);
+        ret._window.EnableDrops(ret._currentPage.CanDrop);
+        return ret;
+    }
+
+    public Window GetWindowHandle()
+    {
+        if (_window != null)
+        {
+            return _window;
+        }
+        throw new Exception("MainWindowDelegate: GetWindowHandle() can't be called yet!");
     }
 
     public override bool CanClose() => true;
@@ -98,8 +112,8 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     {
         _currentPage = page;
         _currentPage.OnSize(_width, _height);
-        Window!.SetTitle(_currentPage.PageTitle);
-        Window!.EnableDrops(_currentPage.CanDrop);
+        _window!.SetTitle(_currentPage.PageTitle);
+        _window!.EnableDrops(_currentPage.CanDrop);
         Invalidate(0, 0, _width, _height);
     }
 
@@ -186,7 +200,7 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
 
     public void Invalidate(int x, int y, int width, int height)
     {
-        Window!.Invalidate(x, y, width, height);
+        _window!.Invalidate(x, y, width, height);
     }
 
     public void TimerTick(double secondsSinceLast)
@@ -199,7 +213,12 @@ internal class MainWindowDelegate : ClientWindowDelegate, IWindowMethods
     
     public void DestroyWindow()
     {
-        Window!.Destroy();
+        _window!.Destroy();
+    }
+
+    public void Show()
+    {
+        _window!.Show();
     }
 }
 
@@ -212,30 +231,22 @@ internal static class Program
 
         // scope for opaque disposal, prior to library exit
         {
-            var options = new WindowOptions
-            {
-                MinWidth = Constants.MinWidth,
-                MinHeight = Constants.MinHeight,
-                MaxWidth = Constants.MaxWidth,
-                MaxHeight = Constants.MaxHeight
-            };
-            var mainWinDel = new MainWindowDelegate();
-            using var window = Window.Create(Constants.InitWidth, Constants.InitHeight, "this is the first window! 🚀", mainWinDel, options);
-            mainWinDel.Window = window;
+            var window = MainWindow.Create();
 
             using var timer = Windowing.Timer.Create(1000 / 60, secondsSinceLast =>
             {
-                if (!mainWinDel.IsDestroyed)
+                if (!window.IsDestroyed)
                 {
-                    mainWinDel.TimerTick(secondsSinceLast);
+                    window.TimerTick(secondsSinceLast);
                 }
             });
         
             window.Show();
             Runloop();
             
-            // disposal of everything upon leaving this scope!
+            // disposal of everything 'using' upon leaving this scope!
         }
+        
         Library.Shutdown();
     }
 }

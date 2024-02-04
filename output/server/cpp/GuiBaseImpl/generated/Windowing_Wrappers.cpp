@@ -456,6 +456,16 @@ void Window_show__wrapper() {
     Window_show(_this);
 }
 
+void Window_showRelativeTo__wrapper() {
+    auto _this = Window__pop();
+    auto other = Window__pop();
+    auto x = ni_popInt32();
+    auto y = ni_popInt32();
+    auto newWidth = ni_popInt32();
+    auto newHeight = ni_popInt32();
+    Window_showRelativeTo(_this, other, x, y, newWidth, newHeight);
+}
+
 void Window_destroy__wrapper() {
     auto _this = Window__pop();
     Window_destroy(_this);
@@ -726,6 +736,7 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "DropData_getFiles", &DropData_getFiles__wrapper);
     ni_registerModuleMethod(m, "DropData_dispose", &DropData_dispose__wrapper);
     ni_registerModuleMethod(m, "Window_show", &Window_show__wrapper);
+    ni_registerModuleMethod(m, "Window_showRelativeTo", &Window_showRelativeTo__wrapper);
     ni_registerModuleMethod(m, "Window_destroy", &Window_destroy__wrapper);
     ni_registerModuleMethod(m, "Window_setMenuBar", &Window_setMenuBar__wrapper);
     ni_registerModuleMethod(m, "Window_showContextMenu", &Window_showContextMenu__wrapper);

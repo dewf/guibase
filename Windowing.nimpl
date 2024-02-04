@@ -84,6 +84,7 @@ interface WindowDelegate {
 
 opaque Window {
    void show();
+   void showRelativeTo(Window other, int x, int y, int newWidth, int newHeight); // use "0" for newWidth/newHeight for no change, until we have Option<>
    void destroy();
    void setMenuBar(MenuBar menuBar);
    void showContextMenu(int x, int y, Menu menu); // hmm, had a "fromEvent" parameter I think for GTK

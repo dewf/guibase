@@ -6,6 +6,7 @@ public interface IWindowMethods
 {
     void Invalidate(int x, int y, int width, int height);
     void DestroyWindow();
+    Windowing.Window GetWindowHandle();
 }
 
 public readonly struct RenderArea(int x, int y, int width, int height)
@@ -61,7 +62,7 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     {
         windowMethods.Invalidate(x, y, width, height);
     }
-
+    
     public virtual void OnMouseMove(int x, int y, Windowing.Modifiers modifiers)
     {
     }

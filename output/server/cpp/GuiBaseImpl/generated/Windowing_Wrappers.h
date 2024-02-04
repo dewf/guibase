@@ -79,6 +79,8 @@ void DropData_dispose__wrapper();
 
 void Window_show__wrapper();
 
+void Window_showRelativeTo__wrapper();
+
 void Window_destroy__wrapper();
 
 void Window_setMenuBar__wrapper();

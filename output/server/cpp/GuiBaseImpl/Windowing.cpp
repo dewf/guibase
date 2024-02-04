@@ -70,6 +70,9 @@ public:
     void show() {
         wl_WindowShow(wlWindow);
     }
+    void showRelativeTo(InternalWindow* other, int x, int y, int newWidth, int newHeight) {
+        wl_WindowShowRelative(wlWindow, other->wlWindow, x, y, newWidth, newHeight);
+    }
     void destroy() {
         wl_WindowDestroy(wlWindow);
     }
@@ -298,6 +301,11 @@ void DropData_dispose(DropData _this)
 
 void Window_show(Window _this) {
     ((InternalWindow*)_this)->show();
+}
+
+void Window_showRelativeTo(Window _this, Window other, int32_t x, int32_t y, int32_t newWidth, int32_t newHeight)
+{
+    ((InternalWindow*)_this)->showRelativeTo((InternalWindow*)other, x, y, newWidth, newHeight);
 }
 
 void Window_destroy(Window _this) {

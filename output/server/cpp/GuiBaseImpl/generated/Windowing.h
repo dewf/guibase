@@ -325,6 +325,7 @@ std::shared_ptr<NativeBuffer<uint8_t>> DropData_getFormat(DropData _this, std::s
 std::vector<std::string> DropData_getFiles(DropData _this); // throws DropDataBadFormat
 void DropData_dispose(DropData _this);
 void Window_show(Window _this);
+void Window_showRelativeTo(Window _this, Window other, int32_t x, int32_t y, int32_t newWidth, int32_t newHeight);
 void Window_destroy(Window _this);
 void Window_setMenuBar(Window _this, MenuBar menuBar);
 void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu);

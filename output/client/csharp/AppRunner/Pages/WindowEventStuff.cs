@@ -15,7 +15,7 @@ public class WindowEventStuff : BasePage
     private double _animPhase;
     private string[]? _lastDroppedFiles;
 
-    private readonly Menubar _menuBar = new();
+    private readonly Menubar _menuBar;
     
     public override string PageTitle => "Windowing/Event testing";
     public override bool CanDrop => true;
@@ -28,7 +28,7 @@ public class WindowEventStuff : BasePage
 
     public WindowEventStuff(IWindowMethods windowMethods) : base(windowMethods)
     {
-        // CreateMenu();
+        _menuBar = new Menubar(windowMethods);
         _menuBar.NeedsInvalidation += OnMenuInvalidation;
     }
 

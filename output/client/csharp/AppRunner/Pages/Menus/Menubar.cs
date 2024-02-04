@@ -8,6 +8,7 @@ public class Menubar
 {
     public const int MenuHeight = 24;
 
+    private readonly IWindowMethods _windowMethods;
     private readonly string[] _menuNames = ["File", "Edit", "View", "Misc", "Help"];
     private readonly Gradient _bgGradient = GetGradient(0.8, 0.8, 0.8, 1, 0.5, 0.5, 0.5, 1);
     public event EventHandler? NeedsInvalidation;
@@ -22,8 +23,10 @@ public class Menubar
     private readonly MenuItem[] _items;
     private int _hoverIndex = -1;
 
-    public Menubar()
+    public Menubar(IWindowMethods windowMethods)
     {
+        _windowMethods = windowMethods;
+        
         using var black = Color.CreateGenericRGB(0, 0, 0, 1);
         using var font = Font.CreateWithName(Constants.HelveticaFontName, 16, new OptArgs());
         
@@ -50,16 +53,29 @@ public class Menubar
         }).ToArray();
     }
 
-    public void OnMouseMove(int x, int y)
+    private int IndexAtPoint(int x, int y)
     {
         var p = new Point(x, y);
+        return Array.FindIndex(_items, item => item.Bounds.ContainsPoint(p));
+    }
+
+    public void OnMouseMove(int x, int y)
+    {
         var lastIndex = _hoverIndex;
-        _hoverIndex = Array.FindIndex(_items, item => item.Bounds.ContainsPoint(p));
+        _hoverIndex = IndexAtPoint(x, y);
         if (_hoverIndex != lastIndex)
         {
             // repaint necessary
             var invalidation = NeedsInvalidation;
             invalidation?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public void OnMouseDown(int x, int y)
+    {
+        if (_hoverIndex >= 0)
+        {
+            // create menu and show relative to x,y
         }
     }
     
@@ -86,6 +102,12 @@ public class Menubar
             i++;
         }
         
+        // context.SetLineWidth(1);
+        // context.MoveToPoint(0, MenuHeight - 0.5);
+        // context.AddLineToPoint(width, MenuHeight - 0.5);
+        // context.SetRGBStrokeColor(1, 0.7, 0, 0.7);
+        // context.StrokePath();
+        //
         context.RestoreGState();
     }
 }

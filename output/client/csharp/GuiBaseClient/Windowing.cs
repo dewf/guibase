@@ -23,6 +23,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _dropData_getFiles;
         private static ModuleMethodHandle _DropData_dispose;
         private static ModuleMethodHandle _window_show;
+        private static ModuleMethodHandle _window_showRelativeTo;
         private static ModuleMethodHandle _window_destroy;
         private static ModuleMethodHandle _window_setMenuBar;
         private static ModuleMethodHandle _window_showContextMenu;
@@ -957,6 +958,16 @@ namespace Org.Prefixed.GuiBase
                 Window__Push(this);
                 NativeImplClient.InvokeModuleMethod(_window_show);
             }
+            public void ShowRelativeTo(Window other, int x, int y, int newWidth, int newHeight)
+            {
+                NativeImplClient.PushInt32(newHeight);
+                NativeImplClient.PushInt32(newWidth);
+                NativeImplClient.PushInt32(y);
+                NativeImplClient.PushInt32(x);
+                Window__Push(other);
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_showRelativeTo);
+            }
             public void Destroy()
             {
                 Window__Push(this);
@@ -1252,6 +1263,7 @@ namespace Org.Prefixed.GuiBase
             _dropData_getFiles = NativeImplClient.GetModuleMethod(_module, "DropData_getFiles");
             _DropData_dispose = NativeImplClient.GetModuleMethod(_module, "DropData_dispose");
             _window_show = NativeImplClient.GetModuleMethod(_module, "Window_show");
+            _window_showRelativeTo = NativeImplClient.GetModuleMethod(_module, "Window_showRelativeTo");
             _window_destroy = NativeImplClient.GetModuleMethod(_module, "Window_destroy");
             _window_setMenuBar = NativeImplClient.GetModuleMethod(_module, "Window_setMenuBar");
             _window_showContextMenu = NativeImplClient.GetModuleMethod(_module, "Window_showContextMenu");
