@@ -50,6 +50,10 @@ public class SpinningFlower(IWindowMethods windowMethods) : BasePage(windowMetho
             _doCrossMask = !_doCrossMask;
             Invalidate();
         }
+        else
+        {
+            Console.WriteLine($"Key: {key} / modifiers: {ModifiersToString(modifiers)}");
+        }
     }
 
     private static void DrawStrokedLine(DrawContext context, Point start, Point end)

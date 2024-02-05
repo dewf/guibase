@@ -22,10 +22,14 @@ public class WindowEventPage : BasePage
     private readonly Rect _dragSourceRect = MakeRect(100, 100, 200, 200);
 
     private bool _mouseDownPotentialDrag;
+
+    private readonly MenuBar _nativeMenuBar;
     
     public override string PageTitle => "Windowing/Event testing";
     public override bool CanDrop => true;
     public override bool IsAnimating => _dropInProgress;
+
+    public override MenuBar MenuBar => _nativeMenuBar;
 
     private void OnMenuInvalidation(object? sender, EventArgs args)
     {
@@ -37,6 +41,18 @@ public class WindowEventPage : BasePage
         _windowMethods = windowMethods;
         _menuBar = new ClientMenuBar(windowMethods);
         _menuBar.NeedsInvalidation += OnMenuInvalidation;
+
+        // menu creation
+        using var exitAccel = Accelerator.Create(Key.Q, Modifiers.Control);
+        using var exitAction = Windowing.Action.Create("E&xit", null, exitAccel, () =>
+        {
+            Console.WriteLine("Exiting!");
+            windowMethods.DestroyWindow();
+        });
+        using var fileMenu = Menu.Create();
+        fileMenu.AddAction(exitAction);
+        _nativeMenuBar = MenuBar.Create();
+        _nativeMenuBar.AddMenu("&File", fileMenu);
     }
 
     public override void OnHostWindowMoved()

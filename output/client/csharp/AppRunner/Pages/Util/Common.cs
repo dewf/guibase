@@ -1,11 +1,12 @@
 ﻿using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
+using static Org.Prefixed.GuiBase.Windowing;
 
 namespace AppRunner.Pages.Util;
 
 public static class Common
 {
-    public static readonly Drawing.Point PointZero = new(0, 0);
+    public static readonly Point PointZero = new(0, 0);
     
     // rect methods
     public static Rect MakeRect(double x, double y, double width, double height)
@@ -222,5 +223,12 @@ public static class Common
         }
         
         line.Draw(context);
+    }
+    
+    public static string ModifiersToString(Modifiers modifiers)
+    {
+        var strings = 
+            from modifier in new[] { Modifiers.Shift, Modifiers.Control, Modifiers.Alt, Modifiers.MacControl } where modifiers.HasFlag(modifier) select modifier.ToString();
+        return string.Join("+", strings);
     }
 }

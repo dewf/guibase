@@ -147,7 +147,7 @@ opaque Menu {
 
 
 opaque MenuBar {
-   MenuItem addMenu(string label, Menu menu);
+   void addMenu(string label, Menu menu);
    
    static MenuBar create();
 }

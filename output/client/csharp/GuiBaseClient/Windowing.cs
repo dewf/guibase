@@ -700,13 +700,12 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
-            public MenuItem AddMenu(string label, Menu menu)
+            public void AddMenu(string label, Menu menu)
             {
                 Menu__Push(menu);
                 NativeImplClient.PushString(label);
                 MenuBar__Push(this);
                 NativeImplClient.InvokeModuleMethod(_menuBar_addMenu);
-                return MenuItem__Pop();
             }
             public static MenuBar Create()
             {

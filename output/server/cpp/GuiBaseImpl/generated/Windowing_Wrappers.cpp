@@ -692,7 +692,7 @@ void MenuBar_addMenu__wrapper() {
     auto _this = MenuBar__pop();
     auto label = popStringInternal();
     auto menu = Menu__pop();
-    MenuItem__push(MenuBar_addMenu(_this, label, menu));
+    MenuBar_addMenu(_this, label, menu);
 }
 
 void MenuBar_create__wrapper() {

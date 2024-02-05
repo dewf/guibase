@@ -364,6 +364,6 @@ MenuItem Menu_addSubmenu(Menu _this, std::string label, Menu sub);
 void Menu_addSeparator(Menu _this);
 Menu Menu_create();
 void Menu_dispose(Menu _this);
-MenuItem MenuBar_addMenu(MenuBar _this, std::string label, Menu menu);
+void MenuBar_addMenu(MenuBar _this, std::string label, Menu menu);
 MenuBar MenuBar_create();
 void MenuBar_dispose(MenuBar _this);

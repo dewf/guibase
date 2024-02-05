@@ -113,6 +113,7 @@ internal class MainWindow : BaseWindowDelegate, IWindowMethods
         _currentPage.OnSize(_width, _height);
         _window!.SetTitle(_currentPage.PageTitle);
         _window!.EnableDrops(_currentPage.CanDrop);
+        _window!.SetMenuBar(_currentPage.MenuBar); // might be null, that's OK
         Invalidate(0, 0, _width, _height);
     }
 
@@ -156,13 +157,6 @@ internal class MainWindow : BaseWindowDelegate, IWindowMethods
         }
     }
 
-    private static string ModifiersToString(Modifiers modifiers)
-    {
-        var strings = 
-            from modifier in new[] { Modifiers.Shift, Modifiers.Control, Modifiers.Alt, Modifiers.MacControl } where modifiers.HasFlag(modifier) select modifier.ToString();
-        return string.Join("+", strings);
-    }
-    
     public override void Repaint(DrawContext context, int x, int y, int width, int height)
     {
         // _watch.Restart();

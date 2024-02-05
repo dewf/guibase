@@ -499,12 +499,11 @@ void MenuBar_dispose(MenuBar _this)
 {
 }
 
-MenuItem MenuBar_addMenu(MenuBar _this, std::string label, Menu menu) {
-    return (MenuItem)wl_MenuBarAddMenu((wl_MenuBarRef)_this, label.c_str(), (wl_MenuRef)menu);
+void MenuBar_addMenu(MenuBar _this, std::string label, Menu menu) {
+    wl_MenuBarAddMenu((wl_MenuBarRef)_this, label.c_str(), (wl_MenuRef)menu);
 }
 
 MenuBar MenuBar_create()
 {
     return (MenuBar)wl_MenuBarCreate();
 }
-
