@@ -59,6 +59,10 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _menuBar_addMenu;
         private static ModuleMethodHandle _menuBar_create;
         private static ModuleMethodHandle _MenuBar_dispose;
+        private static ModuleMethodHandle _clipData_setClipboard;
+        private static ModuleMethodHandle _clipData_get;
+        private static ModuleMethodHandle _clipData_flushClipboard;
+        private static ModuleMethodHandle _ClipData_dispose;
         private static InterfaceHandle _windowDelegate;
         private static InterfaceMethodHandle _windowDelegate_canClose;
         private static InterfaceMethodHandle _windowDelegate_closed;
@@ -326,6 +330,49 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new Action(ptr) : null;
+        }
+
+        public class ClipData : DropData
+        {
+            internal ClipData(IntPtr nativeHandle) : base(nativeHandle)
+            {
+            }
+            public override void Dispose()
+            {
+                if (!_disposed)
+                {
+                    ClipData__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_ClipData_dispose);
+                    _disposed = true;
+                }
+            }
+            public static void SetClipboard(DragData dragData)
+            {
+                DragData__Push(dragData);
+                NativeImplClient.InvokeModuleMethod(_clipData_setClipboard);
+            }
+            public static ClipData Get()
+            {
+                NativeImplClient.InvokeModuleMethod(_clipData_get);
+                return ClipData__Pop();
+            }
+            public static void FlushClipboard()
+            {
+                NativeImplClient.InvokeModuleMethod(_clipData_flushClipboard);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void ClipData__Push(ClipData thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ClipData ClipData__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new ClipData(ptr) : null;
         }
 
         [Flags]
@@ -1441,6 +1488,10 @@ namespace Org.Prefixed.GuiBase
             _menuBar_addMenu = NativeImplClient.GetModuleMethod(_module, "MenuBar_addMenu");
             _menuBar_create = NativeImplClient.GetModuleMethod(_module, "MenuBar_create");
             _MenuBar_dispose = NativeImplClient.GetModuleMethod(_module, "MenuBar_dispose");
+            _clipData_setClipboard = NativeImplClient.GetModuleMethod(_module, "ClipData_setClipboard");
+            _clipData_get = NativeImplClient.GetModuleMethod(_module, "ClipData_get");
+            _clipData_flushClipboard = NativeImplClient.GetModuleMethod(_module, "ClipData_flushClipboard");
+            _ClipData_dispose = NativeImplClient.GetModuleMethod(_module, "ClipData_dispose");
 
             _dropDataBadFormat = NativeImplClient.GetException(_module, "DropDataBadFormat");
             NativeImplClient.SetExceptionBuilder(_dropDataBadFormat, DropDataBadFormat.BuildAndThrow);

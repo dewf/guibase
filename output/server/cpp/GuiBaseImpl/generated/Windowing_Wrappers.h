@@ -14,6 +14,9 @@ std::function<MenuActionFunc> MenuActionFunc__pop();
 void Action__push(Action value);
 Action Action__pop();
 
+void ClipData__push(ClipData value);
+ClipData ClipData__pop();
+
 void DropEffect__push(uint32_t value);
 uint32_t DropEffect__pop();
 
@@ -156,6 +159,14 @@ void MenuBar_addMenu__wrapper();
 void MenuBar_create__wrapper();
 
 void MenuBar_dispose__wrapper();
+
+void ClipData_setClipboard__wrapper();
+
+void ClipData_get__wrapper();
+
+void ClipData_flushClipboard__wrapper();
+
+void ClipData_dispose__wrapper();
 
 void WindowDelegate_canClose__wrapper(int serverID);
 

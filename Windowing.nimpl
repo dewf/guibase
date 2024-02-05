@@ -145,12 +145,21 @@ opaque Menu {
    static Menu create();   // for menu bars and standalone popups
 }
 
-
 opaque MenuBar {
    void addMenu(string label, Menu menu);
    
    static MenuBar create();
 }
+
+// CLIPBOARD =========================================================================
+
+opaque ClipData extends DropData {
+   static void setClipboard(DragData dragData); // for sending
+   static ClipData get();                       // really just a DropData
+   static void flushClipboard();
+}
+
+// KEY ENUM STUFF ====================================================================
 
 enum KeyLocation {
    Default,

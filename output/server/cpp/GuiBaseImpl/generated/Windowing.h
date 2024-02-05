@@ -22,6 +22,7 @@ struct __Action; typedef struct __Action* Action;
 struct __MenuItem; typedef struct __MenuItem* MenuItem;
 struct __Menu; typedef struct __Menu* Menu;
 struct __MenuBar; typedef struct __MenuBar* MenuBar;
+struct __ClipData; typedef struct __ClipData* ClipData;
 
 enum class Key {
     Unknown,
@@ -142,6 +143,7 @@ enum Modifiers {
 
 
 typedef void MenuActionFunc();
+
 
 
 enum DropEffect {
@@ -367,3 +369,7 @@ void Menu_dispose(Menu _this);
 void MenuBar_addMenu(MenuBar _this, std::string label, Menu menu);
 MenuBar MenuBar_create();
 void MenuBar_dispose(MenuBar _this);
+void ClipData_setClipboard(DragData dragData);
+ClipData ClipData_get();
+void ClipData_flushClipboard();
+void ClipData_dispose(ClipData _this);

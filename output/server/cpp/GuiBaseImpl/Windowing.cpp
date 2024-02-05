@@ -499,6 +499,28 @@ void MenuBar_dispose(MenuBar _this)
 {
 }
 
+void ClipData_setClipboard(DragData dragData)
+{
+    wl_ClipboardSet((wl_DragDataRef)dragData);
+}
+
+ClipData ClipData_get()
+{
+    // really just a DropDataRef
+    // but we extend with ClipData so we can use wl_ClipboardRelease on dispose! fancy
+    return (ClipData)wl_ClipboardGet(); 
+}
+
+void ClipData_flushClipboard()
+{
+    wl_ClipboardFlush();
+}
+
+void ClipData_dispose(ClipData _this)
+{
+    wl_ClipboardRelease((wl_DropDataRef)_this);
+}
+
 void MenuBar_addMenu(MenuBar _this, std::string label, Menu menu) {
     wl_MenuBarAddMenu((wl_MenuBarRef)_this, label.c_str(), (wl_MenuRef)menu);
 }

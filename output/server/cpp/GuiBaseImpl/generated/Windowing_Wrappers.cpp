@@ -77,6 +77,14 @@ Action Action__pop() {
     return (Action)ni_popPtr();
 }
 
+void ClipData__push(ClipData value) {
+    ni_pushPtr(value);
+}
+
+ClipData ClipData__pop() {
+    return (ClipData)ni_popPtr();
+}
+
 inline void DropEffect__push(uint32_t value) {
     ni_pushUInt32(value);
 }
@@ -704,6 +712,24 @@ void MenuBar_dispose__wrapper() {
     MenuBar_dispose(_this);
 }
 
+void ClipData_setClipboard__wrapper() {
+    auto dragData = DragData__pop();
+    ClipData_setClipboard(dragData);
+}
+
+void ClipData_get__wrapper() {
+    ClipData__push(ClipData_get());
+}
+
+void ClipData_flushClipboard__wrapper() {
+    ClipData_flushClipboard();
+}
+
+void ClipData_dispose__wrapper() {
+    auto _this = ClipData__pop();
+    ClipData_dispose(_this);
+}
+
 void WindowDelegate_canClose__wrapper(int serverID) {
     auto inst = ServerWindowDelegate::getByID(serverID);
     ni_pushBool(inst->canClose());
@@ -876,6 +902,10 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "MenuBar_addMenu", &MenuBar_addMenu__wrapper);
     ni_registerModuleMethod(m, "MenuBar_create", &MenuBar_create__wrapper);
     ni_registerModuleMethod(m, "MenuBar_dispose", &MenuBar_dispose__wrapper);
+    ni_registerModuleMethod(m, "ClipData_setClipboard", &ClipData_setClipboard__wrapper);
+    ni_registerModuleMethod(m, "ClipData_get", &ClipData_get__wrapper);
+    ni_registerModuleMethod(m, "ClipData_flushClipboard", &ClipData_flushClipboard__wrapper);
+    ni_registerModuleMethod(m, "ClipData_dispose", &ClipData_dispose__wrapper);
     auto windowDelegate = ni_registerInterface(m, "WindowDelegate");
     windowDelegate_canClose = ni_registerInterfaceMethod(windowDelegate, "canClose", &WindowDelegate_canClose__wrapper);
     windowDelegate_closed = ni_registerInterfaceMethod(windowDelegate, "closed", &WindowDelegate_closed__wrapper);

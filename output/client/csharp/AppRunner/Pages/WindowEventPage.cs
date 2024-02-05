@@ -1,4 +1,5 @@
-﻿using AppRunner.Pages.Menus;
+﻿using System.Data.Common;
+using AppRunner.Pages.Menus;
 using AppRunner.Pages.Util;
 using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
@@ -23,17 +24,65 @@ public class WindowEventPage : BasePage
 
     private bool _mouseDownPotentialDrag;
 
-    private readonly MenuBar _nativeMenuBar;
     
     public override string PageTitle => "Windowing/Event testing";
     public override bool CanDrop => true;
     public override bool IsAnimating => _dropInProgress;
 
-    public override MenuBar MenuBar => _nativeMenuBar;
+    private readonly MenuBar _nativeMenuBar;
+    public override MenuBar? MenuBar => _nativeMenuBar;
 
     private void OnMenuInvalidation(object? sender, EventArgs args)
     {
         Invalidate(0, 0, Width, ClientMenuBar.MenuHeight);
+    }
+
+    private static MenuBar CreateMenuBar(IWindowMethods windowMethods)
+    {
+        // no 'using' since we're returning it
+        var menuBar = MenuBar.Create();
+        
+        // file menu
+        using var fileMenu = Menu.Create();
+        // exit
+        using var exitAccel = Accelerator.Create(Key.Q, Modifiers.Control);
+        using var exitAction = Windowing.Action.Create("E&xit", null, exitAccel, () =>
+        {
+            Console.WriteLine("Exiting!");
+            windowMethods.DestroyWindow();
+        });
+        fileMenu.AddAction(exitAction);
+        
+        // edit menu
+        using var editMenu = Menu.Create();
+        // copy
+        using var copyAccel = Accelerator.Create(Key.C, Modifiers.Control);
+        using var copyAction = Windowing.Action.Create("&Copy", null, copyAccel, () =>
+        {
+            using var dragData = DragData.Create(windowMethods.GetWindowHandle()); // would be kind of cool if we had another constructor that rendered from a delegate ... would make a lot more sense for deferred rendering
+            dragData.AddFormat(KDragFormatUTF8);
+            ClipData.SetClipboard(dragData);
+            Console.WriteLine("Set UTF8 text to clipboard! (deferred rendering, though)");
+            // dragData will be released, but I think it's OK because behind the scenes it's using COM reference counting for the actual (deferred) data payload
+        });
+        editMenu.AddAction(copyAction);
+        // paste
+        using var pasteAccel = Accelerator.Create(Key.V, Modifiers.Control);
+        using var pasteAction = Windowing.Action.Create("&Paste", null, pasteAccel, () =>
+        {
+            using var data = ClipData.Get();
+            if (data.HasFormat(KDragFormatUTF8))
+            {
+                var text = data.GetTextUTF8();
+                Console.WriteLine($"Pasting from clipboard: [[{text}]]");
+            }
+        });
+        editMenu.AddAction(pasteAction);
+
+        // menubar
+        menuBar.AddMenu("&File", fileMenu);
+        menuBar.AddMenu("&Edit", editMenu);
+        return menuBar;
     }
 
     public WindowEventPage(IWindowMethods windowMethods) : base(windowMethods)
@@ -41,18 +90,8 @@ public class WindowEventPage : BasePage
         _windowMethods = windowMethods;
         _menuBar = new ClientMenuBar(windowMethods);
         _menuBar.NeedsInvalidation += OnMenuInvalidation;
-
-        // menu creation
-        using var exitAccel = Accelerator.Create(Key.Q, Modifiers.Control);
-        using var exitAction = Windowing.Action.Create("E&xit", null, exitAccel, () =>
-        {
-            Console.WriteLine("Exiting!");
-            windowMethods.DestroyWindow();
-        });
-        using var fileMenu = Menu.Create();
-        fileMenu.AddAction(exitAction);
-        _nativeMenuBar = MenuBar.Create();
-        _nativeMenuBar.AddMenu("&File", fileMenu);
+        
+        _nativeMenuBar = CreateMenuBar(windowMethods);
     }
 
     public override void OnHostWindowMoved()
@@ -200,7 +239,7 @@ public class WindowEventPage : BasePage
     {
         if (requestedFormat == KDragFormatUTF8)
         {
-            payload.RenderUTF8("Hello from the Window Event Page!!");
+            payload.RenderUTF8("Hello from the Window Event Page!! This text will be rendered when dragging or copying to clipboard.");
         }
         else
         {
