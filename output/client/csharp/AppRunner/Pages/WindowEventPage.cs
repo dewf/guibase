@@ -1,6 +1,4 @@
-﻿using System.Data.Common;
-using AppRunner.Pages.Menus;
-using AppRunner.Pages.Util;
+﻿using AppRunner.Pages.Util;
 using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
 using static Org.Prefixed.GuiBase.Windowing;
@@ -18,12 +16,9 @@ public class WindowEventPage : BasePage
     private double _animPhase;
     private string[]? _lastDroppedFiles;
 
-    private readonly ClientMenuBar _menuBar;
-
     private readonly Rect _dragSourceRect = MakeRect(100, 100, 200, 200);
 
     private bool _mouseDownPotentialDrag;
-
     
     public override string PageTitle => "Windowing/Event testing";
     public override bool CanDrop => true;
@@ -31,11 +26,6 @@ public class WindowEventPage : BasePage
 
     private readonly MenuBar _nativeMenuBar;
     public override MenuBar? MenuBar => _nativeMenuBar;
-
-    private void OnMenuInvalidation(object? sender, EventArgs args)
-    {
-        Invalidate(0, 0, Width, ClientMenuBar.MenuHeight);
-    }
 
     private static MenuBar CreateMenuBar(IWindowMethods windowMethods)
     {
@@ -88,20 +78,11 @@ public class WindowEventPage : BasePage
     public WindowEventPage(IWindowMethods windowMethods) : base(windowMethods)
     {
         _windowMethods = windowMethods;
-        _menuBar = new ClientMenuBar(windowMethods);
-        _menuBar.NeedsInvalidation += OnMenuInvalidation;
-        
         _nativeMenuBar = CreateMenuBar(windowMethods);
-    }
-
-    public override void OnHostWindowMoved()
-    {
-        _menuBar.HostWindowMoved();
     }
 
     public override void OnMouseMove(int x, int y, Modifiers modifiers)
     {
-        _menuBar.OnMouseMove(x, y);
         if (_mouseDownPotentialDrag)
         {
             // begin DnD drag
@@ -116,15 +97,7 @@ public class WindowEventPage : BasePage
 
     public override void OnMouseDown(int x, int y, MouseButton button, Modifiers modifiers)
     {
-        if (y < ClientMenuBar.MenuHeight)
-        {
-            _menuBar.OnMouseDown(x, y);
-        }
-        else
-        {
-            _menuBar.PublicHide();
-            _mouseDownPotentialDrag = _dragSourceRect.ContainsPoint(new Point(x, y));
-        }
+        _mouseDownPotentialDrag = _dragSourceRect.ContainsPoint(new Point(x, y));
     }
 
     public override void Render(DrawContext context, RenderArea area)
@@ -142,13 +115,6 @@ public class WindowEventPage : BasePage
         // background
         context.SetRGBFillColor(0, 0.3, 0.4, 1);
         context.FillRect(totalRect);
-        
-        // menu
-        context.SaveGState();
-        var menuRect = MakeRect(0, 0, Width, ClientMenuBar.MenuHeight);
-        context.ClipToRect(menuRect);
-        _menuBar.Render(context, Width);
-        context.RestoreGState();
         
         // drag rect
         context.SetStrokeColorWithColor(orange);
