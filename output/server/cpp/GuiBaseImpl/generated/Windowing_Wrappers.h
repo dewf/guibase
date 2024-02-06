@@ -19,6 +19,8 @@ ClipData ClipData__pop();
 
 void DropEffect__push(uint32_t value);
 uint32_t DropEffect__pop();
+void DragRenderFunc__push(std::function<DragRenderFunc> f);
+std::function<DragRenderFunc> DragRenderFunc__pop();
 
 void DragData__push(DragData value);
 DragData DragData__pop();
@@ -88,14 +90,6 @@ void DropData_getFormat__wrapper();
 
 void DropData_dispose__wrapper();
 
-void DragData_addFormat__wrapper();
-
-void DragData_execute__wrapper();
-
-void DragData_create__wrapper();
-
-void DragData_dispose__wrapper();
-
 void DragRenderPayload_renderUTF8__wrapper();
 
 void DragRenderPayload_renderFiles__wrapper();
@@ -103,6 +97,12 @@ void DragRenderPayload_renderFiles__wrapper();
 void DragRenderPayload_renderFormat__wrapper();
 
 void DragRenderPayload_dispose__wrapper();
+
+void DragData_dragExec__wrapper();
+
+void DragData_create__wrapper();
+
+void DragData_dispose__wrapper();
 
 void Window_show__wrapper();
 
@@ -191,8 +191,6 @@ void WindowDelegate_moved__wrapper(int serverID);
 void WindowDelegate_resized__wrapper(int serverID);
 
 void WindowDelegate_keyDown__wrapper(int serverID);
-
-void WindowDelegate_dragRender__wrapper(int serverID);
 
 void WindowDelegate_dropFeedback__wrapper(int serverID);
 

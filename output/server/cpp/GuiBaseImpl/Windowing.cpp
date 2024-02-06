@@ -94,9 +94,6 @@ public:
     void enableDrops(bool enable) {
         wl_WindowEnableDrops(wlWindow, enable);
     }
-    wl_DragDataRef createDragData() {
-        return wl_DragDataCreate(wlWindow);
-    }
     // OpenWL event handling ==========================
     void onDestroyed() {
         del->destroyed();
@@ -160,9 +157,6 @@ public:
             break;
         }
     }
-    void onDragRender(wl_DragRenderEvent& renderEvent) {
-        del->dragRender((DragRenderPayload)renderEvent.payload, renderEvent.dragFormat);
-    }
 };
 
 struct __Timer {
@@ -223,9 +217,6 @@ CDECL int eventHandler(wl_WindowRef wlWindow, struct wl_Event* event, void* user
         case wl_kEventTypeDrop:
             win->onDrop(event->dropEvent);
             break;
-        case wl_kEventTypeDragRender:
-            win->onDragRender(event->dragRenderEvent);
-            break;
         default:
             //printf("unhandled event type: %d\n", event->eventType);
             event->handled = false;
@@ -257,6 +248,10 @@ void moduleInit() {
 }
 
 void moduleShutdown() {
+    // always flush the clipboard to render any pending stuff
+    wl_ClipboardFlush();
+
+    // final shutdown
     wl_Shutdown();
     dl_Shutdown();
 }
@@ -335,20 +330,51 @@ void DragData_addFormat(DragData _this, std::string dragFormatMIME)
     wl_DragAddFormat((wl_DragDataRef)_this, dragFormatMIME.c_str());
 }
 
-uint32_t DragData_execute(DragData _this, uint32_t canDoMask)
+
+// some ugly wrapper stuff for the drag render delegate
+// this because we're still dealing with WL's C API and can't just pass a std::function
+
+struct __renderFuncWrapper {
+    std::function<DragRenderFunc> outerFunc;
+    ~__renderFuncWrapper() {
+        printf("~~ internal renderFuncWrapper destroyed!\n");
+    }
+};
+
+static bool __renderFuncExec(const char* requestedFormat, wl_RenderPayloadRef payload, void* data)
+{
+    __renderFuncWrapper *wrapper = (__renderFuncWrapper*)data;
+    return wrapper->outerFunc(requestedFormat, (DragRenderPayload)payload);
+}
+
+static void __renderFuncRelease(void* data)
+{
+    delete (__renderFuncWrapper*)data;
+}
+
+DragData DragData_create(std::vector<std::string> supportedFormats, std::function<DragRenderFunc> renderFunc)
+{
+    wl_DragRenderDelegate renderDelegate;
+    renderDelegate.data = new __renderFuncWrapper{ renderFunc };
+    renderDelegate.renderFunc = __renderFuncExec;
+    renderDelegate.release = __renderFuncRelease;
+
+    // don't forget to add formats!
+    auto ret = wl_DragDataCreate(renderDelegate);
+    for (auto i = supportedFormats.begin(); i != supportedFormats.end(); i++) {
+        wl_DragAddFormat(ret, i->c_str());
+    }
+    return (DragData)ret;
+}
+
+uint32_t DragData_dragExec(DragData _this, uint32_t canDoMask)
 {
     return wl_DragExec((wl_DragDataRef)_this, canDoMask, nullptr); // I think 'fromEvent' was only necessary for GTK/linux ...
 }
 
-DragData DragData_create(Window forWindow)
-{
-    return (DragData)((InternalWindow*)forWindow)->createDragData();
-}
-
 void DragData_dispose(DragData _this)
 {
-    auto x = (wl_DragDataRef)_this; // a silly layer of indirection, because DragDataRelease nullifies the pointer as well ... not that we care about the incoming parameter per se, but could preclude some weird future bugs
-    wl_DragDataRelease(&x);
+    wl_DragDataRelease((wl_DragDataRef)_this);
 }
 
 void DragRenderPayload_renderUTF8(DragRenderPayload _this, std::string text)

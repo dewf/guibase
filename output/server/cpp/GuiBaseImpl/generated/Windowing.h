@@ -12,8 +12,8 @@
 #include "Drawing.h"
 
 struct __DropData; typedef struct __DropData* DropData;
-struct __DragData; typedef struct __DragData* DragData;
 struct __DragRenderPayload; typedef struct __DragRenderPayload* DragRenderPayload;
+struct __DragData; typedef struct __DragData* DragData;
 struct __Window; typedef struct __Window* Window;
 struct __Timer; typedef struct __Timer* Timer;
 struct __Icon; typedef struct __Icon* Icon;
@@ -154,8 +154,10 @@ enum DropEffect {
     Other = 1 << 3
 };
 
-
 // std::vector<std::string>
+
+typedef bool DragRenderFunc(std::string requestedFormat, DragRenderPayload payload);
+
 
 // std::shared_ptr<NativeBuffer<uint8_t>>
 
@@ -305,7 +307,6 @@ public:
     virtual void moved(int32_t x, int32_t y) = 0;
     virtual void resized(int32_t width, int32_t height) = 0;
     virtual void keyDown(Key key, uint32_t modifiers, KeyLocation location) = 0;
-    virtual void dragRender(DragRenderPayload payload, std::string requestedFormatMIME) = 0;
     virtual uint32_t dropFeedback(DropData data, int32_t x, int32_t y, uint32_t modifiers, uint32_t suggested) = 0;
     virtual void dropLeave() = 0;
     virtual void dropSubmit(DropData data, int32_t x, int32_t y, uint32_t modifiers, uint32_t effect) = 0;
@@ -333,14 +334,13 @@ std::vector<std::string> DropData_getFiles(DropData _this); // throws DropDataBa
 std::string DropData_getTextUTF8(DropData _this); // throws DropDataBadFormat
 std::shared_ptr<NativeBuffer<uint8_t>> DropData_getFormat(DropData _this, std::string mimeFormat); // throws DropDataBadFormat
 void DropData_dispose(DropData _this);
-void DragData_addFormat(DragData _this, std::string dragFormatMIME);
-uint32_t DragData_execute(DragData _this, uint32_t canDoMask);
-DragData DragData_create(Window forWindow);
-void DragData_dispose(DragData _this);
 void DragRenderPayload_renderUTF8(DragRenderPayload _this, std::string text);
 void DragRenderPayload_renderFiles(DragRenderPayload _this, std::vector<std::string> filenames);
 void DragRenderPayload_renderFormat(DragRenderPayload _this, std::string formatMIME, std::shared_ptr<NativeBuffer<uint8_t>> data);
 void DragRenderPayload_dispose(DragRenderPayload _this);
+uint32_t DragData_dragExec(DragData _this, uint32_t canDoMask);
+DragData DragData_create(std::vector<std::string> supportedFormats, std::function<DragRenderFunc> renderFunc);
+void DragData_dispose(DragData _this);
 void Window_show(Window _this);
 void Window_showRelativeTo(Window _this, Window other, int32_t x, int32_t y, int32_t newWidth, int32_t newHeight);
 void Window_hide(Window _this);

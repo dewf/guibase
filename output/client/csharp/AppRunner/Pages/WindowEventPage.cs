@@ -38,9 +38,6 @@ public class WindowEventPage : BasePage
         using var exitAccel = Accelerator.Create(Key.Q, Modifiers.Control);
         using var exitAction = Windowing.Action.Create("E&xit", null, exitAccel, () =>
         {
-            // must call this before exiting if anything is on the clipboard
-            ClipData.FlushClipboard();
-            
             Console.WriteLine("Exiting!");
             windowMethods.DestroyWindow();
         });
@@ -52,11 +49,17 @@ public class WindowEventPage : BasePage
         using var copyAccel = Accelerator.Create(Key.C, Modifiers.Control);
         using var copyAction = Windowing.Action.Create("&Copy", null, copyAccel, () =>
         {
-            using var dragData = DragData.Create(windowMethods.GetWindowHandle()); // would be kind of cool if we had another constructor that rendered from a delegate ... would make a lot more sense for deferred rendering
-            dragData.AddFormat(KDragFormatUTF8);
+            using var dragData = DragData.Create([KDragFormatUTF8], (format, payload) =>
+            {
+                if (format == KDragFormatUTF8)
+                {
+                    payload.RenderUTF8("HELLO FROM CLIPBOARD COPY!!!!");
+                    return true;
+                }
+                return false;
+            });
             ClipData.SetClipboard(dragData);
-            Console.WriteLine("Set UTF8 text to clipboard! (deferred rendering, though)");
-            // dragData will be released, but I think it's OK because behind the scenes it's using COM reference counting for the actual (deferred) data payload
+            // dragData will be released, but I think it's OK because behind the scenes it's using COM reference counting for the actual (deferred) delegate stuff
         });
         editMenu.AddAction(copyAction);
         // paste
@@ -89,9 +92,16 @@ public class WindowEventPage : BasePage
         if (_mouseDownPotentialDrag)
         {
             // begin DnD drag
-            using var dragData = DragData.Create(_windowMethods.GetWindowHandle());
-            dragData.AddFormat(KDragFormatUTF8);
-            var dropEffect = dragData.Execute(DropEffect.Copy);
+            using var dragData = DragData.Create([KDragFormatUTF8], (format, payload) =>
+            {
+                if (format == KDragFormatUTF8)
+                {
+                    payload.RenderUTF8("hello from DnD source!!! UTF8 in the house");
+                    return true;
+                }
+                return false;
+            });
+            var dropEffect = dragData.DragExec(DropEffect.Copy);
             Console.WriteLine($"DnD Drop effect: {dropEffect} (source format: {KDragFormatUTF8})");
             // cancel the potential, otherwise they will keep happening!
             _mouseDownPotentialDrag = false;

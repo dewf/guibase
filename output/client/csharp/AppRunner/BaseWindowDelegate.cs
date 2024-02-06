@@ -49,12 +49,7 @@ public class BaseWindowDelegate : Windowing.ClientWindowDelegate
     public override void KeyDown(Windowing.Key key, Windowing.Modifiers modifiers, Windowing.KeyLocation location)
     {
     }
-
-    public override void DragRender(Windowing.DragRenderPayload payload, string requestedFormatMIME)
-    {
-        throw new NotImplementedException("BaseWindowDelegate.DragRender() - you probably want to do something here");
-    }
-
+    
     public override Windowing.DropEffect DropFeedback(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect suggested)
     {
         return Windowing.DropEffect.None;

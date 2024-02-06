@@ -198,11 +198,6 @@ internal class MainWindow : BaseWindowDelegate, IWindowMethods
         if (_currentPage.CanDrop) _currentPage.DropSubmit(data, x, y, modifiers, effect);
     }
 
-    public override void DragRender(DragRenderPayload payload, string requestedFormatMIME)
-    {
-        _currentPage.DragRender(payload, requestedFormatMIME);
-    }
-
     public void Invalidate(int x, int y, int width, int height)
     {
         _window!.Invalidate(x, y, width, height);

@@ -64,17 +64,18 @@ flags DropEffect {
    Other = 1 << 3 // ask / private / etc
 }
 
-opaque DragData {
-   void addFormat(string dragFormatMIME);    // drag source: we're capable of generating this format
-   DropEffect execute(DropEffect canDoMask); // modal/blocking (note: currently missing *fromEvent parameter, which I think was required for GTK)
-
-   static DragData create(Window forWindow);
-}
-
 opaque DragRenderPayload {
    void renderUTF8(string text);
    void renderFiles(Array<string> filenames);
    void renderFormat(string formatMIME, Buffer<byte> data);
+}
+
+delegate bool DragRenderFunc(string requestedFormat, DragRenderPayload payload);
+
+opaque DragData {
+   DropEffect dragExec(DropEffect canDoMask); // modal/blocking (note: currently missing *fromEvent parameter, which I think was required for GTK)
+
+   static DragData create(Array<string> supportedFormats, DragRenderFunc renderFunc);
 }
 
 interface WindowDelegate {
@@ -90,9 +91,6 @@ interface WindowDelegate {
    void moved(int x, int y);
    void resized(int width, int height);
    void keyDown(Key key, Modifiers modifiers, KeyLocation location);
-
-   // dnd drag
-   void dragRender(DragRenderPayload payload, string requestedFormatMIME);
 
    // dnd drop
    DropEffect dropFeedback(DropData data, int x, int y, Modifiers modifiers, DropEffect suggested);
