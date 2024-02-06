@@ -16,7 +16,6 @@
                 }
                 return _id.Value;
             }
-            private set => _id = value;
         }
         private int RefCount { get; set; }
         
