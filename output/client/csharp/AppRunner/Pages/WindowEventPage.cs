@@ -38,6 +38,9 @@ public class WindowEventPage : BasePage
         using var exitAccel = Accelerator.Create(Key.Q, Modifiers.Control);
         using var exitAction = Windowing.Action.Create("E&xit", null, exitAccel, () =>
         {
+            // must call this before exiting if anything is on the clipboard
+            ClipData.FlushClipboard();
+            
             Console.WriteLine("Exiting!");
             windowMethods.DestroyWindow();
         });
