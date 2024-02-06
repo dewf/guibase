@@ -5,7 +5,19 @@
         private static int _nextClientResourceId = 1;
         private static readonly Dictionary<int, ClientResource> ClientResources = new();
 
-        internal int Id { get; private set; } = -1;
+        private int? _id;
+        internal int Id
+        {
+            get
+            {
+                if (!_id.HasValue)
+                {
+                    throw new Exception("ClientResource: attempted to use .Id before it has been set!");
+                }
+                return _id.Value;
+            }
+            private set => _id = value;
+        }
         private int RefCount { get; set; }
         
         protected abstract void NativePush();
@@ -16,10 +28,10 @@
 
         void IPushable.Push(bool isReturn) // isReturn unused here
         {
-            if (Id == -1)
+            if (!_id.HasValue)
             {
                 // unset as yet
-                Id = _nextClientResourceId++;
+                _id = _nextClientResourceId++;
                 RefCount = 1;
                 ClientResources[Id] = this;
                 Console.WriteLine($"C# ClientObject: pushed {Id}");
@@ -40,7 +52,7 @@
             {
                 Console.WriteLine($"C# Release on ClientResource {Id} - refCount 0, removing from clientObjects table");
                 ClientResources.Remove(Id);
-                Id = -1; // reset ID, since we're not in the object table anymore
+                _id = null; // reset ID, since we're not in the object table anymore
                 // all this does is remove this object from the 'checked-out' table -
                 // things we were keeping alive as long as the remote (server) side had reference to them
                 // but that doesn't mean we're ready to dispose it - might still be useful to us on this side!

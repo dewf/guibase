@@ -17,6 +17,8 @@
         protected override void NativePush()
         {
             NativeMethods.pushClientFunc(Id);
+            // NOW we can put in the Reverse dictionary! we didn't have the ID until this point ...
+            ReverseFuncValDict[_key] = Id;
         }
         
         protected override void ReleaseExtra()
@@ -33,9 +35,8 @@
                 return (ClientFuncVal)GetResourceById(id);
             }
             // else create anew
-            var clientFunc = new ClientFuncVal(wrapper, uniqueKey);
-            ReverseFuncValDict[uniqueKey] = clientFunc.Id;
-            return clientFunc;
+            // note, we still need to add to reverse dictionary in NativePush, because we don't yet have the generated .Id to do so
+            return new ClientFuncVal(wrapper, uniqueKey);
         }
     }
 }
