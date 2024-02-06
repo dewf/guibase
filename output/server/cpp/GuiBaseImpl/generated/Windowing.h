@@ -23,6 +23,7 @@ struct __MenuItem; typedef struct __MenuItem* MenuItem;
 struct __Menu; typedef struct __Menu* Menu;
 struct __MenuBar; typedef struct __MenuBar* MenuBar;
 struct __ClipData; typedef struct __ClipData* ClipData;
+struct __FileDialog; typedef struct __FileDialog* FileDialog;
 
 enum class Key {
     Unknown,
@@ -167,6 +168,36 @@ public:
     std::string format;
     DropDataBadFormat(std::string format)
         : format(format) {}
+};
+
+
+struct FileDialogResult {
+    bool success;
+    std::vector<std::string> filenames;
+};
+
+enum class FileDialogMode {
+    File,
+    Folder
+};
+
+// std::vector<std::vector<std::string>>
+
+struct FileDialogFilterSpec {
+    std::string description;
+    std::vector<std::string> extensions;
+};
+
+// std::vector<FileDialogFilterSpec>
+
+struct FileDialogOptions {
+    Window forWindow;
+    FileDialogMode mode;
+    std::vector<FileDialogFilterSpec> filters;
+    bool allowAll;
+    std::string defaultExt;
+    bool allowMultiple;
+    std::string suggestedFilename;
 };
 
 
@@ -373,3 +404,6 @@ void ClipData_setClipboard(DragData dragData);
 ClipData ClipData_get();
 void ClipData_flushClipboard();
 void ClipData_dispose(ClipData _this);
+FileDialogResult FileDialog_openFile(FileDialogOptions opts);
+FileDialogResult FileDialog_saveFile(FileDialogOptions opts);
+void FileDialog_dispose(FileDialog _this);

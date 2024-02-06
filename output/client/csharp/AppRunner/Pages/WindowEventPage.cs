@@ -34,6 +34,24 @@ public class WindowEventPage : BasePage
         
         // file menu
         using var fileMenu = Menu.Create();
+        // open
+        using var openAccel = Accelerator.Create(Key.O, Modifiers.Control);
+        using var openAction = Windowing.Action.Create("&Open", null, openAccel, () =>
+        {
+            var result = FileDialog.OpenFile(new FileDialogOptions {
+                ForWindow = null,
+                Filters = [
+                    new FileDialogFilterSpec("Text Files (*.txt, *.doc)", ["txt", "doc"])
+                ],
+                Mode = FileDialogMode.File,
+                AllowAll = true,
+                AllowMultiple = false,
+                DefaultExt = "txt",
+                SuggestedFilename = "none"
+            });
+            Console.WriteLine(result.Success ? $"success: opened file [{result.Filenames[0]}]" : "Canceled");
+        });
+        fileMenu.AddAction(openAction);
         // exit
         using var exitAccel = Accelerator.Create(Key.Q, Modifiers.Control);
         using var exitAction = Windowing.Action.Create("E&xit", null, exitAccel, () =>

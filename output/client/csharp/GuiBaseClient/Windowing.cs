@@ -62,6 +62,9 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _clipData_get;
         private static ModuleMethodHandle _clipData_flushClipboard;
         private static ModuleMethodHandle _ClipData_dispose;
+        private static ModuleMethodHandle _fileDialog_openFile;
+        private static ModuleMethodHandle _fileDialog_saveFile;
+        private static ModuleMethodHandle _FileDialog_dispose;
         private static InterfaceHandle _windowDelegate;
         private static InterfaceMethodHandle _windowDelegate_canClose;
         private static InterfaceMethodHandle _windowDelegate_closed;
@@ -631,6 +634,207 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new DropData(ptr) : null;
+        }
+
+        public struct FileDialogResult {
+            public bool Success;
+            public string[] Filenames;
+            public FileDialogResult(bool success, string[] filenames)
+            {
+                this.Success = success;
+                this.Filenames = filenames;
+            }
+        }
+
+        internal static void FileDialogResult__Push(FileDialogResult value, bool isReturn)
+        {
+            NativeImplClient.PushStringArray(value.Filenames);
+            NativeImplClient.PushBool(value.Success);
+        }
+
+        internal static FileDialogResult FileDialogResult__Pop()
+        {
+            var success = NativeImplClient.PopBool();
+            var filenames = NativeImplClient.PopStringArray();
+            return new FileDialogResult(success, filenames);
+        }
+
+        public enum FileDialogMode
+        {
+            File,
+            Folder
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void FileDialogMode__Push(FileDialogMode value)
+        {
+            NativeImplClient.PushInt32((int)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static FileDialogMode FileDialogMode__Pop()
+        {
+            var ret = NativeImplClient.PopInt32();
+            return (FileDialogMode)ret;
+        }
+
+        internal static void __String_Array_Array__Push(string[][] values, bool isReturn)
+        {
+            foreach (var value in values.Reverse())
+            {
+                NativeImplClient.PushStringArray(value);
+            }
+            NativeImplClient.PushSizeT((IntPtr)values.Length);
+        }
+
+        internal static string[][] __String_Array_Array__Pop()
+        {
+            var count = (int)NativeImplClient.PopSizeT();
+            var ret = new string[count][];
+            for (var i = 0; i < count; i++)
+            {
+                ret[i] = NativeImplClient.PopStringArray();
+            }
+            return ret;
+        }
+
+        public struct FileDialogFilterSpec {
+            public string Description;
+            public string[] Extensions;
+            public FileDialogFilterSpec(string description, string[] extensions)
+            {
+                this.Description = description;
+                this.Extensions = extensions;
+            }
+        }
+
+        internal static void FileDialogFilterSpec__Push(FileDialogFilterSpec value, bool isReturn)
+        {
+            NativeImplClient.PushStringArray(value.Extensions);
+            NativeImplClient.PushString(value.Description);
+        }
+
+        internal static FileDialogFilterSpec FileDialogFilterSpec__Pop()
+        {
+            var description = NativeImplClient.PopString();
+            var extensions = NativeImplClient.PopStringArray();
+            return new FileDialogFilterSpec(description, extensions);
+        }
+
+        internal static void __FileDialogFilterSpec_Array__Push(FileDialogFilterSpec[] items, bool isReturn)
+        {
+            var count = items.Length;
+            var f0Values = new string[count];
+            var f1Values = new string[count][];
+            for (var i = 0; i < count; i++)
+            {
+                f0Values[i] = items[i].Description;
+                f1Values[i] = items[i].Extensions;
+            }
+            __String_Array_Array__Push(f1Values, isReturn);
+            NativeImplClient.PushStringArray(f0Values);
+        }
+
+        internal static FileDialogFilterSpec[] __FileDialogFilterSpec_Array__Pop()
+        {
+            var f0Values = NativeImplClient.PopStringArray();
+            var f1Values = __String_Array_Array__Pop();
+            var count = f0Values.Length;
+            var ret = new FileDialogFilterSpec[count];
+            for (var i = 0; i < count; i++)
+            {
+                var f0 = f0Values[i];
+                var f1 = f1Values[i];
+                ret[i] = new FileDialogFilterSpec(f0, f1);
+            }
+            return ret;
+        }
+
+        public struct FileDialogOptions {
+            public Window ForWindow;
+            public FileDialogMode Mode;
+            public FileDialogFilterSpec[] Filters;
+            public bool AllowAll;
+            public string DefaultExt;
+            public bool AllowMultiple;
+            public string SuggestedFilename;
+            public FileDialogOptions(Window forWindow, FileDialogMode mode, FileDialogFilterSpec[] filters, bool allowAll, string defaultExt, bool allowMultiple, string suggestedFilename)
+            {
+                this.ForWindow = forWindow;
+                this.Mode = mode;
+                this.Filters = filters;
+                this.AllowAll = allowAll;
+                this.DefaultExt = defaultExt;
+                this.AllowMultiple = allowMultiple;
+                this.SuggestedFilename = suggestedFilename;
+            }
+        }
+
+        internal static void FileDialogOptions__Push(FileDialogOptions value, bool isReturn)
+        {
+            NativeImplClient.PushString(value.SuggestedFilename);
+            NativeImplClient.PushBool(value.AllowMultiple);
+            NativeImplClient.PushString(value.DefaultExt);
+            NativeImplClient.PushBool(value.AllowAll);
+            __FileDialogFilterSpec_Array__Push(value.Filters, isReturn);
+            FileDialogMode__Push(value.Mode);
+            Window__Push(value.ForWindow);
+        }
+
+        internal static FileDialogOptions FileDialogOptions__Pop()
+        {
+            var forWindow = Window__Pop();
+            var mode = FileDialogMode__Pop();
+            var filters = __FileDialogFilterSpec_Array__Pop();
+            var allowAll = NativeImplClient.PopBool();
+            var defaultExt = NativeImplClient.PopString();
+            var allowMultiple = NativeImplClient.PopBool();
+            var suggestedFilename = NativeImplClient.PopString();
+            return new FileDialogOptions(forWindow, mode, filters, allowAll, defaultExt, allowMultiple, suggestedFilename);
+        }
+
+        public class FileDialog : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            protected bool _disposed;
+            internal FileDialog(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public virtual void Dispose()
+            {
+                if (!_disposed)
+                {
+                    FileDialog__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_FileDialog_dispose);
+                    _disposed = true;
+                }
+            }
+            public static FileDialogResult OpenFile(FileDialogOptions opts)
+            {
+                FileDialogOptions__Push(opts, false);
+                NativeImplClient.InvokeModuleMethod(_fileDialog_openFile);
+                return FileDialogResult__Pop();
+            }
+            public static FileDialogResult SaveFile(FileDialogOptions opts)
+            {
+                FileDialogOptions__Push(opts, false);
+                NativeImplClient.InvokeModuleMethod(_fileDialog_saveFile);
+                return FileDialogResult__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void FileDialog__Push(FileDialog thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static FileDialog FileDialog__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new FileDialog(ptr) : null;
         }
 
         public class Icon : IDisposable
@@ -1502,6 +1706,9 @@ namespace Org.Prefixed.GuiBase
             _clipData_get = NativeImplClient.GetModuleMethod(_module, "ClipData_get");
             _clipData_flushClipboard = NativeImplClient.GetModuleMethod(_module, "ClipData_flushClipboard");
             _ClipData_dispose = NativeImplClient.GetModuleMethod(_module, "ClipData_dispose");
+            _fileDialog_openFile = NativeImplClient.GetModuleMethod(_module, "FileDialog_openFile");
+            _fileDialog_saveFile = NativeImplClient.GetModuleMethod(_module, "FileDialog_saveFile");
+            _FileDialog_dispose = NativeImplClient.GetModuleMethod(_module, "FileDialog_dispose");
 
             _dropDataBadFormat = NativeImplClient.GetException(_module, "DropDataBadFormat");
             NativeImplClient.SetExceptionBuilder(_dropDataBadFormat, DropDataBadFormat.BuildAndThrow);

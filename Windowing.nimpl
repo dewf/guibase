@@ -157,6 +157,38 @@ opaque ClipData extends DropData {
    static void flushClipboard();
 }
 
+// FILE DIALOGS ======================================================================
+
+enum FileDialogMode {
+   File,
+   Folder
+}
+
+struct FileDialogFilterSpec {
+   string description;
+   Array<string> extensions; // no leading '.'
+}
+
+struct FileDialogOptions {
+   Window forWindow;                     // optional, otherwise is app-modal
+   FileDialogMode mode;
+   Array<FileDialogFilterSpec> filters;
+   bool allowAll;                        // append *.*
+   string defaultExt;                    // windows only at the moment (?): "sets the default extension to be added to file names"
+   bool allowMultiple;                   // for open mode only
+   string suggestedFilename;             // for save mode
+}
+
+struct FileDialogResult {
+   bool success;
+   Array<string> filenames;
+}
+
+opaque FileDialog {
+   static FileDialogResult openFile(FileDialogOptions opts);
+   static FileDialogResult saveFile(FileDialogOptions opts);
+}
+
 // KEY ENUM STUFF ====================================================================
 
 enum KeyLocation {

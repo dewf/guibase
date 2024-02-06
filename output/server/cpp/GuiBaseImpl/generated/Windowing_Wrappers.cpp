@@ -185,6 +185,107 @@ DropData DropData__pop() {
     return (DropData)ni_popPtr();
 }
 
+void FileDialogResult__push(FileDialogResult value, bool isReturn) {
+    pushStringArrayInternal(value.filenames);
+    ni_pushBool(value.success);
+}
+
+FileDialogResult FileDialogResult__pop() {
+    auto success = ni_popBool();
+    auto filenames = popStringArrayInternal();
+    return FileDialogResult { success, filenames };
+}
+
+inline void FileDialogMode__push(FileDialogMode value) {
+    ni_pushInt32((int32_t)value);
+}
+
+inline FileDialogMode FileDialogMode__pop() {
+    auto tag = ni_popInt32();
+    return (FileDialogMode)tag;
+}
+
+void __String_Array_Array__push(std::vector<std::vector<std::string>> values, bool isReturn) {
+    for (auto v = values.rbegin(); v != values.rend(); v++) {
+        pushStringArrayInternal(*v);
+    }
+    ni_pushSizeT(values.size());
+}
+
+std::vector<std::vector<std::string>> __String_Array_Array__pop() {
+    std::vector<std::vector<std::string>> __ret;
+    auto count = ni_popSizeT();
+    for (auto i = 0; i < count; i++) {
+        auto value = popStringArrayInternal();
+        __ret.push_back(value);
+    }
+    return __ret;
+}
+
+void FileDialogFilterSpec__push(FileDialogFilterSpec value, bool isReturn) {
+    pushStringArrayInternal(value.extensions);
+    pushStringInternal(value.description);
+}
+
+FileDialogFilterSpec FileDialogFilterSpec__pop() {
+    auto description = popStringInternal();
+    auto extensions = popStringArrayInternal();
+    return FileDialogFilterSpec { description, extensions };
+}
+
+void __FileDialogFilterSpec_Array__push(std::vector<FileDialogFilterSpec> values, bool isReturn) {
+    std::vector<std::vector<std::string>> extensions_values;
+    std::vector<std::string> description_values;
+    for (auto v = values.begin(); v != values.end(); v++) {
+        extensions_values.push_back(v->extensions);
+        description_values.push_back(v->description);
+    }
+    __String_Array_Array__push(extensions_values, isReturn);
+    pushStringArrayInternal(description_values);
+}
+
+std::vector<FileDialogFilterSpec> __FileDialogFilterSpec_Array__pop() {
+    auto description_values = popStringArrayInternal();
+    auto extensions_values = __String_Array_Array__pop();
+    std::vector<FileDialogFilterSpec> __ret;
+    for (auto i = 0; i < description_values.size(); i++) {
+        FileDialogFilterSpec __value;
+        __value.description = description_values[i];
+        __value.extensions = extensions_values[i];
+        __ret.push_back(__value);
+    }
+    return __ret;
+}
+
+void FileDialogOptions__push(FileDialogOptions value, bool isReturn) {
+    pushStringInternal(value.suggestedFilename);
+    ni_pushBool(value.allowMultiple);
+    pushStringInternal(value.defaultExt);
+    ni_pushBool(value.allowAll);
+    __FileDialogFilterSpec_Array__push(value.filters, isReturn);
+    FileDialogMode__push(value.mode);
+    Window__push(value.forWindow);
+}
+
+FileDialogOptions FileDialogOptions__pop() {
+    auto forWindow = Window__pop();
+    auto mode = FileDialogMode__pop();
+    auto filters = __FileDialogFilterSpec_Array__pop();
+    auto allowAll = ni_popBool();
+    auto defaultExt = popStringInternal();
+    auto allowMultiple = ni_popBool();
+    auto suggestedFilename = popStringInternal();
+    return FileDialogOptions { forWindow, mode, filters, allowAll, defaultExt, allowMultiple, suggestedFilename };
+}
+
+void FileDialog__push(FileDialog value) {
+    ni_pushPtr(value);
+}
+
+FileDialog FileDialog__pop() {
+    return (FileDialog)ni_popPtr();
+}
+
 void Icon__push(Icon value) {
     ni_pushPtr(value);
 }
@@ -747,6 +848,21 @@ void ClipData_dispose__wrapper() {
     ClipData_dispose(_this);
 }
 
+void FileDialog_openFile__wrapper() {
+    auto opts = FileDialogOptions__pop();
+    FileDialogResult__push(FileDialog_openFile(opts), true);
+}
+
+void FileDialog_saveFile__wrapper() {
+    auto opts = FileDialogOptions__pop();
+    FileDialogResult__push(FileDialog_saveFile(opts), true);
+}
+
+void FileDialog_dispose__wrapper() {
+    auto _this = FileDialog__pop();
+    FileDialog_dispose(_this);
+}
+
 void WindowDelegate_canClose__wrapper(int serverID) {
     auto inst = ServerWindowDelegate::getByID(serverID);
     ni_pushBool(inst->canClose());
@@ -915,6 +1031,9 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "ClipData_get", &ClipData_get__wrapper);
     ni_registerModuleMethod(m, "ClipData_flushClipboard", &ClipData_flushClipboard__wrapper);
     ni_registerModuleMethod(m, "ClipData_dispose", &ClipData_dispose__wrapper);
+    ni_registerModuleMethod(m, "FileDialog_openFile", &FileDialog_openFile__wrapper);
+    ni_registerModuleMethod(m, "FileDialog_saveFile", &FileDialog_saveFile__wrapper);
+    ni_registerModuleMethod(m, "FileDialog_dispose", &FileDialog_dispose__wrapper);
     auto windowDelegate = ni_registerInterface(m, "WindowDelegate");
     windowDelegate_canClose = ni_registerInterfaceMethod(windowDelegate, "canClose", &WindowDelegate_canClose__wrapper);
     windowDelegate_closed = ni_registerInterfaceMethod(windowDelegate, "closed", &WindowDelegate_closed__wrapper);

@@ -13,7 +13,6 @@ static std::function<MenuActionFunc> actionFuncForId(int id) {
     return menuActionFuncs[id];
 }
 
-
 const std::string kDragFormatUTF8 = wl_kDragFormatUTF8;
 const std::string kDragFormatFiles = wl_kDragFormatFiles;
 
@@ -65,6 +64,10 @@ public:
         win2->del = del;
 
         return win2;
+    }
+    // util
+    wl_WindowRef getWlWindow() {
+        return wlWindow;
     }
     // opaque methods ==========================
     void show() {
@@ -554,4 +557,78 @@ void MenuBar_addMenu(MenuBar _this, std::string label, Menu menu) {
 MenuBar MenuBar_create()
 {
     return (MenuBar)wl_MenuBarCreate();
+}
+
+static std::string joinStrings(std::vector<std::string> strings, const char* delim) {
+    std::string output = strings[0];
+    for (auto i = 1; i < strings.size(); i++) {
+        output += delim;
+        output += strings[i];
+    }
+    return output;
+}
+
+template <typename F>
+static void execWithDialogOpts(FileDialogOptions& src, const F& func)
+{
+    wl_FileDialogOpts dest;
+    dest.forWindow = src.forWindow
+        ? ((InternalWindow*)src.forWindow)->getWlWindow()
+        : nullptr;
+    dest.mode = (wl_FileDialogOpts::Mode)src.mode;
+    auto destFilters = new wl_FileDialogOpts::FilterSpec[src.filters.size()];
+
+    std::vector<std::string> joinedExtensions; // to keep the joined strings alive until we're done
+
+    int i = 0;
+    for (auto f = src.filters.begin(); f != src.filters.end(); f++) {
+        destFilters[i].desc = f->description.c_str();
+        
+        auto joined = joinStrings(f->extensions, ";");
+        joinedExtensions.push_back(joined);
+        destFilters[i].exts = joined.c_str();
+
+        i++;
+    }
+    dest.filters = destFilters;
+    dest.numFilters = (int)src.filters.size();
+    dest.allowAll = src.allowAll;
+    dest.defaultExt = src.defaultExt.c_str();
+    dest.allowMultiple = src.allowMultiple;
+    dest.suggestedFilename = src.suggestedFilename.c_str();
+    //
+    func(&dest);
+    //
+    delete[] destFilters;
+}
+
+FileDialogResult FileDialog_openFile(FileDialogOptions opts)
+{
+    FileDialogResult ret;
+    ret.success = false;
+
+    execWithDialogOpts(opts, [&ret](wl_FileDialogOpts *wlOpts) {
+        wl_FileResults* results;
+        if (wl_FileOpenDialog(wlOpts, &results)) {
+            ret.success = true;
+            for (auto i = 0; i < results->numResults; i++) {
+                ret.filenames.push_back(results->results[i]);
+            }
+            wl_FileResultsFree(&results);
+        }
+    });
+    return ret;
+}
+
+FileDialogResult FileDialog_saveFile(FileDialogOptions opts)
+{
+    FileDialogResult x;
+    x.success = false;
+    printf("FileDialog_saveFile: TODO\n");
+    return x;
+}
+
+void FileDialog_dispose(FileDialog _this)
+{
+    // nothing to do, it's a namespace prefix only!
 }

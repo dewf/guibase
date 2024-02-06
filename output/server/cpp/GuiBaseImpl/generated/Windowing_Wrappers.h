@@ -37,6 +37,21 @@ void DropDataBadFormat__buildAndThrow();
 void DropData__push(DropData value);
 DropData DropData__pop();
 
+void FileDialogResult__push(FileDialogResult value, bool isReturn);
+FileDialogResult FileDialogResult__pop();
+
+void FileDialogMode__push(FileDialogMode value);
+FileDialogMode FileDialogMode__pop();
+
+void FileDialogFilterSpec__push(FileDialogFilterSpec value, bool isReturn);
+FileDialogFilterSpec FileDialogFilterSpec__pop();
+
+void FileDialogOptions__push(FileDialogOptions value, bool isReturn);
+FileDialogOptions FileDialogOptions__pop();
+
+void FileDialog__push(FileDialog value);
+FileDialog FileDialog__pop();
+
 void Icon__push(Icon value);
 Icon Icon__pop();
 
@@ -167,6 +182,12 @@ void ClipData_get__wrapper();
 void ClipData_flushClipboard__wrapper();
 
 void ClipData_dispose__wrapper();
+
+void FileDialog_openFile__wrapper();
+
+void FileDialog_saveFile__wrapper();
+
+void FileDialog_dispose__wrapper();
 
 void WindowDelegate_canClose__wrapper(int serverID);
 
