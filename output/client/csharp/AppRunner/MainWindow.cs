@@ -203,6 +203,11 @@ internal class MainWindow : BaseWindowDelegate, IWindowMethods
         _window!.Invalidate(x, y, width, height);
     }
 
+    public void ShowContextMenu(int x, int y, Menu menu)
+    {
+        _window!.ShowContextMenu(x, y, menu);
+    }
+
     public void TimerTick(double secondsSinceLast)
     {
         if (_currentPage.IsAnimating)

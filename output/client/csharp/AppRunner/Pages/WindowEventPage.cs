@@ -15,10 +15,9 @@ public class WindowEventPage : BasePage
     private DropEffect _suggestedEffect;
     private double _animPhase;
     private string[]? _lastDroppedFiles;
-
     private readonly Rect _dragSourceRect = MakeRect(100, 100, 200, 200);
-
     private bool _mouseDownPotentialDrag;
+    private readonly Menu _contextMenu;
     
     public override string PageTitle => "Windowing/Event testing";
     public override bool CanDrop => true;
@@ -27,108 +26,28 @@ public class WindowEventPage : BasePage
     private readonly MenuBar _nativeMenuBar;
     public override MenuBar? MenuBar => _nativeMenuBar;
 
-    private static MenuBar CreateMenuBar(IWindowMethods windowMethods)
+    private static Menu CreateContextMenu()
     {
-        // no 'using' since we're returning it
-        var menuBar = MenuBar.Create();
+        var menu = Menu.Create();
         
-        // file menu
-        using var fileMenu = Menu.Create();
+        // these could have accelerators if the actions were installed in the menubar (for our win32 implementation, that's how keyboard accelerators are installed)
         
-        // open
-        using var openAccel = Accelerator.Create(Key.O, Modifiers.Control);
-        using var openAction = Windowing.Action.Create("&Open", null, openAccel, () =>
-        {
-            var result = FileDialog.OpenFile(new FileDialogOptions {
-                ForWindow = null,
-                Filters = [
-                    new FileDialogFilterSpec("Text Files (*.txt, *.doc)", ["txt", "doc"])
-                ],
-                Mode = FileDialogMode.File,
-                AllowAll = true,
-                AllowMultiple = false,
-                DefaultExt = "txt",
-                SuggestedFilename = "none"
-            });
-            Console.WriteLine(result.Success ? $"success: opened file [{result.Filenames[0]}]" : "Canceled");
-        });
-        fileMenu.AddAction(openAction);
-        
-        // save
-        using var saveAccel = Accelerator.Create(Key.S, Modifiers.Control);
-        using var saveAction = Windowing.Action.Create("&Save", null, saveAccel, () =>
-        {
-            var result = FileDialog.SaveFile(new FileDialogOptions
-            {
-                ForWindow = null,
-                Filters =
-                [
-                    new FileDialogFilterSpec("Text Files (*.txt, *.doc)", ["txt", "doc"])
-                ],
-                Mode = FileDialogMode.File,
-                AllowAll = true,
-                AllowMultiple = false,
-                DefaultExt = "txt",
-                SuggestedFilename = "TestDocument.txt"
-            });
-            Console.WriteLine(result.Success ? $"success: saved file [{result.Filenames[0]}]" : "Canceled");
-        });
-        fileMenu.AddAction(saveAction);
-        
-        // separator
-        fileMenu.AddSeparator();
-        
-        // exit
-        using var exitAccel = Accelerator.Create(Key.Q, Modifiers.Control);
-        using var exitAction = Windowing.Action.Create("E&xit", null, exitAccel, () =>
-        {
-            Console.WriteLine("Exiting!");
-            windowMethods.DestroyWindow();
-        });
-        fileMenu.AddAction(exitAction);
-        
-        // edit menu
-        using var editMenu = Menu.Create();
-        // copy
-        using var copyAccel = Accelerator.Create(Key.C, Modifiers.Control);
-        using var copyAction = Windowing.Action.Create("&Copy", null, copyAccel, () =>
-        {
-            using var dragData = DragData.Create([KDragFormatUTF8], (format, payload) =>
-            {
-                if (format == KDragFormatUTF8)
-                {
-                    payload.RenderUTF8("HELLO FROM CLIPBOARD COPY!!!!");
-                    return true;
-                }
-                return false;
-            });
-            ClipData.SetClipboard(dragData);
-            // dragData will be released, but I think it's OK because behind the scenes it's using COM reference counting for the actual (deferred) delegate stuff
-        });
-        editMenu.AddAction(copyAction);
-        // paste
-        using var pasteAccel = Accelerator.Create(Key.V, Modifiers.Control);
-        using var pasteAction = Windowing.Action.Create("&Paste", null, pasteAccel, () =>
-        {
-            using var data = ClipData.Get();
-            if (data.HasFormat(KDragFormatUTF8))
-            {
-                var text = data.GetTextUTF8();
-                Console.WriteLine($"Pasting from clipboard: [[{text}]]");
-            }
-        });
-        editMenu.AddAction(pasteAction);
+        var action1 = Windowing.Action.Create("Action 1", null, null, () => Console.WriteLine("You clicked Action1"));
+        menu.AddAction(action1);
 
-        // menubar
-        menuBar.AddMenu("&File", fileMenu);
-        menuBar.AddMenu("&Edit", editMenu);
-        return menuBar;
+        var action2 = Windowing.Action.Create("Some Action 2", null, null, () => Console.WriteLine("You clicked Action2"));
+        menu.AddAction(action2);
+        
+        return menu;
     }
 
     public WindowEventPage(IWindowMethods windowMethods) : base(windowMethods)
     {
         _windowMethods = windowMethods;
         _nativeMenuBar = CreateMenuBar(windowMethods);
+        
+        // create a simple context menu
+        _contextMenu = CreateContextMenu();
     }
 
     public override void OnMouseMove(int x, int y, Modifiers modifiers)
@@ -154,7 +73,13 @@ public class WindowEventPage : BasePage
 
     public override void OnMouseDown(int x, int y, MouseButton button, Modifiers modifiers)
     {
-        _mouseDownPotentialDrag = _dragSourceRect.ContainsPoint(new Point(x, y));
+        if (button == MouseButton.Left)
+        {
+            _mouseDownPotentialDrag = _dragSourceRect.ContainsPoint(new Point(x, y));
+        } else if (button == MouseButton.Right)
+        {
+            _windowMethods.ShowContextMenu(x, y, _contextMenu);
+        }
     }
 
     public override void Render(DrawContext context, RenderArea area)
@@ -275,5 +200,103 @@ public class WindowEventPage : BasePage
         // 1 complete cycle per second?
         _animPhase = (_animPhase + (secondsSinceLast * 8.0)) % 8.0;
         Invalidate();
+    }
+    
+    private static MenuBar CreateMenuBar(IWindowMethods windowMethods)
+    {
+        // no 'using' since we're returning it
+        var menuBar = MenuBar.Create();
+        
+        // file menu
+        using var fileMenu = Menu.Create();
+        
+        // open
+        using var openAccel = Accelerator.Create(Key.O, Modifiers.Control);
+        using var openAction = Windowing.Action.Create("&Open", null, openAccel, () =>
+        {
+            var result = FileDialog.OpenFile(new FileDialogOptions {
+                ForWindow = windowMethods.GetWindowHandle(),
+                Filters = [
+                    new FileDialogFilterSpec("Text Files (*.txt, *.doc)", ["txt", "doc"])
+                ],
+                Mode = FileDialogMode.File,
+                AllowAll = true,
+                AllowMultiple = false,
+                DefaultExt = "txt",
+                SuggestedFilename = "none"
+            });
+            Console.WriteLine(result.Success ? $"success: opened file [{result.Filenames[0]}]" : "Canceled");
+        });
+        fileMenu.AddAction(openAction);
+        
+        // save
+        using var saveAccel = Accelerator.Create(Key.S, Modifiers.Control);
+        using var saveAction = Windowing.Action.Create("&Save", null, saveAccel, () =>
+        {
+            var result = FileDialog.SaveFile(new FileDialogOptions
+            {
+                ForWindow = windowMethods.GetWindowHandle(),
+                Filters =
+                [
+                    new FileDialogFilterSpec("Text Files (*.txt, *.doc)", ["txt", "doc"])
+                ],
+                Mode = FileDialogMode.File,
+                AllowAll = true,
+                AllowMultiple = false,
+                DefaultExt = "txt",
+                SuggestedFilename = "TestDocument.txt"
+            });
+            Console.WriteLine(result.Success ? $"success: saved file [{result.Filenames[0]}]" : "Canceled");
+        });
+        fileMenu.AddAction(saveAction);
+        
+        // separator
+        fileMenu.AddSeparator();
+        
+        // exit
+        using var exitAccel = Accelerator.Create(Key.Q, Modifiers.Control);
+        using var exitAction = Windowing.Action.Create("E&xit", null, exitAccel, () =>
+        {
+            Console.WriteLine("Exiting!");
+            windowMethods.DestroyWindow();
+        });
+        fileMenu.AddAction(exitAction);
+        
+        // edit menu
+        using var editMenu = Menu.Create();
+        // copy
+        using var copyAccel = Accelerator.Create(Key.C, Modifiers.Control);
+        using var copyAction = Windowing.Action.Create("&Copy", null, copyAccel, () =>
+        {
+            using var dragData = DragData.Create([KDragFormatUTF8], (format, payload) =>
+            {
+                if (format == KDragFormatUTF8)
+                {
+                    payload.RenderUTF8("HELLO FROM CLIPBOARD COPY!!!!");
+                    return true;
+                }
+                return false;
+            });
+            ClipData.SetClipboard(dragData);
+            // dragData will be released, but I think it's OK because behind the scenes it's using COM reference counting for the actual (deferred) delegate stuff
+        });
+        editMenu.AddAction(copyAction);
+        // paste
+        using var pasteAccel = Accelerator.Create(Key.V, Modifiers.Control);
+        using var pasteAction = Windowing.Action.Create("&Paste", null, pasteAccel, () =>
+        {
+            using var data = ClipData.Get();
+            if (data.HasFormat(KDragFormatUTF8))
+            {
+                var text = data.GetTextUTF8();
+                Console.WriteLine($"Pasting from clipboard: [[{text}]]");
+            }
+        });
+        editMenu.AddAction(pasteAction);
+
+        // menubar
+        menuBar.AddMenu("&File", fileMenu);
+        menuBar.AddMenu("&Edit", editMenu);
+        return menuBar;
     }
 }

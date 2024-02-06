@@ -170,7 +170,7 @@ struct FileDialogFilterSpec {
 }
 
 struct FileDialogOptions {
-   Window forWindow;                     // optional, otherwise is app-modal
+   Window forWindow;                     // window-modal if provided, otherwise NOT app-modal
    FileDialogMode mode;
    Array<FileDialogFilterSpec> filters;
    bool allowAll;                        // append *.*

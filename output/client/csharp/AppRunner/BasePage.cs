@@ -6,6 +6,7 @@ public interface IWindowMethods
 {
     void Invalidate(int x, int y, int width, int height);
     void DestroyWindow();
+    void ShowContextMenu(int x, int y, Windowing.Menu menu);
     Windowing.Window GetWindowHandle();
 }
 
