@@ -568,6 +568,12 @@ static std::string joinStrings(std::vector<std::string> strings, const char* del
     return output;
 }
 
+// this is just complexity necessitated by sending everything over in C-friendly structs
+// namely, allocating and deallocating the various pointers that go in the structure
+// another approach would have been to allocate a meta-struct holding not only the
+// wl file options, but also the string buffers holding the data whose pointers we're using
+// no compelling reason to do it this way, just having fun with C++ lambdas
+ 
 template <typename F>
 static void execWithDialogOpts(FileDialogOptions& src, const F& func)
 {
@@ -622,13 +628,23 @@ FileDialogResult FileDialog_openFile(FileDialogOptions opts)
 
 FileDialogResult FileDialog_saveFile(FileDialogOptions opts)
 {
-    FileDialogResult x;
-    x.success = false;
-    printf("FileDialog_saveFile: TODO\n");
-    return x;
+    FileDialogResult ret;
+    ret.success = false;
+
+    execWithDialogOpts(opts, [&ret](wl_FileDialogOpts* wlOpts) {
+        wl_FileResults* results;
+        if (wl_FileSaveDialog(wlOpts, &results)) {
+            ret.success = true;
+            for (auto i = 0; i < results->numResults; i++) {
+                ret.filenames.push_back(results->results[i]);
+            }
+            wl_FileResultsFree(&results);
+        }
+    });
+    return ret;
 }
 
 void FileDialog_dispose(FileDialog _this)
 {
-    // nothing to do, it's a namespace prefix only!
+    // nothing to do, it's a namespace prefix only (no FileDialog instances are ever created)
 }
