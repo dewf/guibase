@@ -45,37 +45,6 @@ Accelerator Accelerator__pop() {
     return (Accelerator)ni_popPtr();
 }
 
-void MenuActionFunc__push(std::function<MenuActionFunc> f) {
-    size_t uniqueKey = 0;
-    if (f) {
-        MenuActionFunc* ptr_fun = f.target<MenuActionFunc>();
-        if (ptr_fun != nullptr) {
-            uniqueKey = (size_t)ptr_fun;
-        }
-    }
-    auto wrapper = [f]() {
-        f();
-    };
-    pushServerFuncVal(wrapper, uniqueKey);
-}
-
-std::function<MenuActionFunc> MenuActionFunc__pop() {
-    auto id = ni_popClientFunc();
-    auto cf = std::shared_ptr<ClientFuncVal>(new ClientFuncVal(id));
-    auto wrapper = [cf]() {
-        cf->remoteExec();
-    };
-    return wrapper;
-}
-
-void Action__push(Action value) {
-    ni_pushPtr(value);
-}
-
-Action Action__pop() {
-    return (Action)ni_popPtr();
-}
-
 void ClipData__push(ClipData value) {
     ni_pushPtr(value);
 }
@@ -318,6 +287,37 @@ void Menu__push(Menu value) {
 
 Menu Menu__pop() {
     return (Menu)ni_popPtr();
+}
+
+void MenuActionFunc__push(std::function<MenuActionFunc> f) {
+    size_t uniqueKey = 0;
+    if (f) {
+        MenuActionFunc* ptr_fun = f.target<MenuActionFunc>();
+        if (ptr_fun != nullptr) {
+            uniqueKey = (size_t)ptr_fun;
+        }
+    }
+    auto wrapper = [f]() {
+        f();
+    };
+    pushServerFuncVal(wrapper, uniqueKey);
+}
+
+std::function<MenuActionFunc> MenuActionFunc__pop() {
+    auto id = ni_popClientFunc();
+    auto cf = std::shared_ptr<ClientFuncVal>(new ClientFuncVal(id));
+    auto wrapper = [cf]() {
+        cf->remoteExec();
+    };
+    return wrapper;
+}
+
+void MenuAction__push(MenuAction value) {
+    ni_pushPtr(value);
+}
+
+MenuAction MenuAction__pop() {
+    return (MenuAction)ni_popPtr();
 }
 
 void MenuBar__push(MenuBar value) {
@@ -866,17 +866,17 @@ void Accelerator_dispose__wrapper() {
     Accelerator_dispose(_this);
 }
 
-void Action_create__wrapper() {
+void MenuAction_create__wrapper() {
     auto label = popStringInternal();
     auto icon = Icon__pop();
     auto accel = Accelerator__pop();
     auto func = MenuActionFunc__pop();
-    Action__push(Action_create(label, icon, accel, func));
+    MenuAction__push(MenuAction_create(label, icon, accel, func));
 }
 
-void Action_dispose__wrapper() {
-    auto _this = Action__pop();
-    Action_dispose(_this);
+void MenuAction_dispose__wrapper() {
+    auto _this = MenuAction__pop();
+    MenuAction_dispose(_this);
 }
 
 void MenuItem_dispose__wrapper() {
@@ -886,7 +886,7 @@ void MenuItem_dispose__wrapper() {
 
 void Menu_addAction__wrapper() {
     auto _this = Menu__pop();
-    auto action = Action__pop();
+    auto action = MenuAction__pop();
     MenuItem__push(Menu_addAction(_this, action));
 }
 
@@ -1131,8 +1131,8 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "Icon_dispose", &Icon_dispose__wrapper);
     ni_registerModuleMethod(m, "Accelerator_create", &Accelerator_create__wrapper);
     ni_registerModuleMethod(m, "Accelerator_dispose", &Accelerator_dispose__wrapper);
-    ni_registerModuleMethod(m, "Action_create", &Action_create__wrapper);
-    ni_registerModuleMethod(m, "Action_dispose", &Action_dispose__wrapper);
+    ni_registerModuleMethod(m, "MenuAction_create", &MenuAction_create__wrapper);
+    ni_registerModuleMethod(m, "MenuAction_dispose", &MenuAction_dispose__wrapper);
     ni_registerModuleMethod(m, "MenuItem_dispose", &MenuItem_dispose__wrapper);
     ni_registerModuleMethod(m, "Menu_addAction", &Menu_addAction__wrapper);
     ni_registerModuleMethod(m, "Menu_addSubmenu", &Menu_addSubmenu__wrapper);

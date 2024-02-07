@@ -8,11 +8,6 @@ uint32_t Modifiers__pop();
 
 void Accelerator__push(Accelerator value);
 Accelerator Accelerator__pop();
-void MenuActionFunc__push(std::function<MenuActionFunc> f);
-std::function<MenuActionFunc> MenuActionFunc__pop();
-
-void Action__push(Action value);
-Action Action__pop();
 
 void ClipData__push(ClipData value);
 ClipData ClipData__pop();
@@ -63,6 +58,11 @@ KeyLocation KeyLocation__pop();
 
 void Menu__push(Menu value);
 Menu Menu__pop();
+void MenuActionFunc__push(std::function<MenuActionFunc> f);
+std::function<MenuActionFunc> MenuActionFunc__pop();
+
+void MenuAction__push(MenuAction value);
+MenuAction MenuAction__pop();
 
 void MenuBar__push(MenuBar value);
 MenuBar MenuBar__pop();
@@ -185,9 +185,9 @@ void Accelerator_create__wrapper();
 
 void Accelerator_dispose__wrapper();
 
-void Action_create__wrapper();
+void MenuAction_create__wrapper();
 
-void Action_dispose__wrapper();
+void MenuAction_dispose__wrapper();
 
 void MenuItem_dispose__wrapper();
 

@@ -18,7 +18,7 @@ struct __Window; typedef struct __Window* Window;
 struct __Timer; typedef struct __Timer* Timer;
 struct __Icon; typedef struct __Icon* Icon;
 struct __Accelerator; typedef struct __Accelerator* Accelerator;
-struct __Action; typedef struct __Action* Action;
+struct __MenuAction; typedef struct __MenuAction* MenuAction;
 struct __MenuItem; typedef struct __MenuItem* MenuItem;
 struct __Menu; typedef struct __Menu* Menu;
 struct __MenuBar; typedef struct __MenuBar* MenuBar;
@@ -144,9 +144,6 @@ enum Modifiers {
 };
 
 
-typedef void MenuActionFunc();
-
-
 
 enum class CursorStyle {
     Default,
@@ -229,6 +226,9 @@ enum class KeyLocation {
     Right,
     NumPad
 };
+
+
+typedef void MenuActionFunc();
 
 
 
@@ -457,10 +457,10 @@ Icon Icon_create(std::string filename, int32_t sizeToWidth);
 void Icon_dispose(Icon _this);
 Accelerator Accelerator_create(Key key, uint32_t modifiers);
 void Accelerator_dispose(Accelerator _this);
-Action Action_create(std::string label, Icon icon, Accelerator accel, std::function<MenuActionFunc> func);
-void Action_dispose(Action _this);
+MenuAction MenuAction_create(std::string label, Icon icon, Accelerator accel, std::function<MenuActionFunc> func);
+void MenuAction_dispose(MenuAction _this);
 void MenuItem_dispose(MenuItem _this);
-MenuItem Menu_addAction(Menu _this, Action action);
+MenuItem Menu_addAction(Menu _this, MenuAction action);
 MenuItem Menu_addSubmenu(Menu _this, std::string label, Menu sub);
 void Menu_addSeparator(Menu _this);
 Menu Menu_create();

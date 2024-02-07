@@ -54,8 +54,8 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _Icon_dispose;
         private static ModuleMethodHandle _accelerator_create;
         private static ModuleMethodHandle _Accelerator_dispose;
-        private static ModuleMethodHandle _action_create;
-        private static ModuleMethodHandle _Action_dispose;
+        private static ModuleMethodHandle _menuAction_create;
+        private static ModuleMethodHandle _MenuAction_dispose;
         private static ModuleMethodHandle _MenuItem_dispose;
         private static ModuleMethodHandle _menu_addAction;
         private static ModuleMethodHandle _menu_addSubmenu;
@@ -277,69 +277,6 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new Accelerator(ptr) : null;
-        }
-
-        public delegate void MenuActionFunc();
-
-        internal static void MenuActionFunc__Push(MenuActionFunc callback)
-        {
-            void CallbackWrapper()
-            {
-                callback();
-            }
-            NativeImplClient.PushClientFuncVal(CallbackWrapper, Marshal.GetFunctionPointerForDelegate(callback));
-        }
-
-        internal static MenuActionFunc MenuActionFunc__Pop()
-        {
-            var id = NativeImplClient.PopServerFuncValId();
-            var remoteFunc = new ServerFuncVal(id);
-            void Wrapper()
-            {
-                remoteFunc.Exec();
-            }
-            return Wrapper;
-        }
-
-        public class Action : IDisposable
-        {
-            internal readonly IntPtr NativeHandle;
-            protected bool _disposed;
-            internal Action(IntPtr nativeHandle)
-            {
-                NativeHandle = nativeHandle;
-            }
-            public virtual void Dispose()
-            {
-                if (!_disposed)
-                {
-                    Action__Push(this);
-                    NativeImplClient.InvokeModuleMethod(_Action_dispose);
-                    _disposed = true;
-                }
-            }
-            public static Action Create(string label, Icon icon, Accelerator accel, MenuActionFunc func)
-            {
-                MenuActionFunc__Push(func);
-                Accelerator__Push(accel);
-                Icon__Push(icon);
-                NativeImplClient.PushString(label);
-                NativeImplClient.InvokeModuleMethod(_action_create);
-                return Action__Pop();
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void Action__Push(Action thing)
-        {
-            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Action Action__Pop()
-        {
-            var ptr = NativeImplClient.PopPtr();
-            return ptr != IntPtr.Zero ? new Action(ptr) : null;
         }
 
         public class ClipData : DropData
@@ -957,9 +894,9 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
-            public MenuItem AddAction(Action action)
+            public MenuItem AddAction(MenuAction action)
             {
-                Action__Push(action);
+                MenuAction__Push(action);
                 Menu__Push(this);
                 NativeImplClient.InvokeModuleMethod(_menu_addAction);
                 return MenuItem__Pop();
@@ -995,6 +932,69 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new Menu(ptr) : null;
+        }
+
+        public delegate void MenuActionFunc();
+
+        internal static void MenuActionFunc__Push(MenuActionFunc callback)
+        {
+            void CallbackWrapper()
+            {
+                callback();
+            }
+            NativeImplClient.PushClientFuncVal(CallbackWrapper, Marshal.GetFunctionPointerForDelegate(callback));
+        }
+
+        internal static MenuActionFunc MenuActionFunc__Pop()
+        {
+            var id = NativeImplClient.PopServerFuncValId();
+            var remoteFunc = new ServerFuncVal(id);
+            void Wrapper()
+            {
+                remoteFunc.Exec();
+            }
+            return Wrapper;
+        }
+
+        public class MenuAction : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            protected bool _disposed;
+            internal MenuAction(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public virtual void Dispose()
+            {
+                if (!_disposed)
+                {
+                    MenuAction__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_MenuAction_dispose);
+                    _disposed = true;
+                }
+            }
+            public static MenuAction Create(string label, Icon icon, Accelerator accel, MenuActionFunc func)
+            {
+                MenuActionFunc__Push(func);
+                Accelerator__Push(accel);
+                Icon__Push(icon);
+                NativeImplClient.PushString(label);
+                NativeImplClient.InvokeModuleMethod(_menuAction_create);
+                return MenuAction__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void MenuAction__Push(MenuAction thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static MenuAction MenuAction__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new MenuAction(ptr) : null;
         }
 
         public class MenuBar : IDisposable
@@ -1925,8 +1925,8 @@ namespace Org.Prefixed.GuiBase
             _Icon_dispose = NativeImplClient.GetModuleMethod(_module, "Icon_dispose");
             _accelerator_create = NativeImplClient.GetModuleMethod(_module, "Accelerator_create");
             _Accelerator_dispose = NativeImplClient.GetModuleMethod(_module, "Accelerator_dispose");
-            _action_create = NativeImplClient.GetModuleMethod(_module, "Action_create");
-            _Action_dispose = NativeImplClient.GetModuleMethod(_module, "Action_dispose");
+            _menuAction_create = NativeImplClient.GetModuleMethod(_module, "MenuAction_create");
+            _MenuAction_dispose = NativeImplClient.GetModuleMethod(_module, "MenuAction_dispose");
             _MenuItem_dispose = NativeImplClient.GetModuleMethod(_module, "MenuItem_dispose");
             _menu_addAction = NativeImplClient.GetModuleMethod(_module, "Menu_addAction");
             _menu_addSubmenu = NativeImplClient.GetModuleMethod(_module, "Menu_addSubmenu");

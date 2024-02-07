@@ -159,13 +159,13 @@ opaque Accelerator {
 
 delegate void MenuActionFunc();
 
-opaque Action {
-   static Action create(string label, Icon icon, Accelerator accel, MenuActionFunc func);
+opaque MenuAction {
+   static MenuAction create(string label, Icon icon, Accelerator accel, MenuActionFunc func);
 }
 
 opaque MenuItem;
 opaque Menu {
-   MenuItem addAction(Action action);
+   MenuItem addAction(MenuAction action);
    MenuItem addSubmenu(string label, Menu sub);
    void addSeparator();
 

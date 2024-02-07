@@ -34,7 +34,7 @@ public class WindowEventPage : BasePage
         
         // these could have accelerators if the actions were installed in the menubar (for our win32 implementation, that's how keyboard accelerators are installed)
         
-        var action1 = Windowing.Action.Create("Show MessageBox #1", null, null, () =>
+        var action1 = MenuAction.Create("Show MessageBox #1", null, null, () =>
         {
             var result = MessageBoxModal.Show(windowMethods.GetWindowHandle(), new MessageBoxParams
             {
@@ -48,7 +48,7 @@ public class WindowEventPage : BasePage
         });
         menu.AddAction(action1);
 
-        var action2 = Windowing.Action.Create("Some Action 2", null, null, () => Console.WriteLine("You clicked Action2"));
+        var action2 = MenuAction.Create("Some Action 2", null, null, () => Console.WriteLine("You clicked Action2"));
         menu.AddAction(action2);
         
         return menu;
@@ -240,7 +240,7 @@ public class WindowEventPage : BasePage
         
         // open
         using var openAccel = Accelerator.Create(Key.O, Modifiers.Control);
-        using var openAction = Windowing.Action.Create("&Open", null, openAccel, () =>
+        using var openAction = MenuAction.Create("&Open", null, openAccel, () =>
         {
             var result = FileDialog.OpenFile(new FileDialogOptions {
                 ForWindow = windowMethods.GetWindowHandle(),
@@ -259,7 +259,7 @@ public class WindowEventPage : BasePage
         
         // save
         using var saveAccel = Accelerator.Create(Key.S, Modifiers.Control);
-        using var saveAction = Windowing.Action.Create("&Save", null, saveAccel, () =>
+        using var saveAction = MenuAction.Create("&Save", null, saveAccel, () =>
         {
             var result = FileDialog.SaveFile(new FileDialogOptions
             {
@@ -283,7 +283,7 @@ public class WindowEventPage : BasePage
         
         // exit
         using var exitAccel = Accelerator.Create(Key.Q, Modifiers.Control);
-        using var exitAction = Windowing.Action.Create("E&xit", null, exitAccel, () =>
+        using var exitAction = MenuAction.Create("E&xit", null, exitAccel, () =>
         {
             Console.WriteLine("Exiting!");
             windowMethods.DestroyWindow();
@@ -294,7 +294,7 @@ public class WindowEventPage : BasePage
         using var editMenu = Menu.Create();
         // copy
         using var copyAccel = Accelerator.Create(Key.C, Modifiers.Control);
-        using var copyAction = Windowing.Action.Create("&Copy", null, copyAccel, () =>
+        using var copyAction = MenuAction.Create("&Copy", null, copyAccel, () =>
         {
             using var dragData = DragData.Create([KDragFormatUTF8], (format, payload) =>
             {
@@ -312,7 +312,7 @@ public class WindowEventPage : BasePage
         editMenu.AddAction(copyAction);
         // paste
         using var pasteAccel = Accelerator.Create(Key.V, Modifiers.Control);
-        using var pasteAction = Windowing.Action.Create("&Paste", null, pasteAccel, () =>
+        using var pasteAction = MenuAction.Create("&Paste", null, pasteAccel, () =>
         {
             using var data = ClipData.Get();
             if (data.HasFormat(KDragFormatUTF8))

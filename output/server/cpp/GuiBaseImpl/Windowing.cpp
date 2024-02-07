@@ -553,14 +553,14 @@ Accelerator Accelerator_create(Key key, uint32_t modifiers)
     return (Accelerator)wl_AccelCreate((wl_KeyEnum)key, modifiers);
 }
 
-Action Action_create(std::string label, Icon icon, Accelerator accel, std::function<MenuActionFunc> func)
+MenuAction MenuAction_create(std::string label, Icon icon, Accelerator accel, std::function<MenuActionFunc> func)
 {
     auto id = _nextMenuActionId++;
     menuActionFuncs[id] = func;
-    return (Action)wl_ActionCreate(id, label.c_str(), (wl_IconRef)icon, (wl_AcceleratorRef)accel);
+    return (MenuAction)wl_ActionCreate(id, label.c_str(), (wl_IconRef)icon, (wl_AcceleratorRef)accel);
 }
 
-void Action_dispose(Action _this)
+void MenuAction_dispose(MenuAction _this)
 {
     // TODO: remove func from table so it can be released on the client
 }
@@ -573,7 +573,7 @@ void Menu_dispose(Menu _this)
 {
 }
 
-MenuItem Menu_addAction(Menu _this, Action action) {
+MenuItem Menu_addAction(Menu _this, MenuAction action) {
     return (MenuItem)wl_MenuAddAction((wl_MenuRef)_this, (wl_ActionRef)action);
 }
 
