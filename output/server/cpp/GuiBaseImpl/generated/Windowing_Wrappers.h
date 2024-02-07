@@ -67,6 +67,21 @@ MenuBar MenuBar__pop();
 void MenuItem__push(MenuItem value);
 MenuItem MenuItem__pop();
 
+void MessageBoxButtons__push(MessageBoxButtons value);
+MessageBoxButtons MessageBoxButtons__pop();
+
+void MessageBoxIcon__push(MessageBoxIcon value);
+MessageBoxIcon MessageBoxIcon__pop();
+
+void MessageBoxResult__push(MessageBoxResult value);
+MessageBoxResult MessageBoxResult__pop();
+
+void MessageBoxParams__push(MessageBoxParams value, bool isReturn);
+MessageBoxParams MessageBoxParams__pop();
+
+void MessageBoxModal__push(MessageBoxModal value);
+MessageBoxModal MessageBoxModal__pop();
+
 void MouseButton__push(MouseButton value);
 MouseButton MouseButton__pop();
 void TimerFunc__push(std::function<TimerFunc> f);
@@ -188,6 +203,10 @@ void FileDialog_openFile__wrapper();
 void FileDialog_saveFile__wrapper();
 
 void FileDialog_dispose__wrapper();
+
+void MessageBoxModal_show__wrapper();
+
+void MessageBoxModal_dispose__wrapper();
 
 void WindowDelegate_canClose__wrapper(int serverID);
 

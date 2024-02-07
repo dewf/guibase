@@ -118,7 +118,7 @@ opaque Timer {
    static Timer create(int msTimeout, TimerFunc func);
 }
 
-// menu stuff
+// MENU ==============================================================================
 
 opaque Icon {
    static Icon create(string filename, int sizeToWidth);
@@ -187,6 +187,51 @@ struct FileDialogResult {
 opaque FileDialog {
    static FileDialogResult openFile(FileDialogOptions opts);
    static FileDialogResult saveFile(FileDialogOptions opts);
+}
+
+// MESSAGEBOX ========================================================================
+
+enum MessageBoxButtons {
+   Default = 0,
+   AbortRetryIgnore,
+   CancelTryContinue,
+   Ok,                  // default
+   OkCancel,
+   RetryCancel,
+   YesNo,
+   YesNoCancel
+}
+
+enum MessageBoxIcon {
+   Default = 0,
+   Information,         // default
+   Warning,
+   Question,
+   Error,
+}
+
+enum MessageBoxResult {
+   Abort,
+   Cancel,
+   Continue,
+   Ignore,
+   No,
+   Ok,
+   Retry,
+   TryAgain,
+   Yes
+}
+
+struct MessageBoxParams {
+   string title;           // optional?
+   string message;         
+   bool withHelpButton;
+   MessageBoxIcon icon;
+   MessageBoxButtons buttons;
+}
+
+opaque MessageBoxModal { // 'MessageBox' is a win32 function
+   static MessageBoxResult show(Window forWindow, MessageBoxParams mbParams);
 }
 
 // KEY ENUM STUFF ====================================================================

@@ -24,6 +24,7 @@ struct __Menu; typedef struct __Menu* Menu;
 struct __MenuBar; typedef struct __MenuBar* MenuBar;
 struct __ClipData; typedef struct __ClipData* ClipData;
 struct __FileDialog; typedef struct __FileDialog* FileDialog;
+struct __MessageBoxModal; typedef struct __MessageBoxModal* MessageBoxModal;
 
 enum class Key {
     Unknown,
@@ -210,6 +211,46 @@ enum class KeyLocation {
 };
 
 
+
+
+enum class MessageBoxButtons {
+    Default = 0,
+    AbortRetryIgnore,
+    CancelTryContinue,
+    Ok,
+    OkCancel,
+    RetryCancel,
+    YesNo,
+    YesNoCancel
+};
+
+enum class MessageBoxIcon {
+    Default = 0,
+    Information,
+    Warning,
+    Question,
+    Error
+};
+
+enum class MessageBoxResult {
+    Abort,
+    Cancel,
+    Continue,
+    Ignore,
+    No,
+    Ok,
+    Retry,
+    TryAgain,
+    Yes
+};
+
+struct MessageBoxParams {
+    std::string title;
+    MessageBoxIcon icon;
+    std::string message;
+    bool withHelpButton;
+    MessageBoxButtons buttons;
+};
 
 
 enum class MouseButton {
@@ -407,3 +448,5 @@ void ClipData_dispose(ClipData _this);
 FileDialogResult FileDialog_openFile(FileDialogOptions opts);
 FileDialogResult FileDialog_saveFile(FileDialogOptions opts);
 void FileDialog_dispose(FileDialog _this);
+MessageBoxResult MessageBoxModal_show(Window forWindow, MessageBoxParams mbParams);
+void MessageBoxModal_dispose(MessageBoxModal _this);

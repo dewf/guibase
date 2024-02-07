@@ -26,13 +26,24 @@ public class WindowEventPage : BasePage
     private readonly MenuBar _nativeMenuBar;
     public override MenuBar? MenuBar => _nativeMenuBar;
 
-    private static Menu CreateContextMenu()
+    private static Menu CreateContextMenu(IWindowMethods windowMethods)
     {
         var menu = Menu.Create();
         
         // these could have accelerators if the actions were installed in the menubar (for our win32 implementation, that's how keyboard accelerators are installed)
         
-        var action1 = Windowing.Action.Create("Action 1", null, null, () => Console.WriteLine("You clicked Action1"));
+        var action1 = Windowing.Action.Create("Show MessageBox #1", null, null, () =>
+        {
+            var result = MessageBoxModal.Show(windowMethods.GetWindowHandle(), new MessageBoxParams
+            {
+                Buttons = MessageBoxButtons.AbortRetryIgnore,
+                Icon = MessageBoxIcon.Error,
+                Message = "Hello from MessageBox!",
+                Title = "This is the MB Title",
+                WithHelpButton = false
+            });
+            Console.WriteLine($"MessageBox result: {result}");
+        });
         menu.AddAction(action1);
 
         var action2 = Windowing.Action.Create("Some Action 2", null, null, () => Console.WriteLine("You clicked Action2"));
@@ -47,7 +58,7 @@ public class WindowEventPage : BasePage
         _nativeMenuBar = CreateMenuBar(windowMethods);
         
         // create a simple context menu
-        _contextMenu = CreateContextMenu();
+        _contextMenu = CreateContextMenu(windowMethods);
     }
 
     public override void OnMouseMove(int x, int y, Modifiers modifiers)
@@ -293,7 +304,7 @@ public class WindowEventPage : BasePage
             }
         });
         editMenu.AddAction(pasteAction);
-
+        
         // menubar
         menuBar.AddMenu("&File", fileMenu);
         menuBar.AddMenu("&Edit", editMenu);

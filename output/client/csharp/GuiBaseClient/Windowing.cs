@@ -65,6 +65,8 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _fileDialog_openFile;
         private static ModuleMethodHandle _fileDialog_saveFile;
         private static ModuleMethodHandle _FileDialog_dispose;
+        private static ModuleMethodHandle _messageBoxModal_show;
+        private static ModuleMethodHandle _MessageBoxModal_dispose;
         private static InterfaceHandle _windowDelegate;
         private static InterfaceMethodHandle _windowDelegate_canClose;
         private static InterfaceMethodHandle _windowDelegate_closed;
@@ -1030,6 +1032,153 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new MenuItem(ptr) : null;
         }
 
+        public enum MessageBoxButtons
+        {
+            Default = 0,
+            AbortRetryIgnore,
+            CancelTryContinue,
+            Ok,
+            OkCancel,
+            RetryCancel,
+            YesNo,
+            YesNoCancel
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void MessageBoxButtons__Push(MessageBoxButtons value)
+        {
+            NativeImplClient.PushInt32((int)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static MessageBoxButtons MessageBoxButtons__Pop()
+        {
+            var ret = NativeImplClient.PopInt32();
+            return (MessageBoxButtons)ret;
+        }
+
+        public enum MessageBoxIcon
+        {
+            Default = 0,
+            Information,
+            Warning,
+            Question,
+            Error
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void MessageBoxIcon__Push(MessageBoxIcon value)
+        {
+            NativeImplClient.PushInt32((int)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static MessageBoxIcon MessageBoxIcon__Pop()
+        {
+            var ret = NativeImplClient.PopInt32();
+            return (MessageBoxIcon)ret;
+        }
+
+        public enum MessageBoxResult
+        {
+            Abort,
+            Cancel,
+            Continue,
+            Ignore,
+            No,
+            Ok,
+            Retry,
+            TryAgain,
+            Yes
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void MessageBoxResult__Push(MessageBoxResult value)
+        {
+            NativeImplClient.PushInt32((int)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static MessageBoxResult MessageBoxResult__Pop()
+        {
+            var ret = NativeImplClient.PopInt32();
+            return (MessageBoxResult)ret;
+        }
+
+        public struct MessageBoxParams {
+            public string Title;
+            public MessageBoxIcon Icon;
+            public string Message;
+            public bool WithHelpButton;
+            public MessageBoxButtons Buttons;
+            public MessageBoxParams(string title, MessageBoxIcon icon, string message, bool withHelpButton, MessageBoxButtons buttons)
+            {
+                this.Title = title;
+                this.Icon = icon;
+                this.Message = message;
+                this.WithHelpButton = withHelpButton;
+                this.Buttons = buttons;
+            }
+        }
+
+        internal static void MessageBoxParams__Push(MessageBoxParams value, bool isReturn)
+        {
+            MessageBoxButtons__Push(value.Buttons);
+            NativeImplClient.PushBool(value.WithHelpButton);
+            NativeImplClient.PushString(value.Message);
+            MessageBoxIcon__Push(value.Icon);
+            NativeImplClient.PushString(value.Title);
+        }
+
+        internal static MessageBoxParams MessageBoxParams__Pop()
+        {
+            var title = NativeImplClient.PopString();
+            var icon = MessageBoxIcon__Pop();
+            var message = NativeImplClient.PopString();
+            var withHelpButton = NativeImplClient.PopBool();
+            var buttons = MessageBoxButtons__Pop();
+            return new MessageBoxParams(title, icon, message, withHelpButton, buttons);
+        }
+
+        public class MessageBoxModal : IDisposable
+        {
+            internal readonly IntPtr NativeHandle;
+            protected bool _disposed;
+            internal MessageBoxModal(IntPtr nativeHandle)
+            {
+                NativeHandle = nativeHandle;
+            }
+            public virtual void Dispose()
+            {
+                if (!_disposed)
+                {
+                    MessageBoxModal__Push(this);
+                    NativeImplClient.InvokeModuleMethod(_MessageBoxModal_dispose);
+                    _disposed = true;
+                }
+            }
+            public static MessageBoxResult Show(Window forWindow, MessageBoxParams mbParams)
+            {
+                MessageBoxParams__Push(mbParams, false);
+                Window__Push(forWindow);
+                NativeImplClient.InvokeModuleMethod(_messageBoxModal_show);
+                return MessageBoxResult__Pop();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void MessageBoxModal__Push(MessageBoxModal thing)
+        {
+            NativeImplClient.PushPtr(thing?.NativeHandle ?? IntPtr.Zero);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static MessageBoxModal MessageBoxModal__Pop()
+        {
+            var ptr = NativeImplClient.PopPtr();
+            return ptr != IntPtr.Zero ? new MessageBoxModal(ptr) : null;
+        }
+
         public enum MouseButton
         {
             None,
@@ -1709,6 +1858,8 @@ namespace Org.Prefixed.GuiBase
             _fileDialog_openFile = NativeImplClient.GetModuleMethod(_module, "FileDialog_openFile");
             _fileDialog_saveFile = NativeImplClient.GetModuleMethod(_module, "FileDialog_saveFile");
             _FileDialog_dispose = NativeImplClient.GetModuleMethod(_module, "FileDialog_dispose");
+            _messageBoxModal_show = NativeImplClient.GetModuleMethod(_module, "MessageBoxModal_show");
+            _MessageBoxModal_dispose = NativeImplClient.GetModuleMethod(_module, "MessageBoxModal_dispose");
 
             _dropDataBadFormat = NativeImplClient.GetException(_module, "DropDataBadFormat");
             NativeImplClient.SetExceptionBuilder(_dropDataBadFormat, DropDataBadFormat.BuildAndThrow);

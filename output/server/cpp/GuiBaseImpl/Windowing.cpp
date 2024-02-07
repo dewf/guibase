@@ -648,3 +648,19 @@ void FileDialog_dispose(FileDialog _this)
 {
     // nothing to do, it's a namespace prefix only (no FileDialog instances are ever created)
 }
+
+MessageBoxResult MessageBoxModal_show(Window forWindow, MessageBoxParams mbParams)
+{
+    wl_MessageBoxParams wlParams;
+    wlParams.title = mbParams.title.c_str();
+    wlParams.message = mbParams.message.c_str();
+    wlParams.withHelpButton = mbParams.withHelpButton;
+    wlParams.icon = (wl_MessageBoxParams::Icon)mbParams.icon;
+    wlParams.buttons = (wl_MessageBoxParams::Buttons)mbParams.buttons;
+    return (MessageBoxResult)wl_MessageBox(((InternalWindow*)forWindow)->getWlWindow(), &wlParams);
+}
+
+void MessageBoxModal_dispose(MessageBoxModal _this)
+{
+    // nothing to do, we never create these - namespace prefix only
+}

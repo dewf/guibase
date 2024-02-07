@@ -327,6 +327,58 @@ MenuItem MenuItem__pop() {
     return (MenuItem)ni_popPtr();
 }
 
+inline void MessageBoxButtons__push(MessageBoxButtons value) {
+    ni_pushInt32((int32_t)value);
+}
+
+inline MessageBoxButtons MessageBoxButtons__pop() {
+    auto tag = ni_popInt32();
+    return (MessageBoxButtons)tag;
+}
+
+inline void MessageBoxIcon__push(MessageBoxIcon value) {
+    ni_pushInt32((int32_t)value);
+}
+
+inline MessageBoxIcon MessageBoxIcon__pop() {
+    auto tag = ni_popInt32();
+    return (MessageBoxIcon)tag;
+}
+
+inline void MessageBoxResult__push(MessageBoxResult value) {
+    ni_pushInt32((int32_t)value);
+}
+
+inline MessageBoxResult MessageBoxResult__pop() {
+    auto tag = ni_popInt32();
+    return (MessageBoxResult)tag;
+}
+
+void MessageBoxParams__push(MessageBoxParams value, bool isReturn) {
+    MessageBoxButtons__push(value.buttons);
+    ni_pushBool(value.withHelpButton);
+    pushStringInternal(value.message);
+    MessageBoxIcon__push(value.icon);
+    pushStringInternal(value.title);
+}
+
+MessageBoxParams MessageBoxParams__pop() {
+    auto title = popStringInternal();
+    auto icon = MessageBoxIcon__pop();
+    auto message = popStringInternal();
+    auto withHelpButton = ni_popBool();
+    auto buttons = MessageBoxButtons__pop();
+    return MessageBoxParams { title, icon, message, withHelpButton, buttons };
+}
+
+void MessageBoxModal__push(MessageBoxModal value) {
+    ni_pushPtr(value);
+}
+
+MessageBoxModal MessageBoxModal__pop() {
+    return (MessageBoxModal)ni_popPtr();
+}
+
 inline void MouseButton__push(MouseButton value) {
     ni_pushInt32((int32_t)value);
 }
@@ -863,6 +915,17 @@ void FileDialog_dispose__wrapper() {
     FileDialog_dispose(_this);
 }
 
+void MessageBoxModal_show__wrapper() {
+    auto forWindow = Window__pop();
+    auto mbParams = MessageBoxParams__pop();
+    MessageBoxResult__push(MessageBoxModal_show(forWindow, mbParams));
+}
+
+void MessageBoxModal_dispose__wrapper() {
+    auto _this = MessageBoxModal__pop();
+    MessageBoxModal_dispose(_this);
+}
+
 void WindowDelegate_canClose__wrapper(int serverID) {
     auto inst = ServerWindowDelegate::getByID(serverID);
     ni_pushBool(inst->canClose());
@@ -1034,6 +1097,8 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "FileDialog_openFile", &FileDialog_openFile__wrapper);
     ni_registerModuleMethod(m, "FileDialog_saveFile", &FileDialog_saveFile__wrapper);
     ni_registerModuleMethod(m, "FileDialog_dispose", &FileDialog_dispose__wrapper);
+    ni_registerModuleMethod(m, "MessageBoxModal_show", &MessageBoxModal_show__wrapper);
+    ni_registerModuleMethod(m, "MessageBoxModal_dispose", &MessageBoxModal_dispose__wrapper);
     auto windowDelegate = ni_registerInterface(m, "WindowDelegate");
     windowDelegate_canClose = ni_registerInterfaceMethod(windowDelegate, "canClose", &WindowDelegate_canClose__wrapper);
     windowDelegate_closed = ni_registerInterfaceMethod(windowDelegate, "closed", &WindowDelegate_closed__wrapper);
