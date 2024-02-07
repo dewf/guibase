@@ -148,6 +148,26 @@ typedef void MenuActionFunc();
 
 
 
+enum class CursorStyle {
+    Default,
+    TextSelect,
+    BusyWait,
+    Cross,
+    UpArrow,
+    ResizeTopLeftBottomRight,
+    ResizeTopRightBottomLeft,
+    ResizeLeftRight,
+    ResizeUpDown,
+    Move,
+    Unavailable,
+    HandSelect,
+    PointerWorking,
+    HelpSelect,
+    LocationSelect,
+    PersonSelect,
+    Handwriting
+};
+
 enum DropEffect {
     None = 0,
     Copy = 1,
@@ -246,9 +266,9 @@ enum class MessageBoxResult {
 
 struct MessageBoxParams {
     std::string title;
-    MessageBoxIcon icon;
     std::string message;
     bool withHelpButton;
+    MessageBoxIcon icon;
     MessageBoxButtons buttons;
 };
 
@@ -413,16 +433,23 @@ void DragRenderPayload_dispose(DragRenderPayload _this);
 uint32_t DragData_dragExec(DragData _this, uint32_t canDoMask);
 DragData DragData_create(std::vector<std::string> supportedFormats, std::function<DragRenderFunc> renderFunc);
 void DragData_dispose(DragData _this);
+void Window_destroy(Window _this);
 void Window_show(Window _this);
 void Window_showRelativeTo(Window _this, Window other, int32_t x, int32_t y, int32_t newWidth, int32_t newHeight);
+void Window_showModal(Window _this, Window parent);
+void Window_endModal(Window _this);
 void Window_hide(Window _this);
-void Window_destroy(Window _this);
-void Window_setMenuBar(Window _this, MenuBar menuBar);
-void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu);
 void Window_invalidate(Window _this, int32_t x, int32_t y, int32_t width, int32_t height);
 void Window_setTitle(Window _this, std::string title);
+void Window_focus(Window _this);
+void Window_mouseGrab(Window _this);
+size_t Window_getOSHandle(Window _this);
 void Window_enableDrops(Window _this, bool enable);
+void Window_setMenuBar(Window _this, MenuBar menuBar);
+void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu);
+void Window_setCursor(Window _this, CursorStyle style);
 Window Window_create(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts);
+void Window_mouseUngrab();
 void Window_dispose(Window _this);
 Timer Timer_create(int32_t msTimeout, std::function<TimerFunc> func);
 void Timer_dispose(Timer _this);

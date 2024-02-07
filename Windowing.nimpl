@@ -98,19 +98,48 @@ interface WindowDelegate {
    void dropSubmit(DropData data, int x, int y, Modifiers modifiers, DropEffect effect);
 }
 
+enum CursorStyle {
+   Default,                  // IDC_ARROW, normal select
+   TextSelect,               // IDC_IBEAM, text select
+   BusyWait,                 // IDC_WAIT, busy
+   Cross,                    // IDC_CROSS, precision select
+   UpArrow,                  // IDC_UPARROW, alternate select
+   ResizeTopLeftBottomRight, // IDC_SIZENWSE, diagonal resize 1
+   ResizeTopRightBottomLeft, // IDC_SIZENESW, diagonal resize 2
+   ResizeLeftRight,          // IDC_SIZEWE, horizontal resize
+   ResizeUpDown,             // IDC_SIZENS, vertical resize
+   Move,                     // IDC_SIZEALL, move
+   Unavailable,              // IDC_NO, unavailable
+   HandSelect,               // IDC_HAND, link select
+   PointerWorking,           // IDC_APPSTARTING, working in background
+   HelpSelect,               // IDC_HELP, help select
+   LocationSelect,           // IDC_PIN, location select
+   PersonSelect,             // IDC_PERSON, person select
+   Handwriting               // MAKEINTRESOURCE(32631), pencil cursor
+}
+
 opaque Window {
+   void destroy();
    void show();
    void showRelativeTo(Window other, int x, int y, int newWidth, int newHeight); // use "0" for newWidth/newHeight for no change, until we have Option<>
+   void showModal(Window parent);                                                // parent = null for app-modal (otherwise centers inside of parent, and only modal for that window, I think)
+   void endModal();                                                              // call to end a modal runloop that we're in
    void hide();
-   void destroy();
-   void setMenuBar(MenuBar menuBar);
-   void showContextMenu(int x, int y, Menu menu); // hmm, had a "fromEvent" parameter I think for GTK
    void invalidate(int x, int y, int width, int height);
    void setTitle(string title);
+   void focus();
+   void mouseGrab();
+   size_t getOSHandle();
    void enableDrops(bool enable);
+   void setMenuBar(MenuBar menuBar);
+   void showContextMenu(int x, int y, Menu menu); // hmm, had a "fromEvent" parameter I think for GTK
+   void setCursor(CursorStyle style);
 
    static Window create(int width, int height, string title, WindowDelegate del, WindowOptions opts);
+   static void mouseUngrab();
 }
+
+// TIMER =============================================================================
 
 delegate void TimerFunc(double secondsSinceLast);
 

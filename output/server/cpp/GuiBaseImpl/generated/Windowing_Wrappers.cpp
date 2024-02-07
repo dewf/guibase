@@ -84,6 +84,15 @@ ClipData ClipData__pop() {
     return (ClipData)ni_popPtr();
 }
 
+inline void CursorStyle__push(CursorStyle value) {
+    ni_pushInt32((int32_t)value);
+}
+
+inline CursorStyle CursorStyle__pop() {
+    auto tag = ni_popInt32();
+    return (CursorStyle)tag;
+}
+
 inline void DropEffect__push(uint32_t value) {
     ni_pushUInt32(value);
 }
@@ -356,19 +365,19 @@ inline MessageBoxResult MessageBoxResult__pop() {
 
 void MessageBoxParams__push(MessageBoxParams value, bool isReturn) {
     MessageBoxButtons__push(value.buttons);
+    MessageBoxIcon__push(value.icon);
     ni_pushBool(value.withHelpButton);
     pushStringInternal(value.message);
-    MessageBoxIcon__push(value.icon);
     pushStringInternal(value.title);
 }
 
 MessageBoxParams MessageBoxParams__pop() {
     auto title = popStringInternal();
-    auto icon = MessageBoxIcon__pop();
     auto message = popStringInternal();
     auto withHelpButton = ni_popBool();
+    auto icon = MessageBoxIcon__pop();
     auto buttons = MessageBoxButtons__pop();
-    return MessageBoxParams { title, icon, message, withHelpButton, buttons };
+    return MessageBoxParams { title, message, withHelpButton, icon, buttons };
 }
 
 void MessageBoxModal__push(MessageBoxModal value) {
@@ -714,6 +723,11 @@ void DragData_dispose__wrapper() {
     DragData_dispose(_this);
 }
 
+void Window_destroy__wrapper() {
+    auto _this = Window__pop();
+    Window_destroy(_this);
+}
+
 void Window_show__wrapper() {
     auto _this = Window__pop();
     Window_show(_this);
@@ -729,28 +743,20 @@ void Window_showRelativeTo__wrapper() {
     Window_showRelativeTo(_this, other, x, y, newWidth, newHeight);
 }
 
+void Window_showModal__wrapper() {
+    auto _this = Window__pop();
+    auto parent = Window__pop();
+    Window_showModal(_this, parent);
+}
+
+void Window_endModal__wrapper() {
+    auto _this = Window__pop();
+    Window_endModal(_this);
+}
+
 void Window_hide__wrapper() {
     auto _this = Window__pop();
     Window_hide(_this);
-}
-
-void Window_destroy__wrapper() {
-    auto _this = Window__pop();
-    Window_destroy(_this);
-}
-
-void Window_setMenuBar__wrapper() {
-    auto _this = Window__pop();
-    auto menuBar = MenuBar__pop();
-    Window_setMenuBar(_this, menuBar);
-}
-
-void Window_showContextMenu__wrapper() {
-    auto _this = Window__pop();
-    auto x = ni_popInt32();
-    auto y = ni_popInt32();
-    auto menu = Menu__pop();
-    Window_showContextMenu(_this, x, y, menu);
 }
 
 void Window_invalidate__wrapper() {
@@ -768,10 +774,45 @@ void Window_setTitle__wrapper() {
     Window_setTitle(_this, title);
 }
 
+void Window_focus__wrapper() {
+    auto _this = Window__pop();
+    Window_focus(_this);
+}
+
+void Window_mouseGrab__wrapper() {
+    auto _this = Window__pop();
+    Window_mouseGrab(_this);
+}
+
+void Window_getOSHandle__wrapper() {
+    auto _this = Window__pop();
+    ni_pushSizeT(Window_getOSHandle(_this));
+}
+
 void Window_enableDrops__wrapper() {
     auto _this = Window__pop();
     auto enable = ni_popBool();
     Window_enableDrops(_this, enable);
+}
+
+void Window_setMenuBar__wrapper() {
+    auto _this = Window__pop();
+    auto menuBar = MenuBar__pop();
+    Window_setMenuBar(_this, menuBar);
+}
+
+void Window_showContextMenu__wrapper() {
+    auto _this = Window__pop();
+    auto x = ni_popInt32();
+    auto y = ni_popInt32();
+    auto menu = Menu__pop();
+    Window_showContextMenu(_this, x, y, menu);
+}
+
+void Window_setCursor__wrapper() {
+    auto _this = Window__pop();
+    auto style = CursorStyle__pop();
+    Window_setCursor(_this, style);
 }
 
 void Window_create__wrapper() {
@@ -781,6 +822,10 @@ void Window_create__wrapper() {
     auto del = WindowDelegate__pop();
     auto opts = WindowOptions__pop();
     Window__push(Window_create(width, height, title, del, opts));
+}
+
+void Window_mouseUngrab__wrapper() {
+    Window_mouseUngrab();
 }
 
 void Window_dispose__wrapper() {
@@ -1062,16 +1107,23 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "DragData_dragExec", &DragData_dragExec__wrapper);
     ni_registerModuleMethod(m, "DragData_create", &DragData_create__wrapper);
     ni_registerModuleMethod(m, "DragData_dispose", &DragData_dispose__wrapper);
+    ni_registerModuleMethod(m, "Window_destroy", &Window_destroy__wrapper);
     ni_registerModuleMethod(m, "Window_show", &Window_show__wrapper);
     ni_registerModuleMethod(m, "Window_showRelativeTo", &Window_showRelativeTo__wrapper);
+    ni_registerModuleMethod(m, "Window_showModal", &Window_showModal__wrapper);
+    ni_registerModuleMethod(m, "Window_endModal", &Window_endModal__wrapper);
     ni_registerModuleMethod(m, "Window_hide", &Window_hide__wrapper);
-    ni_registerModuleMethod(m, "Window_destroy", &Window_destroy__wrapper);
-    ni_registerModuleMethod(m, "Window_setMenuBar", &Window_setMenuBar__wrapper);
-    ni_registerModuleMethod(m, "Window_showContextMenu", &Window_showContextMenu__wrapper);
     ni_registerModuleMethod(m, "Window_invalidate", &Window_invalidate__wrapper);
     ni_registerModuleMethod(m, "Window_setTitle", &Window_setTitle__wrapper);
+    ni_registerModuleMethod(m, "Window_focus", &Window_focus__wrapper);
+    ni_registerModuleMethod(m, "Window_mouseGrab", &Window_mouseGrab__wrapper);
+    ni_registerModuleMethod(m, "Window_getOSHandle", &Window_getOSHandle__wrapper);
     ni_registerModuleMethod(m, "Window_enableDrops", &Window_enableDrops__wrapper);
+    ni_registerModuleMethod(m, "Window_setMenuBar", &Window_setMenuBar__wrapper);
+    ni_registerModuleMethod(m, "Window_showContextMenu", &Window_showContextMenu__wrapper);
+    ni_registerModuleMethod(m, "Window_setCursor", &Window_setCursor__wrapper);
     ni_registerModuleMethod(m, "Window_create", &Window_create__wrapper);
+    ni_registerModuleMethod(m, "Window_mouseUngrab", &Window_mouseUngrab__wrapper);
     ni_registerModuleMethod(m, "Window_dispose", &Window_dispose__wrapper);
     ni_registerModuleMethod(m, "Timer_create", &Timer_create__wrapper);
     ni_registerModuleMethod(m, "Timer_dispose", &Timer_dispose__wrapper);

@@ -208,6 +208,21 @@ internal class MainWindow : BaseWindowDelegate, IWindowMethods
         _window!.ShowContextMenu(x, y, menu);
     }
 
+    public void GrabMouse()
+    {
+        _window!.MouseGrab();
+    }
+
+    public void UngrabMouse()
+    {
+        Window.MouseUngrab();
+    }
+
+    public void SetCursor(CursorStyle style)
+    {
+        _window!.SetCursor(style);
+    }
+
     public void TimerTick(double secondsSinceLast)
     {
         if (_currentPage.IsAnimating)

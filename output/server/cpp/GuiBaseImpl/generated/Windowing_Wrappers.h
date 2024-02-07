@@ -17,6 +17,9 @@ Action Action__pop();
 void ClipData__push(ClipData value);
 ClipData ClipData__pop();
 
+void CursorStyle__push(CursorStyle value);
+CursorStyle CursorStyle__pop();
+
 void DropEffect__push(uint32_t value);
 uint32_t DropEffect__pop();
 void DragRenderFunc__push(std::function<DragRenderFunc> f);
@@ -134,25 +137,39 @@ void DragData_create__wrapper();
 
 void DragData_dispose__wrapper();
 
+void Window_destroy__wrapper();
+
 void Window_show__wrapper();
 
 void Window_showRelativeTo__wrapper();
 
+void Window_showModal__wrapper();
+
+void Window_endModal__wrapper();
+
 void Window_hide__wrapper();
-
-void Window_destroy__wrapper();
-
-void Window_setMenuBar__wrapper();
-
-void Window_showContextMenu__wrapper();
 
 void Window_invalidate__wrapper();
 
 void Window_setTitle__wrapper();
 
+void Window_focus__wrapper();
+
+void Window_mouseGrab__wrapper();
+
+void Window_getOSHandle__wrapper();
+
 void Window_enableDrops__wrapper();
 
+void Window_setMenuBar__wrapper();
+
+void Window_showContextMenu__wrapper();
+
+void Window_setCursor__wrapper();
+
 void Window_create__wrapper();
+
+void Window_mouseUngrab__wrapper();
 
 void Window_dispose__wrapper();
 

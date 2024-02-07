@@ -30,16 +30,23 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _dragData_dragExec;
         private static ModuleMethodHandle _dragData_create;
         private static ModuleMethodHandle _DragData_dispose;
+        private static ModuleMethodHandle _window_destroy;
         private static ModuleMethodHandle _window_show;
         private static ModuleMethodHandle _window_showRelativeTo;
+        private static ModuleMethodHandle _window_showModal;
+        private static ModuleMethodHandle _window_endModal;
         private static ModuleMethodHandle _window_hide;
-        private static ModuleMethodHandle _window_destroy;
-        private static ModuleMethodHandle _window_setMenuBar;
-        private static ModuleMethodHandle _window_showContextMenu;
         private static ModuleMethodHandle _window_invalidate;
         private static ModuleMethodHandle _window_setTitle;
+        private static ModuleMethodHandle _window_focus;
+        private static ModuleMethodHandle _window_mouseGrab;
+        private static ModuleMethodHandle _window_getOSHandle;
         private static ModuleMethodHandle _window_enableDrops;
+        private static ModuleMethodHandle _window_setMenuBar;
+        private static ModuleMethodHandle _window_showContextMenu;
+        private static ModuleMethodHandle _window_setCursor;
         private static ModuleMethodHandle _window_create;
+        private static ModuleMethodHandle _window_mouseUngrab;
         private static ModuleMethodHandle _Window_dispose;
         private static ModuleMethodHandle _timer_create;
         private static ModuleMethodHandle _Timer_dispose;
@@ -376,6 +383,40 @@ namespace Org.Prefixed.GuiBase
         {
             var ptr = NativeImplClient.PopPtr();
             return ptr != IntPtr.Zero ? new ClipData(ptr) : null;
+        }
+
+        public enum CursorStyle
+        {
+            Default,
+            TextSelect,
+            BusyWait,
+            Cross,
+            UpArrow,
+            ResizeTopLeftBottomRight,
+            ResizeTopRightBottomLeft,
+            ResizeLeftRight,
+            ResizeUpDown,
+            Move,
+            Unavailable,
+            HandSelect,
+            PointerWorking,
+            HelpSelect,
+            LocationSelect,
+            PersonSelect,
+            Handwriting
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void CursorStyle__Push(CursorStyle value)
+        {
+            NativeImplClient.PushInt32((int)value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static CursorStyle CursorStyle__Pop()
+        {
+            var ret = NativeImplClient.PopInt32();
+            return (CursorStyle)ret;
         }
 
         [Flags]
@@ -1107,16 +1148,16 @@ namespace Org.Prefixed.GuiBase
 
         public struct MessageBoxParams {
             public string Title;
-            public MessageBoxIcon Icon;
             public string Message;
             public bool WithHelpButton;
+            public MessageBoxIcon Icon;
             public MessageBoxButtons Buttons;
-            public MessageBoxParams(string title, MessageBoxIcon icon, string message, bool withHelpButton, MessageBoxButtons buttons)
+            public MessageBoxParams(string title, string message, bool withHelpButton, MessageBoxIcon icon, MessageBoxButtons buttons)
             {
                 this.Title = title;
-                this.Icon = icon;
                 this.Message = message;
                 this.WithHelpButton = withHelpButton;
+                this.Icon = icon;
                 this.Buttons = buttons;
             }
         }
@@ -1124,20 +1165,20 @@ namespace Org.Prefixed.GuiBase
         internal static void MessageBoxParams__Push(MessageBoxParams value, bool isReturn)
         {
             MessageBoxButtons__Push(value.Buttons);
+            MessageBoxIcon__Push(value.Icon);
             NativeImplClient.PushBool(value.WithHelpButton);
             NativeImplClient.PushString(value.Message);
-            MessageBoxIcon__Push(value.Icon);
             NativeImplClient.PushString(value.Title);
         }
 
         internal static MessageBoxParams MessageBoxParams__Pop()
         {
             var title = NativeImplClient.PopString();
-            var icon = MessageBoxIcon__Pop();
             var message = NativeImplClient.PopString();
             var withHelpButton = NativeImplClient.PopBool();
+            var icon = MessageBoxIcon__Pop();
             var buttons = MessageBoxButtons__Pop();
-            return new MessageBoxParams(title, icon, message, withHelpButton, buttons);
+            return new MessageBoxParams(title, message, withHelpButton, icon, buttons);
         }
 
         public class MessageBoxModal : IDisposable
@@ -1492,6 +1533,11 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
+            public void Destroy()
+            {
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_destroy);
+            }
             public void Show()
             {
                 Window__Push(this);
@@ -1507,29 +1553,21 @@ namespace Org.Prefixed.GuiBase
                 Window__Push(this);
                 NativeImplClient.InvokeModuleMethod(_window_showRelativeTo);
             }
+            public void ShowModal(Window parent)
+            {
+                Window__Push(parent);
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_showModal);
+            }
+            public void EndModal()
+            {
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_endModal);
+            }
             public void Hide()
             {
                 Window__Push(this);
                 NativeImplClient.InvokeModuleMethod(_window_hide);
-            }
-            public void Destroy()
-            {
-                Window__Push(this);
-                NativeImplClient.InvokeModuleMethod(_window_destroy);
-            }
-            public void SetMenuBar(MenuBar menuBar)
-            {
-                MenuBar__Push(menuBar);
-                Window__Push(this);
-                NativeImplClient.InvokeModuleMethod(_window_setMenuBar);
-            }
-            public void ShowContextMenu(int x, int y, Menu menu)
-            {
-                Menu__Push(menu);
-                NativeImplClient.PushInt32(y);
-                NativeImplClient.PushInt32(x);
-                Window__Push(this);
-                NativeImplClient.InvokeModuleMethod(_window_showContextMenu);
             }
             public void Invalidate(int x, int y, int width, int height)
             {
@@ -1546,11 +1584,47 @@ namespace Org.Prefixed.GuiBase
                 Window__Push(this);
                 NativeImplClient.InvokeModuleMethod(_window_setTitle);
             }
+            public void Focus()
+            {
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_focus);
+            }
+            public void MouseGrab()
+            {
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_mouseGrab);
+            }
+            public IntPtr GetOSHandle()
+            {
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_getOSHandle);
+                return NativeImplClient.PopSizeT();
+            }
             public void EnableDrops(bool enable)
             {
                 NativeImplClient.PushBool(enable);
                 Window__Push(this);
                 NativeImplClient.InvokeModuleMethod(_window_enableDrops);
+            }
+            public void SetMenuBar(MenuBar menuBar)
+            {
+                MenuBar__Push(menuBar);
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_setMenuBar);
+            }
+            public void ShowContextMenu(int x, int y, Menu menu)
+            {
+                Menu__Push(menu);
+                NativeImplClient.PushInt32(y);
+                NativeImplClient.PushInt32(x);
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_showContextMenu);
+            }
+            public void SetCursor(CursorStyle style)
+            {
+                CursorStyle__Push(style);
+                Window__Push(this);
+                NativeImplClient.InvokeModuleMethod(_window_setCursor);
             }
             public static Window Create(int width, int height, string title, WindowDelegate del, WindowOptions opts)
             {
@@ -1561,6 +1635,10 @@ namespace Org.Prefixed.GuiBase
                 NativeImplClient.PushInt32(width);
                 NativeImplClient.InvokeModuleMethod(_window_create);
                 return Window__Pop();
+            }
+            public static void MouseUngrab()
+            {
+                NativeImplClient.InvokeModuleMethod(_window_mouseUngrab);
             }
         }
 
@@ -1823,16 +1901,23 @@ namespace Org.Prefixed.GuiBase
             _dragData_dragExec = NativeImplClient.GetModuleMethod(_module, "DragData_dragExec");
             _dragData_create = NativeImplClient.GetModuleMethod(_module, "DragData_create");
             _DragData_dispose = NativeImplClient.GetModuleMethod(_module, "DragData_dispose");
+            _window_destroy = NativeImplClient.GetModuleMethod(_module, "Window_destroy");
             _window_show = NativeImplClient.GetModuleMethod(_module, "Window_show");
             _window_showRelativeTo = NativeImplClient.GetModuleMethod(_module, "Window_showRelativeTo");
+            _window_showModal = NativeImplClient.GetModuleMethod(_module, "Window_showModal");
+            _window_endModal = NativeImplClient.GetModuleMethod(_module, "Window_endModal");
             _window_hide = NativeImplClient.GetModuleMethod(_module, "Window_hide");
-            _window_destroy = NativeImplClient.GetModuleMethod(_module, "Window_destroy");
-            _window_setMenuBar = NativeImplClient.GetModuleMethod(_module, "Window_setMenuBar");
-            _window_showContextMenu = NativeImplClient.GetModuleMethod(_module, "Window_showContextMenu");
             _window_invalidate = NativeImplClient.GetModuleMethod(_module, "Window_invalidate");
             _window_setTitle = NativeImplClient.GetModuleMethod(_module, "Window_setTitle");
+            _window_focus = NativeImplClient.GetModuleMethod(_module, "Window_focus");
+            _window_mouseGrab = NativeImplClient.GetModuleMethod(_module, "Window_mouseGrab");
+            _window_getOSHandle = NativeImplClient.GetModuleMethod(_module, "Window_getOSHandle");
             _window_enableDrops = NativeImplClient.GetModuleMethod(_module, "Window_enableDrops");
+            _window_setMenuBar = NativeImplClient.GetModuleMethod(_module, "Window_setMenuBar");
+            _window_showContextMenu = NativeImplClient.GetModuleMethod(_module, "Window_showContextMenu");
+            _window_setCursor = NativeImplClient.GetModuleMethod(_module, "Window_setCursor");
             _window_create = NativeImplClient.GetModuleMethod(_module, "Window_create");
+            _window_mouseUngrab = NativeImplClient.GetModuleMethod(_module, "Window_mouseUngrab");
             _Window_dispose = NativeImplClient.GetModuleMethod(_module, "Window_dispose");
             _timer_create = NativeImplClient.GetModuleMethod(_module, "Timer_create");
             _Timer_dispose = NativeImplClient.GetModuleMethod(_module, "Timer_dispose");

@@ -54,6 +54,7 @@ class InternalWindow {
 private:
     wl_WindowRef wlWindow = nullptr;
     std::shared_ptr<WindowDelegate> del;
+    std::map<CursorStyle, wl_CursorRef> cachedCursors;
 public:
     static InternalWindow* create(int width, int height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions &opts) {
         wl_WindowProperties wlProps;
@@ -88,6 +89,17 @@ public:
     void showContextMenu(int x, int y, Menu menu) {
         wl_WindowShowContextMenu(wlWindow, x, y, (wl_MenuRef)menu, nullptr);
     }
+    void setCursor(CursorStyle style) {
+        wl_CursorRef wlCursor;
+        if (cachedCursors.contains(style)) {
+            wlCursor = cachedCursors[style];
+        }
+        else {
+            wlCursor = wl_CursorCreate((wl_CursorStyle)style);
+            cachedCursors[style] = wlCursor;
+        }
+        wl_WindowSetCursor(wlWindow, wlCursor);
+    }
     void invalidate(int x, int y, int width, int height) {
         wl_WindowInvalidate(wlWindow, x, y, width, height);
     }
@@ -96,6 +108,24 @@ public:
     }
     void enableDrops(bool enable) {
         wl_WindowEnableDrops(wlWindow, enable);
+    }
+    void showModal(InternalWindow* parent) {
+        wl_WindowShowModal(wlWindow, parent->wlWindow);
+    }
+    void endModal() {
+        wl_WindowEndModal(wlWindow);
+    }
+    void focus() {
+        wl_WindowSetFocus(wlWindow);
+    }
+    void mouseGrab() {
+        wl_MouseGrab(wlWindow);
+    }
+    static void mouseUngrab() {
+        wl_MouseUngrab();
+    }
+    size_t getOSHandle() {
+        return wl_WindowGetOSHandle(wlWindow);
     }
     // OpenWL event handling ==========================
     void onDestroyed() {
@@ -418,6 +448,16 @@ void Window_showRelativeTo(Window _this, Window other, int32_t x, int32_t y, int
     ((InternalWindow*)_this)->showRelativeTo((InternalWindow*)other, x, y, newWidth, newHeight);
 }
 
+void Window_showModal(Window _this, Window parent)
+{
+    ((InternalWindow*)_this)->showModal((InternalWindow*)parent);
+}
+
+void Window_endModal(Window _this)
+{
+    ((InternalWindow*)_this)->endModal();
+}
+
 void Window_hide(Window _this)
 {
     ((InternalWindow*)_this)->hide();
@@ -435,6 +475,11 @@ void Window_showContextMenu(Window _this, int32_t x, int32_t y, Menu menu) {
     ((InternalWindow*)_this)->showContextMenu(x, y, menu);
 }
 
+void Window_setCursor(Window _this, CursorStyle style)
+{
+    ((InternalWindow*)_this)->setCursor(style);
+}
+
 void Window_invalidate(Window _this, int32_t x, int32_t y, int32_t width, int32_t height)
 {
     ((InternalWindow*)_this)->invalidate(x, y, width, height);
@@ -445,6 +490,21 @@ void Window_setTitle(Window _this, std::string title)
     ((InternalWindow*)_this)->setTitle(title);
 }
 
+void Window_focus(Window _this)
+{
+    ((InternalWindow*)_this)->focus();
+}
+
+void Window_mouseGrab(Window _this)
+{
+    ((InternalWindow*)_this)->mouseGrab();
+}
+
+size_t Window_getOSHandle(Window _this)
+{
+    return ((InternalWindow*)_this)->getOSHandle();
+}
+
 void Window_enableDrops(Window _this, bool enable)
 {
     ((InternalWindow*)_this)->enableDrops(enable);
@@ -453,6 +513,11 @@ void Window_enableDrops(Window _this, bool enable)
 Window Window_create(int32_t width, int32_t height, std::string title, std::shared_ptr<WindowDelegate> del, WindowOptions opts)
 {
     return (Window)InternalWindow::create(width, height, title, del, opts);
+}
+
+void Window_mouseUngrab()
+{
+    InternalWindow::mouseUngrab();
 }
 
 void Window_dispose(Window _this)
@@ -497,6 +562,7 @@ Action Action_create(std::string label, Icon icon, Accelerator accel, std::funct
 
 void Action_dispose(Action _this)
 {
+    // TODO: remove func from table so it can be released on the client
 }
 
 void MenuItem_dispose(MenuItem _this)

@@ -7,6 +7,9 @@ public interface IWindowMethods
     void Invalidate(int x, int y, int width, int height);
     void DestroyWindow();
     void ShowContextMenu(int x, int y, Windowing.Menu menu);
+    void GrabMouse();
+    void UngrabMouse();
+    void SetCursor(Windowing.CursorStyle style);
     Windowing.Window GetWindowHandle();
 }
 
@@ -39,8 +42,6 @@ public interface IPage
     Windowing.DropEffect DropFeedback(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect suggested);
     void DropLeave();
     void DropSubmit(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect effect);
-
-    void DragRender(Windowing.DragRenderPayload payload, string requestedFormat);
 }
 
 public abstract class BasePage(IWindowMethods windowMethods) : IPage
@@ -60,6 +61,21 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     protected void Invalidate()
     {
         windowMethods.Invalidate(0, 0, 0, 0);
+    }
+
+    protected void GrabMouse()
+    {
+        windowMethods.GrabMouse();
+    }
+
+    protected void UngrabMouse()
+    {
+        windowMethods.UngrabMouse();
+    }
+
+    protected void SetCursor(Windowing.CursorStyle style)
+    {
+        windowMethods.SetCursor(style);
     }
     
     protected void Invalidate(int x, int y, int width, int height)
@@ -124,10 +140,5 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
 
     public virtual void DropSubmit(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect effect)
     {
-    }
-
-    public virtual void DragRender(Windowing.DragRenderPayload payload, string requestedFormat)
-    {
-        throw new NotImplementedException("base page DragRender, you don't want to see this");
     }
 }

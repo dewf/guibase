@@ -16,7 +16,9 @@ public class WindowEventPage : BasePage
     private double _animPhase;
     private string[]? _lastDroppedFiles;
     private readonly Rect _dragSourceRect = MakeRect(100, 100, 200, 200);
+    private readonly Rect _mouseGrabRect = MakeRect(400, 100, 200, 200);
     private bool _mouseDownPotentialDrag;
+    private bool _grabDragging;
     private readonly Menu _contextMenu;
     
     public override string PageTitle => "Windowing/Event testing";
@@ -55,9 +57,8 @@ public class WindowEventPage : BasePage
     public WindowEventPage(IWindowMethods windowMethods) : base(windowMethods)
     {
         _windowMethods = windowMethods;
-        _nativeMenuBar = CreateMenuBar(windowMethods);
         
-        // create a simple context menu
+        _nativeMenuBar = CreateMenuBar(windowMethods);
         _contextMenu = CreateContextMenu(windowMethods);
     }
 
@@ -79,6 +80,9 @@ public class WindowEventPage : BasePage
             Console.WriteLine($"DnD Drop effect: {dropEffect} (source format: {KDragFormatUTF8})");
             // cancel the potential, otherwise they will keep happening!
             _mouseDownPotentialDrag = false;
+        } else if (_grabDragging)
+        {
+            Console.WriteLine($"Grab drag movement: {x}/{y}");
         }
     }
 
@@ -87,9 +91,28 @@ public class WindowEventPage : BasePage
         if (button == MouseButton.Left)
         {
             _mouseDownPotentialDrag = _dragSourceRect.ContainsPoint(new Point(x, y));
+
+            if (_mouseGrabRect.ContainsPoint(new Point(x, y)))
+            {
+                _grabDragging = true;
+                GrabMouse();
+                SetCursor(CursorStyle.Move);
+            }
         } else if (button == MouseButton.Right)
         {
             _windowMethods.ShowContextMenu(x, y, _contextMenu);
+        }
+    }
+
+    public override void OnMouseUp(int x, int y, MouseButton button, Modifiers modifiers)
+    {
+        _mouseDownPotentialDrag = false;
+        if (_grabDragging)
+        {
+            Console.WriteLine("grabbed mouse released!");
+            _grabDragging = false;
+            UngrabMouse();
+            SetCursor(CursorStyle.Default);
         }
     }
 
@@ -114,6 +137,12 @@ public class WindowEventPage : BasePage
         context.SetLineWidth(2);
         context.StrokeRect(_dragSourceRect);
         CenterText(context, _dragSourceRect, "Drag Source", new AttributedStringOptions { Font = smallFont, ForegroundColor = orange });
+        
+        // grab rect
+        context.SetStrokeColorWithColor(orange);
+        context.SetLineWidth(2);
+        context.StrokeRect(_mouseGrabRect);
+        CenterText(context, _mouseGrabRect, "Mouse Grab", new AttributedStringOptions { Font = smallFont, ForegroundColor = orange });
         
         // etc
         // TextLine(context, 20, 40, "DnD Testing", new AttributedStringOptions { Font = font, ForegroundColor = orange }, withGradient:false);
@@ -194,18 +223,6 @@ public class WindowEventPage : BasePage
         Invalidate();
     }
 
-    public override void DragRender(DragRenderPayload payload, string requestedFormat)
-    {
-        if (requestedFormat == KDragFormatUTF8)
-        {
-            payload.RenderUTF8("Hello from the Window Event Page!! This text will be rendered when dragging or copying to clipboard.");
-        }
-        else
-        {
-            Console.WriteLine($"DragRender: we failed to render [{requestedFormat}] !");
-        }
-    }
-
     public override void OnTimer(double secondsSinceLast)
     {
         // 1 complete cycle per second?
@@ -281,6 +298,7 @@ public class WindowEventPage : BasePage
         {
             using var dragData = DragData.Create([KDragFormatUTF8], (format, payload) =>
             {
+                Console.WriteLine("#### WE ARE ACTIVELY RENDERING ######");
                 if (format == KDragFormatUTF8)
                 {
                     payload.RenderUTF8("HELLO FROM CLIPBOARD COPY!!!!");
