@@ -346,7 +346,7 @@ sumtype ParagraphStyleSetting {
 
 opaque ParagraphStyle {
     static {
-        ParagraphStyle create(Array<ParagraphStyleSetting> settings);
+        ParagraphStyle create(Array<ParagraphStyleSetting> settings); // need to check the source API - would this make more sense as 'options', than providing an Array of settings?
     }
 }
 
