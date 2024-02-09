@@ -635,7 +635,7 @@ static std::string joinStrings(std::vector<std::string> strings, const char* del
 }
 
 // this is just complexity necessitated by sending everything over in C-friendly structs
-// namely, allocating and deallocating the various pointers that go in the structure
+// namely, allocating and deallocating the various pointers that go in the wl_FileDialogOpts structure
 // another approach would have been to allocate a meta-struct holding not only the
 // wl file options, but also the string buffers holding the data whose pointers we're using
 // no compelling reason to do it this way, just having fun with C++ lambdas

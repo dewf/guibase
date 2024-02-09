@@ -712,15 +712,15 @@ void DragData_dragExec__wrapper() {
     DropEffect__push(DragData_dragExec(_this, canDoMask));
 }
 
+void DragData_dispose__wrapper() {
+    auto _this = DragData__pop();
+    DragData_dispose(_this);
+}
+
 void DragData_create__wrapper() {
     auto supportedFormats = popStringArrayInternal();
     auto renderFunc = DragRenderFunc__pop();
     DragData__push(DragData_create(supportedFormats, renderFunc));
-}
-
-void DragData_dispose__wrapper() {
-    auto _this = DragData__pop();
-    DragData_dispose(_this);
 }
 
 void Window_destroy__wrapper() {
@@ -815,6 +815,11 @@ void Window_setCursor__wrapper() {
     Window_setCursor(_this, style);
 }
 
+void Window_dispose__wrapper() {
+    auto _this = Window__pop();
+    Window_dispose(_this);
+}
+
 void Window_create__wrapper() {
     auto width = ni_popInt32();
     auto height = ni_popInt32();
@@ -828,9 +833,9 @@ void Window_mouseUngrab__wrapper() {
     Window_mouseUngrab();
 }
 
-void Window_dispose__wrapper() {
-    auto _this = Window__pop();
-    Window_dispose(_this);
+void Timer_dispose__wrapper() {
+    auto _this = Timer__pop();
+    Timer_dispose(_this);
 }
 
 void Timer_create__wrapper() {
@@ -839,9 +844,9 @@ void Timer_create__wrapper() {
     Timer__push(Timer_create(msTimeout, func));
 }
 
-void Timer_dispose__wrapper() {
-    auto _this = Timer__pop();
-    Timer_dispose(_this);
+void Icon_dispose__wrapper() {
+    auto _this = Icon__pop();
+    Icon_dispose(_this);
 }
 
 void Icon_create__wrapper() {
@@ -850,9 +855,9 @@ void Icon_create__wrapper() {
     Icon__push(Icon_create(filename, sizeToWidth));
 }
 
-void Icon_dispose__wrapper() {
-    auto _this = Icon__pop();
-    Icon_dispose(_this);
+void Accelerator_dispose__wrapper() {
+    auto _this = Accelerator__pop();
+    Accelerator_dispose(_this);
 }
 
 void Accelerator_create__wrapper() {
@@ -861,9 +866,9 @@ void Accelerator_create__wrapper() {
     Accelerator__push(Accelerator_create(key, modifiers));
 }
 
-void Accelerator_dispose__wrapper() {
-    auto _this = Accelerator__pop();
-    Accelerator_dispose(_this);
+void MenuAction_dispose__wrapper() {
+    auto _this = MenuAction__pop();
+    MenuAction_dispose(_this);
 }
 
 void MenuAction_create__wrapper() {
@@ -872,11 +877,6 @@ void MenuAction_create__wrapper() {
     auto accel = Accelerator__pop();
     auto func = MenuActionFunc__pop();
     MenuAction__push(MenuAction_create(label, icon, accel, func));
-}
-
-void MenuAction_dispose__wrapper() {
-    auto _this = MenuAction__pop();
-    MenuAction_dispose(_this);
 }
 
 void MenuItem_dispose__wrapper() {
@@ -902,13 +902,13 @@ void Menu_addSeparator__wrapper() {
     Menu_addSeparator(_this);
 }
 
-void Menu_create__wrapper() {
-    Menu__push(Menu_create());
-}
-
 void Menu_dispose__wrapper() {
     auto _this = Menu__pop();
     Menu_dispose(_this);
+}
+
+void Menu_create__wrapper() {
+    Menu__push(Menu_create());
 }
 
 void MenuBar_addMenu__wrapper() {
@@ -918,13 +918,18 @@ void MenuBar_addMenu__wrapper() {
     MenuBar_addMenu(_this, label, menu);
 }
 
+void MenuBar_dispose__wrapper() {
+    auto _this = MenuBar__pop();
+    MenuBar_dispose(_this);
+}
+
 void MenuBar_create__wrapper() {
     MenuBar__push(MenuBar_create());
 }
 
-void MenuBar_dispose__wrapper() {
-    auto _this = MenuBar__pop();
-    MenuBar_dispose(_this);
+void ClipData_dispose__wrapper() {
+    auto _this = ClipData__pop();
+    ClipData_dispose(_this);
 }
 
 void ClipData_setClipboard__wrapper() {
@@ -940,9 +945,9 @@ void ClipData_flushClipboard__wrapper() {
     ClipData_flushClipboard();
 }
 
-void ClipData_dispose__wrapper() {
-    auto _this = ClipData__pop();
-    ClipData_dispose(_this);
+void FileDialog_dispose__wrapper() {
+    auto _this = FileDialog__pop();
+    FileDialog_dispose(_this);
 }
 
 void FileDialog_openFile__wrapper() {
@@ -955,20 +960,15 @@ void FileDialog_saveFile__wrapper() {
     FileDialogResult__push(FileDialog_saveFile(opts), true);
 }
 
-void FileDialog_dispose__wrapper() {
-    auto _this = FileDialog__pop();
-    FileDialog_dispose(_this);
+void MessageBoxModal_dispose__wrapper() {
+    auto _this = MessageBoxModal__pop();
+    MessageBoxModal_dispose(_this);
 }
 
 void MessageBoxModal_show__wrapper() {
     auto forWindow = Window__pop();
     auto mbParams = MessageBoxParams__pop();
     MessageBoxResult__push(MessageBoxModal_show(forWindow, mbParams));
-}
-
-void MessageBoxModal_dispose__wrapper() {
-    auto _this = MessageBoxModal__pop();
-    MessageBoxModal_dispose(_this);
 }
 
 void WindowDelegate_canClose__wrapper(int serverID) {
@@ -1105,8 +1105,8 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "DragRenderPayload_renderFormat", &DragRenderPayload_renderFormat__wrapper);
     ni_registerModuleMethod(m, "DragRenderPayload_dispose", &DragRenderPayload_dispose__wrapper);
     ni_registerModuleMethod(m, "DragData_dragExec", &DragData_dragExec__wrapper);
-    ni_registerModuleMethod(m, "DragData_create", &DragData_create__wrapper);
     ni_registerModuleMethod(m, "DragData_dispose", &DragData_dispose__wrapper);
+    ni_registerModuleMethod(m, "DragData_create", &DragData_create__wrapper);
     ni_registerModuleMethod(m, "Window_destroy", &Window_destroy__wrapper);
     ni_registerModuleMethod(m, "Window_show", &Window_show__wrapper);
     ni_registerModuleMethod(m, "Window_showRelativeTo", &Window_showRelativeTo__wrapper);
@@ -1122,35 +1122,35 @@ int Windowing__register() {
     ni_registerModuleMethod(m, "Window_setMenuBar", &Window_setMenuBar__wrapper);
     ni_registerModuleMethod(m, "Window_showContextMenu", &Window_showContextMenu__wrapper);
     ni_registerModuleMethod(m, "Window_setCursor", &Window_setCursor__wrapper);
+    ni_registerModuleMethod(m, "Window_dispose", &Window_dispose__wrapper);
     ni_registerModuleMethod(m, "Window_create", &Window_create__wrapper);
     ni_registerModuleMethod(m, "Window_mouseUngrab", &Window_mouseUngrab__wrapper);
-    ni_registerModuleMethod(m, "Window_dispose", &Window_dispose__wrapper);
-    ni_registerModuleMethod(m, "Timer_create", &Timer_create__wrapper);
     ni_registerModuleMethod(m, "Timer_dispose", &Timer_dispose__wrapper);
-    ni_registerModuleMethod(m, "Icon_create", &Icon_create__wrapper);
+    ni_registerModuleMethod(m, "Timer_create", &Timer_create__wrapper);
     ni_registerModuleMethod(m, "Icon_dispose", &Icon_dispose__wrapper);
-    ni_registerModuleMethod(m, "Accelerator_create", &Accelerator_create__wrapper);
+    ni_registerModuleMethod(m, "Icon_create", &Icon_create__wrapper);
     ni_registerModuleMethod(m, "Accelerator_dispose", &Accelerator_dispose__wrapper);
-    ni_registerModuleMethod(m, "MenuAction_create", &MenuAction_create__wrapper);
+    ni_registerModuleMethod(m, "Accelerator_create", &Accelerator_create__wrapper);
     ni_registerModuleMethod(m, "MenuAction_dispose", &MenuAction_dispose__wrapper);
+    ni_registerModuleMethod(m, "MenuAction_create", &MenuAction_create__wrapper);
     ni_registerModuleMethod(m, "MenuItem_dispose", &MenuItem_dispose__wrapper);
     ni_registerModuleMethod(m, "Menu_addAction", &Menu_addAction__wrapper);
     ni_registerModuleMethod(m, "Menu_addSubmenu", &Menu_addSubmenu__wrapper);
     ni_registerModuleMethod(m, "Menu_addSeparator", &Menu_addSeparator__wrapper);
-    ni_registerModuleMethod(m, "Menu_create", &Menu_create__wrapper);
     ni_registerModuleMethod(m, "Menu_dispose", &Menu_dispose__wrapper);
+    ni_registerModuleMethod(m, "Menu_create", &Menu_create__wrapper);
     ni_registerModuleMethod(m, "MenuBar_addMenu", &MenuBar_addMenu__wrapper);
-    ni_registerModuleMethod(m, "MenuBar_create", &MenuBar_create__wrapper);
     ni_registerModuleMethod(m, "MenuBar_dispose", &MenuBar_dispose__wrapper);
+    ni_registerModuleMethod(m, "MenuBar_create", &MenuBar_create__wrapper);
+    ni_registerModuleMethod(m, "ClipData_dispose", &ClipData_dispose__wrapper);
     ni_registerModuleMethod(m, "ClipData_setClipboard", &ClipData_setClipboard__wrapper);
     ni_registerModuleMethod(m, "ClipData_get", &ClipData_get__wrapper);
     ni_registerModuleMethod(m, "ClipData_flushClipboard", &ClipData_flushClipboard__wrapper);
-    ni_registerModuleMethod(m, "ClipData_dispose", &ClipData_dispose__wrapper);
+    ni_registerModuleMethod(m, "FileDialog_dispose", &FileDialog_dispose__wrapper);
     ni_registerModuleMethod(m, "FileDialog_openFile", &FileDialog_openFile__wrapper);
     ni_registerModuleMethod(m, "FileDialog_saveFile", &FileDialog_saveFile__wrapper);
-    ni_registerModuleMethod(m, "FileDialog_dispose", &FileDialog_dispose__wrapper);
-    ni_registerModuleMethod(m, "MessageBoxModal_show", &MessageBoxModal_show__wrapper);
     ni_registerModuleMethod(m, "MessageBoxModal_dispose", &MessageBoxModal_dispose__wrapper);
+    ni_registerModuleMethod(m, "MessageBoxModal_show", &MessageBoxModal_show__wrapper);
     auto windowDelegate = ni_registerInterface(m, "WindowDelegate");
     windowDelegate_canClose = ni_registerInterfaceMethod(windowDelegate, "canClose", &WindowDelegate_canClose__wrapper);
     windowDelegate_closed = ni_registerInterfaceMethod(windowDelegate, "closed", &WindowDelegate_closed__wrapper);

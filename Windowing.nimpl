@@ -74,8 +74,9 @@ delegate bool DragRenderFunc(string requestedFormat, DragRenderPayload payload);
 
 opaque DragData {
    DropEffect dragExec(DropEffect canDoMask); // modal/blocking (note: currently missing *fromEvent parameter, which I think was required for GTK)
-
-   static DragData create(Array<string> supportedFormats, DragRenderFunc renderFunc);
+   static {
+      DragData create(Array<string> supportedFormats, DragRenderFunc renderFunc);
+   }
 }
 
 interface WindowDelegate {
@@ -91,7 +92,6 @@ interface WindowDelegate {
    void moved(int x, int y);
    void resized(int width, int height);
    void keyDown(Key key, Modifiers modifiers, KeyLocation location);
-
    // dnd drop
    DropEffect dropFeedback(DropData data, int x, int y, Modifiers modifiers, DropEffect suggested);
    void dropLeave();
@@ -134,9 +134,10 @@ opaque Window {
    void setMenuBar(MenuBar menuBar);
    void showContextMenu(int x, int y, Menu menu); // hmm, had a "fromEvent" parameter I think for GTK
    void setCursor(CursorStyle style);
-
-   static Window create(int width, int height, string title, WindowDelegate del, WindowOptions opts);
-   static void mouseUngrab();
+   static {
+      Window create(int width, int height, string title, WindowDelegate del, WindowOptions opts);
+      void mouseUngrab();
+   }
 }
 
 // TIMER =============================================================================
@@ -144,23 +145,31 @@ opaque Window {
 delegate void TimerFunc(double secondsSinceLast);
 
 opaque Timer {
-   static Timer create(int msTimeout, TimerFunc func);
+   static {
+      Timer create(int msTimeout, TimerFunc func);
+   }
 }
 
 // MENU ==============================================================================
 
 opaque Icon {
-   static Icon create(string filename, int sizeToWidth);
+   static {
+      Icon create(string filename, int sizeToWidth);
+   }
 }
 
 opaque Accelerator {
-   static Accelerator create(Key key, Modifiers modifiers);
+   static {
+      Accelerator create(Key key, Modifiers modifiers);
+   }
 }
 
 delegate void MenuActionFunc();
 
 opaque MenuAction {
-   static MenuAction create(string label, Icon icon, Accelerator accel, MenuActionFunc func);
+   static {
+      MenuAction create(string label, Icon icon, Accelerator accel, MenuActionFunc func);
+   }
 }
 
 opaque MenuItem;
@@ -168,22 +177,26 @@ opaque Menu {
    MenuItem addAction(MenuAction action);
    MenuItem addSubmenu(string label, Menu sub);
    void addSeparator();
-
-   static Menu create();   // for menu bars and standalone popups
+   static {
+      Menu create();   // for menu bars and standalone popups
+   }
 }
 
 opaque MenuBar {
    void addMenu(string label, Menu menu);
-   
-   static MenuBar create();
+   static {
+      MenuBar create();
+   }
 }
 
 // CLIPBOARD =========================================================================
 
 opaque ClipData extends DropData {
-   static void setClipboard(DragData dragData); // for sending
-   static ClipData get();                       // really just a DropData
-   static void flushClipboard();
+   static {
+      void setClipboard(DragData dragData); // for sending
+      ClipData get();                       // really just a DropData
+      void flushClipboard();
+   }
 }
 
 // FILE DIALOGS ======================================================================
@@ -214,8 +227,10 @@ struct FileDialogResult {
 }
 
 opaque FileDialog {
-   static FileDialogResult openFile(FileDialogOptions opts);
-   static FileDialogResult saveFile(FileDialogOptions opts);
+   static {
+      FileDialogResult openFile(FileDialogOptions opts);
+      FileDialogResult saveFile(FileDialogOptions opts);
+   }
 }
 
 // MESSAGEBOX ========================================================================
@@ -260,7 +275,9 @@ struct MessageBoxParams {
 }
 
 opaque MessageBoxModal { // 'MessageBox' is a win32 function
-   static MessageBoxResult show(Window forWindow, MessageBoxParams mbParams);
+   static {
+      MessageBoxResult show(Window forWindow, MessageBoxParams mbParams);
+   }
 }
 
 // KEY ENUM STUFF ====================================================================

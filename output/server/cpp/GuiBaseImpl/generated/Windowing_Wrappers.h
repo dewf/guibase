@@ -133,9 +133,9 @@ void DragRenderPayload_dispose__wrapper();
 
 void DragData_dragExec__wrapper();
 
-void DragData_create__wrapper();
-
 void DragData_dispose__wrapper();
+
+void DragData_create__wrapper();
 
 void Window_destroy__wrapper();
 
@@ -167,27 +167,27 @@ void Window_showContextMenu__wrapper();
 
 void Window_setCursor__wrapper();
 
+void Window_dispose__wrapper();
+
 void Window_create__wrapper();
 
 void Window_mouseUngrab__wrapper();
 
-void Window_dispose__wrapper();
+void Timer_dispose__wrapper();
 
 void Timer_create__wrapper();
 
-void Timer_dispose__wrapper();
+void Icon_dispose__wrapper();
 
 void Icon_create__wrapper();
 
-void Icon_dispose__wrapper();
+void Accelerator_dispose__wrapper();
 
 void Accelerator_create__wrapper();
 
-void Accelerator_dispose__wrapper();
+void MenuAction_dispose__wrapper();
 
 void MenuAction_create__wrapper();
-
-void MenuAction_dispose__wrapper();
 
 void MenuItem_dispose__wrapper();
 
@@ -197,15 +197,17 @@ void Menu_addSubmenu__wrapper();
 
 void Menu_addSeparator__wrapper();
 
-void Menu_create__wrapper();
-
 void Menu_dispose__wrapper();
+
+void Menu_create__wrapper();
 
 void MenuBar_addMenu__wrapper();
 
+void MenuBar_dispose__wrapper();
+
 void MenuBar_create__wrapper();
 
-void MenuBar_dispose__wrapper();
+void ClipData_dispose__wrapper();
 
 void ClipData_setClipboard__wrapper();
 
@@ -213,17 +215,15 @@ void ClipData_get__wrapper();
 
 void ClipData_flushClipboard__wrapper();
 
-void ClipData_dispose__wrapper();
+void FileDialog_dispose__wrapper();
 
 void FileDialog_openFile__wrapper();
 
 void FileDialog_saveFile__wrapper();
 
-void FileDialog_dispose__wrapper();
+void MessageBoxModal_dispose__wrapper();
 
 void MessageBoxModal_show__wrapper();
-
-void MessageBoxModal_dispose__wrapper();
 
 void WindowDelegate_canClose__wrapper(int serverID);
 

@@ -136,21 +136,21 @@ void AffineTransformScale__wrapper();
 
 void AffineTransformConcat__wrapper();
 
+void Color_dispose__wrapper();
+
 void Color_createGenericRGB__wrapper();
 
 void Color_getConstantColor__wrapper();
 
-void Color_dispose__wrapper();
+void ColorSpace_dispose__wrapper();
 
 void ColorSpace_createWithName__wrapper();
 
 void ColorSpace_createDeviceGray__wrapper();
 
-void ColorSpace_dispose__wrapper();
+void Gradient_dispose__wrapper();
 
 void Gradient_createWithColorComponents__wrapper();
-
-void Gradient_dispose__wrapper();
 
 void Path_getCurrentPoint__wrapper();
 
@@ -158,13 +158,13 @@ void Path_createCopy__wrapper();
 
 void Path_createMutableCopy__wrapper();
 
+void Path_dispose__wrapper();
+
 void Path_createWithRect__wrapper();
 
 void Path_createWithEllipseInRect__wrapper();
 
 void Path_createWithRoundedRect__wrapper();
-
-void Path_dispose__wrapper();
 
 void MutablePath_addPath__wrapper();
 
@@ -194,9 +194,9 @@ void MutablePath_addQuadCurveToPoint__wrapper();
 
 void MutablePath_closeSubpath__wrapper();
 
-void MutablePath_create__wrapper();
-
 void MutablePath_dispose__wrapper();
+
+void MutablePath_create__wrapper();
 
 void DrawContext_saveGState__wrapper();
 
@@ -274,9 +274,9 @@ void AttributedString_getLength__wrapper();
 
 void AttributedString_createMutableCopy__wrapper();
 
-void AttributedString_create__wrapper();
-
 void AttributedString_dispose__wrapper();
+
+void AttributedString_create__wrapper();
 
 void MutableAttributedString_replaceString__wrapper();
 
@@ -288,9 +288,9 @@ void MutableAttributedString_beginEditing__wrapper();
 
 void MutableAttributedString_endEditing__wrapper();
 
-void MutableAttributedString_create__wrapper();
-
 void MutableAttributedString_dispose__wrapper();
+
+void MutableAttributedString_create__wrapper();
 
 void Font_createCopyWithSymbolicTraits__wrapper();
 
@@ -302,11 +302,11 @@ void Font_getUnderlineThickness__wrapper();
 
 void Font_getUnderlinePosition__wrapper();
 
+void Font_dispose__wrapper();
+
 void Font_createFromFile__wrapper();
 
 void Font_createWithName__wrapper();
-
-void Font_dispose__wrapper();
 
 void Run_getAttributes__wrapper();
 
@@ -332,9 +332,9 @@ void Line_getOffsetForStringIndex__wrapper();
 
 void Line_getStringIndexForPosition__wrapper();
 
-void Line_createWithAttributedString__wrapper();
-
 void Line_dispose__wrapper();
+
+void Line_createWithAttributedString__wrapper();
 
 void Frame_draw__wrapper();
 
@@ -346,15 +346,15 @@ void Frame_getLinesExtended__wrapper();
 
 void Frame_dispose__wrapper();
 
-void FrameSetter_createWithAttributedString__wrapper();
-
 void FrameSetter_createFrame__wrapper();
 
 void FrameSetter_dispose__wrapper();
 
-void ParagraphStyle_create__wrapper();
+void FrameSetter_createWithAttributedString__wrapper();
 
 void ParagraphStyle_dispose__wrapper();
+
+void ParagraphStyle_create__wrapper();
 
 void BitmapLock_dispose__wrapper();
 
@@ -364,9 +364,9 @@ void BitmapDrawContext_createImage__wrapper();
 
 void BitmapDrawContext_getData__wrapper();
 
-void BitmapDrawContext_create__wrapper();
-
 void BitmapDrawContext_dispose__wrapper();
+
+void BitmapDrawContext_create__wrapper();
 
 void Drawing__constantsFunc();
 

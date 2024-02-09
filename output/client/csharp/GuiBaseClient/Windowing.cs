@@ -28,8 +28,8 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _dragRenderPayload_renderFormat;
         private static ModuleMethodHandle _DragRenderPayload_dispose;
         private static ModuleMethodHandle _dragData_dragExec;
-        private static ModuleMethodHandle _dragData_create;
         private static ModuleMethodHandle _DragData_dispose;
+        private static ModuleMethodHandle _dragData_create;
         private static ModuleMethodHandle _window_destroy;
         private static ModuleMethodHandle _window_show;
         private static ModuleMethodHandle _window_showRelativeTo;
@@ -45,35 +45,35 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _window_setMenuBar;
         private static ModuleMethodHandle _window_showContextMenu;
         private static ModuleMethodHandle _window_setCursor;
+        private static ModuleMethodHandle _Window_dispose;
         private static ModuleMethodHandle _window_create;
         private static ModuleMethodHandle _window_mouseUngrab;
-        private static ModuleMethodHandle _Window_dispose;
-        private static ModuleMethodHandle _timer_create;
         private static ModuleMethodHandle _Timer_dispose;
-        private static ModuleMethodHandle _icon_create;
+        private static ModuleMethodHandle _timer_create;
         private static ModuleMethodHandle _Icon_dispose;
-        private static ModuleMethodHandle _accelerator_create;
+        private static ModuleMethodHandle _icon_create;
         private static ModuleMethodHandle _Accelerator_dispose;
-        private static ModuleMethodHandle _menuAction_create;
+        private static ModuleMethodHandle _accelerator_create;
         private static ModuleMethodHandle _MenuAction_dispose;
+        private static ModuleMethodHandle _menuAction_create;
         private static ModuleMethodHandle _MenuItem_dispose;
         private static ModuleMethodHandle _menu_addAction;
         private static ModuleMethodHandle _menu_addSubmenu;
         private static ModuleMethodHandle _menu_addSeparator;
-        private static ModuleMethodHandle _menu_create;
         private static ModuleMethodHandle _Menu_dispose;
+        private static ModuleMethodHandle _menu_create;
         private static ModuleMethodHandle _menuBar_addMenu;
-        private static ModuleMethodHandle _menuBar_create;
         private static ModuleMethodHandle _MenuBar_dispose;
+        private static ModuleMethodHandle _menuBar_create;
+        private static ModuleMethodHandle _ClipData_dispose;
         private static ModuleMethodHandle _clipData_setClipboard;
         private static ModuleMethodHandle _clipData_get;
         private static ModuleMethodHandle _clipData_flushClipboard;
-        private static ModuleMethodHandle _ClipData_dispose;
+        private static ModuleMethodHandle _FileDialog_dispose;
         private static ModuleMethodHandle _fileDialog_openFile;
         private static ModuleMethodHandle _fileDialog_saveFile;
-        private static ModuleMethodHandle _FileDialog_dispose;
-        private static ModuleMethodHandle _messageBoxModal_show;
         private static ModuleMethodHandle _MessageBoxModal_dispose;
+        private static ModuleMethodHandle _messageBoxModal_show;
         private static InterfaceHandle _windowDelegate;
         private static InterfaceMethodHandle _windowDelegate_canClose;
         private static InterfaceMethodHandle _windowDelegate_closed;
@@ -425,19 +425,19 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
-            public DropEffect DragExec(DropEffect canDoMask)
-            {
-                DropEffect__Push(canDoMask);
-                DragData__Push(this);
-                NativeImplClient.InvokeModuleMethod(_dragData_dragExec);
-                return DropEffect__Pop();
-            }
             public static DragData Create(string[] supportedFormats, DragRenderFunc renderFunc)
             {
                 DragRenderFunc__Push(renderFunc);
                 NativeImplClient.PushStringArray(supportedFormats);
                 NativeImplClient.InvokeModuleMethod(_dragData_create);
                 return DragData__Pop();
+            }
+            public DropEffect DragExec(DropEffect canDoMask)
+            {
+                DropEffect__Push(canDoMask);
+                DragData__Push(this);
+                NativeImplClient.InvokeModuleMethod(_dragData_dragExec);
+                return DropEffect__Pop();
             }
         }
 
@@ -894,6 +894,11 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
+            public static Menu Create()
+            {
+                NativeImplClient.InvokeModuleMethod(_menu_create);
+                return Menu__Pop();
+            }
             public MenuItem AddAction(MenuAction action)
             {
                 MenuAction__Push(action);
@@ -913,11 +918,6 @@ namespace Org.Prefixed.GuiBase
             {
                 Menu__Push(this);
                 NativeImplClient.InvokeModuleMethod(_menu_addSeparator);
-            }
-            public static Menu Create()
-            {
-                NativeImplClient.InvokeModuleMethod(_menu_create);
-                return Menu__Pop();
             }
         }
 
@@ -1014,17 +1014,17 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
+            public static MenuBar Create()
+            {
+                NativeImplClient.InvokeModuleMethod(_menuBar_create);
+                return MenuBar__Pop();
+            }
             public void AddMenu(string label, Menu menu)
             {
                 Menu__Push(menu);
                 NativeImplClient.PushString(label);
                 MenuBar__Push(this);
                 NativeImplClient.InvokeModuleMethod(_menuBar_addMenu);
-            }
-            public static MenuBar Create()
-            {
-                NativeImplClient.InvokeModuleMethod(_menuBar_create);
-                return MenuBar__Pop();
             }
         }
 
@@ -1533,6 +1533,20 @@ namespace Org.Prefixed.GuiBase
                     _disposed = true;
                 }
             }
+            public static Window Create(int width, int height, string title, WindowDelegate del, WindowOptions opts)
+            {
+                WindowOptions__Push(opts, false);
+                WindowDelegate__Push(del, false);
+                NativeImplClient.PushString(title);
+                NativeImplClient.PushInt32(height);
+                NativeImplClient.PushInt32(width);
+                NativeImplClient.InvokeModuleMethod(_window_create);
+                return Window__Pop();
+            }
+            public static void MouseUngrab()
+            {
+                NativeImplClient.InvokeModuleMethod(_window_mouseUngrab);
+            }
             public void Destroy()
             {
                 Window__Push(this);
@@ -1625,20 +1639,6 @@ namespace Org.Prefixed.GuiBase
                 CursorStyle__Push(style);
                 Window__Push(this);
                 NativeImplClient.InvokeModuleMethod(_window_setCursor);
-            }
-            public static Window Create(int width, int height, string title, WindowDelegate del, WindowOptions opts)
-            {
-                WindowOptions__Push(opts, false);
-                WindowDelegate__Push(del, false);
-                NativeImplClient.PushString(title);
-                NativeImplClient.PushInt32(height);
-                NativeImplClient.PushInt32(width);
-                NativeImplClient.InvokeModuleMethod(_window_create);
-                return Window__Pop();
-            }
-            public static void MouseUngrab()
-            {
-                NativeImplClient.InvokeModuleMethod(_window_mouseUngrab);
             }
         }
 
@@ -1899,8 +1899,8 @@ namespace Org.Prefixed.GuiBase
             _dragRenderPayload_renderFormat = NativeImplClient.GetModuleMethod(_module, "DragRenderPayload_renderFormat");
             _DragRenderPayload_dispose = NativeImplClient.GetModuleMethod(_module, "DragRenderPayload_dispose");
             _dragData_dragExec = NativeImplClient.GetModuleMethod(_module, "DragData_dragExec");
-            _dragData_create = NativeImplClient.GetModuleMethod(_module, "DragData_create");
             _DragData_dispose = NativeImplClient.GetModuleMethod(_module, "DragData_dispose");
+            _dragData_create = NativeImplClient.GetModuleMethod(_module, "DragData_create");
             _window_destroy = NativeImplClient.GetModuleMethod(_module, "Window_destroy");
             _window_show = NativeImplClient.GetModuleMethod(_module, "Window_show");
             _window_showRelativeTo = NativeImplClient.GetModuleMethod(_module, "Window_showRelativeTo");
@@ -1916,35 +1916,35 @@ namespace Org.Prefixed.GuiBase
             _window_setMenuBar = NativeImplClient.GetModuleMethod(_module, "Window_setMenuBar");
             _window_showContextMenu = NativeImplClient.GetModuleMethod(_module, "Window_showContextMenu");
             _window_setCursor = NativeImplClient.GetModuleMethod(_module, "Window_setCursor");
+            _Window_dispose = NativeImplClient.GetModuleMethod(_module, "Window_dispose");
             _window_create = NativeImplClient.GetModuleMethod(_module, "Window_create");
             _window_mouseUngrab = NativeImplClient.GetModuleMethod(_module, "Window_mouseUngrab");
-            _Window_dispose = NativeImplClient.GetModuleMethod(_module, "Window_dispose");
-            _timer_create = NativeImplClient.GetModuleMethod(_module, "Timer_create");
             _Timer_dispose = NativeImplClient.GetModuleMethod(_module, "Timer_dispose");
-            _icon_create = NativeImplClient.GetModuleMethod(_module, "Icon_create");
+            _timer_create = NativeImplClient.GetModuleMethod(_module, "Timer_create");
             _Icon_dispose = NativeImplClient.GetModuleMethod(_module, "Icon_dispose");
-            _accelerator_create = NativeImplClient.GetModuleMethod(_module, "Accelerator_create");
+            _icon_create = NativeImplClient.GetModuleMethod(_module, "Icon_create");
             _Accelerator_dispose = NativeImplClient.GetModuleMethod(_module, "Accelerator_dispose");
-            _menuAction_create = NativeImplClient.GetModuleMethod(_module, "MenuAction_create");
+            _accelerator_create = NativeImplClient.GetModuleMethod(_module, "Accelerator_create");
             _MenuAction_dispose = NativeImplClient.GetModuleMethod(_module, "MenuAction_dispose");
+            _menuAction_create = NativeImplClient.GetModuleMethod(_module, "MenuAction_create");
             _MenuItem_dispose = NativeImplClient.GetModuleMethod(_module, "MenuItem_dispose");
             _menu_addAction = NativeImplClient.GetModuleMethod(_module, "Menu_addAction");
             _menu_addSubmenu = NativeImplClient.GetModuleMethod(_module, "Menu_addSubmenu");
             _menu_addSeparator = NativeImplClient.GetModuleMethod(_module, "Menu_addSeparator");
-            _menu_create = NativeImplClient.GetModuleMethod(_module, "Menu_create");
             _Menu_dispose = NativeImplClient.GetModuleMethod(_module, "Menu_dispose");
+            _menu_create = NativeImplClient.GetModuleMethod(_module, "Menu_create");
             _menuBar_addMenu = NativeImplClient.GetModuleMethod(_module, "MenuBar_addMenu");
-            _menuBar_create = NativeImplClient.GetModuleMethod(_module, "MenuBar_create");
             _MenuBar_dispose = NativeImplClient.GetModuleMethod(_module, "MenuBar_dispose");
+            _menuBar_create = NativeImplClient.GetModuleMethod(_module, "MenuBar_create");
+            _ClipData_dispose = NativeImplClient.GetModuleMethod(_module, "ClipData_dispose");
             _clipData_setClipboard = NativeImplClient.GetModuleMethod(_module, "ClipData_setClipboard");
             _clipData_get = NativeImplClient.GetModuleMethod(_module, "ClipData_get");
             _clipData_flushClipboard = NativeImplClient.GetModuleMethod(_module, "ClipData_flushClipboard");
-            _ClipData_dispose = NativeImplClient.GetModuleMethod(_module, "ClipData_dispose");
+            _FileDialog_dispose = NativeImplClient.GetModuleMethod(_module, "FileDialog_dispose");
             _fileDialog_openFile = NativeImplClient.GetModuleMethod(_module, "FileDialog_openFile");
             _fileDialog_saveFile = NativeImplClient.GetModuleMethod(_module, "FileDialog_saveFile");
-            _FileDialog_dispose = NativeImplClient.GetModuleMethod(_module, "FileDialog_dispose");
-            _messageBoxModal_show = NativeImplClient.GetModuleMethod(_module, "MessageBoxModal_show");
             _MessageBoxModal_dispose = NativeImplClient.GetModuleMethod(_module, "MessageBoxModal_dispose");
+            _messageBoxModal_show = NativeImplClient.GetModuleMethod(_module, "MessageBoxModal_show");
 
             _dropDataBadFormat = NativeImplClient.GetException(_module, "DropDataBadFormat");
             NativeImplClient.SetExceptionBuilder(_dropDataBadFormat, DropDataBadFormat.BuildAndThrow);

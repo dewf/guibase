@@ -904,6 +904,11 @@ void AffineTransformConcat__wrapper() {
     AffineTransform__push(AffineTransformConcat(t1, t2), true);
 }
 
+void Color_dispose__wrapper() {
+    auto _this = Color__pop();
+    Color_dispose(_this);
+}
+
 void Color_createGenericRGB__wrapper() {
     auto red = ni_popDouble();
     auto green = ni_popDouble();
@@ -917,9 +922,9 @@ void Color_getConstantColor__wrapper() {
     Color__push(Color_getConstantColor(which));
 }
 
-void Color_dispose__wrapper() {
-    auto _this = Color__pop();
-    Color_dispose(_this);
+void ColorSpace_dispose__wrapper() {
+    auto _this = ColorSpace__pop();
+    ColorSpace_dispose(_this);
 }
 
 void ColorSpace_createWithName__wrapper() {
@@ -931,20 +936,15 @@ void ColorSpace_createDeviceGray__wrapper() {
     ColorSpace__push(ColorSpace_createDeviceGray());
 }
 
-void ColorSpace_dispose__wrapper() {
-    auto _this = ColorSpace__pop();
-    ColorSpace_dispose(_this);
+void Gradient_dispose__wrapper() {
+    auto _this = Gradient__pop();
+    Gradient_dispose(_this);
 }
 
 void Gradient_createWithColorComponents__wrapper() {
     auto space = ColorSpace__pop();
     auto stops = __GradientStop_Array__pop();
     Gradient__push(Gradient_createWithColorComponents(space, stops));
-}
-
-void Gradient_dispose__wrapper() {
-    auto _this = Gradient__pop();
-    Gradient_dispose(_this);
 }
 
 void Path_getCurrentPoint__wrapper() {
@@ -960,6 +960,11 @@ void Path_createCopy__wrapper() {
 void Path_createMutableCopy__wrapper() {
     auto _this = Path__pop();
     MutablePath__push(Path_createMutableCopy(_this));
+}
+
+void Path_dispose__wrapper() {
+    auto _this = Path__pop();
+    Path_dispose(_this);
 }
 
 void Path_createWithRect__wrapper() {
@@ -980,11 +985,6 @@ void Path_createWithRoundedRect__wrapper() {
     auto cornerHeight = ni_popDouble();
     auto optArgs = OptArgs__pop();
     Path__push(Path_createWithRoundedRect(rect, cornerWidth, cornerHeight, optArgs));
-}
-
-void Path_dispose__wrapper() {
-    auto _this = Path__pop();
-    Path_dispose(_this);
 }
 
 void MutablePath_addPath__wrapper() {
@@ -1156,13 +1156,13 @@ void MutablePath_closeSubpath__wrapper() {
     MutablePath_closeSubpath(_this);
 }
 
-void MutablePath_create__wrapper() {
-    MutablePath__push(MutablePath_create());
-}
-
 void MutablePath_dispose__wrapper() {
     auto _this = MutablePath__pop();
     MutablePath_dispose(_this);
+}
+
+void MutablePath_create__wrapper() {
+    MutablePath__push(MutablePath_create());
 }
 
 void DrawContext_saveGState__wrapper() {
@@ -1410,15 +1410,15 @@ void AttributedString_createMutableCopy__wrapper() {
     MutableAttributedString__push(AttributedString_createMutableCopy(_this, maxLength));
 }
 
+void AttributedString_dispose__wrapper() {
+    auto _this = AttributedString__pop();
+    AttributedString_dispose(_this);
+}
+
 void AttributedString_create__wrapper() {
     auto s = popStringInternal();
     auto opts = AttributedStringOptions__pop();
     AttributedString__push(AttributedString_create(s, opts));
-}
-
-void AttributedString_dispose__wrapper() {
-    auto _this = AttributedString__pop();
-    AttributedString_dispose(_this);
 }
 
 void MutableAttributedString_replaceString__wrapper() {
@@ -1453,14 +1453,14 @@ void MutableAttributedString_endEditing__wrapper() {
     MutableAttributedString_endEditing(_this);
 }
 
-void MutableAttributedString_create__wrapper() {
-    auto maxLength = ni_popInt64();
-    MutableAttributedString__push(MutableAttributedString_create(maxLength));
-}
-
 void MutableAttributedString_dispose__wrapper() {
     auto _this = MutableAttributedString__pop();
     MutableAttributedString_dispose(_this);
+}
+
+void MutableAttributedString_create__wrapper() {
+    auto maxLength = ni_popInt64();
+    MutableAttributedString__push(MutableAttributedString_create(maxLength));
 }
 
 void Font_createCopyWithSymbolicTraits__wrapper() {
@@ -1491,6 +1491,11 @@ void Font_getUnderlinePosition__wrapper() {
     ni_pushDouble(Font_getUnderlinePosition(_this));
 }
 
+void Font_dispose__wrapper() {
+    auto _this = Font__pop();
+    Font_dispose(_this);
+}
+
 void Font_createFromFile__wrapper() {
     auto path = popStringInternal();
     auto size = ni_popDouble();
@@ -1503,11 +1508,6 @@ void Font_createWithName__wrapper() {
     auto size = ni_popDouble();
     auto optArgs = OptArgs__pop();
     Font__push(Font_createWithName(name, size, optArgs));
-}
-
-void Font_dispose__wrapper() {
-    auto _this = Font__pop();
-    Font_dispose(_this);
 }
 
 void Run_getAttributes__wrapper() {
@@ -1576,14 +1576,14 @@ void Line_getStringIndexForPosition__wrapper() {
     ni_pushInt64(Line_getStringIndexForPosition(_this, p));
 }
 
-void Line_createWithAttributedString__wrapper() {
-    auto str = AttributedString__pop();
-    Line__push(Line_createWithAttributedString(str));
-}
-
 void Line_dispose__wrapper() {
     auto _this = Line__pop();
     Line_dispose(_this);
+}
+
+void Line_createWithAttributedString__wrapper() {
+    auto str = AttributedString__pop();
+    Line__push(Line_createWithAttributedString(str));
 }
 
 void Frame_draw__wrapper() {
@@ -1614,11 +1614,6 @@ void Frame_dispose__wrapper() {
     Frame_dispose(_this);
 }
 
-void FrameSetter_createWithAttributedString__wrapper() {
-    auto str = AttributedString__pop();
-    FrameSetter__push(FrameSetter_createWithAttributedString(str));
-}
-
 void FrameSetter_createFrame__wrapper() {
     auto _this = FrameSetter__pop();
     auto range = Range__pop();
@@ -1631,14 +1626,19 @@ void FrameSetter_dispose__wrapper() {
     FrameSetter_dispose(_this);
 }
 
-void ParagraphStyle_create__wrapper() {
-    auto settings = __ParagraphStyleSetting_Array__pop();
-    ParagraphStyle__push(ParagraphStyle_create(settings));
+void FrameSetter_createWithAttributedString__wrapper() {
+    auto str = AttributedString__pop();
+    FrameSetter__push(FrameSetter_createWithAttributedString(str));
 }
 
 void ParagraphStyle_dispose__wrapper() {
     auto _this = ParagraphStyle__pop();
     ParagraphStyle_dispose(_this);
+}
+
+void ParagraphStyle_create__wrapper() {
+    auto settings = __ParagraphStyleSetting_Array__pop();
+    ParagraphStyle__push(ParagraphStyle_create(settings));
 }
 
 void BitmapLock_dispose__wrapper() {
@@ -1661,6 +1661,11 @@ void BitmapDrawContext_getData__wrapper() {
     BitmapLock__push(BitmapDrawContext_getData(_this));
 }
 
+void BitmapDrawContext_dispose__wrapper() {
+    auto _this = BitmapDrawContext__pop();
+    BitmapDrawContext_dispose(_this);
+}
+
 void BitmapDrawContext_create__wrapper() {
     auto width = ni_popInt32();
     auto height = ni_popInt32();
@@ -1669,11 +1674,6 @@ void BitmapDrawContext_create__wrapper() {
     auto space = ColorSpace__pop();
     auto bitmapInfo = BitmapInfo__pop();
     BitmapDrawContext__push(BitmapDrawContext_create(width, height, bitsPerComponent, bytesPerRow, space, bitmapInfo));
-}
-
-void BitmapDrawContext_dispose__wrapper() {
-    auto _this = BitmapDrawContext__pop();
-    BitmapDrawContext_dispose(_this);
 }
 
 void Drawing__constantsFunc() {
@@ -1687,21 +1687,21 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "AffineTransformRotate", &AffineTransformRotate__wrapper);
     ni_registerModuleMethod(m, "AffineTransformScale", &AffineTransformScale__wrapper);
     ni_registerModuleMethod(m, "AffineTransformConcat", &AffineTransformConcat__wrapper);
+    ni_registerModuleMethod(m, "Color_dispose", &Color_dispose__wrapper);
     ni_registerModuleMethod(m, "Color_createGenericRGB", &Color_createGenericRGB__wrapper);
     ni_registerModuleMethod(m, "Color_getConstantColor", &Color_getConstantColor__wrapper);
-    ni_registerModuleMethod(m, "Color_dispose", &Color_dispose__wrapper);
+    ni_registerModuleMethod(m, "ColorSpace_dispose", &ColorSpace_dispose__wrapper);
     ni_registerModuleMethod(m, "ColorSpace_createWithName", &ColorSpace_createWithName__wrapper);
     ni_registerModuleMethod(m, "ColorSpace_createDeviceGray", &ColorSpace_createDeviceGray__wrapper);
-    ni_registerModuleMethod(m, "ColorSpace_dispose", &ColorSpace_dispose__wrapper);
-    ni_registerModuleMethod(m, "Gradient_createWithColorComponents", &Gradient_createWithColorComponents__wrapper);
     ni_registerModuleMethod(m, "Gradient_dispose", &Gradient_dispose__wrapper);
+    ni_registerModuleMethod(m, "Gradient_createWithColorComponents", &Gradient_createWithColorComponents__wrapper);
     ni_registerModuleMethod(m, "Path_getCurrentPoint", &Path_getCurrentPoint__wrapper);
     ni_registerModuleMethod(m, "Path_createCopy", &Path_createCopy__wrapper);
     ni_registerModuleMethod(m, "Path_createMutableCopy", &Path_createMutableCopy__wrapper);
+    ni_registerModuleMethod(m, "Path_dispose", &Path_dispose__wrapper);
     ni_registerModuleMethod(m, "Path_createWithRect", &Path_createWithRect__wrapper);
     ni_registerModuleMethod(m, "Path_createWithEllipseInRect", &Path_createWithEllipseInRect__wrapper);
     ni_registerModuleMethod(m, "Path_createWithRoundedRect", &Path_createWithRoundedRect__wrapper);
-    ni_registerModuleMethod(m, "Path_dispose", &Path_dispose__wrapper);
     ni_registerModuleMethod(m, "MutablePath_addPath", &MutablePath_addPath__wrapper);
     ni_registerModuleMethod(m, "MutablePath_addRect", &MutablePath_addRect__wrapper);
     ni_registerModuleMethod(m, "MutablePath_addRects", &MutablePath_addRects__wrapper);
@@ -1716,8 +1716,8 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "MutablePath_addLineToPoint", &MutablePath_addLineToPoint__wrapper);
     ni_registerModuleMethod(m, "MutablePath_addQuadCurveToPoint", &MutablePath_addQuadCurveToPoint__wrapper);
     ni_registerModuleMethod(m, "MutablePath_closeSubpath", &MutablePath_closeSubpath__wrapper);
-    ni_registerModuleMethod(m, "MutablePath_create", &MutablePath_create__wrapper);
     ni_registerModuleMethod(m, "MutablePath_dispose", &MutablePath_dispose__wrapper);
+    ni_registerModuleMethod(m, "MutablePath_create", &MutablePath_create__wrapper);
     ni_registerModuleMethod(m, "DrawContext_saveGState", &DrawContext_saveGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_restoreGState", &DrawContext_restoreGState__wrapper);
     ni_registerModuleMethod(m, "DrawContext_setRGBFillColor", &DrawContext_setRGBFillColor__wrapper);
@@ -1756,23 +1756,23 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "DrawContext_dispose", &DrawContext_dispose__wrapper);
     ni_registerModuleMethod(m, "AttributedString_getLength", &AttributedString_getLength__wrapper);
     ni_registerModuleMethod(m, "AttributedString_createMutableCopy", &AttributedString_createMutableCopy__wrapper);
-    ni_registerModuleMethod(m, "AttributedString_create", &AttributedString_create__wrapper);
     ni_registerModuleMethod(m, "AttributedString_dispose", &AttributedString_dispose__wrapper);
+    ni_registerModuleMethod(m, "AttributedString_create", &AttributedString_create__wrapper);
     ni_registerModuleMethod(m, "MutableAttributedString_replaceString", &MutableAttributedString_replaceString__wrapper);
     ni_registerModuleMethod(m, "MutableAttributedString_setAttribute", &MutableAttributedString_setAttribute__wrapper);
     ni_registerModuleMethod(m, "MutableAttributedString_setCustomAttribute", &MutableAttributedString_setCustomAttribute__wrapper);
     ni_registerModuleMethod(m, "MutableAttributedString_beginEditing", &MutableAttributedString_beginEditing__wrapper);
     ni_registerModuleMethod(m, "MutableAttributedString_endEditing", &MutableAttributedString_endEditing__wrapper);
-    ni_registerModuleMethod(m, "MutableAttributedString_create", &MutableAttributedString_create__wrapper);
     ni_registerModuleMethod(m, "MutableAttributedString_dispose", &MutableAttributedString_dispose__wrapper);
+    ni_registerModuleMethod(m, "MutableAttributedString_create", &MutableAttributedString_create__wrapper);
     ni_registerModuleMethod(m, "Font_createCopyWithSymbolicTraits", &Font_createCopyWithSymbolicTraits__wrapper);
     ni_registerModuleMethod(m, "Font_getAscent", &Font_getAscent__wrapper);
     ni_registerModuleMethod(m, "Font_getDescent", &Font_getDescent__wrapper);
     ni_registerModuleMethod(m, "Font_getUnderlineThickness", &Font_getUnderlineThickness__wrapper);
     ni_registerModuleMethod(m, "Font_getUnderlinePosition", &Font_getUnderlinePosition__wrapper);
+    ni_registerModuleMethod(m, "Font_dispose", &Font_dispose__wrapper);
     ni_registerModuleMethod(m, "Font_createFromFile", &Font_createFromFile__wrapper);
     ni_registerModuleMethod(m, "Font_createWithName", &Font_createWithName__wrapper);
-    ni_registerModuleMethod(m, "Font_dispose", &Font_dispose__wrapper);
     ni_registerModuleMethod(m, "Run_getAttributes", &Run_getAttributes__wrapper);
     ni_registerModuleMethod(m, "Run_getTypographicBounds", &Run_getTypographicBounds__wrapper);
     ni_registerModuleMethod(m, "Run_getStringRange", &Run_getStringRange__wrapper);
@@ -1785,24 +1785,24 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "Line_getGlyphRuns", &Line_getGlyphRuns__wrapper);
     ni_registerModuleMethod(m, "Line_getOffsetForStringIndex", &Line_getOffsetForStringIndex__wrapper);
     ni_registerModuleMethod(m, "Line_getStringIndexForPosition", &Line_getStringIndexForPosition__wrapper);
-    ni_registerModuleMethod(m, "Line_createWithAttributedString", &Line_createWithAttributedString__wrapper);
     ni_registerModuleMethod(m, "Line_dispose", &Line_dispose__wrapper);
+    ni_registerModuleMethod(m, "Line_createWithAttributedString", &Line_createWithAttributedString__wrapper);
     ni_registerModuleMethod(m, "Frame_draw", &Frame_draw__wrapper);
     ni_registerModuleMethod(m, "Frame_getLines", &Frame_getLines__wrapper);
     ni_registerModuleMethod(m, "Frame_getLineOrigins", &Frame_getLineOrigins__wrapper);
     ni_registerModuleMethod(m, "Frame_getLinesExtended", &Frame_getLinesExtended__wrapper);
     ni_registerModuleMethod(m, "Frame_dispose", &Frame_dispose__wrapper);
-    ni_registerModuleMethod(m, "FrameSetter_createWithAttributedString", &FrameSetter_createWithAttributedString__wrapper);
     ni_registerModuleMethod(m, "FrameSetter_createFrame", &FrameSetter_createFrame__wrapper);
     ni_registerModuleMethod(m, "FrameSetter_dispose", &FrameSetter_dispose__wrapper);
-    ni_registerModuleMethod(m, "ParagraphStyle_create", &ParagraphStyle_create__wrapper);
+    ni_registerModuleMethod(m, "FrameSetter_createWithAttributedString", &FrameSetter_createWithAttributedString__wrapper);
     ni_registerModuleMethod(m, "ParagraphStyle_dispose", &ParagraphStyle_dispose__wrapper);
+    ni_registerModuleMethod(m, "ParagraphStyle_create", &ParagraphStyle_create__wrapper);
     ni_registerModuleMethod(m, "BitmapLock_dispose", &BitmapLock_dispose__wrapper);
     ni_registerModuleMethod(m, "Image_dispose", &Image_dispose__wrapper);
     ni_registerModuleMethod(m, "BitmapDrawContext_createImage", &BitmapDrawContext_createImage__wrapper);
     ni_registerModuleMethod(m, "BitmapDrawContext_getData", &BitmapDrawContext_getData__wrapper);
-    ni_registerModuleMethod(m, "BitmapDrawContext_create", &BitmapDrawContext_create__wrapper);
     ni_registerModuleMethod(m, "BitmapDrawContext_dispose", &BitmapDrawContext_dispose__wrapper);
+    ni_registerModuleMethod(m, "BitmapDrawContext_create", &BitmapDrawContext_create__wrapper);
     mutablePathTransformException = ni_registerException(m, "MutablePathTransformException", &MutablePathTransformException__buildAndThrow);
     return 0; // = OK
 }

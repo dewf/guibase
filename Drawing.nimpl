@@ -61,8 +61,10 @@ enum ColorConstants {
 }
 
 opaque Color {
-    static Color createGenericRGB(double red, double green, double blue, double alpha);
-    static Color getConstantColor(ColorConstants which);
+    static {
+        Color createGenericRGB(double red, double green, double blue, double alpha);
+        Color getConstantColor(ColorConstants which);
+    }
 }
 
 enum ColorSpaceName {
@@ -77,8 +79,10 @@ enum ColorSpaceName {
 }
 
 opaque ColorSpace {
-    static ColorSpace createWithName(ColorSpaceName name);
-    static ColorSpace createDeviceGray();
+    static {
+        ColorSpace createWithName(ColorSpaceName name);
+        ColorSpace createDeviceGray();
+    }
 }
 
 flags GradientDrawingOptions {
@@ -95,17 +99,20 @@ struct GradientStop {
 }
 
 opaque Gradient {
-    static Gradient createWithColorComponents(ColorSpace space, Array<GradientStop> stops);
+    static {
+        Gradient createWithColorComponents(ColorSpace space, Array<GradientStop> stops);
+    }
 }
 
 opaque Path {
     Point getCurrentPoint();
     Path createCopy();
     MutablePath createMutableCopy();
-
-    static Path createWithRect(Rect rect, OptArgs optArgs);
-    static Path createWithEllipseInRect(Rect rect, OptArgs optArgs);
-    static Path createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
+    static {
+        Path createWithRect(Rect rect, OptArgs optArgs);
+        Path createWithEllipseInRect(Rect rect, OptArgs optArgs);
+        Path createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
+    }
 }
 
 exception MutablePathTransformException(string error);
@@ -127,8 +134,9 @@ opaque MutablePath extends Path {
     void addLineToPoint(double x, double y, OptArgs optArgs) throws MutablePathTransformException;
     void addQuadCurveToPoint(double cpx, double cpy, double x, double y, OptArgs optArgs) throws MutablePathTransformException;
     void closeSubpath();
-
-    static MutablePath create();
+    static {
+        MutablePath create();
+    }
 }
 
 enum TextDrawingMode {
@@ -213,8 +221,9 @@ struct Range {
 opaque AttributedString {
     long getLength();
     MutableAttributedString createMutableCopy(long maxLength);
-
-    static AttributedString create(string s, AttributedStringOptions opts);
+    static {
+        AttributedString create(string s, AttributedStringOptions opts);
+    }
 }
 
 opaque MutableAttributedString extends AttributedString {
@@ -225,7 +234,9 @@ opaque MutableAttributedString extends AttributedString {
     void beginEditing(); // for batch edits
     void endEditing();
 
-    static MutableAttributedString create(long maxLength);
+    static {
+        MutableAttributedString create(long maxLength);
+    }
 }
 
 options FontTraits {
@@ -244,9 +255,10 @@ opaque Font {
     double getDescent();
     double getUnderlineThickness();
     double getUnderlinePosition();
-
-    static Font createFromFile(string path, double size, OptArgs optArgs);
-    static Font createWithName(string name, double size, OptArgs optArgs);
+    static {
+        Font createFromFile(string path, double size, OptArgs optArgs);
+        Font createWithName(string name, double size, OptArgs optArgs);
+    }
 }
 
 struct TypographicBounds {
@@ -286,8 +298,9 @@ opaque Line {
     Array<Run> getGlyphRuns();
     Tuple<double,double> getOffsetForStringIndex(long charIndex); // offset + secondaryOffset
     long getStringIndexForPosition(Point p);
-
-    static Line createWithAttributedString(AttributedString str);
+    static {
+        Line createWithAttributedString(AttributedString str);
+    }
 }
 
 struct RunInfo {
@@ -313,8 +326,10 @@ opaque Frame {
 }
 
 opaque FrameSetter {
-    static FrameSetter createWithAttributedString(AttributedString str);
     Frame createFrame(Range range, Path path); // no frameAttributes yet, not sure what they are!
+    static {
+        FrameSetter createWithAttributedString(AttributedString str);
+    }
 }
 
 enum TextAlignment {
@@ -330,7 +345,9 @@ sumtype ParagraphStyleSetting {
 }
 
 opaque ParagraphStyle {
-    static ParagraphStyle create(Array<ParagraphStyleSetting> settings);
+    static {
+        ParagraphStyle create(Array<ParagraphStyleSetting> settings);
+    }
 }
 
 // bitmaps ===============
@@ -376,5 +393,7 @@ opaque BitmapDrawContext extends DrawContext {
 
     // we don't support a void* data argument on this yet
     // (will eventually support a Buffer<whatever> argument)
-    static BitmapDrawContext create(int width, int height, int bitsPerComponent, int bytesPerRow, ColorSpace space, BitmapInfo bitmapInfo);
+    static {
+        BitmapDrawContext create(int width, int height, int bitsPerComponent, int bytesPerRow, ColorSpace space, BitmapInfo bitmapInfo);
+    }
 }
