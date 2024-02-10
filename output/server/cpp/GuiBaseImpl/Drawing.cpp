@@ -924,6 +924,28 @@ AffineTransform AffineTransformConcat(AffineTransform t1, AffineTransform t2)
     return STRUCT_CAST(AffineTransform, ret);
 }
 
+AffineTransform AffineTransformModify(AffineTransform input, std::vector<AffineTransformOps> ops)
+{
+    dl_CGAffineTransform result = STRUCT_CAST(dl_CGAffineTransform, input);
+    for (auto i = ops.begin(); i != ops.end(); i++) {
+        switch (i->tag) {
+        case AffineTransformOps::Tag::Translate:
+            result = dl_CGAffineTransformTranslate(STRUCT_CAST(dl_CGAffineTransform, result), i->translate->tx, i->translate->ty);
+            break;
+        case AffineTransformOps::Tag::Rotate:
+            result = dl_CGAffineTransformRotate(STRUCT_CAST(dl_CGAffineTransform, result), i->rotate->angle);
+            break;
+        case AffineTransformOps::Tag::Scale:
+            result = dl_CGAffineTransformScale(STRUCT_CAST(dl_CGAffineTransform, result), i->scale->sx, i->scale->sy);
+            break;
+        case AffineTransformOps::Tag::Concat:
+            result = dl_CGAffineTransformConcat(STRUCT_CAST(dl_CGAffineTransform, result), STRUCT_CAST(dl_CGAffineTransform, i->concat->t2));
+            break;
+        }
+    }
+    return STRUCT_CAST(AffineTransform, result);
+}
+
 Point Path_getCurrentPoint(Path _this)
 {
     auto ret = dl_CGPathGetCurrentPoint((dl_CGPathRef)_this);

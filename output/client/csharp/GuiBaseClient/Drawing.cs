@@ -16,6 +16,7 @@ namespace Org.Prefixed.GuiBase
         private static ModuleMethodHandle _AffineTransformRotate;
         private static ModuleMethodHandle _AffineTransformScale;
         private static ModuleMethodHandle _AffineTransformConcat;
+        private static ModuleMethodHandle _AffineTransformModify;
         private static ModuleMethodHandle _Color_dispose;
         private static ModuleMethodHandle _color_createGenericRGB;
         private static ModuleMethodHandle _color_getConstantColor;
@@ -172,6 +173,97 @@ namespace Org.Prefixed.GuiBase
             var tx = NativeImplClient.PopDouble();
             var ty = NativeImplClient.PopDouble();
             return new AffineTransform(a, b, c, d, tx, ty);
+        }
+
+        public abstract record AffineTransformOps
+        {
+            public sealed record Translate(double Tx, double Ty) : AffineTransformOps
+            {
+                public double Tx { get; } = Tx;
+                public double Ty { get; } = Ty;
+            }
+            public sealed record Rotate(double Angle) : AffineTransformOps
+            {
+                public double Angle { get; } = Angle;
+            }
+            public sealed record Scale(double Sx, double Sy) : AffineTransformOps
+            {
+                public double Sx { get; } = Sx;
+                public double Sy { get; } = Sy;
+            }
+            public sealed record Concat(AffineTransform T2) : AffineTransformOps
+            {
+                public AffineTransform T2 { get; } = T2;
+            }
+        }
+
+        private enum AffineTransformOps__Tag
+        {
+            Translate,
+            Rotate,
+            Scale,
+            Concat
+        }
+
+        internal static void AffineTransformOps__Push(AffineTransformOps thing, bool isReturn)
+        {
+            AffineTransformOps__Tag which;
+            switch (thing)
+            {
+                case AffineTransformOps.Translate translate:
+                    which = AffineTransformOps__Tag.Translate;
+                    NativeImplClient.PushDouble(translate.Ty);
+                    NativeImplClient.PushDouble(translate.Tx);
+                    break;
+                case AffineTransformOps.Rotate rotate:
+                    which = AffineTransformOps__Tag.Rotate;
+                    NativeImplClient.PushDouble(rotate.Angle);
+                    break;
+                case AffineTransformOps.Scale scale:
+                    which = AffineTransformOps__Tag.Scale;
+                    NativeImplClient.PushDouble(scale.Sy);
+                    NativeImplClient.PushDouble(scale.Sx);
+                    break;
+                case AffineTransformOps.Concat concat:
+                    which = AffineTransformOps__Tag.Concat;
+                    AffineTransform__Push(concat.T2, isReturn);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(thing));
+            }
+            NativeImplClient.PushInt32((int)which);
+        }
+
+        internal static AffineTransformOps AffineTransformOps__Pop()
+        {
+            var which = NativeImplClient.PopInt32();
+            switch ((AffineTransformOps__Tag)which)
+            {
+                case AffineTransformOps__Tag.Translate:
+                {
+                    var tx = NativeImplClient.PopDouble();
+                    var ty = NativeImplClient.PopDouble();
+                    return new AffineTransformOps.Translate(tx, ty);
+                }
+                case AffineTransformOps__Tag.Rotate:
+                {
+                    var angle = NativeImplClient.PopDouble();
+                    return new AffineTransformOps.Rotate(angle);
+                }
+                case AffineTransformOps__Tag.Scale:
+                {
+                    var sx = NativeImplClient.PopDouble();
+                    var sy = NativeImplClient.PopDouble();
+                    return new AffineTransformOps.Scale(sx, sy);
+                }
+                case AffineTransformOps__Tag.Concat:
+                {
+                    var t2 = AffineTransform__Pop();
+                    return new AffineTransformOps.Concat(t2);
+                }
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         // built-in array type: string[]
@@ -2771,6 +2863,26 @@ namespace Org.Prefixed.GuiBase
             return ptr != IntPtr.Zero ? new Run(ptr) : null;
         }
 
+        internal static void __AffineTransformOps_Array__Push(AffineTransformOps[] values, bool isReturn)
+        {
+            foreach (var value in values.Reverse())
+            {
+                AffineTransformOps__Push(value, isReturn);
+            }
+            NativeImplClient.PushSizeT((IntPtr)values.Length);
+        }
+
+        internal static AffineTransformOps[] __AffineTransformOps_Array__Pop()
+        {
+            var count = (int)NativeImplClient.PopSizeT();
+            var ret = new AffineTransformOps[count];
+            for (var i = 0; i < count; i++)
+            {
+                ret[i] = AffineTransformOps__Pop();
+            }
+            return ret;
+        }
+
         public static AffineTransform AffineTransformTranslate(AffineTransform input, double tx, double ty)
         {
             NativeImplClient.PushDouble(ty);
@@ -2805,6 +2917,14 @@ namespace Org.Prefixed.GuiBase
             return AffineTransform__Pop();
         }
 
+        public static AffineTransform AffineTransformModify(AffineTransform input, AffineTransformOps[] ops)
+        {
+            __AffineTransformOps_Array__Push(ops, false);
+            AffineTransform__Push(input, false);
+            NativeImplClient.InvokeModuleMethod(_AffineTransformModify);
+            return AffineTransform__Pop();
+        }
+
         internal static void Init()
         {
             _module = NativeImplClient.GetModule("Drawing");
@@ -2816,6 +2936,7 @@ namespace Org.Prefixed.GuiBase
             _AffineTransformRotate = NativeImplClient.GetModuleMethod(_module, "AffineTransformRotate");
             _AffineTransformScale = NativeImplClient.GetModuleMethod(_module, "AffineTransformScale");
             _AffineTransformConcat = NativeImplClient.GetModuleMethod(_module, "AffineTransformConcat");
+            _AffineTransformModify = NativeImplClient.GetModuleMethod(_module, "AffineTransformModify");
 
             _Color_dispose = NativeImplClient.GetModuleMethod(_module, "Color_dispose");
             _color_createGenericRGB = NativeImplClient.GetModuleMethod(_module, "Color_createGenericRGB");

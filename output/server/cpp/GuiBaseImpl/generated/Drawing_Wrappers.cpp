@@ -23,6 +23,48 @@ AffineTransform AffineTransform__pop() {
     return AffineTransform { a, b, c, d, tx, ty };
 }
 
+void AffineTransformOps__push(AffineTransformOps value, bool isReturn) {
+    switch (value.tag) {
+    case AffineTransformOps::Tag::Translate:
+        ni_pushDouble(value.translate->ty);
+        ni_pushDouble(value.translate->tx);
+        break;
+    case AffineTransformOps::Tag::Rotate:
+        ni_pushDouble(value.rotate->angle);
+        break;
+    case AffineTransformOps::Tag::Scale:
+        ni_pushDouble(value.scale->sy);
+        ni_pushDouble(value.scale->sx);
+        break;
+    case AffineTransformOps::Tag::Concat:
+        AffineTransform__push(value.concat->t2, isReturn);
+        break;
+    }
+    ni_pushInt32((int32_t)value.tag);
+}
+
+AffineTransformOps AffineTransformOps__pop() {
+    auto which = ni_popInt32();
+    switch ((AffineTransformOps::Tag)which) {
+    case AffineTransformOps::Tag::Translate: {
+        auto tx = ni_popDouble();
+        auto ty = ni_popDouble();
+        return AffineTransformOps::Translate::make(tx, ty); }
+    case AffineTransformOps::Tag::Rotate: {
+        auto angle = ni_popDouble();
+        return AffineTransformOps::Rotate::make(angle); }
+    case AffineTransformOps::Tag::Scale: {
+        auto sx = ni_popDouble();
+        auto sy = ni_popDouble();
+        return AffineTransformOps::Scale::make(sx, sy); }
+    case AffineTransformOps::Tag::Concat: {
+        auto t2 = AffineTransform__pop();
+        return AffineTransformOps::Concat::make(t2); }
+    default:
+        throw "AffineTransformOps__pop(): unknown tag!";
+    }
+}
+
 // built-in array type: std::vector<std::string>
 
 // built-in array type: std::vector<int64_t>
@@ -878,6 +920,23 @@ Run Run__pop() {
     return (Run)ni_popPtr();
 }
 
+void __AffineTransformOps_Array__push(std::vector<AffineTransformOps> values, bool isReturn) {
+    for (auto v = values.rbegin(); v != values.rend(); v++) {
+        AffineTransformOps__push(*v, isReturn);
+    }
+    ni_pushSizeT(values.size());
+}
+
+std::vector<AffineTransformOps> __AffineTransformOps_Array__pop() {
+    std::vector<AffineTransformOps> __ret;
+    auto count = ni_popSizeT();
+    for (auto i = 0; i < count; i++) {
+        auto value = AffineTransformOps__pop();
+        __ret.push_back(value);
+    }
+    return __ret;
+}
+
 void AffineTransformTranslate__wrapper() {
     auto input = AffineTransform__pop();
     auto tx = ni_popDouble();
@@ -902,6 +961,12 @@ void AffineTransformConcat__wrapper() {
     auto t1 = AffineTransform__pop();
     auto t2 = AffineTransform__pop();
     AffineTransform__push(AffineTransformConcat(t1, t2), true);
+}
+
+void AffineTransformModify__wrapper() {
+    auto input = AffineTransform__pop();
+    auto ops = __AffineTransformOps_Array__pop();
+    AffineTransform__push(AffineTransformModify(input, ops), true);
 }
 
 void Color_dispose__wrapper() {
@@ -1687,6 +1752,7 @@ int Drawing__register() {
     ni_registerModuleMethod(m, "AffineTransformRotate", &AffineTransformRotate__wrapper);
     ni_registerModuleMethod(m, "AffineTransformScale", &AffineTransformScale__wrapper);
     ni_registerModuleMethod(m, "AffineTransformConcat", &AffineTransformConcat__wrapper);
+    ni_registerModuleMethod(m, "AffineTransformModify", &AffineTransformModify__wrapper);
     ni_registerModuleMethod(m, "Color_dispose", &Color_dispose__wrapper);
     ni_registerModuleMethod(m, "Color_createGenericRGB", &Color_createGenericRGB__wrapper);
     ni_registerModuleMethod(m, "Color_getConstantColor", &Color_getConstantColor__wrapper);

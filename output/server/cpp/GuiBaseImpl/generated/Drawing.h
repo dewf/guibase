@@ -36,6 +36,55 @@ struct AffineTransform {
     double ty;
 };
 
+struct AffineTransformOps {
+public:
+    enum class Tag {
+        Translate,
+        Rotate,
+        Scale,
+        Concat
+    };
+    const Tag tag;
+    struct Translate {
+        const double tx;
+        const double ty;
+        static AffineTransformOps make(double tx, double ty) {
+            AffineTransformOps ret{ Tag::Translate };
+            ret.translate = std::shared_ptr<Translate>(new Translate{ tx, ty });
+            return ret;
+        }
+    };
+    struct Rotate {
+        const double angle;
+        static AffineTransformOps make(double angle) {
+            AffineTransformOps ret{ Tag::Rotate };
+            ret.rotate = std::shared_ptr<Rotate>(new Rotate{ angle });
+            return ret;
+        }
+    };
+    struct Scale {
+        const double sx;
+        const double sy;
+        static AffineTransformOps make(double sx, double sy) {
+            AffineTransformOps ret{ Tag::Scale };
+            ret.scale = std::shared_ptr<Scale>(new Scale{ sx, sy });
+            return ret;
+        }
+    };
+    struct Concat {
+        const AffineTransform t2;
+        static AffineTransformOps make(AffineTransform t2) {
+            AffineTransformOps ret{ Tag::Concat };
+            ret.concat = std::shared_ptr<Concat>(new Concat{ t2 });
+            return ret;
+        }
+    };
+    std::shared_ptr<Translate> translate;
+    std::shared_ptr<Rotate> rotate;
+    std::shared_ptr<Scale> scale;
+    std::shared_ptr<Concat> concat;
+};
+
 // std::vector<std::string>
 
 // std::vector<int64_t>
@@ -474,12 +523,15 @@ public:
 
 
 
+// std::vector<AffineTransformOps>
+
 extern const AffineTransform AffineTransformIdentity;
 
 AffineTransform AffineTransformTranslate(AffineTransform input, double tx, double ty);
 AffineTransform AffineTransformRotate(AffineTransform input, double angle);
 AffineTransform AffineTransformScale(AffineTransform input, double sx, double sy);
 AffineTransform AffineTransformConcat(AffineTransform t1, AffineTransform t2);
+AffineTransform AffineTransformModify(AffineTransform input, std::vector<AffineTransformOps> ops);
 void Color_dispose(Color _this);
 Color Color_createGenericRGB(double red, double green, double blue, double alpha);
 Color Color_getConstantColor(ColorConstants which);

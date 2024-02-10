@@ -23,14 +23,20 @@ struct AffineTransform {
     double tx;
     double ty;
 }
-
-// ugh
-// decide either what to do with structs (allow methods + static values?) or make opaque!
 AffineTransform AffineTransformIdentity;
+
 AffineTransform AffineTransformTranslate(AffineTransform input, double tx, double ty);
 AffineTransform AffineTransformRotate(AffineTransform input, double angle);
 AffineTransform AffineTransformScale(AffineTransform input, double sx, double sy);
 AffineTransform AffineTransformConcat(AffineTransform t1, AffineTransform t2);
+
+sumtype AffineTransformOps {
+    Translate(double tx, double ty),
+    Rotate(double angle),
+    Scale(double sx, double sy),
+    Concat(AffineTransform t2)
+}
+AffineTransform AffineTransformModify(AffineTransform input, Array<AffineTransformOps> ops);
 
 enum PathDrawingMode {
     Fill,

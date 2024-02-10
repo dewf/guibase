@@ -2,6 +2,8 @@
 
 void AffineTransform__push(AffineTransform value, bool isReturn);
 AffineTransform AffineTransform__pop();
+void AffineTransformOps__push(AffineTransformOps value, bool isReturn);
+AffineTransformOps AffineTransformOps__pop();
 
 void __String_Int64_Map__push(std::map<std::string,int64_t> _map, bool isReturn);
 std::map<std::string,int64_t> __String_Int64_Map__pop();
@@ -135,6 +137,8 @@ void AffineTransformRotate__wrapper();
 void AffineTransformScale__wrapper();
 
 void AffineTransformConcat__wrapper();
+
+void AffineTransformModify__wrapper();
 
 void Color_dispose__wrapper();
 
