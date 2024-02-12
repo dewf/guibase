@@ -212,6 +212,7 @@ options AttributedStringOptions {
     // during run analysis - but it can certainly deal with ints! and we can use those to construct our own queryable things per run
     // another option would have been approximating CF* types via a sumtype, and storing things that way.
     // but ints yield greater flexibility, because we can store absolutely whatever on the client side instead (not limiting us to known CF* types)
+    // however that does require being mindful of the lifetimes of any CF/DL resources, they must be kept alive as long as the attributed string since it won't know to retain them
 
     // right now this only works for reads, for writes use .setCustomAttribute()
     Map<string,long> custom;
