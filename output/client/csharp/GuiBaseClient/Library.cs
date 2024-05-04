@@ -12,15 +12,19 @@ public static class Library
             return;
         }
         // registrations, static module inits
-        Drawing.Init();
-        Windowing.Init();
+        Drawing.__Init();
+        Text.__Init();
+        Keys.__Init();
+        Windowing.__Init();
     }
 
     public static void Shutdown()
     {
         // module static shutdowns (if any, might be empty)
-        Windowing.Shutdown();
-        Drawing.Shutdown();
+        Windowing.__Shutdown();
+        Keys.__Shutdown();
+        Text.__Shutdown();
+        Drawing.__Shutdown();
         // bye
         NativeImplClient.Shutdown();
     }

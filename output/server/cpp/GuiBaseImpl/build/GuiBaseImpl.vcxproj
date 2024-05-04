@@ -137,17 +137,28 @@
   <ItemGroup>
     <ClInclude Include="..\generated\Drawing.h" />
     <ClInclude Include="..\generated\Drawing_Wrappers.h" />
+    <ClInclude Include="..\generated\Keys.h" />
+    <ClInclude Include="..\generated\Keys_Wrappers.h" />
+    <ClInclude Include="..\generated\Text.h" />
+    <ClInclude Include="..\generated\Text_Wrappers.h" />
     <ClInclude Include="..\generated\Windowing.h" />
     <ClInclude Include="..\generated\Windowing_Wrappers.h" />
     <ClInclude Include="..\support\CoreStuff.h" />
     <ClInclude Include="..\support\NativeImplServer.h" />
+    <ClInclude Include="..\support\result.h" />
+    <ClInclude Include="..\util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Drawing.cpp" />
     <ClCompile Include="..\generated\Drawing_Wrappers.cpp" />
+    <ClCompile Include="..\generated\Keys_Wrappers.cpp" />
     <ClCompile Include="..\generated\Library.cpp" />
+    <ClCompile Include="..\generated\Text_Wrappers.cpp" />
     <ClCompile Include="..\generated\Windowing_Wrappers.cpp" />
+    <ClCompile Include="..\Keys.cpp" />
     <ClCompile Include="..\support\NativeImplServer.cpp" />
+    <ClCompile Include="..\Text.cpp" />
+    <ClCompile Include="..\util.cpp" />
     <ClCompile Include="..\Windowing.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

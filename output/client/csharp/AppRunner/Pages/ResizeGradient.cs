@@ -13,7 +13,7 @@ public class ResizeGradient(IWindowMethods windowMethods) : BasePage(windowMetho
         using var grad1 = GetGradient(0.3, 0.2, 1, 1, 1, 0.3, 0, 1);
         var start = new Point(100, 100);
         var end = new Point(Width - 100, Height - 100);
-        context.DrawLinearGradient(grad1, start, end, GradientDrawingOptions.DrawsBeforeStartLocation | GradientDrawingOptions.DrawsAfterEndLocation);
+        context.DrawLinearGradient(grad1, start, end, Gradient.DrawingOptions.DrawsBeforeStartLocation | Gradient.DrawingOptions.DrawsAfterEndLocation);
 
         using var grad2 = GetGradient(0, 0, 0, 0.5, 1, 1, 1, 0.5);
         start = new Point(100, Height - 100);

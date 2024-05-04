@@ -53,9 +53,9 @@ namespace Org.Prefixed.GuiBase.Support
         public static void Shutdown()
         {
             RemoteIsShutdown = true; // don't free any remote delegates after this!
-            Console.WriteLine("C# NativeImplCLient Shutdown (before native)");
+            Console.WriteLine("C# NativeImplClient Shutdown (before native)");
             NativeMethods.nativeImplShutdown();
-            Console.WriteLine("C# NativeImplCLient Shutdown (after native)");
+            Console.WriteLine("C# NativeImplClient Shutdown (after native)");
         }
 
         public static ModuleHandle GetModule(string name)

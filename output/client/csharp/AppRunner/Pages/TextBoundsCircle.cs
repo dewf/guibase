@@ -1,4 +1,6 @@
-﻿using static Org.Prefixed.GuiBase.Drawing;
+﻿using CSharpFunctionalExtensions;
+using static Org.Prefixed.GuiBase.Drawing;
+using static Org.Prefixed.GuiBase.Text;
 using static AppRunner.Pages.Util.Common;
 
 namespace AppRunner.Pages;
@@ -12,8 +14,8 @@ public class TextBoundsCircle : BasePage
     public TextBoundsCircle(IWindowMethods windowMethods) : base(windowMethods)
     {
         // test create some fonts and layouts and stuff
-        using var font = Font.CreateFromFile("./_democontent/LiberationSerif-Regular.ttf", 120.0, new OptArgs());
-        _labelString = AttributedString.Create("Quartz♪❦♛あぎ", new AttributedStringOptions
+        using var font = Font.CreateFromFile("./_democontent/LiberationSerif-Regular.ttf", 120.0, Maybe.None);
+        _labelString = AttributedString.Create("Quartz♪❦♛あぎ", new AttributedString.Options
         {
             Font = font,
             ForegroundColor = Color.CreateGenericRGB(0, 1, 1, 0.5)
@@ -25,7 +27,7 @@ public class TextBoundsCircle : BasePage
     {
         context.SetRGBFillColor(0.2, 0.2, 0.3, 1);
         context.FillRect(MakeRect(0, 0, Width, Height));
-        context.SetTextMatrix(AffineTransformIdentity);
+        context.SetTextMatrix(AffineTransform.Identity);
 
         using var line = Line.CreateWithAttributedString(_labelString);
 

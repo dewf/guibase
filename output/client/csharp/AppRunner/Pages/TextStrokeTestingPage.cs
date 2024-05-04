@@ -1,5 +1,7 @@
-﻿using Org.Prefixed.GuiBase;
+﻿using CSharpFunctionalExtensions;
+using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
+using static Org.Prefixed.GuiBase.Text;
 using static AppRunner.Pages.Util.Common;
 
 namespace AppRunner.Pages;
@@ -34,22 +36,22 @@ public class TextStrokeTestingPage(IWindowMethods windowMethods) : BasePage(wind
     {
     	// dict
         var totalRange = MakeRange(0, attrString.GetLength());
-        attrString.SetAttribute(totalRange, new AttributedStringOptions { Font = font });
-        attrString.SetAttribute(totalRange, new AttributedStringOptions { ForegroundColorFromContext = useForegroundColor });
+        attrString.SetAttribute(totalRange, new AttributedString.Options { Font = font });
+        attrString.SetAttribute(totalRange, new AttributedString.Options { ForegroundColorFromContext = useForegroundColor });
         using var line0 = Line.CreateWithAttributedString(attrString);
 
         // variations
         using var as1 = attrString.CreateMutableCopy(0);
-        as1.SetAttribute(totalRange, new AttributedStringOptions { StrokeWidth = 2 });
+        as1.SetAttribute(totalRange, new AttributedString.Options { StrokeWidth = 2 });
         using var line1 = Line.CreateWithAttributedString(as1);
 
         using var as2 = attrString.CreateMutableCopy(0);
-        as2.SetAttribute(totalRange, new AttributedStringOptions{ StrokeWidth = -2 });
+        as2.SetAttribute(totalRange, new AttributedString.Options{ StrokeWidth = -2 });
         using var line2 = Line.CreateWithAttributedString(as2);
 
         using var green = Color.CreateGenericRGB(0, 1, 0, 1);
         using var as3 = attrString.CreateMutableCopy(0);
-        as3.SetAttribute(totalRange, new AttributedStringOptions { StrokeWidth = 2, StrokeColor = green });
+        as3.SetAttribute(totalRange, new AttributedString.Options { StrokeWidth = 2, StrokeColor = green });
         using var line3 = Line.CreateWithAttributedString(as3);
         
         context.SetRGBFillColor(0, 0.8, 1, 1);
@@ -90,9 +92,9 @@ public class TextStrokeTestingPage(IWindowMethods windowMethods) : BasePage(wind
         context.SetRGBFillColor(0.5, 0.5, 0.5, 1);
         context.FillRect(MakeRect(0, 0, Width, Height));
 
-        context.SetTextMatrix(AffineTransformIdentity);
+        context.SetTextMatrix(AffineTransform.Identity);
 
-        using var font = Font.CreateWithName("Times New Roman", 70, new OptArgs());
+        using var font = Font.CreateWithName("Times New Roman", 70, Maybe.None);
         using var attrString = MutableAttributedString.Create(0);
 
         attrString.ReplaceString(RangeZero, "Testing 123!");

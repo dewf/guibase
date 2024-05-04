@@ -1,5 +1,6 @@
 module Windowing;
 
+import Keys;
 import Drawing;
 
 void moduleInit();
@@ -8,13 +9,7 @@ void moduleShutdown();
 void runloop();
 void exitRunloop();
 
-enum MouseButton {
-   None,
-   Left,
-   Middle,
-   Right,
-   Other
-}
+// MISC ==============================================================================
 
 flags Modifiers {
    Shift = 1 << 0,
@@ -23,25 +18,46 @@ flags Modifiers {
    MacControl = 1 << 3
 }
 
-enum WindowStyle {
-   Default,
-   Frameless,
-   PluginWindow   // for VST/AU/etc
+// MENU ==============================================================================
+
+opaque Icon {
+   static {
+      Icon create(string filename, int sizeToWidth);
+   }
 }
 
-options WindowOptions {
-   // each of these will provide a setter and will keep track of whether it "exists" or not
-   // basically a quicker way of implementing a group of optional settings without either flags or sumtypes
-   int minWidth;
-   int minHeight;
-   int maxWidth;
-   int maxHeight;
-   WindowStyle style;
-   // windows-only:
-   size_t nativeParent; // HWND actually
+opaque Accelerator {
+   static {
+      Accelerator create(Key key, Modifiers modifiers);
+   }
 }
 
-exception DropDataBadFormat(string format); // until we have an Option<> or Result<> type for the result of getFormat()
+opaque MenuAction {
+   static {
+      delegate void ActionFunc();
+      MenuAction create(string label, Icon icon, Accelerator accel, ActionFunc func);
+   }
+}
+
+opaque MenuItem;
+
+opaque Menu {
+   static {
+      Menu create();   // for menu bars and standalone popups
+   }
+   MenuItem addAction(MenuAction action);
+   MenuItem addSubmenu(string label, Menu sub);
+   void addSeparator();
+}
+
+opaque MenuBar {
+   static {
+      MenuBar create();
+   }
+   void addMenu(string label, Menu menu);
+}
+
+// DATA EXCHANGE ====================================================================
 
 // constants for easy checking
 // might want to create a way to enumerate what's in the DropData for easy inspection ...
@@ -50,10 +66,13 @@ string kDragFormatUTF8;
 string kDragFormatFiles;
 
 opaque DropData {
+   static {
+      exception BadFormat(string format); // until we have an Option<> or Result<> type for the result of getFormat()
+   }
    bool hasFormat(string mimeFormat);
-   Array<string> getFiles() throws DropDataBadFormat;
-   string getTextUTF8() throws DropDataBadFormat;
-   Buffer<byte> getFormat(string mimeFormat) throws DropDataBadFormat;
+   Array<string> getFiles() throws BadFormat;
+   string getTextUTF8() throws BadFormat;
+   Buffer<byte> getFormat(string mimeFormat) throws BadFormat;
 }
 
 flags DropEffect {
@@ -64,19 +83,35 @@ flags DropEffect {
    Other = 1 << 3 // ask / private / etc
 }
 
-opaque DragRenderPayload {
-   void renderUTF8(string text);
-   void renderFiles(Array<string> filenames);
-   void renderFormat(string formatMIME, Buffer<byte> data);
+opaque DragData {
+   static {
+      opaque RenderPayload {
+         void renderUTF8(string text);
+         void renderFiles(Array<string> filenames);
+         void renderFormat(string formatMIME, Buffer<byte> data);
+      }
+      delegate bool RenderFunc(string requestedFormat, RenderPayload payload);
+      DragData create(Array<string> supportedFormats, RenderFunc renderFunc);
+   }
+   DropEffect dragExec(DropEffect canDoMask); // modal/blocking (note: currently missing *fromEvent parameter, which I think was required for GTK)
 }
 
-delegate bool DragRenderFunc(string requestedFormat, DragRenderPayload payload);
-
-opaque DragData {
-   DropEffect dragExec(DropEffect canDoMask); // modal/blocking (note: currently missing *fromEvent parameter, which I think was required for GTK)
+opaque ClipData extends DropData {
    static {
-      DragData create(Array<string> supportedFormats, DragRenderFunc renderFunc);
+      void setClipboard(DragData dragData); // for sending
+      ClipData get();                       // really just a DropData
+      void flushClipboard();
    }
+}
+
+// WINDOW ============================================================================
+
+enum MouseButton {
+   None,
+   Left,
+   Middle,
+   Right,
+   Other
 }
 
 interface WindowDelegate {
@@ -119,6 +154,26 @@ enum CursorStyle {
 }
 
 opaque Window {
+   static {
+      enum Style {
+         Default,
+         Frameless,
+         PluginWindow   // for VST/AU/etc
+      }
+      options Options {
+         // each of these will provide a setter and will keep track of whether it "exists" or not
+         // basically a quicker way of implementing a group of optional settings without either flags or sumtypes
+         int minWidth;
+         int minHeight;
+         int maxWidth;
+         int maxHeight;
+         Style style;
+         // windows-only:
+         size_t nativeParent; // HWND actually
+      }
+      Window create(int width, int height, string title, WindowDelegate del, Options opts);
+      void mouseUngrab();
+   }
    void destroy();
    void show();
    void showRelativeTo(Window other, int x, int y, int newWidth, int newHeight); // use "0" for newWidth/newHeight for no change, until we have Option<>
@@ -134,279 +189,90 @@ opaque Window {
    void setMenuBar(MenuBar menuBar);
    void showContextMenu(int x, int y, Menu menu); // hmm, had a "fromEvent" parameter I think for GTK
    void setCursor(CursorStyle style);
-   static {
-      Window create(int width, int height, string title, WindowDelegate del, WindowOptions opts);
-      void mouseUngrab();
-   }
 }
 
 // TIMER =============================================================================
 
-delegate void TimerFunc(double secondsSinceLast);
-
 opaque Timer {
    static {
+      delegate void TimerFunc(double secondsSinceLast);
       Timer create(int msTimeout, TimerFunc func);
-   }
-}
-
-// MENU ==============================================================================
-
-opaque Icon {
-   static {
-      Icon create(string filename, int sizeToWidth);
-   }
-}
-
-opaque Accelerator {
-   static {
-      Accelerator create(Key key, Modifiers modifiers);
-   }
-}
-
-delegate void MenuActionFunc();
-
-opaque MenuAction {
-   static {
-      MenuAction create(string label, Icon icon, Accelerator accel, MenuActionFunc func);
-   }
-}
-
-opaque MenuItem;
-opaque Menu {
-   MenuItem addAction(MenuAction action);
-   MenuItem addSubmenu(string label, Menu sub);
-   void addSeparator();
-   static {
-      Menu create();   // for menu bars and standalone popups
-   }
-}
-
-opaque MenuBar {
-   void addMenu(string label, Menu menu);
-   static {
-      MenuBar create();
-   }
-}
-
-// CLIPBOARD =========================================================================
-
-opaque ClipData extends DropData {
-   static {
-      void setClipboard(DragData dragData); // for sending
-      ClipData get();                       // really just a DropData
-      void flushClipboard();
    }
 }
 
 // FILE DIALOGS ======================================================================
 
-enum FileDialogMode {
-   File,
-   Folder
-}
-
-struct FileDialogFilterSpec {
-   string description;
-   Array<string> extensions; // no leading '.'
-}
-
-struct FileDialogOptions {
-   Window forWindow;                     // window-modal if provided, otherwise NOT app-modal
-   FileDialogMode mode;
-   Array<FileDialogFilterSpec> filters;
-   bool allowAll;                        // append *.*
-   string defaultExt;                    // windows only at the moment (?): "sets the default extension to be added to file names"
-   bool allowMultiple;                   // for open mode only
-   string suggestedFilename;             // for save mode
-}
-
-struct FileDialogResult {
-   bool success;
-   Array<string> filenames;
-}
-
-opaque FileDialog {
-   static {
-      FileDialogResult openFile(FileDialogOptions opts);
-      FileDialogResult saveFile(FileDialogOptions opts);
+group FileDialog {
+   enum Mode {
+      File,
+      Folder
    }
+
+   struct FilterSpec {
+      string description;
+      Array<string> extensions; // no leading '.'
+   }
+
+   struct Options {
+      Window forWindow;                     // window-modal if provided, otherwise NOT app-modal
+      Mode mode;
+      Array<FilterSpec> filters;
+      bool allowAll;                        // append *.*
+      string defaultExt;                    // windows only at the moment (?): "sets the default extension to be added to file names"
+      bool allowMultiple;                   // for open mode only
+      string suggestedFilename;             // for save mode
+   }
+
+   struct DialogResult {
+      bool success;
+      Array<string> filenames;
+   }
+
+   DialogResult openFile(Options opts);
+   DialogResult saveFile(Options opts);
 }
 
 // MESSAGEBOX ========================================================================
 
-enum MessageBoxButtons {
-   Default = 0,
-   AbortRetryIgnore,
-   CancelTryContinue,
-   Ok,                  // default
-   OkCancel,
-   RetryCancel,
-   YesNo,
-   YesNoCancel
-}
-
-enum MessageBoxIcon {
-   Default = 0,
-   Information,         // default
-   Warning,
-   Question,
-   Error,
-}
-
-enum MessageBoxResult {
-   Abort,
-   Cancel,
-   Continue,
-   Ignore,
-   No,
-   Ok,
-   Retry,
-   TryAgain,
-   Yes
-}
-
-struct MessageBoxParams {
-   string title;           // optional?
-   string message;         
-   bool withHelpButton;
-   MessageBoxIcon icon;
-   MessageBoxButtons buttons;
-}
-
-opaque MessageBoxModal { // 'MessageBox' is a win32 function
-   static {
-      MessageBoxResult show(Window forWindow, MessageBoxParams mbParams);
+group MessageBoxModal { // 'MessageBox' is a win32 function
+   enum Buttons {
+      Default = 0,
+      AbortRetryIgnore,
+      CancelTryContinue,
+      Ok,                  // default
+      OkCancel,
+      RetryCancel,
+      YesNo,
+      YesNoCancel
    }
-}
 
-// KEY ENUM STUFF ====================================================================
+   enum Icon {
+      Default = 0,
+      Information,         // default
+      Warning,
+      Question,
+      Error,
+   }
 
-enum KeyLocation {
-   Default,
-   Left,
-   Right,
-   NumPad
-}
+   struct Params {
+      string title;           // optional?
+      string message;         
+      bool withHelpButton;
+      Icon icon;
+      Buttons buttons;
+   }
 
-enum Key {
-   Unknown,
-   //
-   Escape,
-   Tab,
-   Backspace,
-   Return,
-   Space,
-   //
-   F1,
-   F2,
-   F3,
-   F4,
-   F5,
-   F6,
-   F7,
-   F8,
-   F9,
-   F10,
-   F11,
-   F12,
-   F13,
-   F14,
-   F15,
-   F16,
-   F17,
-   F18,
-   F19,
-   //
-   _0,
-   _1,
-   _2,
-   _3,
-   _4,
-   _5,
-   _6,
-   _7,
-   _8,
-   _9,
-   //
-   A,
-   B,
-   C,
-   D,
-   E,
-   F,
-   G,
-   H,
-   I,
-   J,
-   K,
-   L,
-   M,
-   N,
-   O,
-   P,
-   Q,
-   R,
-   S,
-   T,
-   U,
-   V,
-   W,
-   X,
-   Y,
-   Z,
-   // modifiers
-   Control,
-   Shift,
-   AltOption,
-   WinCommand,
-   Fn,
-   // home/end block
-   Insert,
-   Delete,
-   PageUp,
-   PageDown,
-   Home,
-   End,
-   // arrow keys
-   LeftArrow,
-   UpArrow,
-   RightArrow,
-   DownArrow,
-   // keypad numbers
-   KP0,
-   KP1,
-   KP2,
-   KP3,
-   KP4,
-   KP5,
-   KP6,
-   KP7,
-   KP8,
-   KP9,
-   // keypad ops
-   KPClear,
-   KPEquals,
-   KPDivide,
-   KPMultiply,
-   KPSubtract,
-   KPAdd,
-   KPEnter,
-   KPDecimal,
-   // locks
-   CapsLock,
-   NumLock,
-   ScrollLock,
-   // misc
-   PrintScreen,
-   Pause,  // Pause/Break button minus Ctrl
-   Cancel, // Ctrl-Break
-   // media
-   MediaMute,
-   MediaVolumeDown,
-   MediaVolumeUp,
-   MediaNext,
-   MediaPrev,
-   MediaStop,
-   MediaPlayPause
+   enum MessageBoxResult {
+      Abort,
+      Cancel,
+      Continue,
+      Ignore,
+      No,
+      Ok,
+      Retry,
+      TryAgain,
+      Yes
+   }
+
+   MessageBoxResult show(Window forWindow, Params mbParams);
 }

@@ -1,6 +1,8 @@
 ﻿using AppRunner.Pages.Util;
+using CSharpFunctionalExtensions;
 using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
+using static Org.Prefixed.GuiBase.Text;
 using static Org.Prefixed.GuiBase.Windowing;
 using static AppRunner.Pages.Util.Common;
 
@@ -36,10 +38,10 @@ public class WindowEventPage : BasePage
         
         var action1 = MenuAction.Create("Show MessageBox #1", null, null, () =>
         {
-            var result = MessageBoxModal.Show(windowMethods.GetWindowHandle(), new MessageBoxParams
+            var result = MessageBoxModal.Show(windowMethods.GetWindowHandle(), new MessageBoxModal.Params
             {
-                Buttons = MessageBoxButtons.AbortRetryIgnore,
-                Icon = MessageBoxIcon.Error,
+                Buttons = MessageBoxModal.Buttons.AbortRetryIgnore,
+                Icon =MessageBoxModal.Icon.Error,
                 Message = "Hello from MessageBox!",
                 Title = "This is the MB Title",
                 WithHelpButton = false
@@ -118,11 +120,11 @@ public class WindowEventPage : BasePage
 
     public override void Render(DrawContext context, RenderArea area)
     {
-        using var smallFont = Font.CreateWithName(Constants.TimesFontName, 16, new OptArgs());
-        using var font = Font.CreateWithName(Constants.TimesFontName, 32, new OptArgs());
-        using var largeFont = Font.CreateWithName(Constants.FuturaFontName, 64, new OptArgs());
+        using var smallFont = Font.CreateWithName(Constants.TimesFontName, 16, Maybe.None);
+        using var font = Font.CreateWithName(Constants.TimesFontName, 32, Maybe.None);
+        using var largeFont = Font.CreateWithName(Constants.FuturaFontName, 64, Maybe.None);
         using var orange = Color.CreateGenericRGB(1, 0.75, 0, 1);
-        using var black = Color.GetConstantColor(ColorConstants.Black);
+        using var black = Color.GetConstantColor(Color.Constant.Black);
         using var green = Color.CreateGenericRGB(0, 1, 0.6, 0.8);
         using var lightBlue = Color.CreateGenericRGB(0.3, 0.3, 1.0, 1);
 
@@ -136,25 +138,25 @@ public class WindowEventPage : BasePage
         context.SetStrokeColorWithColor(orange);
         context.SetLineWidth(2);
         context.StrokeRect(_dragSourceRect);
-        CenterText(context, _dragSourceRect, "Drag Source", new AttributedStringOptions { Font = smallFont, ForegroundColor = orange });
+        CenterText(context, _dragSourceRect, "Drag Source", new AttributedString.Options { Font = smallFont, ForegroundColor = orange });
         
         // grab rect
         context.SetStrokeColorWithColor(orange);
         context.SetLineWidth(2);
         context.StrokeRect(_mouseGrabRect);
-        CenterText(context, _mouseGrabRect, "Mouse Grab", new AttributedStringOptions { Font = smallFont, ForegroundColor = orange });
+        CenterText(context, _mouseGrabRect, "Mouse Grab", new AttributedString.Options { Font = smallFont, ForegroundColor = orange });
         
         // etc
         // TextLine(context, 20, 40, "DnD Testing", new AttributedStringOptions { Font = font, ForegroundColor = orange }, withGradient:false);
         if (_dropInProgress && _dropAllowed)
         {
             var rect = totalRect.Inset(20);
-            using var path = Drawing.Path.CreateWithRoundedRect(rect, 20, 20, new OptArgs());
+            using var path = Drawing.Path.CreateWithRoundedRect(rect, 20, 20, Maybe.None);
             context.SetStrokeColorWithColor(green);
             context.SetLineDash(_animPhase, [4, 4]);
             context.SetLineWidth(8);
             context.AddPath(path);
-            context.DrawPath(PathDrawingMode.Stroke);
+            context.DrawPath(Drawing.Path.DrawingMode.Stroke);
 
             var effectLabel = _suggestedEffect switch
             {
@@ -164,16 +166,16 @@ public class WindowEventPage : BasePage
                 DropEffect.Other => "Other",
                 _ => "None"
             };
-            CenterText(context, totalRect, effectLabel, new AttributedStringOptions { Font = largeFont, ForegroundColor = green });
+            CenterText(context, totalRect, effectLabel, new AttributedString.Options { Font = largeFont, ForegroundColor = green });
         } else if (_lastDroppedFiles != null)
         {
             var items =
                 new[] { "you dropped:" }
                     .Concat(_lastDroppedFiles.Select(fname => $" - {fname}"));
             var joined = string.Join("\n", items);
-            using var attrString = AttributedString.Create(joined, new AttributedStringOptions { Font = font, ForegroundColor = lightBlue });
+            using var attrString = AttributedString.Create(joined, new AttributedString.Options { Font = font, ForegroundColor = lightBlue });
             using var frameSetter = FrameSetter.CreateWithAttributedString(attrString);
-            using var path = Drawing.Path.CreateWithRect(totalRect.Inset(60), new OptArgs());
+            using var path = Drawing.Path.CreateWithRect(totalRect.Inset(60), Maybe.None);
             using var frame = frameSetter.CreateFrame(RangeZero, path);
             frame.Draw(context);
         }
@@ -239,15 +241,15 @@ public class WindowEventPage : BasePage
         using var fileMenu = Menu.Create();
         
         // open
-        using var openAccel = Accelerator.Create(Key.O, Modifiers.Control);
+        using var openAccel = Accelerator.Create(Keys.Key.O, Modifiers.Control);
         using var openAction = MenuAction.Create("&Open", null, openAccel, () =>
         {
-            var result = FileDialog.OpenFile(new FileDialogOptions {
+            var result = FileDialog.OpenFile(new FileDialog.Options {
                 ForWindow = windowMethods.GetWindowHandle(),
                 Filters = [
-                    new FileDialogFilterSpec("Text Files (*.txt, *.doc)", ["txt", "doc"])
+                    new FileDialog.FilterSpec("Text Files (*.txt, *.doc)", ["txt", "doc"])
                 ],
-                Mode = FileDialogMode.File,
+                Mode = FileDialog.Mode.File,
                 AllowAll = true,
                 AllowMultiple = false,
                 DefaultExt = "txt",
@@ -258,17 +260,17 @@ public class WindowEventPage : BasePage
         fileMenu.AddAction(openAction);
         
         // save
-        using var saveAccel = Accelerator.Create(Key.S, Modifiers.Control);
+        using var saveAccel = Accelerator.Create(Keys.Key.S, Modifiers.Control);
         using var saveAction = MenuAction.Create("&Save", null, saveAccel, () =>
         {
-            var result = FileDialog.SaveFile(new FileDialogOptions
+            var result = FileDialog.SaveFile(new FileDialog.Options
             {
                 ForWindow = windowMethods.GetWindowHandle(),
                 Filters =
                 [
-                    new FileDialogFilterSpec("Text Files (*.txt, *.doc)", ["txt", "doc"])
+                    new FileDialog.FilterSpec("Text Files (*.txt, *.doc)", ["txt", "doc"])
                 ],
-                Mode = FileDialogMode.File,
+                Mode = FileDialog.Mode.File,
                 AllowAll = true,
                 AllowMultiple = false,
                 DefaultExt = "txt",
@@ -282,7 +284,7 @@ public class WindowEventPage : BasePage
         fileMenu.AddSeparator();
         
         // exit
-        using var exitAccel = Accelerator.Create(Key.Q, Modifiers.Control);
+        using var exitAccel = Accelerator.Create(Keys.Key.Q, Modifiers.Control);
         using var exitAction = MenuAction.Create("E&xit", null, exitAccel, () =>
         {
             Console.WriteLine("Exiting!");
@@ -293,7 +295,7 @@ public class WindowEventPage : BasePage
         // edit menu
         using var editMenu = Menu.Create();
         // copy
-        using var copyAccel = Accelerator.Create(Key.C, Modifiers.Control);
+        using var copyAccel = Accelerator.Create(Keys.Key.C, Modifiers.Control);
         using var copyAction = MenuAction.Create("&Copy", null, copyAccel, () =>
         {
             using var dragData = DragData.Create([KDragFormatUTF8], (format, payload) =>
@@ -311,7 +313,7 @@ public class WindowEventPage : BasePage
         });
         editMenu.AddAction(copyAction);
         // paste
-        using var pasteAccel = Accelerator.Create(Key.V, Modifiers.Control);
+        using var pasteAccel = Accelerator.Create(Keys.Key.V, Modifiers.Control);
         using var pasteAction = MenuAction.Create("&Paste", null, pasteAccel, () =>
         {
             using var data = ClipData.Get();

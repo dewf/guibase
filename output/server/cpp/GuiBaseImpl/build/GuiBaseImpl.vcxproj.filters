@@ -15,11 +15,20 @@
     <Filter Include="Source Files\support">
       <UniqueIdentifier>{d921281b-b3b3-4024-bbf3-bce56e03b2f6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\generated\drawing">
+      <UniqueIdentifier>{6ec4ba63-efa3-4462-82db-182576a8280f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\keys">
+      <UniqueIdentifier>{d4c18bde-e81c-4279-af5d-d7d547d798b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\text">
+      <UniqueIdentifier>{18a5c7d9-6186-494a-8c15-8055dbdf7bcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\windowing">
+      <UniqueIdentifier>{3a44e43d-04b4-40cd-b901-9ea9b0259a33}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\generated\Windowing_Wrappers.cpp">
-      <Filter>Source Files\generated</Filter>
-    </ClCompile>
     <ClCompile Include="..\support\NativeImplServer.cpp">
       <Filter>Source Files\support</Filter>
     </ClCompile>
@@ -29,31 +38,67 @@
     <ClCompile Include="..\Drawing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\generated\Drawing_Wrappers.cpp">
-      <Filter>Source Files\generated</Filter>
-    </ClCompile>
     <ClCompile Include="..\generated\Library.cpp">
       <Filter>Source Files\generated</Filter>
     </ClCompile>
+    <ClCompile Include="..\Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\generated\Drawing_Wrappers.cpp">
+      <Filter>Source Files\generated\drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\generated\Keys_Wrappers.cpp">
+      <Filter>Source Files\generated\keys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\generated\Text_Wrappers.cpp">
+      <Filter>Source Files\generated\text</Filter>
+    </ClCompile>
+    <ClCompile Include="..\generated\Windowing_Wrappers.cpp">
+      <Filter>Source Files\generated\windowing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Keys.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\generated\Windowing.h">
-      <Filter>Source Files\generated</Filter>
-    </ClInclude>
     <ClInclude Include="..\support\CoreStuff.h">
       <Filter>Source Files\support</Filter>
     </ClInclude>
     <ClInclude Include="..\support\NativeImplServer.h">
       <Filter>Source Files\support</Filter>
     </ClInclude>
+    <ClInclude Include="..\support\result.h">
+      <Filter>Source Files\support</Filter>
+    </ClInclude>
     <ClInclude Include="..\generated\Drawing.h">
-      <Filter>Source Files\generated</Filter>
+      <Filter>Source Files\generated\drawing</Filter>
     </ClInclude>
     <ClInclude Include="..\generated\Drawing_Wrappers.h">
-      <Filter>Source Files\generated</Filter>
+      <Filter>Source Files\generated\drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\generated\Keys.h">
+      <Filter>Source Files\generated\keys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\generated\Keys_Wrappers.h">
+      <Filter>Source Files\generated\keys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\generated\Text.h">
+      <Filter>Source Files\generated\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\generated\Text_Wrappers.h">
+      <Filter>Source Files\generated\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\generated\Windowing.h">
+      <Filter>Source Files\generated\windowing</Filter>
     </ClInclude>
     <ClInclude Include="..\generated\Windowing_Wrappers.h">
-      <Filter>Source Files\generated</Filter>
+      <Filter>Source Files\generated\windowing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\util.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

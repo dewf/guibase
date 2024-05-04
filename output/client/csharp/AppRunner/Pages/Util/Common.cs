@@ -1,5 +1,6 @@
 ﻿using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
+using static Org.Prefixed.GuiBase.Text;
 using static Org.Prefixed.GuiBase.Windowing;
 
 namespace AppRunner.Pages.Util;
@@ -32,20 +33,20 @@ public static class Common
     }
 
     // range methods
-    public static long RangeEnd(this Drawing.Range r)
+    public static long RangeEnd(this Text.Range r)
     {
         return r.Location + r.Length;
     }
 
-    public static Drawing.Range MakeRange(long location, long length)
+    public static Text.Range MakeRange(long location, long length)
     {
-        return new Drawing.Range(location, length);
+        return new Text.Range(location, length);
     }
 
-    public static readonly Drawing.Range RangeZero = new(0, 0);
-    public static readonly Drawing.Range RangeNotFound = new(-1, -1);
+    public static readonly Text.Range RangeZero = new(0, 0);
+    public static readonly Text.Range RangeNotFound = new(-1, -1);
 
-    public static Drawing.Range StringFind(string str, string substring)
+    public static Text.Range StringFind(string str, string substring)
     {
         var result = str.IndexOf(substring, StringComparison.Ordinal);
         if (result >= 0)
@@ -61,16 +62,16 @@ public static class Common
         context.SetRGBFillColor(1, 0, 0, 1);
         context.BeginPath();
         context.AddArc(p.X, p.Y, 2.5, 0, Math.PI * 2, false);
-        context.DrawPath(PathDrawingMode.Fill);
+        context.DrawPath(Drawing.Path.DrawingMode.Fill);
         context.RestoreGState();
     }
 
     public static AffineTransform MakeTransform(Point p, double angle, double scale)
     {
-        var m1 = AffineTransformTranslate(AffineTransformIdentity, p.X, p.Y);
-        var m2 = AffineTransformRotate(m1, angle);
-        var m3 = AffineTransformScale(m2, scale, scale);
-        return AffineTransformTranslate(m3, -p.X, -p.Y);
+        var m1 = AffineTransform.Translate(AffineTransform.Identity, p.X, p.Y);
+        var m2 = AffineTransform.Rotate(m1, angle);
+        var m3 = AffineTransform.Scale(m2, scale, scale);
+        return AffineTransform.Translate(m3, -p.X, -p.Y);
     }
 
     public static void DrawRect(DrawContext context, Rect r, Color color, double width)
@@ -149,9 +150,9 @@ public static class Common
         double fromRed, double fromGreen, double fromBlue, double fromAlpha,
         double toRed, double toGreen, double toBlue, double toAlpha)
     {
-        var start = new GradientStop(0, fromRed, fromGreen, fromBlue, fromAlpha);
-        var end = new GradientStop(1, toRed, toGreen, toBlue, toAlpha);
-        using var space = ColorSpace.CreateWithName(ColorSpaceName.GenericRGB);
+        var start = new Gradient.Stop(0, fromRed, fromGreen, fromBlue, fromAlpha);
+        var end = new Gradient.Stop(1, toRed, toGreen, toBlue, toAlpha);
+        using var space = ColorSpace.CreateWithName(ColorSpace.Name.GenericRGB);
         return Gradient.CreateWithColorComponents(space, [start, end]);
     }
     
@@ -183,7 +184,7 @@ public static class Common
         context.RestoreGState();
     }
 
-    public static void CenterText(DrawContext context, Rect centerInRect, string text, AttributedStringOptions attrOpts)
+    public static void CenterText(DrawContext context, Rect centerInRect, string text, AttributedString.Options attrOpts)
     {
         using var labelString = AttributedString.Create(text, attrOpts);
         using var line = Line.CreateWithAttributedString(labelString);
@@ -195,7 +196,7 @@ public static class Common
         line.Draw(context);
     }
     
-    public static void TextLine(DrawContext context, double x, double y, string text, AttributedStringOptions attrOpts, bool withGradient = true, bool fromBaseline = false)
+    public static void TextLine(DrawContext context, double x, double y, string text, AttributedString.Options attrOpts, bool withGradient = true, bool fromBaseline = false)
     {
         using var labelString = AttributedString.Create(text, attrOpts);
         using var line = Line.CreateWithAttributedString(labelString);

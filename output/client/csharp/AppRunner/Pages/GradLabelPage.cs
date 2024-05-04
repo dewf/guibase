@@ -1,6 +1,8 @@
-﻿using Org.Prefixed.GuiBase;
+﻿using CSharpFunctionalExtensions;
+using Org.Prefixed.GuiBase;
 using static AppRunner.Pages.Util.Common;
 using static Org.Prefixed.GuiBase.Drawing;
+using static Org.Prefixed.GuiBase.Text;
 
 namespace AppRunner.Pages;
 
@@ -12,18 +14,18 @@ public class GradLabelPage(IWindowMethods windowMethods) : BasePage(windowMethod
 
 	public override string PageTitle => "Gradient Label";
 
-	private static void DrawTextInShape(DrawContext context, Drawing.Path path, string text, Color color, Font font, TextAlignment? alignment = null)
+	private static void DrawTextInShape(DrawContext context, Drawing.Path path, string text, Color color, Font font, ParagraphStyle.TextAlignment? alignment = null)
 	{
 		using var attrString = MutableAttributedString.Create(0); // 0 = amt of storage to reserve, no hint
 		attrString.ReplaceString(RangeZero, text);
 		var fullRange = MakeRange(0, attrString.GetLength());
 		
-		attrString.SetAttribute(fullRange, new AttributedStringOptions { ForegroundColor = color });
-		attrString.SetAttribute(fullRange, new AttributedStringOptions { Font = font });
+		attrString.SetAttribute(fullRange, new AttributedString.Options { ForegroundColor = color });
+		attrString.SetAttribute(fullRange, new AttributedString.Options { Font = font });
 		if (alignment != null)
 		{
-			using var pStyle = ParagraphStyle.Create([new ParagraphStyleSetting.Alignment(alignment.Value)]);
-			attrString.SetAttribute(fullRange, new AttributedStringOptions { ParagraphStyle = pStyle });
+			using var pStyle = ParagraphStyle.Create([new ParagraphStyle.Setting.Alignment(alignment.Value)]);
+			attrString.SetAttribute(fullRange, new AttributedString.Options { ParagraphStyle = pStyle });
 		}
 		
 		// framesetter
@@ -36,11 +38,11 @@ public class GradLabelPage(IWindowMethods windowMethods) : BasePage(windowMethod
 
 	private void DoBigLabel(DrawContext context)
 	{
-		var helv120 = Font.CreateWithName("Arial", 120, new OptArgs());
+		var helv120 = Font.CreateWithName("Arial", 120, Maybe.None);
 
 		using var strokeColor = Color.CreateGenericRGB(1, 1, 0, 1);
 		using var fgColor = Color.CreateGenericRGB(0, 0, 0, 1);
-		using var labelString = AttributedString.Create(BigLabelText, new AttributedStringOptions
+		using var labelString = AttributedString.Create(BigLabelText, new AttributedString.Options
 		{
 			Font = helv120,
 			StrokeWidth = -2,
@@ -60,8 +62,8 @@ public class GradLabelPage(IWindowMethods windowMethods) : BasePage(windowMethod
 
 	private void DoGradientLabel(DrawContext context)
 	{
-		using var helv180 = Font.CreateWithName("Arial", 180, new OptArgs());
-		using var labelString = AttributedString.Create(GradLabelText, new AttributedStringOptions { Font = helv180 });
+		using var helv180 = Font.CreateWithName("Arial", 180, Maybe.None);
+		using var labelString = AttributedString.Create(GradLabelText, new AttributedString.Options { Font = helv180 });
 
 		using var line = Line.CreateWithAttributedString(labelString);
 		var bounds = line.GetBoundsWithOptions(LineBoundsOptions.UseGlyphPathBounds);
@@ -80,7 +82,7 @@ public class GradLabelPage(IWindowMethods windowMethods) : BasePage(windowMethod
 		using var grad = GetGradient(0, 0, 0, 1, 0, 1, 1, 1);
 		var start = new Point(x, y + bounds.Origin.Y); // top left of bounds rect (y is negative, relative to baseline)
 		var end = new Point(x, y + bounds.Origin.Y + bounds.Size.Height); // bottom left of bounds rect
-		context.DrawLinearGradient(grad, start, end, GradientDrawingOptions.DrawsBeforeStartLocation | GradientDrawingOptions.DrawsAfterEndLocation);
+		context.DrawLinearGradient(grad, start, end, Gradient.DrawingOptions.DrawsBeforeStartLocation | Gradient.DrawingOptions.DrawsAfterEndLocation);
 		
 		context.RestoreGState();
 		// <==== end clip
@@ -89,14 +91,14 @@ public class GradLabelPage(IWindowMethods windowMethods) : BasePage(windowMethod
 		using var graySpace = ColorSpace.CreateDeviceGray();
 		using var bitmapContext =
 			BitmapDrawContext.Create(Width, Height, 8, Width, graySpace, BitmapInfo.ByteOrderDefault);
-		using var black = Color.GetConstantColor(ColorConstants.Black); // "using" but it should survive release, constant colors are eternal
+		using var black = Color.GetConstantColor(Color.Constant.Black); // "using" but it should survive release, constant colors are eternal
 		bitmapContext.SetFillColorWithColor(black);
 		bitmapContext.FillRect(MakeRect(0, 0, Width, Height));
 
 		// draw outside stroke on mask
 		bitmapContext.SetTextPosition(x, y);
 		bitmapContext.SetTextDrawingMode(TextDrawingMode.Stroke);
-		using var white = Color.GetConstantColor(ColorConstants.White);
+		using var white = Color.GetConstantColor(Color.Constant.White);
 		bitmapContext.SetStrokeColorWithColor(white);
 		bitmapContext.SetLineWidth(4);
 		line.Draw(bitmapContext);
@@ -109,7 +111,7 @@ public class GradLabelPage(IWindowMethods windowMethods) : BasePage(windowMethod
 
 		// fill 2nd gradient over masked outline
 		using var grad2 = GetGradient(1, 0.5, 0, 1, 0, 0, 0, 1);
-		context.DrawLinearGradient(grad2, start, end, GradientDrawingOptions.DrawsBeforeStartLocation | GradientDrawingOptions.DrawsAfterEndLocation);
+		context.DrawLinearGradient(grad2, start, end, Gradient.DrawingOptions.DrawsBeforeStartLocation | Gradient.DrawingOptions.DrawsAfterEndLocation);
 		
 		context.RestoreGState();
 		// <=== end mask
@@ -121,7 +123,7 @@ public class GradLabelPage(IWindowMethods windowMethods) : BasePage(windowMethod
         using var grad = GetGradient(0, 0.5, 1, 1, 0, 0, 0, 1);
         context.DrawLinearGradient(grad, new Drawing.Point(0, Height), PointZero, 0);
         
-		context.SetTextMatrix(AffineTransformIdentity);
+		context.SetTextMatrix(AffineTransform.Identity);
 
 		// colors
 		using var white = Color.CreateGenericRGB(1, 1, 1, 1);
@@ -130,14 +132,14 @@ public class GradLabelPage(IWindowMethods windowMethods) : BasePage(windowMethod
 		using var yellow = Color.CreateGenericRGB(1, 1, 0, 1);
 
 		// font
-		using var times40 = Font.CreateWithName("Times New Roman", 40, new OptArgs());
-		using var helv16 = Font.CreateWithName("Arial", 16, new OptArgs());
-		using var futura32 = Font.CreateWithName("Impact", 32, new OptArgs());
+		using var times40 = Font.CreateWithName("Times New Roman", 40, Maybe.None);
+		using var helv16 = Font.CreateWithName("Arial", 16, Maybe.None);
+		using var futura32 = Font.CreateWithName("Impact", 32, Maybe.None);
 		
 		// shapes
-		var totalRect = Drawing.Path.CreateWithRect(MakeRect(0, 0, Width, Height).Inset(10), new OptArgs()); // whole window minus borders
-		var rightRect = Drawing.Path.CreateWithRect(MakeRect(Width - 400, 0, 400, Height).Inset(10), new OptArgs()); // right side, top to bottom
-		var midLeftRect = Drawing.Path.CreateWithRect(MakeRect(50, (Height - 300.0) / 2, 300, 300), new OptArgs()); // mid-left-side, 300px wide/tall
+		var totalRect = Drawing.Path.CreateWithRect(MakeRect(0, 0, Width, Height).Inset(10), Maybe.None); // whole window minus borders
+		var rightRect = Drawing.Path.CreateWithRect(MakeRect(Width - 400, 0, 400, Height).Inset(10), Maybe.None); // right side, top to bottom
+		var midLeftRect = Drawing.Path.CreateWithRect(MakeRect(50, (Height - 300.0) / 2, 300, 300), Maybe.None); // mid-left-side, 300px wide/tall
 		
 		// text drawing
 		DrawTextInShape(context, totalRect, Text, black, times40);
@@ -146,8 +148,8 @@ public class GradLabelPage(IWindowMethods windowMethods) : BasePage(windowMethod
 		context.AddPath(midLeftRect);
 		context.StrokePath();
 		
-		DrawTextInShape(context, midLeftRect, Text, white, helv16, TextAlignment.Justified);
-		DrawTextInShape(context, rightRect, Text, green, futura32, TextAlignment.Right);
+		DrawTextInShape(context, midLeftRect, Text, white, helv16, ParagraphStyle.TextAlignment.Justified);
+		DrawTextInShape(context, rightRect, Text, green, futura32, ParagraphStyle.TextAlignment.Right);
 		
 		DoBigLabel(context);
 		

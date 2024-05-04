@@ -1,4 +1,5 @@
-﻿using Org.Prefixed.GuiBase;
+﻿using CSharpFunctionalExtensions;
+using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
 using static AppRunner.Pages.Util.Common;
 
@@ -43,9 +44,9 @@ public class SpinningFlower(IWindowMethods windowMethods) : BasePage(windowMetho
         _animating = !_animating;
     }
 
-    public override void OnKeyDown(Windowing.Key key, Windowing.Modifiers modifiers)
+    public override void OnKeyDown(Keys.Key key, Windowing.Modifiers modifiers)
     {
-        if (key == Windowing.Key.C)
+        if (key == Keys.Key.C)
         {
             _doCrossMask = !_doCrossMask;
             Invalidate();
@@ -61,7 +62,7 @@ public class SpinningFlower(IWindowMethods windowMethods) : BasePage(windowMetho
         context.BeginPath();
         context.MoveToPoint(start.X, start.Y);
         context.AddLineToPoint(end.X, end.Y);
-        context.DrawPath(PathDrawingMode.Stroke);
+        context.DrawPath(Drawing.Path.DrawingMode.Stroke);
     }
 
     private static void DoBlueRect(DrawContext context, Rect r, double alpha)
@@ -98,7 +99,7 @@ public class SpinningFlower(IWindowMethods windowMethods) : BasePage(windowMetho
         context.BeginPath();
         // construct cirle path counterclockwise
         context.AddArc(circleCenter.X, circleCenter.Y, circleRadius, startingAngle, endingAngle, false);
-        context.DrawPath(PathDrawingMode.Fill);
+        context.DrawPath(Drawing.Path.DrawingMode.Fill);
 
         // stroked square
         context.StrokeRect(ourRect);
@@ -115,7 +116,7 @@ public class SpinningFlower(IWindowMethods windowMethods) : BasePage(windowMetho
         context.BeginPath();
         // construct cirle path counterclockwise
         context.AddArc(circleCenter.X, circleCenter.Y, circleRadius, startingAngle, endingAngle, false);
-        context.DrawPath(PathDrawingMode.FillStroke);
+        context.DrawPath(Drawing.Path.DrawingMode.FillStroke);
     }
 
     public override void Render(DrawContext context, RenderArea area)
@@ -164,7 +165,7 @@ public class SpinningFlower(IWindowMethods windowMethods) : BasePage(windowMetho
         context.SetLineWidth(5.0);
         context.BeginPath();
         context.AddArc(start.X + linesWidth / 2, start.Y + linesHeight / 2, 300, 0, Math.PI * 2, false);
-        context.DrawPath(PathDrawingMode.FillStroke);
+        context.DrawPath(Drawing.Path.DrawingMode.FillStroke);
 
         context.BeginPath();
         context.AddArc(start.X + linesWidth / 2, start.Y + linesHeight / 2, 300, 0, Math.PI * 2, false);
@@ -266,7 +267,7 @@ public class SpinningFlower(IWindowMethods windowMethods) : BasePage(windowMetho
         for (var i = 0; i < 5; i++)
         {
             CreateRectPath(context, r5);
-            context.DrawPath((i % 2) != 0 ? PathDrawingMode.Fill : PathDrawingMode.FillStroke);
+            context.DrawPath((i % 2) != 0 ? Drawing.Path.DrawingMode.Fill : Drawing.Path.DrawingMode.FillStroke);
             context.TranslateCTM(-15, 15);
         }
 
@@ -287,8 +288,8 @@ public class SpinningFlower(IWindowMethods windowMethods) : BasePage(windowMetho
 
         context.RotateCTM(_animAngle);
 
-        using var rounded = Drawing.Path.CreateWithRoundedRect(r6, 10, 10, new OptArgs());
-        using var cornerCircle = Drawing.Path.CreateWithEllipseInRect(r7, new OptArgs());
+        using var rounded = Drawing.Path.CreateWithRoundedRect(r6, 10, 10, Maybe.None);
+        using var cornerCircle = Drawing.Path.CreateWithEllipseInRect(r7, Maybe.None);
         for (var i = 0; i < numRects; i++)
         {
             context.SetRGBFillColor(tint, tint / 2, 0, tint);

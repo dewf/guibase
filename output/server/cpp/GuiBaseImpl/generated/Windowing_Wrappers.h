@@ -1,260 +1,271 @@
+#pragma once
 #include "Windowing.h"
 
-void Key__push(Key value);
-Key Key__pop();
+namespace Windowing
+{
 
-void Modifiers__push(uint32_t value);
-uint32_t Modifiers__pop();
+    inline void __Native_UInt8_Buffer__push(std::shared_ptr<NativeBuffer<uint8_t>> buf, bool isReturn);
+    std::shared_ptr<NativeBuffer<uint8_t>> __Native_UInt8_Buffer__pop();
 
-void Accelerator__push(Accelerator value);
-Accelerator Accelerator__pop();
+    void moduleInit__wrapper();
 
-void ClipData__push(ClipData value);
-ClipData ClipData__pop();
+    void moduleShutdown__wrapper();
 
-void CursorStyle__push(CursorStyle value);
-CursorStyle CursorStyle__pop();
+    void runloop__wrapper();
 
-void DropEffect__push(uint32_t value);
-uint32_t DropEffect__pop();
-void DragRenderFunc__push(std::function<DragRenderFunc> f);
-std::function<DragRenderFunc> DragRenderFunc__pop();
+    void exitRunloop__wrapper();
 
-void DragData__push(DragData value);
-DragData DragData__pop();
+    void Modifiers__push(uint32_t value);
+    uint32_t Modifiers__pop();
 
-inline void __Native_UInt8_Buffer__push(std::shared_ptr<NativeBuffer<uint8_t>> buf, bool isReturn);
-std::shared_ptr<NativeBuffer<uint8_t>> __Native_UInt8_Buffer__pop();
+    void Icon__push(IconRef value);
+    IconRef Icon__pop();
+    namespace Icon {
 
-void DragRenderPayload__push(DragRenderPayload value);
-DragRenderPayload DragRenderPayload__pop();
+        void create__wrapper();
+    }
 
-void DropDataBadFormat__push(DropDataBadFormat e);
-void DropDataBadFormat__buildAndThrow();
+    void Icon_dispose__wrapper();
 
-void DropData__push(DropData value);
-DropData DropData__pop();
+    void Accelerator__push(AcceleratorRef value);
+    AcceleratorRef Accelerator__pop();
+    namespace Accelerator {
 
-void FileDialogResult__push(FileDialogResult value, bool isReturn);
-FileDialogResult FileDialogResult__pop();
+        void create__wrapper();
+    }
 
-void FileDialogMode__push(FileDialogMode value);
-FileDialogMode FileDialogMode__pop();
+    void Accelerator_dispose__wrapper();
 
-void FileDialogFilterSpec__push(FileDialogFilterSpec value, bool isReturn);
-FileDialogFilterSpec FileDialogFilterSpec__pop();
+    void MenuAction__push(MenuActionRef value);
+    MenuActionRef MenuAction__pop();
+    namespace MenuAction {
+        void ActionFunc__push(std::function<ActionFunc> f);
+        std::function<ActionFunc> ActionFunc__pop();
 
-void FileDialogOptions__push(FileDialogOptions value, bool isReturn);
-FileDialogOptions FileDialogOptions__pop();
+        void create__wrapper();
+    }
 
-void FileDialog__push(FileDialog value);
-FileDialog FileDialog__pop();
+    void MenuAction_dispose__wrapper();
 
-void Icon__push(Icon value);
-Icon Icon__pop();
+    void MenuItem__push(MenuItemRef value);
+    MenuItemRef MenuItem__pop();
 
-void KeyLocation__push(KeyLocation value);
-KeyLocation KeyLocation__pop();
+    void MenuItem_dispose__wrapper();
 
-void Menu__push(Menu value);
-Menu Menu__pop();
-void MenuActionFunc__push(std::function<MenuActionFunc> f);
-std::function<MenuActionFunc> MenuActionFunc__pop();
+    void Menu__push(MenuRef value);
+    MenuRef Menu__pop();
+    namespace Menu {
 
-void MenuAction__push(MenuAction value);
-MenuAction MenuAction__pop();
+        void create__wrapper();
+    }
 
-void MenuBar__push(MenuBar value);
-MenuBar MenuBar__pop();
+    void Menu_addAction__wrapper();
 
-void MenuItem__push(MenuItem value);
-MenuItem MenuItem__pop();
+    void Menu_addSubmenu__wrapper();
 
-void MessageBoxButtons__push(MessageBoxButtons value);
-MessageBoxButtons MessageBoxButtons__pop();
+    void Menu_addSeparator__wrapper();
 
-void MessageBoxIcon__push(MessageBoxIcon value);
-MessageBoxIcon MessageBoxIcon__pop();
+    void Menu_dispose__wrapper();
 
-void MessageBoxResult__push(MessageBoxResult value);
-MessageBoxResult MessageBoxResult__pop();
+    void MenuBar__push(MenuBarRef value);
+    MenuBarRef MenuBar__pop();
+    namespace MenuBar {
 
-void MessageBoxParams__push(MessageBoxParams value, bool isReturn);
-MessageBoxParams MessageBoxParams__pop();
+        void create__wrapper();
+    }
 
-void MessageBoxModal__push(MessageBoxModal value);
-MessageBoxModal MessageBoxModal__pop();
+    void MenuBar_addMenu__wrapper();
 
-void MouseButton__push(MouseButton value);
-MouseButton MouseButton__pop();
-void TimerFunc__push(std::function<TimerFunc> f);
-std::function<TimerFunc> TimerFunc__pop();
+    void MenuBar_dispose__wrapper();
 
-void Timer__push(Timer value);
-Timer Timer__pop();
+    void DropData__push(DropDataRef value);
+    DropDataRef DropData__pop();
+    namespace DropData {
 
-void WindowStyle__push(WindowStyle value);
-WindowStyle WindowStyle__pop();
+        void BadFormat__push(BadFormat e);
+        void BadFormat__buildAndThrow();
+    }
 
-void WindowOptions__push(WindowOptions value, bool isReturn);
-WindowOptions WindowOptions__pop();
+    void DropData_hasFormat__wrapper();
 
-void Window__push(Window value);
-Window Window__pop();
+    void DropData_getFiles__wrapper();
 
-void WindowDelegate__push(std::shared_ptr<WindowDelegate> inst, bool isReturn);
-std::shared_ptr<WindowDelegate> WindowDelegate__pop();
+    void DropData_getTextUTF8__wrapper();
 
-void moduleInit__wrapper();
+    void DropData_getFormat__wrapper();
 
-void moduleShutdown__wrapper();
+    void DropData_dispose__wrapper();
 
-void runloop__wrapper();
+    void DropEffect__push(uint32_t value);
+    uint32_t DropEffect__pop();
 
-void exitRunloop__wrapper();
+    void DragData__push(DragDataRef value);
+    DragDataRef DragData__pop();
+    namespace DragData {
 
-void DropData_hasFormat__wrapper();
+        void RenderPayload__push(RenderPayloadRef value);
+        RenderPayloadRef RenderPayload__pop();
 
-void DropData_getFiles__wrapper();
+        void RenderPayload_renderUTF8__wrapper();
 
-void DropData_getTextUTF8__wrapper();
+        void RenderPayload_renderFiles__wrapper();
 
-void DropData_getFormat__wrapper();
+        void RenderPayload_renderFormat__wrapper();
 
-void DropData_dispose__wrapper();
+        void RenderPayload_dispose__wrapper();
+        void RenderFunc__push(std::function<RenderFunc> f);
+        std::function<RenderFunc> RenderFunc__pop();
 
-void DragRenderPayload_renderUTF8__wrapper();
+        void create__wrapper();
+    }
 
-void DragRenderPayload_renderFiles__wrapper();
+    void DragData_dragExec__wrapper();
 
-void DragRenderPayload_renderFormat__wrapper();
+    void DragData_dispose__wrapper();
 
-void DragRenderPayload_dispose__wrapper();
+    void ClipData__push(ClipDataRef value);
+    ClipDataRef ClipData__pop();
+    namespace ClipData {
 
-void DragData_dragExec__wrapper();
+        void setClipboard__wrapper();
 
-void DragData_dispose__wrapper();
+        void get__wrapper();
 
-void DragData_create__wrapper();
+        void flushClipboard__wrapper();
+    }
 
-void Window_destroy__wrapper();
+    void ClipData_dispose__wrapper();
 
-void Window_show__wrapper();
+    void MouseButton__push(MouseButton value);
+    MouseButton MouseButton__pop();
 
-void Window_showRelativeTo__wrapper();
+    void WindowDelegate__push(std::shared_ptr<WindowDelegate> inst, bool isReturn);
+    std::shared_ptr<WindowDelegate> WindowDelegate__pop();
 
-void Window_showModal__wrapper();
+    void WindowDelegate_canClose__wrapper(int serverID);
 
-void Window_endModal__wrapper();
+    void WindowDelegate_closed__wrapper(int serverID);
 
-void Window_hide__wrapper();
+    void WindowDelegate_destroyed__wrapper(int serverID);
 
-void Window_invalidate__wrapper();
+    void WindowDelegate_mouseDown__wrapper(int serverID);
 
-void Window_setTitle__wrapper();
+    void WindowDelegate_mouseUp__wrapper(int serverID);
 
-void Window_focus__wrapper();
+    void WindowDelegate_mouseMove__wrapper(int serverID);
 
-void Window_mouseGrab__wrapper();
+    void WindowDelegate_mouseEnter__wrapper(int serverID);
 
-void Window_getOSHandle__wrapper();
+    void WindowDelegate_mouseLeave__wrapper(int serverID);
 
-void Window_enableDrops__wrapper();
+    void WindowDelegate_repaint__wrapper(int serverID);
 
-void Window_setMenuBar__wrapper();
+    void WindowDelegate_moved__wrapper(int serverID);
 
-void Window_showContextMenu__wrapper();
+    void WindowDelegate_resized__wrapper(int serverID);
 
-void Window_setCursor__wrapper();
+    void WindowDelegate_keyDown__wrapper(int serverID);
 
-void Window_dispose__wrapper();
+    void WindowDelegate_dropFeedback__wrapper(int serverID);
 
-void Window_create__wrapper();
+    void WindowDelegate_dropLeave__wrapper(int serverID);
 
-void Window_mouseUngrab__wrapper();
+    void WindowDelegate_dropSubmit__wrapper(int serverID);
 
-void Timer_dispose__wrapper();
+    void CursorStyle__push(CursorStyle value);
+    CursorStyle CursorStyle__pop();
 
-void Timer_create__wrapper();
+    void Window__push(WindowRef value);
+    WindowRef Window__pop();
+    namespace Window {
 
-void Icon_dispose__wrapper();
+        void Style__push(Style value);
+        Style Style__pop();
 
-void Icon_create__wrapper();
+        void Options__push(Options value, bool isReturn);
+        Options Options__pop();
 
-void Accelerator_dispose__wrapper();
+        void create__wrapper();
 
-void Accelerator_create__wrapper();
+        void mouseUngrab__wrapper();
+    }
 
-void MenuAction_dispose__wrapper();
+    void Window_destroy__wrapper();
 
-void MenuAction_create__wrapper();
+    void Window_show__wrapper();
 
-void MenuItem_dispose__wrapper();
+    void Window_showRelativeTo__wrapper();
 
-void Menu_addAction__wrapper();
+    void Window_showModal__wrapper();
 
-void Menu_addSubmenu__wrapper();
+    void Window_endModal__wrapper();
 
-void Menu_addSeparator__wrapper();
+    void Window_hide__wrapper();
 
-void Menu_dispose__wrapper();
+    void Window_invalidate__wrapper();
 
-void Menu_create__wrapper();
+    void Window_setTitle__wrapper();
 
-void MenuBar_addMenu__wrapper();
+    void Window_focus__wrapper();
 
-void MenuBar_dispose__wrapper();
+    void Window_mouseGrab__wrapper();
 
-void MenuBar_create__wrapper();
+    void Window_getOSHandle__wrapper();
 
-void ClipData_dispose__wrapper();
+    void Window_enableDrops__wrapper();
 
-void ClipData_setClipboard__wrapper();
+    void Window_setMenuBar__wrapper();
 
-void ClipData_get__wrapper();
+    void Window_showContextMenu__wrapper();
 
-void ClipData_flushClipboard__wrapper();
+    void Window_setCursor__wrapper();
 
-void FileDialog_dispose__wrapper();
+    void Window_dispose__wrapper();
 
-void FileDialog_openFile__wrapper();
+    void Timer__push(TimerRef value);
+    TimerRef Timer__pop();
+    namespace Timer {
+        void TimerFunc__push(std::function<TimerFunc> f);
+        std::function<TimerFunc> TimerFunc__pop();
 
-void FileDialog_saveFile__wrapper();
+        void create__wrapper();
+    }
 
-void MessageBoxModal_dispose__wrapper();
+    void Timer_dispose__wrapper();
+    namespace FileDialog {
 
-void MessageBoxModal_show__wrapper();
+        void Mode__push(Mode value);
+        Mode Mode__pop();
 
-void WindowDelegate_canClose__wrapper(int serverID);
+        void FilterSpec__push(FilterSpec value, bool isReturn);
+        FilterSpec FilterSpec__pop();
 
-void WindowDelegate_closed__wrapper(int serverID);
+        void Options__push(Options value, bool isReturn);
+        Options Options__pop();
 
-void WindowDelegate_destroyed__wrapper(int serverID);
+        void DialogResult__push(DialogResult value, bool isReturn);
+        DialogResult DialogResult__pop();
 
-void WindowDelegate_mouseDown__wrapper(int serverID);
+        void openFile__wrapper();
 
-void WindowDelegate_mouseUp__wrapper(int serverID);
+        void saveFile__wrapper();
+    }
+    namespace MessageBoxModal {
 
-void WindowDelegate_mouseMove__wrapper(int serverID);
+        void Buttons__push(Buttons value);
+        Buttons Buttons__pop();
 
-void WindowDelegate_mouseEnter__wrapper(int serverID);
+        void Icon__push(Icon value);
+        Icon Icon__pop();
 
-void WindowDelegate_mouseLeave__wrapper(int serverID);
+        void Params__push(Params value, bool isReturn);
+        Params Params__pop();
 
-void WindowDelegate_repaint__wrapper(int serverID);
+        void MessageBoxResult__push(MessageBoxResult value);
+        MessageBoxResult MessageBoxResult__pop();
 
-void WindowDelegate_moved__wrapper(int serverID);
+        void show__wrapper();
+    }
 
-void WindowDelegate_resized__wrapper(int serverID);
-
-void WindowDelegate_keyDown__wrapper(int serverID);
-
-void WindowDelegate_dropFeedback__wrapper(int serverID);
-
-void WindowDelegate_dropLeave__wrapper(int serverID);
-
-void WindowDelegate_dropSubmit__wrapper(int serverID);
-
-void Windowing__constantsFunc();
-
-int Windowing__register();
+    int __register();
+}

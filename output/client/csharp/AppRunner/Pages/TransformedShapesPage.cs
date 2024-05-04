@@ -1,4 +1,5 @@
-﻿using Org.Prefixed.GuiBase;
+﻿using CSharpFunctionalExtensions;
+using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
 using static AppRunner.Pages.Util.Common;
 
@@ -13,14 +14,14 @@ public class TransformedShapesPage : BasePage
     
     public TransformedShapesPage(IWindowMethods windowMethods) : base(windowMethods)
     {
-        using var space = ColorSpace.CreateWithName(ColorSpaceName.GenericRGB);
+        using var space = ColorSpace.CreateWithName(ColorSpace.Name.GenericRGB);
         _grad = Gradient.CreateWithColorComponents(space, [
-            new GradientStop(0, 0.0, 0.5, 1.0, 1.0),
-            new GradientStop(1, 0.0, 1.0, 0.0, 1.0)
+            new Gradient.Stop(0, 0.0, 0.5, 1.0, 1.0),
+            new Gradient.Stop(1, 0.0, 1.0, 0.0, 1.0)
         ]);
         _grad2 = Gradient.CreateWithColorComponents(space, [
-            new GradientStop(0, 0.0, 0.5, 1.0, 0.3),
-            new GradientStop(1, 0.0, 1.0, 0.0, 0.3)
+            new Gradient.Stop(0, 0.0, 0.5, 1.0, 0.3),
+            new Gradient.Stop(1, 0.0, 1.0, 0.0, 0.3)
         ]);
     }
 
@@ -93,17 +94,15 @@ public class TransformedShapesPage : BasePage
             new Point(center.X - 143.33, center.Y + 196.67)
         ];
 
-        var optArgs =
-            m.HasValue
-                ? new OptArgs { Transform = m.Value }
-                : new OptArgs();
+        var maybeTransform =
+            m.HasValue ? Maybe.From(m.Value) : Maybe.None;
         
         // line version
         using var linePath = MutablePath.Create();
-        linePath.MoveToPoint(points[0].X, points[0].Y, optArgs);
+        linePath.MoveToPoint(points[0].X, points[0].Y, maybeTransform);
 
-        linePath.AddLineToPoint(points[1].X, points[1].Y, optArgs);
-        linePath.AddLineToPoint(points[2].X, points[2].Y, optArgs);
+        linePath.AddLineToPoint(points[1].X, points[1].Y, maybeTransform);
+        linePath.AddLineToPoint(points[2].X, points[2].Y, maybeTransform);
         linePath.CloseSubpath();
 
         context.SetRGBStrokeColor(1, 1, 1,  baseOpacity * 0.5);
@@ -118,10 +117,10 @@ public class TransformedShapesPage : BasePage
         using var curvedPath = MutablePath.Create();
         var startEnd = BetweenPoints(points[2], points[0]);
 
-        curvedPath.MoveToPoint(startEnd.X, startEnd.Y, optArgs);
-        curvedPath.AddArcToPoint(points[0].X, points[0].Y, points[1].X, points[1].Y, 20, optArgs);
-        curvedPath.AddArcToPoint(points[1].X, points[1].Y, points[2].X, points[2].Y, 20.0, optArgs);
-        curvedPath.AddArcToPoint(points[2].X, points[2].Y, points[0].X, points[0].Y, 20.0, optArgs);
+        curvedPath.MoveToPoint(startEnd.X, startEnd.Y, maybeTransform);
+        curvedPath.AddArcToPoint(points[0].X, points[0].Y, points[1].X, points[1].Y, 20, maybeTransform);
+        curvedPath.AddArcToPoint(points[1].X, points[1].Y, points[2].X, points[2].Y, 20.0, maybeTransform);
+        curvedPath.AddArcToPoint(points[2].X, points[2].Y, points[0].X, points[0].Y, 20.0, maybeTransform);
         curvedPath.CloseSubpath();
 
         context.SetRGBStrokeColor(0.85, 0, 1, baseOpacity * 0.75);
@@ -135,10 +134,8 @@ public class TransformedShapesPage : BasePage
 
     private void MiscShapes(DrawContext context, Point center, AffineTransform? m, double baseOpacity)
     {
-        var optArgs =
-            m.HasValue 
-                ? new OptArgs { Transform = m.Value }
-                : new OptArgs();
+        var maybeTransform =
+            m.HasValue ? Maybe.From(m.Value) : Maybe.None;
 
         context.SetLineWidth(2);
         
@@ -162,27 +159,27 @@ public class TransformedShapesPage : BasePage
         // black background
         const double extra = 4;
         var r2 = MakeRect(center.X - 300.0 - extra, center.Y - pointsSide/2 - extra, 600.0 + extra*2, pointsSide + extra*2);
-        using var bgRect = Drawing.Path.CreateWithRect(r2, optArgs);
+        using var bgRect = Drawing.Path.CreateWithRect(r2, maybeTransform);
         context.SetRGBFillColor(0, 0, 0, baseOpacity);
         context.AddPath(bgRect);
         context.FillPath();
 
-        using var rounded = Drawing.Path.CreateWithRoundedRect(r, 10, 10, optArgs);
+        using var rounded = Drawing.Path.CreateWithRoundedRect(r, 10, 10, maybeTransform);
         using var mutable01 = rounded.CreateMutableCopy();
 
         var rSquare = MakeRect(center.X - ellipseWidth / 8, center.Y - ellipseWidth / 8, ellipseWidth / 4, ellipseWidth / 4);
-        using var square = Drawing.Path.CreateWithRect(rSquare, new OptArgs()); // no transform on the square itself, being added to path with xform
-        mutable01.AddPath(square, optArgs);
+        using var square = Drawing.Path.CreateWithRect(rSquare, Maybe.None); // no transform on the square itself, being added to path with xform
+        mutable01.AddPath(square, maybeTransform);
 
         context.SetRGBStrokeColor(0.3, 0, 1, baseOpacity);
         context.AddPath(mutable01);
         context.StrokePath();
 
-        using var ellipse = Drawing.Path.CreateWithEllipseInRect(r, optArgs);
+        using var ellipse = Drawing.Path.CreateWithEllipseInRect(r, maybeTransform);
         using var mutable02 = ellipse.CreateMutableCopy();
         
-        mutable02.AddLines(points[..4], optArgs); // already includes implicit moveToPoint(point[0])
-        mutable02.AddCurveToPoint(points[4].X, points[4].Y, points[5].X, points[5].Y, points[0].X, points[0].Y, optArgs);
+        mutable02.AddLines(points[..4], maybeTransform); // already includes implicit moveToPoint(point[0])
+        mutable02.AddCurveToPoint(points[4].X, points[4].Y, points[5].X, points[5].Y, points[0].X, points[0].Y, maybeTransform);
         // closing the path looks a little nicer
         mutable02.CloseSubpath();
 
@@ -196,9 +193,9 @@ public class TransformedShapesPage : BasePage
 
         // quad curves
         using var mutable03 = MutablePath.Create();
-        mutable03.MoveToPoint(center.X - 300.0, center.Y, optArgs);
-        mutable03.AddQuadCurveToPoint(center.X - 150, center.Y - 150, center.X, center.Y, optArgs);
-        mutable03.AddQuadCurveToPoint(center.X + 150, center.Y + 150, center.X + 300, center.Y, optArgs);
+        mutable03.MoveToPoint(center.X - 300.0, center.Y, maybeTransform);
+        mutable03.AddQuadCurveToPoint(center.X - 150, center.Y - 150, center.X, center.Y, maybeTransform);
+        mutable03.AddQuadCurveToPoint(center.X + 150, center.Y + 150, center.X + 300, center.Y, maybeTransform);
 
         context.AddPath(mutable03);
         context.SetRGBStrokeColor(1, 1, 1, baseOpacity);
@@ -207,10 +204,8 @@ public class TransformedShapesPage : BasePage
 
     private void SubPaths(DrawContext context, Point center, AffineTransform? m, double baseOpacity)
     {
-        var optArgs =
-            m.HasValue 
-                ? new OptArgs { Transform = m.Value }
-                : new OptArgs();
+        var maybeTransform =
+            m.HasValue ? Maybe.From(m.Value) : Maybe.None;
         
         // final misc shapes
         Rect[] rects =
@@ -221,14 +216,14 @@ public class TransformedShapesPage : BasePage
         using var mutable04 = MutablePath.Create();
         
         var r1 = MakeRect(center.X - 80.0, center.Y - 80.0, 40.0, 40.0);
-        mutable04.AddRect(r1, optArgs);
-        mutable04.AddRects(rects, optArgs);
+        mutable04.AddRect(r1, maybeTransform);
+        mutable04.AddRects(rects, maybeTransform);
 
         var r2 = MakeRect(center.X + 60, center.Y + 20, 60.0, 60.0);
-        mutable04.AddRoundedRect(r2, 10, 10, optArgs);
+        mutable04.AddRoundedRect(r2, 10, 10, maybeTransform);
 
         var r3 = MakeRect(center.X - 40, center.Y - 40, 80.0, 80.0);
-        mutable04.AddEllipseInRect(r3, optArgs);
+        mutable04.AddEllipseInRect(r3, maybeTransform);
 
         // black outer path
         context.AddPath(mutable04);
@@ -245,18 +240,16 @@ public class TransformedShapesPage : BasePage
 
     private void KeyholeThing(DrawContext context, Point center, AffineTransform? m, double colorInterp)
     {
-        var optArgs =
-            m.HasValue 
-                ? new OptArgs { Transform = m.Value }
-                : new OptArgs();
+        var maybeTransform =
+            m.HasValue ? Maybe.From(m.Value) : Maybe.None;
         
         using var path = MutablePath.Create();
 
         double radius = 50;
-        path.MoveToPoint(center.X + radius, center.Y, optArgs);
-        path.AddArc(center.X, center.Y, radius, 0, Math.PI * 2.0 - (Math.PI/4), true, optArgs);
+        path.MoveToPoint(center.X + radius, center.Y, maybeTransform);
+        path.AddArc(center.X, center.Y, radius, 0, Math.PI * 2.0 - (Math.PI/4), true, maybeTransform);
         
-        path.AddRelativeArc(center.X, center.Y, radius + 70.71067, -(Math.PI/4), Math.PI/4, optArgs);
+        path.AddRelativeArc(center.X, center.Y, radius + 70.71067, -(Math.PI/4), Math.PI/4, maybeTransform);
 
         // just a dot to test GetCurrentPoint
         var p1 = path.GetCurrentPoint();

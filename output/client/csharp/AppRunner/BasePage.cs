@@ -37,7 +37,7 @@ public interface IPage
     void OnMouseEnter(int x, int y, Windowing.Modifiers modifiers);
     void OnMouseDown(int x, int y, Windowing.MouseButton button, Windowing.Modifiers modifiers);
     void OnMouseUp(int x, int y, Windowing.MouseButton button, Windowing.Modifiers modifiers);
-    void OnKeyDown(Windowing.Key key, Windowing.Modifiers modifiers);
+    void OnKeyDown(Keys.Key key, Windowing.Modifiers modifiers);
     
     Windowing.DropEffect DropFeedback(Windowing.DropData data, int x, int y, Windowing.Modifiers modifiers, Windowing.DropEffect suggested);
     void DropLeave();
@@ -99,14 +99,14 @@ public abstract class BasePage(IWindowMethods windowMethods) : IPage
     {
     }
 
-    public virtual void OnKeyDown(Windowing.Key key, Windowing.Modifiers modifiers)
+    public virtual void OnKeyDown(Keys.Key key, Windowing.Modifiers modifiers)
     {
     }
 
     public virtual void OnMouseUp(int x, int y, Windowing.MouseButton button, Windowing.Modifiers modifiers)
     {
     }
-    
+
     public abstract void Render(Drawing.DrawContext context, RenderArea area);
 
     public virtual void Render2(Drawing.DrawContext context, RenderArea area)

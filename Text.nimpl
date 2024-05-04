@@ -1,0 +1,159 @@
+module Text;
+
+import Drawing;
+
+// had this as a sumtype (notfound, zero, actual())
+// but too annoying / overkill
+struct Range {
+    long location;
+    long length;
+}
+
+opaque AttributedString {
+    static {
+        options Options {
+            Color foregroundColor;
+            bool foregroundColorFromContext;
+            Font font;
+            double strokeWidth;
+            Color strokeColor;
+            ParagraphStyle paragraphStyle;
+
+            // for custom types, this seems the simplest for now:
+            // client will maintain its own ID->value mapping, instead of having to have knowledge of CFDictionary types etc
+            // because Core Text ultimately returns a CFDictionary for us for each "run", there's really no way to inject anything with higher level behavior.
+            // for example if we wanted a single C# dictionary per run, because CoreText doesn't know anything about client-side data structures, and can't build them up
+            // during run analysis - but it can certainly deal with ints! and we can use those to construct our own queryable things per run
+            // another option would have been approximating CF* types via a sumtype, and storing things that way.
+            // but ints yield greater flexibility, because we can store absolutely whatever on the client side instead (not limiting us to known CF* types)
+            // however that does require being mindful of the lifetimes of any CF/DL resources, they must be kept alive as long as the attributed string since it won't know to retain them
+
+            // right now this only works for reads, for writes use .setCustomAttribute()
+            Map<string,long> custom;
+        }
+        AttributedString create(string s, Options opts);
+    }
+    long getLength();
+    MutableAttributedString createMutableCopy(long maxLength);
+}
+
+opaque MutableAttributedString extends AttributedString {
+    static {
+        MutableAttributedString create(long maxLength);
+    }
+    void replaceString(Range range, string str);
+    void setAttribute(Range range, AttributedString.Options attr);
+    void setCustomAttribute(Range range, string key, long value); // ID key has client-specific meaning (use a dictionary or something)
+
+    void beginEditing(); // for batch edits
+    void endEditing();
+}
+
+opaque Font {
+    static {
+        options Traits {
+            bool italic;
+            bool bold;
+            bool expanded;
+            bool condensed;
+            bool monospace;
+            bool vertical;
+            // some others not yet put here
+        }
+        Font createFromFile(string path, double size, Option<AffineTransform> transform);
+        Font createWithName(string name, double size, Option<AffineTransform> transform);
+    }
+    Font createCopyWithSymbolicTraits(double size, Option<AffineTransform> transform, Traits newTraits);
+    double getAscent();
+    double getDescent();
+    double getUnderlineThickness();
+    double getUnderlinePosition();
+}
+
+struct TypographicBounds {
+    double width;
+    double ascent;
+    double descent;
+    double leading;
+}
+
+flags LineBoundsOptions {
+    ExcludeTypographicLeading  = 1 << 0,
+    ExcludeTypographicShifts   = 1 << 1,
+    UseHangingPunctuation      = 1 << 2,
+    UseGlyphPathBounds         = 1 << 3,
+    UseOpticalBounds           = 1 << 4
+}
+
+opaque Run {
+    static {
+        flags Status {
+            NoStatus = 0,
+            RightToLeft = 1 << 0,
+            NonMonotonic = 1 << 1,
+            HasNonIdentityMatrix = 1 << 2
+        }
+        struct Info {
+            AttributedString.Options attrs;
+            Range sourceRange;
+            Status status;
+            Rect bounds;
+            TypographicBounds typoBounds;
+        }
+    }
+    AttributedString.Options getAttributes(Array<string> customKeys);
+    TypographicBounds getTypographicBounds(Range range);
+    Range getStringRange();
+    Status getStatus();
+}
+
+opaque Line {
+    static {
+        struct Info {
+            Point origin;
+            TypographicBounds lineTypoBounds;
+            Array<Run.Info> runs;
+        }
+        Line createWithAttributedString(AttributedString str);
+    }
+    Range getStringRange();
+    TypographicBounds getTypographicBounds();
+    Rect getBoundsWithOptions(LineBoundsOptions opts);
+    void draw(DrawContext context);
+    Array<Run> getGlyphRuns();
+    Tuple<double,double> getOffsetForStringIndex(long charIndex); // offset + secondaryOffset
+    long getStringIndexForPosition(Point p);
+}
+
+opaque Frame {
+    void draw(DrawContext context);
+    Array<Line> getLines();
+    Array<Point> getLineOrigins(Range range); // zero range = fetch all
+
+    Array<Line.Info> getLinesExtended(Array<string> customKeys); // a "deep fetch" to spare a ton of frontend calls for iterating the frame runs (probably a wash performance-wise with all the stack operations required however)
+}
+
+opaque FrameSetter {
+    static {
+        FrameSetter createWithAttributedString(AttributedString str);
+    }
+    Frame createFrame(Range range, Path path); // no frameAttributes yet, not sure what they are!
+}
+
+opaque ParagraphStyle {
+    static {
+        enum TextAlignment {
+            Left,
+            Right,
+            Center,
+            Justified,
+            Natural
+        }
+        sumtype Setting {
+            Alignment(TextAlignment value)
+            // others?
+        }
+        ParagraphStyle create(Array<Setting> settings); // need to check the source API - would this make more sense as 'options', than providing an Array of settings?
+    }
+}
+

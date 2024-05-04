@@ -16,6 +16,13 @@ struct Rect {
 }
 
 struct AffineTransform {
+    static {
+        AffineTransform identity;
+        AffineTransform translate(AffineTransform input, double tx, double ty);
+        AffineTransform rotate(AffineTransform input, double angle);
+        AffineTransform scale(AffineTransform input, double sx, double sy);
+        AffineTransform concat(AffineTransform t1, AffineTransform t2);
+    }
     double a;
     double b;
     double c;
@@ -23,126 +30,111 @@ struct AffineTransform {
     double tx;
     double ty;
 }
-AffineTransform AffineTransformIdentity;
 
-AffineTransform AffineTransformTranslate(AffineTransform input, double tx, double ty);
-AffineTransform AffineTransformRotate(AffineTransform input, double angle);
-AffineTransform AffineTransformScale(AffineTransform input, double sx, double sy);
-AffineTransform AffineTransformConcat(AffineTransform t1, AffineTransform t2);
-
-sumtype AffineTransformOps {
-    Translate(double tx, double ty),
-    Rotate(double angle),
-    Scale(double sx, double sy),
-    Concat(AffineTransform t2)
-}
-AffineTransform AffineTransformModify(AffineTransform input, Array<AffineTransformOps> ops);
-
-enum PathDrawingMode {
-    Fill,
-    EOFill,
-    Stroke,
-    FillStroke,
-    EOFillStroke
-}
-
-// a way of handling optional args until we come up with something direct?
-options OptArgs {
-    AffineTransform transform;
-}
-
-
-// ideally these would be directly accessible as Color::White etc - like global constants, but namespaced under the opaque
-// ColorSpaces should have the same thing: ColorSpace::GenericGray etc
-// hmm but what if they are expensive to create? no idea if they are or not ...
-// and if we're maintaining them then we're going to see them as leaks on the C++ size, since they would last the entire program
-// unless they were explicitly disposed in the module shutdown ...
-// lazy initialization perhaps? looks like a property but is actually a function?
-// and what about properties for that matter?
-
-enum ColorConstants {
-    White,
-    Black,
-    Clear
+// couldn't nest this in the AffineTransform static block because the 'Concat' value references the struct itself, a big no-no in C++
+group AffineBatchOps {
+    sumtype Value {
+        Translate(double tx, double ty),
+        Rotate(double angle),
+        Scale(double sx, double sy),
+        Concat(AffineTransform t2)
+    }
+    AffineTransform process(AffineTransform init, Array<Value> ops);
 }
 
 opaque Color {
     static {
+        // ideally these would be directly accessible as Color::White etc - like global constants, but namespaced under the opaque
+        // ColorSpaces should have the same thing: ColorSpace::GenericGray etc
+        // hmm but what if they are expensive to create? no idea if they are or not ...
+        // and if we're maintaining them then we're going to see them as leaks on the C++ size, since they would last the entire program
+        // unless they were explicitly disposed in the module shutdown ...
+        // lazy initialization perhaps? looks like a property but is actually a function?
+        // and what about properties for that matter?
+        enum Constant {
+            White,
+            Black,
+            Clear
+        }
         Color createGenericRGB(double red, double green, double blue, double alpha);
-        Color getConstantColor(ColorConstants which);
+        Color getConstantColor(Constant which);
     }
-}
-
-enum ColorSpaceName {
-    GenericGray,
-    GenericRGB,
-    GenericCMYK,
-    GenericRGBLinear,
-    AdobeRGB1998,
-    SRGB,
-    GenericGrayGamma2_2
-    // many more we don't have yet!
 }
 
 opaque ColorSpace {
     static {
-        ColorSpace createWithName(ColorSpaceName name);
+        enum Name {
+            GenericGray,
+            GenericRGB,
+            GenericCMYK,
+            GenericRGBLinear,
+            AdobeRGB1998,
+            SRGB,
+            GenericGrayGamma2_2
+            // many more we don't have yet!
+        }
+        ColorSpace createWithName(Name name);
         ColorSpace createDeviceGray();
     }
 }
 
-flags GradientDrawingOptions {
-    DrawsBeforeStartLocation = 1 << 0,
-    DrawsAfterEndLocation = 1 << 1
-}
-
-struct GradientStop {
-    double location;
-    double red;
-    double green;
-    double blue;
-    double alpha;
-}
 
 opaque Gradient {
     static {
-        Gradient createWithColorComponents(ColorSpace space, Array<GradientStop> stops);
+        flags DrawingOptions {
+            DrawsBeforeStartLocation = 1 << 0,
+            DrawsAfterEndLocation = 1 << 1
+        }
+        struct Stop {
+            double location;
+            double red;
+            double green;
+            double blue;
+            double alpha;
+        }
+        Gradient createWithColorComponents(ColorSpace space, Array<Stop> stops);
     }
 }
 
 opaque Path {
+    static {
+        enum DrawingMode {
+            Fill,
+            EOFill,
+            Stroke,
+            FillStroke,
+            EOFillStroke
+        }
+        Path createWithRect(Rect rect, Option<AffineTransform> transform);
+        Path createWithEllipseInRect(Rect rect, Option<AffineTransform> transform);
+        Path createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, Option<AffineTransform> transform);
+    }
     Point getCurrentPoint();
     Path createCopy();
     MutablePath createMutableCopy();
-    static {
-        Path createWithRect(Rect rect, OptArgs optArgs);
-        Path createWithEllipseInRect(Rect rect, OptArgs optArgs);
-        Path createWithRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
-    }
 }
 
-exception MutablePathTransformException(string error);
-
 opaque MutablePath extends Path {
-    void addPath(Path path2, OptArgs optArgs);
-    void addRect(Rect rect, OptArgs optArgs);
-    void addRects(Array<Rect> rects, OptArgs optArgs);
-    void addRoundedRect(Rect rect, double cornerWidth, double cornerHeight, OptArgs optArgs);
-    void addEllipseInRect(Rect rect, OptArgs optArgs);
-
-    // subpath (current win/linux limitation: all segments must use same [or no] transform - hence the possible exception)
-    void moveToPoint(double x, double y, OptArgs optArgs) throws MutablePathTransformException;
-    void addArc(double x, double y, double radius, double startAngle, double endAngle, bool clockwise, OptArgs optArgs) throws MutablePathTransformException;
-    void addRelativeArc(double x, double y, double radius, double startAngle, double delta, OptArgs optArgs) throws MutablePathTransformException;
-    void addArcToPoint(double x1, double y1, double x2, double y2, double radius, OptArgs optArgs) throws MutablePathTransformException;
-    void addCurveToPoint(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y, OptArgs optArgs) throws MutablePathTransformException;
-    void addLines(Array<Point> points, OptArgs optArgs) throws MutablePathTransformException;
-    void addLineToPoint(double x, double y, OptArgs optArgs) throws MutablePathTransformException;
-    void addQuadCurveToPoint(double cpx, double cpy, double x, double y, OptArgs optArgs) throws MutablePathTransformException;
-    void closeSubpath();
     static {
+        exception TransformException(string error);
         MutablePath create();
     }
+    void addPath(Path path2, Option<AffineTransform> transform);
+    void addRect(Rect rect, Option<AffineTransform> transform);
+    void addRects(Array<Rect> rects, Option<AffineTransform> transform);
+    void addRoundedRect(Rect rect, double cornerWidth, double cornerHeight, Option<AffineTransform> transform);
+    void addEllipseInRect(Rect rect, Option<AffineTransform> transform);
+
+    // subpath (current win/linux limitation: all segments must use same [or no] transform - hence the possible exception)
+    void moveToPoint(double x, double y, Option<AffineTransform> transform) throws TransformException;
+    void addArc(double x, double y, double radius, double startAngle, double endAngle, bool clockwise, Option<AffineTransform> transform) throws TransformException;
+    void addRelativeArc(double x, double y, double radius, double startAngle, double delta, Option<AffineTransform> transform) throws TransformException;
+    void addArcToPoint(double x1, double y1, double x2, double y2, double radius, Option<AffineTransform> transform) throws TransformException;
+    void addCurveToPoint(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y, Option<AffineTransform> transform) throws TransformException;
+    void addLines(Array<Point> points, Option<AffineTransform> transform) throws TransformException;
+    void addLineToPoint(double x, double y, Option<AffineTransform> transform) throws TransformException;
+    void addQuadCurveToPoint(double cpx, double cpy, double x, double y, Option<AffineTransform> transform) throws TransformException;
+    void closeSubpath();
 }
 
 enum TextDrawingMode {
@@ -168,14 +160,14 @@ opaque DrawContext {
     void beginPath();
     void addArc(double x, double y, double radius, double startAngle, double endAngle, bool clockwise);
     void addArcToPoint(double x1, double y1, double x2, double y2, double radius);
-    void drawPath(PathDrawingMode mode);
+    void drawPath(Path.DrawingMode mode);
     void setStrokeColorWithColor(Color color);
     void strokeRectWithWidth(Rect rect, double width);
     void moveToPoint(double x, double y);
     void addLineToPoint(double x, double y);
     void strokePath();
     void setLineDash(double phase, Array<double> lengths);
-    void clearLineDash();                           // maybe until we have an Option<> type or something to use in setLineDash()
+    void clearLineDash();
     void setLineWidth(double width);
     void clip();
     void clipToRect(Rect clipRect);
@@ -188,173 +180,11 @@ opaque DrawContext {
     void strokeRect(Rect rect);
     void addRect(Rect rect);
     void closePath();
-    void drawLinearGradient(Gradient gradient, Point startPoint, Point endPoint, GradientDrawingOptions drawOpts);
+    void drawLinearGradient(Gradient gradient, Point startPoint, Point endPoint, Gradient.DrawingOptions drawOpts);
     void setTextDrawingMode(TextDrawingMode mode);
 
     void clipToMask(Rect rect, Image mask);
     void drawImage(Rect rect, Image image);
-}
-
-// text stuff
-
-options AttributedStringOptions {
-    Color foregroundColor;
-    bool foregroundColorFromContext;
-    Font font;
-    double strokeWidth;
-    Color strokeColor;
-    ParagraphStyle paragraphStyle;
-
-    // for custom types, this seems the simplest for now:
-    // client will maintain its own ID->value mapping, instead of having to have knowledge of CFDictionary types etc
-    // because Core Text ultimately returns a CFDictionary for us for each "run", there's really no way to inject anything with higher level behavior.
-    // for example if we wanted a single C# dictionary per run, because CoreText doesn't know anything about client-side data structures, and can't build them up
-    // during run analysis - but it can certainly deal with ints! and we can use those to construct our own queryable things per run
-    // another option would have been approximating CF* types via a sumtype, and storing things that way.
-    // but ints yield greater flexibility, because we can store absolutely whatever on the client side instead (not limiting us to known CF* types)
-    // however that does require being mindful of the lifetimes of any CF/DL resources, they must be kept alive as long as the attributed string since it won't know to retain them
-
-    // right now this only works for reads, for writes use .setCustomAttribute()
-    Map<string,long> custom;
-}
-
-// had this as a sumtype (notfound, zero, actual())
-// but too annoying / overkill
-struct Range {
-    long location;
-    long length;
-}
-
-opaque AttributedString {
-    long getLength();
-    MutableAttributedString createMutableCopy(long maxLength);
-    static {
-        AttributedString create(string s, AttributedStringOptions opts);
-    }
-}
-
-opaque MutableAttributedString extends AttributedString {
-    void replaceString(Range range, string str);
-    void setAttribute(Range range, AttributedStringOptions attr);
-    void setCustomAttribute(Range range, string key, long value); // ID key has client-specific meaning (use a dictionary or something)
-
-    void beginEditing(); // for batch edits
-    void endEditing();
-
-    static {
-        MutableAttributedString create(long maxLength);
-    }
-}
-
-options FontTraits {
-    bool italic;
-    bool bold;
-    bool expanded;
-    bool condensed;
-    bool monospace;
-    bool vertical;
-    // some others not yet put here
-}
-
-opaque Font {
-    Font createCopyWithSymbolicTraits(double size, FontTraits newTraits, OptArgs optArgs); // optional matrix was originally next-to-last argument
-    double getAscent();
-    double getDescent();
-    double getUnderlineThickness();
-    double getUnderlinePosition();
-    static {
-        Font createFromFile(string path, double size, OptArgs optArgs);
-        Font createWithName(string name, double size, OptArgs optArgs);
-    }
-}
-
-struct TypographicBounds {
-    double width;
-    double ascent;
-    double descent;
-    double leading;
-}
-
-flags LineBoundsOptions {
-    ExcludeTypographicLeading  = 1 << 0,
-    ExcludeTypographicShifts   = 1 << 1,
-    UseHangingPunctuation      = 1 << 2,
-    UseGlyphPathBounds         = 1 << 3,
-    UseOpticalBounds           = 1 << 4
-}
-
-flags RunStatus {
-    NoStatus = 0,
-    RightToLeft = 1 << 0,
-    NonMonotonic = 1 << 1,
-    HasNonIdentityMatrix = 1 << 2
-}
-
-opaque Run {
-    AttributedStringOptions getAttributes(Array<string> customKeys);
-    TypographicBounds getTypographicBounds(Range range);
-    Range getStringRange();
-    RunStatus getStatus();
-}
-
-opaque Line {
-    Range getStringRange();
-    TypographicBounds getTypographicBounds();
-    Rect getBoundsWithOptions(LineBoundsOptions opts);
-    void draw(DrawContext context);
-    Array<Run> getGlyphRuns();
-    Tuple<double,double> getOffsetForStringIndex(long charIndex); // offset + secondaryOffset
-    long getStringIndexForPosition(Point p);
-    static {
-        Line createWithAttributedString(AttributedString str);
-    }
-}
-
-struct RunInfo {
-    AttributedStringOptions attrs;
-    Range sourceRange;
-    RunStatus status;
-    Rect bounds;
-    TypographicBounds typoBounds;
-}
-
-struct LineInfo {
-    Point origin;
-    TypographicBounds lineTypoBounds;
-    Array<RunInfo> runs;
-}
-
-opaque Frame {
-    void draw(DrawContext context);
-    Array<Line> getLines();
-    Array<Point> getLineOrigins(Range range); // zero range = fetch all
-
-    Array<LineInfo> getLinesExtended(Array<string> customKeys); // a "deep fetch" to spare a ton of frontend calls for iterating the frame runs
-}
-
-opaque FrameSetter {
-    Frame createFrame(Range range, Path path); // no frameAttributes yet, not sure what they are!
-    static {
-        FrameSetter createWithAttributedString(AttributedString str);
-    }
-}
-
-enum TextAlignment {
-    Left,
-    Right,
-    Center,
-    Justified,
-    Natural
-}
-
-sumtype ParagraphStyleSetting {
-    alignment(TextAlignment value)
-}
-
-opaque ParagraphStyle {
-    static {
-        ParagraphStyle create(Array<ParagraphStyleSetting> settings); // need to check the source API - would this make more sense as 'options', than providing an Array of settings?
-    }
 }
 
 // bitmaps ===============
@@ -392,15 +222,15 @@ opaque BitmapLock {
 opaque Image;
 
 opaque BitmapDrawContext extends DrawContext {
-    Image createImage();
-
-    // return the memory so it can be edited
-    // this API differs from stock Quartz (which can return a void* directly), because Windows needs to lock/unlock the data for writing
-    BitmapLock getData();
-
     // we don't support a void* data argument on this yet
     // (will eventually support a Buffer<whatever> argument)
     static {
         BitmapDrawContext create(int width, int height, int bitsPerComponent, int bytesPerRow, ColorSpace space, BitmapInfo bitmapInfo);
     }
+
+    Image createImage();
+
+    // return the memory so it can be edited
+    // this API differs from stock Quartz (which can return a void* directly), because Windows needs to lock/unlock the data for writing
+    BitmapLock getData();
 }

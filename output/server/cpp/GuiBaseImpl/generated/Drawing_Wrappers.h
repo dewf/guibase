@@ -1,377 +1,251 @@
+#pragma once
 #include "Drawing.h"
 
-void AffineTransform__push(AffineTransform value, bool isReturn);
-AffineTransform AffineTransform__pop();
-void AffineTransformOps__push(AffineTransformOps value, bool isReturn);
-AffineTransformOps AffineTransformOps__pop();
+namespace Drawing
+{
 
-void __String_Int64_Map__push(std::map<std::string,int64_t> _map, bool isReturn);
-std::map<std::string,int64_t> __String_Int64_Map__pop();
+    void __AffineTransform_Option__push(std::optional<AffineTransform> value, bool isReturn);
+    std::optional<AffineTransform> __AffineTransform_Option__pop();
 
-void AttributedStringOptions__push(AttributedStringOptions value, bool isReturn);
-AttributedStringOptions AttributedStringOptions__pop();
+    void Point__push(Point value, bool isReturn);
+    Point Point__pop();
 
-void AttributedString__push(AttributedString value);
-AttributedString AttributedString__pop();
+    void Size__push(Size value, bool isReturn);
+    Size Size__pop();
 
-void BitmapInfo__push(uint32_t value);
-uint32_t BitmapInfo__pop();
+    void Rect__push(Rect value, bool isReturn);
+    Rect Rect__pop();
 
-void BitmapDrawContext__push(BitmapDrawContext value);
-BitmapDrawContext BitmapDrawContext__pop();
+    void AffineTransform__push(AffineTransform value, bool isReturn);
+    AffineTransform AffineTransform__pop();
+    namespace AffineTransform__ {
 
-void BitmapLock__push(BitmapLock value);
-BitmapLock BitmapLock__pop();
+        void translate__wrapper();
 
-void ColorConstants__push(ColorConstants value);
-ColorConstants ColorConstants__pop();
+        void rotate__wrapper();
 
-void Color__push(Color value);
-Color Color__pop();
+        void scale__wrapper();
 
-void ColorSpaceName__push(ColorSpaceName value);
-ColorSpaceName ColorSpaceName__pop();
+        void concat__wrapper();
+    }
+    namespace AffineBatchOps {
+        void Value__push(std::shared_ptr<Value::Base> value, bool isReturn);
+        std::shared_ptr<Value::Base> Value__pop();
 
-void ColorSpace__push(ColorSpace value);
-ColorSpace ColorSpace__pop();
+        void process__wrapper();
+    }
 
-void Point__push(Point value, bool isReturn);
-Point Point__pop();
+    void Color__push(ColorRef value);
+    ColorRef Color__pop();
+    namespace Color {
 
-void Size__push(Size value, bool isReturn);
-Size Size__pop();
+        void Constant__push(Constant value);
+        Constant Constant__pop();
 
-void Rect__push(Rect value, bool isReturn);
-Rect Rect__pop();
+        void createGenericRGB__wrapper();
 
-void PathDrawingMode__push(PathDrawingMode value);
-PathDrawingMode PathDrawingMode__pop();
+        void getConstantColor__wrapper();
+    }
 
-void GradientDrawingOptions__push(uint32_t value);
-uint32_t GradientDrawingOptions__pop();
+    void Color_dispose__wrapper();
 
-void TextDrawingMode__push(TextDrawingMode value);
-TextDrawingMode TextDrawingMode__pop();
+    void ColorSpace__push(ColorSpaceRef value);
+    ColorSpaceRef ColorSpace__pop();
+    namespace ColorSpace {
 
-void DrawContext__push(DrawContext value);
-DrawContext DrawContext__pop();
+        void Name__push(Name value);
+        Name Name__pop();
 
-void FontTraits__push(FontTraits value, bool isReturn);
-FontTraits FontTraits__pop();
+        void createWithName__wrapper();
 
-void OptArgs__push(OptArgs value, bool isReturn);
-OptArgs OptArgs__pop();
+        void createDeviceGray__wrapper();
+    }
 
-void Font__push(Font value);
-Font Font__pop();
+    void ColorSpace_dispose__wrapper();
 
-void Range__push(Range value, bool isReturn);
-Range Range__pop();
+    void Gradient__push(GradientRef value);
+    GradientRef Gradient__pop();
+    namespace Gradient {
 
-void TypographicBounds__push(TypographicBounds value, bool isReturn);
-TypographicBounds TypographicBounds__pop();
+        void DrawingOptions__push(uint32_t value);
+        uint32_t DrawingOptions__pop();
 
-void RunStatus__push(uint32_t value);
-uint32_t RunStatus__pop();
+        void Stop__push(Stop value, bool isReturn);
+        Stop Stop__pop();
 
-void RunInfo__push(RunInfo value, bool isReturn);
-RunInfo RunInfo__pop();
+        void createWithColorComponents__wrapper();
+    }
 
-void LineInfo__push(LineInfo value, bool isReturn);
-LineInfo LineInfo__pop();
+    void Gradient_dispose__wrapper();
 
-void Frame__push(Frame value);
-Frame Frame__pop();
+    void Path__push(PathRef value);
+    PathRef Path__pop();
+    namespace Path {
 
-void FrameSetter__push(FrameSetter value);
-FrameSetter FrameSetter__pop();
+        void DrawingMode__push(DrawingMode value);
+        DrawingMode DrawingMode__pop();
 
-void GradientStop__push(GradientStop value, bool isReturn);
-GradientStop GradientStop__pop();
+        void createWithRect__wrapper();
 
-void Gradient__push(Gradient value);
-Gradient Gradient__pop();
+        void createWithEllipseInRect__wrapper();
 
-void Image__push(Image value);
-Image Image__pop();
+        void createWithRoundedRect__wrapper();
+    }
 
-void ImageAlphaInfo__push(ImageAlphaInfo value);
-ImageAlphaInfo ImageAlphaInfo__pop();
+    void Path_getCurrentPoint__wrapper();
 
-void LineBoundsOptions__push(uint32_t value);
-uint32_t LineBoundsOptions__pop();
+    void Path_createCopy__wrapper();
 
-void __DoubleDouble_Tuple__push(std::tuple<double,double> value, bool isReturn);
-std::tuple<double,double> __DoubleDouble_Tuple__pop();
+    void Path_createMutableCopy__wrapper();
 
-void Line__push(Line value);
-Line Line__pop();
+    void Path_dispose__wrapper();
 
-void MutableAttributedString__push(MutableAttributedString value);
-MutableAttributedString MutableAttributedString__pop();
+    void MutablePath__push(MutablePathRef value);
+    MutablePathRef MutablePath__pop();
+    namespace MutablePath {
 
-void MutablePathTransformException__push(MutablePathTransformException e);
-void MutablePathTransformException__buildAndThrow();
+        void TransformException__push(TransformException e);
+        void TransformException__buildAndThrow();
 
-void MutablePath__push(MutablePath value);
-MutablePath MutablePath__pop();
+        void create__wrapper();
+    }
 
-void TextAlignment__push(TextAlignment value);
-TextAlignment TextAlignment__pop();
-void ParagraphStyleSetting__push(ParagraphStyleSetting value, bool isReturn);
-ParagraphStyleSetting ParagraphStyleSetting__pop();
+    void MutablePath_addPath__wrapper();
 
-void ParagraphStyle__push(ParagraphStyle value);
-ParagraphStyle ParagraphStyle__pop();
+    void MutablePath_addRect__wrapper();
 
-void Path__push(Path value);
-Path Path__pop();
+    void MutablePath_addRects__wrapper();
 
-void Run__push(Run value);
-Run Run__pop();
+    void MutablePath_addRoundedRect__wrapper();
 
-void AffineTransformTranslate__wrapper();
+    void MutablePath_addEllipseInRect__wrapper();
 
-void AffineTransformRotate__wrapper();
+    void MutablePath_moveToPoint__wrapper();
 
-void AffineTransformScale__wrapper();
+    void MutablePath_addArc__wrapper();
 
-void AffineTransformConcat__wrapper();
+    void MutablePath_addRelativeArc__wrapper();
 
-void AffineTransformModify__wrapper();
+    void MutablePath_addArcToPoint__wrapper();
 
-void Color_dispose__wrapper();
+    void MutablePath_addCurveToPoint__wrapper();
 
-void Color_createGenericRGB__wrapper();
+    void MutablePath_addLines__wrapper();
 
-void Color_getConstantColor__wrapper();
+    void MutablePath_addLineToPoint__wrapper();
 
-void ColorSpace_dispose__wrapper();
+    void MutablePath_addQuadCurveToPoint__wrapper();
 
-void ColorSpace_createWithName__wrapper();
+    void MutablePath_closeSubpath__wrapper();
 
-void ColorSpace_createDeviceGray__wrapper();
+    void MutablePath_dispose__wrapper();
 
-void Gradient_dispose__wrapper();
+    void TextDrawingMode__push(TextDrawingMode value);
+    TextDrawingMode TextDrawingMode__pop();
 
-void Gradient_createWithColorComponents__wrapper();
+    void DrawContext__push(DrawContextRef value);
+    DrawContextRef DrawContext__pop();
 
-void Path_getCurrentPoint__wrapper();
+    void DrawContext_saveGState__wrapper();
 
-void Path_createCopy__wrapper();
+    void DrawContext_restoreGState__wrapper();
 
-void Path_createMutableCopy__wrapper();
+    void DrawContext_setRGBFillColor__wrapper();
 
-void Path_dispose__wrapper();
+    void DrawContext_setRGBStrokeColor__wrapper();
 
-void Path_createWithRect__wrapper();
+    void DrawContext_setFillColorWithColor__wrapper();
 
-void Path_createWithEllipseInRect__wrapper();
+    void DrawContext_fillRect__wrapper();
 
-void Path_createWithRoundedRect__wrapper();
+    void DrawContext_setTextMatrix__wrapper();
 
-void MutablePath_addPath__wrapper();
+    void DrawContext_setTextPosition__wrapper();
 
-void MutablePath_addRect__wrapper();
+    void DrawContext_beginPath__wrapper();
 
-void MutablePath_addRects__wrapper();
+    void DrawContext_addArc__wrapper();
 
-void MutablePath_addRoundedRect__wrapper();
+    void DrawContext_addArcToPoint__wrapper();
 
-void MutablePath_addEllipseInRect__wrapper();
+    void DrawContext_drawPath__wrapper();
 
-void MutablePath_moveToPoint__wrapper();
+    void DrawContext_setStrokeColorWithColor__wrapper();
 
-void MutablePath_addArc__wrapper();
+    void DrawContext_strokeRectWithWidth__wrapper();
 
-void MutablePath_addRelativeArc__wrapper();
+    void DrawContext_moveToPoint__wrapper();
 
-void MutablePath_addArcToPoint__wrapper();
+    void DrawContext_addLineToPoint__wrapper();
 
-void MutablePath_addCurveToPoint__wrapper();
+    void DrawContext_strokePath__wrapper();
 
-void MutablePath_addLines__wrapper();
+    void DrawContext_setLineDash__wrapper();
 
-void MutablePath_addLineToPoint__wrapper();
+    void DrawContext_clearLineDash__wrapper();
 
-void MutablePath_addQuadCurveToPoint__wrapper();
+    void DrawContext_setLineWidth__wrapper();
 
-void MutablePath_closeSubpath__wrapper();
+    void DrawContext_clip__wrapper();
 
-void MutablePath_dispose__wrapper();
+    void DrawContext_clipToRect__wrapper();
 
-void MutablePath_create__wrapper();
+    void DrawContext_translateCTM__wrapper();
 
-void DrawContext_saveGState__wrapper();
+    void DrawContext_scaleCTM__wrapper();
 
-void DrawContext_restoreGState__wrapper();
+    void DrawContext_rotateCTM__wrapper();
 
-void DrawContext_setRGBFillColor__wrapper();
+    void DrawContext_concatCTM__wrapper();
 
-void DrawContext_setRGBStrokeColor__wrapper();
+    void DrawContext_addPath__wrapper();
 
-void DrawContext_setFillColorWithColor__wrapper();
+    void DrawContext_fillPath__wrapper();
 
-void DrawContext_fillRect__wrapper();
+    void DrawContext_strokeRect__wrapper();
 
-void DrawContext_setTextMatrix__wrapper();
+    void DrawContext_addRect__wrapper();
 
-void DrawContext_setTextPosition__wrapper();
+    void DrawContext_closePath__wrapper();
 
-void DrawContext_beginPath__wrapper();
+    void DrawContext_drawLinearGradient__wrapper();
 
-void DrawContext_addArc__wrapper();
+    void DrawContext_setTextDrawingMode__wrapper();
 
-void DrawContext_addArcToPoint__wrapper();
+    void DrawContext_clipToMask__wrapper();
 
-void DrawContext_drawPath__wrapper();
+    void DrawContext_drawImage__wrapper();
 
-void DrawContext_setStrokeColorWithColor__wrapper();
+    void DrawContext_dispose__wrapper();
 
-void DrawContext_strokeRectWithWidth__wrapper();
+    void ImageAlphaInfo__push(ImageAlphaInfo value);
+    ImageAlphaInfo ImageAlphaInfo__pop();
 
-void DrawContext_moveToPoint__wrapper();
+    void BitmapInfo__push(uint32_t value);
+    uint32_t BitmapInfo__pop();
 
-void DrawContext_addLineToPoint__wrapper();
+    void BitmapLock__push(BitmapLockRef value);
+    BitmapLockRef BitmapLock__pop();
 
-void DrawContext_strokePath__wrapper();
+    void BitmapLock_dispose__wrapper();
 
-void DrawContext_setLineDash__wrapper();
+    void Image__push(ImageRef value);
+    ImageRef Image__pop();
 
-void DrawContext_clearLineDash__wrapper();
+    void Image_dispose__wrapper();
 
-void DrawContext_setLineWidth__wrapper();
+    void BitmapDrawContext__push(BitmapDrawContextRef value);
+    BitmapDrawContextRef BitmapDrawContext__pop();
+    namespace BitmapDrawContext {
 
-void DrawContext_clip__wrapper();
+        void create__wrapper();
+    }
 
-void DrawContext_clipToRect__wrapper();
+    void BitmapDrawContext_createImage__wrapper();
 
-void DrawContext_translateCTM__wrapper();
+    void BitmapDrawContext_getData__wrapper();
 
-void DrawContext_scaleCTM__wrapper();
+    void BitmapDrawContext_dispose__wrapper();
 
-void DrawContext_rotateCTM__wrapper();
-
-void DrawContext_concatCTM__wrapper();
-
-void DrawContext_addPath__wrapper();
-
-void DrawContext_fillPath__wrapper();
-
-void DrawContext_strokeRect__wrapper();
-
-void DrawContext_addRect__wrapper();
-
-void DrawContext_closePath__wrapper();
-
-void DrawContext_drawLinearGradient__wrapper();
-
-void DrawContext_setTextDrawingMode__wrapper();
-
-void DrawContext_clipToMask__wrapper();
-
-void DrawContext_drawImage__wrapper();
-
-void DrawContext_dispose__wrapper();
-
-void AttributedString_getLength__wrapper();
-
-void AttributedString_createMutableCopy__wrapper();
-
-void AttributedString_dispose__wrapper();
-
-void AttributedString_create__wrapper();
-
-void MutableAttributedString_replaceString__wrapper();
-
-void MutableAttributedString_setAttribute__wrapper();
-
-void MutableAttributedString_setCustomAttribute__wrapper();
-
-void MutableAttributedString_beginEditing__wrapper();
-
-void MutableAttributedString_endEditing__wrapper();
-
-void MutableAttributedString_dispose__wrapper();
-
-void MutableAttributedString_create__wrapper();
-
-void Font_createCopyWithSymbolicTraits__wrapper();
-
-void Font_getAscent__wrapper();
-
-void Font_getDescent__wrapper();
-
-void Font_getUnderlineThickness__wrapper();
-
-void Font_getUnderlinePosition__wrapper();
-
-void Font_dispose__wrapper();
-
-void Font_createFromFile__wrapper();
-
-void Font_createWithName__wrapper();
-
-void Run_getAttributes__wrapper();
-
-void Run_getTypographicBounds__wrapper();
-
-void Run_getStringRange__wrapper();
-
-void Run_getStatus__wrapper();
-
-void Run_dispose__wrapper();
-
-void Line_getStringRange__wrapper();
-
-void Line_getTypographicBounds__wrapper();
-
-void Line_getBoundsWithOptions__wrapper();
-
-void Line_draw__wrapper();
-
-void Line_getGlyphRuns__wrapper();
-
-void Line_getOffsetForStringIndex__wrapper();
-
-void Line_getStringIndexForPosition__wrapper();
-
-void Line_dispose__wrapper();
-
-void Line_createWithAttributedString__wrapper();
-
-void Frame_draw__wrapper();
-
-void Frame_getLines__wrapper();
-
-void Frame_getLineOrigins__wrapper();
-
-void Frame_getLinesExtended__wrapper();
-
-void Frame_dispose__wrapper();
-
-void FrameSetter_createFrame__wrapper();
-
-void FrameSetter_dispose__wrapper();
-
-void FrameSetter_createWithAttributedString__wrapper();
-
-void ParagraphStyle_dispose__wrapper();
-
-void ParagraphStyle_create__wrapper();
-
-void BitmapLock_dispose__wrapper();
-
-void Image_dispose__wrapper();
-
-void BitmapDrawContext_createImage__wrapper();
-
-void BitmapDrawContext_getData__wrapper();
-
-void BitmapDrawContext_dispose__wrapper();
-
-void BitmapDrawContext_create__wrapper();
-
-void Drawing__constantsFunc();
-
-int Drawing__register();
+    int __register();
+}

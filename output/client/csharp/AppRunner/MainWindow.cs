@@ -2,6 +2,7 @@
 using static Org.Prefixed.GuiBase.Drawing;
 using System.Diagnostics;
 using AppRunner.Pages;
+using Org.Prefixed.GuiBase;
 
 namespace AppRunner;
 
@@ -45,7 +46,7 @@ internal class MainWindow : BaseWindowDelegate, IWindowMethods
     
     public static MainWindow Create()
     {
-        var options = new WindowOptions
+        var options = new Window.Options
         {
             MinWidth = Constants.MinWidth,
             MinHeight = Constants.MinHeight,
@@ -117,38 +118,38 @@ internal class MainWindow : BaseWindowDelegate, IWindowMethods
         Invalidate(0, 0, _width, _height);
     }
 
-    public override void KeyDown(Key key, Modifiers modifiers, KeyLocation location)
+    public override void KeyDown(Keys.Key key, Modifiers modifiers, Keys.KeyLocation location)
     {
         switch (key)
         {
-            case Key._1:
+            case Keys.Key._1:
                 SelectPage(_page01);
                 break;
-            case Key._2:
+            case Keys.Key._2:
                 SelectPage(_page02);
                 break;
-            case Key._3:
+            case Keys.Key._3:
                 SelectPage(_page03);
                 break;
-            case Key._4:
+            case Keys.Key._4:
                 SelectPage(_page04);
                 break;
-            case Key._5:
+            case Keys.Key._5:
                 SelectPage(_page05);
                 break;
-            case Key._6:
+            case Keys.Key._6:
                 SelectPage(_page06);
                 break;
-            case Key._7:
+            case Keys.Key._7:
                 SelectPage(_page07);
                 break;
-            case Key._8:
+            case Keys.Key._8:
                 SelectPage(_page08);
                 break;
-            case Key._9:
+            case Keys.Key._9:
                 SelectPage(_page09);
                 break;
-            case Key._0:
+            case Keys.Key._0:
                 SelectPage(_page10);
                 break;
             default:

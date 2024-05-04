@@ -21,7 +21,7 @@ internal static class Program
                     window.TimerTick(secondsSinceLast);
                 }
             });
-        
+
             window.Show();
             Runloop();
             

@@ -1,7 +1,9 @@
 ﻿using AppRunner.Pages.Util;
+using CSharpFunctionalExtensions;
 using Org.Prefixed.GuiBase;
 using static AppRunner.Pages.Util.Common;
 using static Org.Prefixed.GuiBase.Drawing;
+using static Org.Prefixed.GuiBase.Text;
 
 namespace AppRunner.Pages;
 
@@ -22,7 +24,7 @@ internal class ClientAttrMap
 			.Select(pair => new KeyValuePair<string, CustomRunAttribute>(pair.Key, _customRunAttributes[pair.Value]))
 			.ToDictionary();
     }
-    public void SetCustom(MutableAttributedString attrString, Drawing.Range range, string key, CustomRunAttribute attr)
+    public void SetCustom(MutableAttributedString attrString, Text.Range range, string key, CustomRunAttribute attr)
     {
 	    attrString.SetCustomAttribute(range, key, Insert(attr));
     }
@@ -49,14 +51,14 @@ public class TextFormattingPage : BasePage
 
     private readonly ClientAttrMap _attrMap = new();
     private readonly FrameSetter _frameSetter;
-    private readonly Color _black = Color.GetConstantColor(ColorConstants.Black);
+    private readonly Color _black = Color.GetConstantColor(Color.Constant.Black);
 
     public override string PageTitle => "Fancy Text Formatting";
 
     public TextFormattingPage(IWindowMethods windowMethods) : base(windowMethods)
     {
-	    using var timesFont = Font.CreateWithName("Times New Roman", 40.0, new OptArgs());
-	    using var timesItalic = timesFont.CreateCopyWithSymbolicTraits(0, new FontTraits { Italic = true }, new OptArgs()); // 0 = preserve size
+	    using var timesFont = Font.CreateWithName("Times New Roman", 40.0, Maybe.None);
+	    using var timesItalic = timesFont.CreateCopyWithSymbolicTraits(0, Maybe.None, new Font.Traits { Italic = true }); // 0 = preserve size
 	    
 	    // since we are storing these resources on the client side (and only keyed by ID on the backend attrstring dictionary)
 	    // we can't "use" them for auto-disposal, since the backend knows nothing about them and therefore can't retain them
@@ -77,15 +79,15 @@ public class TextFormattingPage : BasePage
 	    attrString.BeginEditing();
 	    
         // this was two different lines originally
-        attrString.SetAttribute(fullRange, new AttributedStringOptions { ForegroundColor = _black, Font = timesFont });
+        attrString.SetAttribute(fullRange, new AttributedString.Options { ForegroundColor = _black, Font = timesFont });
 
-        Drawing.Range range;
+        Text.Range range;
 
         range = StringFind(Text, "IDWriteTextFormat");
-        attrString.SetAttribute(range, new AttributedStringOptions { Font = timesItalic });
+        attrString.SetAttribute(range, new AttributedString.Options { Font = timesItalic });
 
         range = StringFind(Text, "IDWriteTextLayout");
-        attrString.SetAttribute(range, new AttributedStringOptions { Font = timesItalic });
+        attrString.SetAttribute(range, new AttributedString.Options { Font = timesItalic });
 
         range = StringFind(Text, "IDWriteTextFormat and IDWriteTextLayout objects");
         _attrMap.SetCustom(attrString, range, BackgroundKey, new ColorAttribute(magenta));
@@ -94,30 +96,30 @@ public class TextFormattingPage : BasePage
         _attrMap.SetCustom(attrString, range, HighlightKey, new ColorAttribute(alphaYellow));
 
         range = StringFind(Text, "SetDrawingEffect");
-        attrString.SetAttribute(range, new AttributedStringOptions { Font = timesItalic });
+        attrString.SetAttribute(range, new AttributedString.Options { Font = timesItalic });
         
         // RBG strikethrough
         range = StringFind(Text, "RBG");
-        attrString.SetAttribute(MakeRange(range.Location, 1), new AttributedStringOptions { ForegroundColor = red });
-        attrString.SetAttribute(MakeRange(range.Location + 1, 1), new AttributedStringOptions { ForegroundColor = blue });
-        attrString.SetAttribute(MakeRange(range.Location + 2, 1), new AttributedStringOptions { ForegroundColor = green });
+        attrString.SetAttribute(MakeRange(range.Location, 1), new AttributedString.Options { ForegroundColor = red });
+        attrString.SetAttribute(MakeRange(range.Location + 1, 1), new AttributedString.Options { ForegroundColor = blue });
+        attrString.SetAttribute(MakeRange(range.Location + 2, 1), new AttributedString.Options { ForegroundColor = green });
         // strike count:
         _attrMap.SetCustom(attrString, range, StrikeCountKey, new IntAttribute(1));
         
         // RGB
         range = StringFind(Text, "RGB");
-        attrString.SetAttribute(MakeRange(range.Location, 1), new AttributedStringOptions { ForegroundColor = red });
-        attrString.SetAttribute(MakeRange(range.Location + 1, 1), new AttributedStringOptions { ForegroundColor = green });
-        attrString.SetAttribute(MakeRange(range.Location + 2, 1), new AttributedStringOptions { ForegroundColor = blue });
+        attrString.SetAttribute(MakeRange(range.Location, 1), new AttributedString.Options { ForegroundColor = red });
+        attrString.SetAttribute(MakeRange(range.Location + 1, 1), new AttributedString.Options { ForegroundColor = green });
+        attrString.SetAttribute(MakeRange(range.Location + 2, 1), new AttributedString.Options { ForegroundColor = blue });
         _attrMap.SetCustom(attrString, range, UnderlineStyleKey, new UnderlineStyleAttribute(UnderlineStyle.Single));
         _attrMap.SetCustom(attrString, range, UnderlineColorKey, new ColorAttribute(yellow));
         
         range = StringFind(Text, " red");
-        attrString.SetAttribute(range, new AttributedStringOptions { ForegroundColor = red });
+        attrString.SetAttribute(range, new AttributedString.Options { ForegroundColor = red });
         range = StringFind(Text, "green");
-        attrString.SetAttribute(range, new AttributedStringOptions { ForegroundColor = green });
+        attrString.SetAttribute(range, new AttributedString.Options { ForegroundColor = green });
         range = StringFind(Text, "blue");
-        attrString.SetAttribute(range, new AttributedStringOptions { ForegroundColor = blue });
+        attrString.SetAttribute(range, new AttributedString.Options { ForegroundColor = blue });
         
         range = StringFind(Text, "double underline");
         _attrMap.SetCustom(attrString, range, UnderlineStyleKey, new UnderlineStyleAttribute(UnderlineStyle.Double));
@@ -172,11 +174,11 @@ public class TextFormattingPage : BasePage
 	    context.SetRGBFillColor(100 / 255.0, 149 / 255.0, 237 / 255.0, 1);
 	    context.FillRect(MakeRect(0, 0, Width, Height));
 
-	    context.SetTextMatrix(AffineTransformIdentity);
+	    context.SetTextMatrix(AffineTransform.Identity);
 
         // RECT ===========================
         var rect = MakeRect(0, 0, Width, Height);
-        using var rectPath = Drawing.Path.CreateWithRect(rect, new OptArgs());
+        using var rectPath = Drawing.Path.CreateWithRect(rect, Maybe.None);
         using var frame = _frameSetter.CreateFrame(RangeZero, rectPath); // don't know what the final argument NULL could be (not implemented yet)
         
         // draw background color, underlines
@@ -367,7 +369,7 @@ public class TextFormattingPage : BasePage
 			    var xOffset = 0.0;
 			    var glyphRange = run.GetStringRange();
 			    var status = run.GetStatus();
-			    if (status.HasFlag(RunStatus.RightToLeft))
+			    if (status.HasFlag(Run.Status.RightToLeft))
 			    {
 				    var (offs1, _) = line.GetOffsetForStringIndex(glyphRange.Location + glyphRange.Length);
 				    xOffset = offs1;

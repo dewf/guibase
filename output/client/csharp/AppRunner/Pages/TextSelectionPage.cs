@@ -1,5 +1,7 @@
-﻿using Org.Prefixed.GuiBase;
+﻿using CSharpFunctionalExtensions;
+using Org.Prefixed.GuiBase;
 using static Org.Prefixed.GuiBase.Drawing;
+using static Org.Prefixed.GuiBase.Text;
 using static AppRunner.Pages.Util.Common;
 
 namespace AppRunner.Pages;
@@ -32,10 +34,10 @@ public class TextSelectionPage : BasePage
     
     public TextSelectionPage(IWindowMethods windowMethods) : base(windowMethods)
     {
-        using var font = Font.CreateWithName(Constants.TimesFontName, 36, new OptArgs());
-        var black = Color.GetConstantColor(ColorConstants.Black);
-        _latinString = AttributedString.Create(Constants.LoremIpsum, new AttributedStringOptions { Font = font, ForegroundColor = black });
-        _arabicString = AttributedString.Create(Constants.ArabicSample, new AttributedStringOptions { Font = font, ForegroundColor = black });
+        using var font = Font.CreateWithName(Constants.TimesFontName, 36, Maybe.None);
+        var black = Color.GetConstantColor(Color.Constant.Black);
+        _latinString = AttributedString.Create(Constants.LoremIpsum, new AttributedString.Options { Font = font, ForegroundColor = black });
+        _arabicString = AttributedString.Create(Constants.ArabicSample, new AttributedString.Options { Font = font, ForegroundColor = black });
         _currentAttrString = _latinString;
         _textDirection = TextDirection.LeftToRight;
     }
@@ -43,7 +45,7 @@ public class TextSelectionPage : BasePage
     private void DoLayout()
     {
         using var frameSetter = FrameSetter.CreateWithAttributedString(_currentAttrString);
-        using var path = Drawing.Path.CreateWithRect(_textRect, new OptArgs());
+        using var path = Drawing.Path.CreateWithRect(_textRect, Maybe.None);
     
         _frame?.Dispose();
     
@@ -59,9 +61,9 @@ public class TextSelectionPage : BasePage
         DoLayout();
     }
 
-    public override void OnKeyDown(Windowing.Key key, Windowing.Modifiers modifiers)
+    public override void OnKeyDown(Keys.Key key, Windowing.Modifiers modifiers)
     {
-        if (key == Windowing.Key.Space)
+        if (key == Keys.Key.Space)
         {
             if (_currentAttrString == _latinString)
             {
@@ -149,7 +151,7 @@ public class TextSelectionPage : BasePage
         context.SetLineWidth(1);
         context.StrokeRect(_textRect);
         
-        context.SetTextMatrix(AffineTransformIdentity);
+        context.SetTextMatrix(AffineTransform.Identity);
         var origins = _frame!.GetLineOrigins(RangeZero);
         
         //       auto useStartIndex = startIndex;
@@ -170,7 +172,7 @@ public class TextSelectionPage : BasePage
             
             context.SetRGBFillColor(1, 0, 0, 1);
             context.AddArc(origin.X, origin.Y, 2, 0, Math.PI * 2, false);
-            context.DrawPath(PathDrawingMode.Fill);
+            context.DrawPath(Drawing.Path.DrawingMode.Fill);
             
             // highlight line if mouse inside
             if (absBounds.ContainsPoint(_mousePos))
