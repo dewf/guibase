@@ -53,7 +53,7 @@ namespace Drawing
             dl_CGAffineTransform result = STRUCT_CAST(dl_CGAffineTransform, input);
             Value::ProcessVisitor v(result);
             for (auto i = ops.begin(); i != ops.end(); i++) {
-                i->get()->accept(&v);
+                (*i)->accept(&v);
             }
             return STRUCT_CAST(AffineTransform, result);
         }
